@@ -1,0 +1,38 @@
+{
+  "schemaVersion" : 1,
+  "createdAtUtc" : "2026-01-17T10:58:25.782824Z",
+  "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs",
+  "runTarPath" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/run.tar",
+  "runTarSha256" : "116936768b633174c6cdc4db9a04a2967132b471c78202f40f49405ccee20352",
+  "extractedFiles" : [ {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/ingestOutputs/work/run_tar_extracted/diffs_0_.tar.zip",
+    "sizeBytes" : 6312
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/ingestOutputs/work/run_tar_extracted/testRunInfo.json",
+    "sizeBytes" : 3000
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/ingestOutputs/work/run_tar_extracted/diffs_11_.tar.zip",
+    "sizeBytes" : 6560
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/ingestOutputs/work/run_tar_extracted/error-logs.txt",
+    "sizeBytes" : 0
+  } ],
+  "diffArchives" : [ {
+    "filename" : "diffs_0_.tar.zip",
+    "baselineRunNumber" : 0,
+    "sha256" : "355049816be11e84946f7a4d457b558dd9033ca8e3416e495637ba3bac84200d",
+    "baselineCount" : 4,
+    "patchCount" : 13,
+    "minPatchRunNumber" : 1,
+    "maxPatchRunNumber" : 10
+  }, {
+    "filename" : "diffs_11_.tar.zip",
+    "baselineRunNumber" : 11,
+    "sha256" : "4b6f80118ef4f1516087c8ce21761bc9658c2672c69e0e86ae2b18d9fbf4f252",
+    "baselineCount" : 4,
+    "patchCount" : 32,
+    "minPatchRunNumber" : 11,
+    "maxPatchRunNumber" : 26
+  } ],
+  "warnings" : [ ]
+}

@@ -1,0 +1,289 @@
+{
+  "runNumber" : 1,
+  "timestamp" : "2026-01-01 20:02:02.568",
+  "timestampMs" : 1767315722568,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testIsEmpty()",
+    "testId" : "BSTManualTesting#testIsEmpty()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 2,
+  "timestamp" : "2026-01-01 20:03:04.531",
+  "timestampMs" : 1767315784531,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testIsEmpty()",
+    "testId" : "BSTManualTesting#testIsEmpty()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 3,
+  "timestamp" : "2026-01-01 20:06:14.842",
+  "timestampMs" : 1767315974842,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testSize()",
+    "testId" : "BSTManualTesting#testSize()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 4,
+  "timestamp" : "2026-01-01 20:06:57.458",
+  "timestampMs" : 1767316017458,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testHeight()",
+    "testId" : "BSTManualTesting#testHeight()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 5,
+  "timestamp" : "2026-01-01 20:19:01.051",
+  "timestampMs" : 1767316741051,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testIsEmpty()",
+    "testId" : "BSTManualTesting#testIsEmpty()",
+    "status" : "FAILED",
+    "cause" : "java.lang.NoSuchMethodError: 'void BinarySearchTree$Node.<init>(BinarySearchTree, java.lang.Object)'"
+  } ]
+}
+{
+  "runNumber" : 6,
+  "timestamp" : "2026-01-01 20:19:05.052",
+  "timestampMs" : 1767316745052,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testIsEmpty()",
+    "testId" : "BSTManualTesting#testIsEmpty()",
+    "status" : "FAILED",
+    "cause" : "java.lang.NoSuchMethodError: 'void BinarySearchTree$Node.<init>(BinarySearchTree, java.lang.Object)'"
+  } ]
+}
+{
+  "runNumber" : 7,
+  "timestamp" : "2026-01-01 20:37:19.184",
+  "timestampMs" : 1767317839184,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testIsEmpty()",
+    "testId" : "BSTManualTesting#testIsEmpty()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 8,
+  "timestamp" : "2026-01-01 20:37:21.38",
+  "timestampMs" : 1767317841380,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testSize()",
+    "testId" : "BSTManualTesting#testSize()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 9,
+  "timestamp" : "2026-01-01 20:37:22.685",
+  "timestampMs" : 1767317842685,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testHeight()",
+    "testId" : "BSTManualTesting#testHeight()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 10,
+  "timestamp" : "2026-01-01 20:37:38.453",
+  "timestampMs" : 1767317858453,
+  "tests" : [ {
+    "testClassSimple" : "BSTManualTesting",
+    "testDisplayName" : "testIsEmpty()",
+    "testId" : "BSTManualTesting#testIsEmpty()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 11,
+  "timestamp" : "2026-01-01 22:34:53.329",
+  "timestampMs" : 1767324893329,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testInsertReturnValueInt()",
+    "testId" : "BSTTesting#testInsertReturnValueInt()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 12,
+  "timestamp" : "2026-01-01 22:35:39.838",
+  "timestampMs" : 1767324939838,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testInsertReturnValueInt()",
+    "testId" : "BSTTesting#testInsertReturnValueInt()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 13,
+  "timestamp" : "2026-01-01 22:36:55.433",
+  "timestampMs" : 1767325015433,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testInsertReturnValueString()",
+    "testId" : "BSTTesting#testInsertReturnValueString()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 14,
+  "timestamp" : "2026-01-01 22:37:28.153",
+  "timestampMs" : 1767325048153,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testInsertExceptions()",
+    "testId" : "BSTTesting#testInsertExceptions()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 15,
+  "timestamp" : "2026-01-01 22:39:25.114",
+  "timestampMs" : 1767325165114,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testInsertInts()",
+    "testId" : "BSTTesting#testInsertInts()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 16,
+  "timestamp" : "2026-01-01 22:39:29.824",
+  "timestampMs" : 1767325169824,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testInsertStrings()",
+    "testId" : "BSTTesting#testInsertStrings()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 17,
+  "timestamp" : "2026-01-01 22:42:16.573",
+  "timestampMs" : 1767325336573,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testIsEmpty()",
+    "testId" : "BSTTesting#testIsEmpty()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 18,
+  "timestamp" : "2026-01-01 22:43:00.205",
+  "timestampMs" : 1767325380205,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testSize()",
+    "testId" : "BSTTesting#testSize()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 19,
+  "timestamp" : "2026-01-01 22:43:23.571",
+  "timestampMs" : 1767325403571,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testToArrayList()",
+    "testId" : "BSTTesting#testToArrayList()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 20,
+  "timestamp" : "2026-01-01 22:43:49.573",
+  "timestampMs" : 1767325429573,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testToArrayInts()",
+    "testId" : "BSTTesting#testToArrayInts()",
+    "status" : "FAILED",
+    "cause" : "java.lang.Error: Unresolved compilation problems: \n\tThe method toArray() is undefined for the type BinarySearchTree<Integer>\n\tThe method toArray() is undefined for the type BinarySearchTree<Integer>"
+  } ]
+}
+{
+  "runNumber" : 21,
+  "timestamp" : "2026-01-01 22:44:05.592",
+  "timestampMs" : 1767325445592,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testToString()",
+    "testId" : "BSTTesting#testToString()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 22,
+  "timestamp" : "2026-01-01 22:51:19.48",
+  "timestampMs" : 1767325879480,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testToArrayInts()",
+    "testId" : "BSTTesting#testToArrayInts()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 23,
+  "timestamp" : "2026-01-01 22:51:21.767",
+  "timestampMs" : 1767325881767,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testToArrayStrings()",
+    "testId" : "BSTTesting#testToArrayStrings()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 24,
+  "timestamp" : "2026-01-02 00:20:13.061",
+  "timestampMs" : 1767331213061,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testContainsInts()",
+    "testId" : "BSTTesting#testContainsInts()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 25,
+  "timestamp" : "2026-01-02 00:20:15.921",
+  "timestampMs" : 1767331215921,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testContainsStrings()",
+    "testId" : "BSTTesting#testContainsStrings()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
+{
+  "runNumber" : 26,
+  "timestamp" : "2026-01-02 00:22:11.314",
+  "timestampMs" : 1767331331314,
+  "tests" : [ {
+    "testClassSimple" : "BSTTesting",
+    "testDisplayName" : "testHeight()",
+    "testId" : "BSTTesting#testHeight()",
+    "status" : "SUCCESSFUL"
+  } ]
+}
