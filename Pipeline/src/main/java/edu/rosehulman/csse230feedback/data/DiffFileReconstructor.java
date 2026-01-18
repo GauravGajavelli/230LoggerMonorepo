@@ -2,7 +2,7 @@ package edu.rosehulman.csse230feedback.data;
 
 import com.github.difflib.patch.PatchFailedException;
 import edu.rosehulman.csse230feedback.model.PatchPointer;
-import testSupport.DiffReplayer;
+import helpers.DiffReplayer;
 
 import com.github.difflib.algorithm.DiffException;
 
