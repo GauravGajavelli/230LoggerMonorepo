@@ -1,5 +1,4 @@
 {
-  "schemaVersion" : 1,
   "archives" : [ {
     "filename" : "diffs_0_.tar.zip",
     "baselineRunNumber" : 0,
@@ -24,5 +23,6 @@
     "patchCount" : 15,
     "minPatchRunNumber" : 3,
     "maxPatchRunNumber" : 12
-  } ]
+  } ],
+  "schemaVersion" : 1
 }

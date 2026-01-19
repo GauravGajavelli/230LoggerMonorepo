@@ -188,13 +188,14 @@ class LoggingSingleton {
 
     static void setTestRunNumberAndStatus(String testFileName, String testName, TestStatus status) {
     	ObjectNode added = (ObjectNode)LoggingSingleton.testRunInfo;
-        
+
     	int currentRunNumber = added.get(prevRunNumber).asInt(); // it's already incremented, presumably
-        
+
         ObjectNode testFileNameNode = getOrCreateObjectNode(added, testFileName);
         ObjectNode testNameNode = getOrCreateObjectNode(testFileNameNode, testName);
-        testNameNode.put(Integer.toString(currentRunNumber),status.toString());
-               
+        ObjectNode runNode = getOrCreateObjectNode(testNameNode, Integer.toString(currentRunNumber));
+        runNode.put("status", status.toString());
+
     	LoggingSingleton.testRunInfo = ((JsonNode)(added));
     }
 
@@ -205,7 +206,8 @@ class LoggingSingleton {
 
         ObjectNode testFileNameNode = getOrCreateObjectNode(added, testFileName);
         ObjectNode testNameNode = getOrCreateObjectNode(testFileNameNode, testName);
-        testNameNode.put(Integer.toString(currentRunNumber),status.toString()+": "+cause);
+        ObjectNode runNode = getOrCreateObjectNode(testNameNode, Integer.toString(currentRunNumber));
+        runNode.put("status", status.toString() + ": " + cause);
 
     	LoggingSingleton.testRunInfo = ((JsonNode)(added));
     }
@@ -334,8 +336,8 @@ class LoggingSingleton {
         ObjectNode testFileNode = getOrCreateObjectNode(root, testFileName);
         ObjectNode testNameNode = getOrCreateObjectNode(testFileNode, testName);
 
-        // Store evidence under: <testFile>/<testName>/evidence/<runNumber>
-        ObjectNode evidenceNode = getOrCreateObjectNode(testNameNode, evidence);
+        // Store evidence under: <testFile>/<testName>/<runNumber>/evidence
+        ObjectNode runNode = getOrCreateObjectNode(testNameNode, Integer.toString(currentRunNumber));
 
         ObjectMapper om = LoggingSingleton.objectMapper;
         ObjectNode evNode = om.createObjectNode();
@@ -349,7 +351,7 @@ class LoggingSingleton {
         if (ev.expected != null) evNode.put("expected", ev.expected);
         if (ev.actual != null) evNode.put("actual", ev.actual);
 
-        evidenceNode.set(Integer.toString(currentRunNumber), evNode);
+        runNode.set(evidence, evNode);
 
         LoggingSingleton.testRunInfo = root;
     }

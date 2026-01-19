@@ -8,14 +8,23 @@ import edu.rosehulman.csse230feedback.model.RunStatus;
 import edu.rosehulman.csse230feedback.model.TestRunResult;
 import edu.rosehulman.csse230feedback.runner.*;
 import edu.rosehulman.csse230feedback.util.Json;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Main service for running test reruns on code snapshots.
@@ -97,6 +106,8 @@ public class WorkspaceRunnerService {
                 processRun(options, runNumber, allPatches, cacheDir, enrichedDir,
                     compiler, junitRunner, resultBuilder, sharedWorkspace);
             }
+
+            summarizeRunCoverage(sharedWorkspace, runNumbers, enrichedDir, resultBuilder);
         } finally {
             if (!options.keepWorkDir()) {
                 workspaceManager.deleteWorkspace(sharedWorkspace);
@@ -221,6 +232,77 @@ public class WorkspaceRunnerService {
         } catch (IOException e) {
             warnings.add("Failed to update startTestRunInfo.json: " + e.getMessage());
         }
+    }
+
+    private void summarizeRunCoverage(Path workspace, List<Integer> runNumbers, Path enrichedDir,
+            RerunResult.Builder resultBuilder) {
+        Set<Integer> failedRuns = new HashSet<>();
+        try (Stream<Path> stream = Files.list(enrichedDir)) {
+            stream.filter(p -> p.getFileName().toString().endsWith("_status.json"))
+                .forEach(p -> {
+                    try {
+                        var node = Json.mapper().readTree(p.toFile());
+                        if (node != null && node.has("runNumber")) {
+                            failedRuns.add(node.get("runNumber").asInt());
+                        } else {
+                            String name = p.getFileName().toString();
+                            int us = name.indexOf('_');
+                            int end = name.indexOf("_status.json");
+                            if (us >= 0 && end > us) {
+                                failedRuns.add(Integer.parseInt(name.substring(us + 1, end)));
+                            }
+                        }
+                    } catch (Exception ignored) {
+                        // Best-effort; missing run numbers simply won't be excluded.
+                    }
+                });
+        } catch (IOException e) {
+            resultBuilder.addWarning("Failed to read run status files: " + e.getMessage());
+        }
+
+        Set<Integer> executedRuns = new TreeSet<>(runNumbers);
+        executedRuns.removeAll(failedRuns);
+
+        Set<Integer> loggedRuns = readLoggedRuns(workspace.resolve("src")
+            .resolve("testSupport").resolve("run.tar"), resultBuilder);
+
+        if (!failedRuns.isEmpty()) {
+            resultBuilder.addWarning("Runs with status files (failed to complete): " + new TreeSet<>(failedRuns));
+        }
+    }
+
+    private Set<Integer> readLoggedRuns(Path runTar, RerunResult.Builder resultBuilder) {
+        Set<Integer> runs = new TreeSet<>();
+        if (!Files.exists(runTar)) {
+            resultBuilder.addWarning("run.tar not found for run coverage summary: " + runTar);
+            return runs;
+        }
+
+        try (InputStream fin = Files.newInputStream(runTar);
+             BufferedInputStream bin = new BufferedInputStream(fin);
+             TarArchiveInputStream tin = new TarArchiveInputStream(bin)) {
+            TarArchiveEntry entry;
+            while ((entry = tin.getNextTarEntry()) != null) {
+                if (!entry.isDirectory() && entry.getName().endsWith("testRunInfo.json")) {
+                    var node = Json.mapper().readTree(tin);
+                    var runTimes = node.get("runTimes");
+                    if (runTimes != null && runTimes.isObject()) {
+                        runTimes.fieldNames().forEachRemaining(k -> {
+                            try {
+                                runs.add(Integer.parseInt(k));
+                            } catch (NumberFormatException ignored) {
+                                // ignore non-integer keys
+                            }
+                        });
+                    }
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            resultBuilder.addWarning("Failed to read testRunInfo.json for run coverage: " + e.getMessage());
+        }
+
+        return runs;
     }
 
 
