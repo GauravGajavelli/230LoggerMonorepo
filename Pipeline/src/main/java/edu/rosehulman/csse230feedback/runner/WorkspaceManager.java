@@ -127,6 +127,38 @@ public class WorkspaceManager {
     }
 
     /**
+     * Clears src/ contents but preserves src/testSupport.
+     *
+     * @param workspace Workspace root path
+     * @throws IOException if clearing fails
+     */
+    public void clearSrcDirPreserveTestSupport(Path workspace) throws IOException {
+        Path srcDir = getSrcDir(workspace);
+        Path preserve = srcDir.resolve("testSupport");
+        if (!Files.exists(srcDir)) {
+            return;
+        }
+
+        Files.walkFileTree(srcDir, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (!file.startsWith(preserve)) {
+                    Files.delete(file);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                if (!dir.equals(srcDir) && !dir.equals(preserve) && !dir.startsWith(preserve)) {
+                    Files.delete(dir);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    /**
      * Clears all contents from the bin/ directory.
      *
      * @param workspace Workspace root path

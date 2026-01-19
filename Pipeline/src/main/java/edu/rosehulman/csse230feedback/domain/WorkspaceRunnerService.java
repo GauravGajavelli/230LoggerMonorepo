@@ -79,15 +79,28 @@ public class WorkspaceRunnerService {
             options.javaHome()
         );
 
-        // Process each run
-        for (int runNumber : runNumbers) {
-            processRun(options, runNumber, allPatches, cacheDir, enrichedDir,
-                compiler, junitRunner, resultBuilder);
-        }
+        Path sharedWorkspace = workspaceManager.createWorkspace(options.workDir(), "shared");
 
-        // Cleanup work directory if not keeping
-        if (!options.keepWorkDir()) {
-            workspaceManager.deleteWorkspace(options.workDir());
+        try {
+            // Overlay testSupport once so run.tar can accumulate across runs.
+            if (options.testSupportDir() != null && Files.exists(options.testSupportDir())) {
+                testSupportOverlay.overlayTestSupport(sharedWorkspace, options.testSupportDir());
+            } else {
+                testSupportOverlay.createMinimalTestSupport(sharedWorkspace);
+                resultBuilder.addWarning("Using minimal testSupport (source not provided)");
+            }
+
+            // Process each run in the same workspace
+            for (int runNumber : runNumbers) {
+                workspaceManager.clearSrcDirPreserveTestSupport(sharedWorkspace);
+                workspaceManager.clearBinDir(sharedWorkspace);
+                processRun(options, runNumber, allPatches, cacheDir, enrichedDir,
+                    compiler, junitRunner, resultBuilder, sharedWorkspace);
+            }
+        } finally {
+            if (!options.keepWorkDir()) {
+                workspaceManager.deleteWorkspace(sharedWorkspace);
+            }
         }
 
         return resultBuilder.build();
@@ -98,16 +111,12 @@ public class WorkspaceRunnerService {
      */
     private void processRun(RerunOptions options, int runNumber, List<PatchPointer> allPatches,
             Path cacheDir, Path enrichedDir, JavaCompilerRunner compiler,
-            JUnitPlatformRunner junitRunner, RerunResult.Builder resultBuilder) {
+            JUnitPlatformRunner junitRunner, RerunResult.Builder resultBuilder, Path workspace) {
 
         resultBuilder.incrementRunsProcessed();
         List<String> warnings = new ArrayList<>();
-        Path workspace = null;
 
         try {
-            // Create workspace
-            workspace = workspaceManager.createWorkspace(options.workDir(), String.valueOf(runNumber));
-
             // Materialize snapshot
             int filesWritten = snapshotMaterializer.materializeLatestSnapshot(
                 workspace,
@@ -130,13 +139,7 @@ public class WorkspaceRunnerService {
                 return;
             }
 
-            // Overlay testSupport
-            if (options.testSupportDir() != null && Files.exists(options.testSupportDir())) {
-                testSupportOverlay.overlayTestSupport(workspace, options.testSupportDir());
-            } else {
-                testSupportOverlay.createMinimalTestSupport(workspace);
-                warnings.add("Using minimal testSupport (source not provided)");
-            }
+            updateStartTestRunInfo(workspace, runNumber, warnings);
 
             // Compile
             CompileResult compileResult = compiler.compile(workspace, options.depsDir());
@@ -188,11 +191,6 @@ public class WorkspaceRunnerService {
                 List.of(e.getMessage()),
                 List.copyOf(warnings)
             ));
-        } finally {
-            // Cleanup workspace unless keeping work dir
-            if (workspace != null && !options.keepWorkDir()) {
-                workspaceManager.deleteWorkspace(workspace);
-            }
         }
     }
 
@@ -204,6 +202,27 @@ public class WorkspaceRunnerService {
             // Best-effort status file to keep partial results visible.
         }
     }
+
+    private void updateStartTestRunInfo(Path workspace, int runNumber, List<String> warnings) {
+        Path startInfoPath = workspace.resolve("src").resolve("testSupport").resolve("startTestRunInfo.json");
+        if (!Files.exists(startInfoPath)) {
+            warnings.add("startTestRunInfo.json not found at " + startInfoPath);
+            return;
+        }
+
+        try {
+            var mapper = Json.mapper();
+            var root = mapper.readTree(startInfoPath.toFile());
+            if (root != null && root.isObject()) {
+                ((com.fasterxml.jackson.databind.node.ObjectNode) root)
+                    .put("prevRunNumber", Math.max(0, runNumber - 1));
+                mapper.writerWithDefaultPrettyPrinter().writeValue(startInfoPath.toFile(), root);
+            }
+        } catch (IOException e) {
+            warnings.add("Failed to update startTestRunInfo.json: " + e.getMessage());
+        }
+    }
+
 
     private void enableLoggingExtensionAutodetect(Path workspace, List<String> warnings) {
         try {

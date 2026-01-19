@@ -17,6 +17,6 @@
   "testDisplayName" : "testInsertInts()",
   "testId" : "BSTTesting#testInsertInts()",
   "status" : "SUCCESSFUL",
-  "durationMs" : 4,
+  "durationMs" : 0,
   "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testInsertInts()]"
 } ]

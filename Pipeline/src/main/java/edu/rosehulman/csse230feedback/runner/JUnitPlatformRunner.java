@@ -1,44 +1,35 @@
 package edu.rosehulman.csse230feedback.runner;
 
 import edu.rosehulman.csse230feedback.model.TestRunResult;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
+import org.junit.platform.launcher.Launcher;
+import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.core.LauncherFactory;
+import org.junit.platform.launcher.listeners.TestExecutionSummary;
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
+import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Runs JUnit 5 tests using the JUnit Platform Console Launcher.
+ * Runs JUnit 5 tests in-process using the JUnit Platform Launcher API.
  */
 public class JUnitPlatformRunner {
 
     private static final int DEFAULT_TIMEOUT_SECONDS = 300;
-    private static final String CONSOLE_LAUNCHER_PREFIX = "junit-platform-console-standalone";
-
-    // Pattern to parse JUnit summary line:
-    // "[ 10 tests found ] [ 10 tests started ] [ 0 tests aborted ]..."
-    private static final Pattern SUMMARY_PATTERN = Pattern.compile(
-        "\\[\\s*(\\d+)\\s+tests?\\s+found\\s*\\].*" +
-        "\\[\\s*(\\d+)\\s+tests?\\s+started\\s*\\].*" +
-        "\\[\\s*(\\d+)\\s+tests?\\s+aborted\\s*\\].*" +
-        "\\[\\s*(\\d+)\\s+tests?\\s+successful\\s*\\].*" +
-        "\\[\\s*(\\d+)\\s+tests?\\s+failed\\s*\\]",
-        Pattern.CASE_INSENSITIVE
-    );
-
-    // Alternative pattern for newer JUnit versions
-    private static final Pattern ALT_SUMMARY_PATTERN = Pattern.compile(
-        "\\[\\s*(\\d+)\\s+tests?\\s+successful\\s*\\]",
-        Pattern.CASE_INSENSITIVE
-    );
+    private static final String DISABLE_SIZE_CHECKS_PROP = "csse230.logger.disableSizeChecks";
+    private static final String BASE_DIR_PROP = "csse230.logger.baseDir";
 
     private final int timeoutSeconds;
     private final Path javaHome;
@@ -53,12 +44,12 @@ public class JUnitPlatformRunner {
     }
 
     /**
-     * Runs all tests in the workspace using JUnit Platform Console Launcher.
+     * Runs all tests in the workspace using the JUnit Platform Launcher.
      *
      * @param workspace Path to workspace root (contains src/ and bin/)
-     * @param depsDir Path to dependencies directory (JARs, including junit-platform-console-standalone)
+     * @param depsDir Path to dependencies directory (JARs)
      * @return TestRunResult with execution details
-     * @throws IOException if test execution fails to start
+     * @throws IOException if test discovery or execution fails to start
      */
     public TestRunResult runTests(Path workspace, Path depsDir) throws IOException {
         return runTests(workspace, depsDir, null, null);
@@ -72,133 +63,88 @@ public class JUnitPlatformRunner {
      * @param testClass Optional specific test class to run (e.g., "TestFoo")
      * @param testMethod Optional specific test method (requires testClass)
      * @return TestRunResult with execution details
-     * @throws IOException if test execution fails to start
+     * @throws IOException if test discovery or execution fails to start
      */
     public TestRunResult runTests(Path workspace, Path depsDir, String testClass, String testMethod)
             throws IOException {
 
         Path binDir = workspace.resolve("bin");
-        Path consoleLauncher = findConsoleLauncher(depsDir);
-
-        if (consoleLauncher == null) {
-            return TestRunResult.noTests("",
-                "junit-platform-console-standalone JAR not found in " + depsDir);
+        if (!Files.exists(binDir)) {
+            return TestRunResult.noTests("", "bin directory not found: " + binDir);
         }
 
-        // Build classpath: bin + all JARs in deps
-        String classpath = buildClasspath(binDir, depsDir);
+        LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
+            .configurationParameter("junit.jupiter.extensions.autodetection.enabled", "true");
 
-        // Build command
-        List<String> command = new ArrayList<>();
-        command.add(getJavaPath());
-        command.add("-Dcsse230.logger.disableSizeChecks=true");
-        command.add("-jar");
-        command.add(consoleLauncher.toAbsolutePath().toString());
-        command.add("--class-path");
-        command.add(classpath);
-        command.add("--disable-ansi-colors");
-        command.add("--details=tree");
-        command.add("--config");
-        command.add("junit.jupiter.extensions.autodetection.enabled=true");
-
-        // Add test selectors
         if (testClass != null && !testClass.isEmpty()) {
             if (testMethod != null && !testMethod.isEmpty()) {
-                command.add("--select-method");
-                command.add(testClass + "#" + testMethod);
+                builder.selectors(DiscoverySelectors.selectMethod(testClass, testMethod));
             } else {
-                command.add("--select-class");
-                command.add(testClass);
+                builder.selectors(DiscoverySelectors.selectClass(testClass));
             }
         } else {
-            // --scan-class-path doesn't find classes in the default package.
-            // Instead, find all *Testing.class files and select them explicitly.
             List<String> testClasses = findTestClasses(binDir);
             if (testClasses.isEmpty()) {
-                // Fallback to scan if no testing classes found
-                command.add("--scan-class-path");
+                builder.selectors(DiscoverySelectors.selectClasspathRoots(Set.of(binDir)));
             } else {
                 for (String tc : testClasses) {
-                    command.add("--select-class");
-                    command.add(tc);
+                    builder.selectors(DiscoverySelectors.selectClass(tc));
                 }
             }
         }
 
-        // Debug: print command
-        System.err.println("[DEBUG] JUnit command: " + String.join(" ", command.subList(0, Math.min(6, command.size()))) + " ...");
+        LauncherDiscoveryRequest request = builder.build();
+        Launcher launcher = LauncherFactory.create();
+        SummaryGeneratingListener listener = new SummaryGeneratingListener();
 
-        // Execute
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.directory(workspace.toFile());
-        pb.redirectErrorStream(false);
+        String prevDisable = System.getProperty(DISABLE_SIZE_CHECKS_PROP);
+        System.setProperty(DISABLE_SIZE_CHECKS_PROP, "true");
+        String prevBaseDir = System.getProperty(BASE_DIR_PROP);
+        System.setProperty(BASE_DIR_PROP, workspace.toAbsolutePath().toString());
 
-        Process process = pb.start();
-
-        StringBuilder stdout = new StringBuilder();
-        StringBuilder stderr = new StringBuilder();
-
-        // Read output streams
-        Thread stdoutThread = new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stdout.append(line).append("\n");
-                }
-            } catch (IOException e) {
-                // Ignore
+        ClassLoader original = Thread.currentThread().getContextClassLoader();
+        try (URLClassLoader testLoader = buildClassLoader(binDir, depsDir, original)) {
+            Thread.currentThread().setContextClassLoader(testLoader);
+            launcher.execute(request, listener);
+            invokeForceClose(testLoader);
+        } finally {
+            Thread.currentThread().setContextClassLoader(original);
+            if (prevDisable == null) {
+                System.clearProperty(DISABLE_SIZE_CHECKS_PROP);
+            } else {
+                System.setProperty(DISABLE_SIZE_CHECKS_PROP, prevDisable);
             }
-        });
-
-        Thread stderrThread = new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stderr.append(line).append("\n");
-                }
-            } catch (IOException e) {
-                // Ignore
+            if (prevBaseDir == null) {
+                System.clearProperty(BASE_DIR_PROP);
+            } else {
+                System.setProperty(BASE_DIR_PROP, prevBaseDir);
             }
-        });
-
-        stdoutThread.start();
-        stderrThread.start();
-
-        try {
-            boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroyForcibly();
-                return new TestRunResult(-1, stdout.toString(), stderr.toString(),
-                    0, 0, 0, 0, 0, 0);
-            }
-
-            stdoutThread.join();
-            stderrThread.join();
-
-            int exitCode = process.exitValue();
-            String output = stdout.toString();
-            String errOutput = stderr.toString();
-
-            // Debug output
-            System.err.println("[DEBUG] JUnit exit code: " + exitCode);
-            System.err.println("[DEBUG] JUnit stdout length: " + output.length());
-            System.err.println("[DEBUG] JUnit stderr length: " + errOutput.length());
-            if (output.length() > 0) {
-                System.err.println("[DEBUG] JUnit stdout (first 1000): " + output.substring(0, Math.min(1000, output.length())));
-            }
-            if (errOutput.length() > 0) {
-                System.err.println("[DEBUG] JUnit stderr: " + errOutput.substring(0, Math.min(500, errOutput.length())));
-            }
-
-            // Parse test counts from output
-            return parseTestResults(exitCode, output, errOutput);
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            process.destroyForcibly();
-            return new TestRunResult(-1, stdout.toString(), stderr.toString(),
-                0, 0, 0, 0, 0, 0);
         }
+
+        TestExecutionSummary summary = listener.getSummary();
+        StringWriter out = new StringWriter();
+        summary.printTo(new PrintWriter(out));
+
+        StringBuilder err = new StringBuilder();
+        for (TestExecutionSummary.Failure failure : summary.getFailures()) {
+            err.append(failure.getTestIdentifier().getDisplayName())
+                .append(": ")
+                .append(failure.getException().toString())
+                .append("\n");
+        }
+
+        int exitCode = summary.getTotalFailureCount() > 0 ? 1 : 0;
+        return TestRunResult.fromExecution(
+            exitCode,
+            out.toString(),
+            err.toString(),
+            (int) summary.getTestsFoundCount(),
+            (int) summary.getTestsStartedCount(),
+            (int) summary.getTestsSucceededCount(),
+            (int) summary.getTestsFailedCount(),
+            (int) summary.getTestsAbortedCount(),
+            (int) summary.getTestsSkippedCount()
+        );
     }
 
     /**
@@ -216,13 +162,11 @@ public class JUnitPlatformRunner {
                 .filter(p -> p.toString().endsWith(".class"))
                 .filter(p -> !p.toString().contains("$")) // Skip inner classes
                 .map(p -> {
-                    // Convert path to class name
                     String relativePath = binDir.relativize(p).toString();
-                    String className = relativePath
+                    return relativePath
                         .replace(".class", "")
                         .replace("/", ".")
                         .replace("\\", ".");
-                    return className;
                 })
                 .filter(name -> name.endsWith("Testing") || name.endsWith("Test"))
                 .filter(name -> !name.startsWith("testSupport.")) // Exclude testSupport package
@@ -230,104 +174,75 @@ public class JUnitPlatformRunner {
         }
     }
 
-    /**
-     * Finds the JUnit Platform Console Launcher JAR in the deps directory.
-     */
-    private Path findConsoleLauncher(Path depsDir) throws IOException {
-        if (depsDir == null || !Files.exists(depsDir)) {
-            return null;
-        }
+    private URLClassLoader buildClassLoader(Path binDir, Path depsDir, ClassLoader parent) throws IOException {
+        Set<URL> urls = new HashSet<>();
+        urls.add(binDir.toUri().toURL());
 
-        try (Stream<Path> walk = Files.list(depsDir)) {
-            return walk
-                .filter(Files::isRegularFile)
-                .filter(p -> {
-                    String name = p.getFileName().toString().toLowerCase();
-                    return name.startsWith(CONSOLE_LAUNCHER_PREFIX) && name.endsWith(".jar");
-                })
-                .findFirst()
-                .orElse(null);
-        }
-    }
-
-    /**
-     * Builds the classpath string for test execution.
-     */
-    private String buildClasspath(Path binDir, Path depsDir) throws IOException {
-        List<String> paths = new ArrayList<>();
-
-        // Add bin directory (absolute path)
-        paths.add(binDir.toAbsolutePath().toString());
-
-        // Add all JARs from deps (absolute paths)
         if (depsDir != null && Files.exists(depsDir)) {
             try (Stream<Path> walk = Files.list(depsDir.toAbsolutePath())) {
                 walk.filter(Files::isRegularFile)
                     .filter(p -> p.toString().endsWith(".jar"))
-                    // Exclude the console launcher itself from classpath
-                    .filter(p -> !p.getFileName().toString().toLowerCase().startsWith(CONSOLE_LAUNCHER_PREFIX))
-                    .map(p -> p.toAbsolutePath().toString())
-                    .forEach(paths::add);
+                    .map(p -> {
+                        try {
+                            return p.toUri().toURL();
+                        } catch (IOException e) {
+                            return null;
+                        }
+                    })
+                    .filter(u -> u != null)
+                    .forEach(urls::add);
             }
         }
 
-        return String.join(System.getProperty("path.separator"), paths);
+        return new ChildFirstClassLoader(urls.toArray(new URL[0]), parent);
     }
 
-    /**
-     * Gets the path to java, respecting JAVA_HOME if set.
-     */
-    private String getJavaPath() {
-        if (javaHome != null) {
-            return javaHome.resolve("bin").resolve("java").toString();
+    private void invokeForceClose(ClassLoader testLoader) {
+        try {
+            Class<?> cls = Class.forName("testSupport.LoggingExtension", true, testLoader);
+            cls.getDeclaredMethod("forceClose").invoke(null);
+        } catch (Exception e) {
+            // Best effort: if missing, the CloseableResource should handle it.
         }
-
-        String javaHomeEnv = System.getenv("JAVA_HOME");
-        if (javaHomeEnv != null && !javaHomeEnv.isEmpty()) {
-            return Path.of(javaHomeEnv, "bin", "java").toString();
-        }
-
-        return "java";
     }
 
-    /**
-     * Parses test results from JUnit console output.
-     */
-    private TestRunResult parseTestResults(int exitCode, String stdout, String stderr) {
-        int found = 0, started = 0, succeeded = 0, failed = 0, aborted = 0, skipped = 0;
+    private static final class ChildFirstClassLoader extends URLClassLoader {
+        private static final String[] PARENT_FIRST_PREFIXES = new String[] {
+            "java.",
+            "javax.",
+            "sun.",
+            "org.junit.",
+            "org.opentest4j.",
+            "org.apiguardian.",
+            "org.slf4j."
+        };
 
-        // Try to parse the summary line
-        Matcher matcher = SUMMARY_PATTERN.matcher(stdout);
-        if (matcher.find()) {
-            found = Integer.parseInt(matcher.group(1));
-            started = Integer.parseInt(matcher.group(2));
-            aborted = Integer.parseInt(matcher.group(3));
-            succeeded = Integer.parseInt(matcher.group(4));
-            failed = Integer.parseInt(matcher.group(5));
-        } else {
-            // Try counting from output lines
-            found = countOccurrences(stdout, "tests found");
-            started = countOccurrences(stdout, "tests started");
-            succeeded = countOccurrences(stdout, "tests successful");
-            failed = countOccurrences(stdout, "tests failed");
-            aborted = countOccurrences(stdout, "tests aborted");
-            skipped = countOccurrences(stdout, "tests skipped");
+        private ChildFirstClassLoader(URL[] urls, ClassLoader parent) {
+            super(urls, parent);
         }
 
-        return TestRunResult.fromExecution(exitCode, stdout, stderr,
-            found, started, succeeded, failed, aborted, skipped);
-    }
+        @Override
+        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+            for (String prefix : PARENT_FIRST_PREFIXES) {
+                if (name.startsWith(prefix)) {
+                    return super.loadClass(name, resolve);
+                }
+            }
 
-    /**
-     * Counts occurrences of a pattern like "[ N tests found ]" in output.
-     */
-    private int countOccurrences(String text, String suffix) {
-        Pattern p = Pattern.compile("\\[\\s*(\\d+)\\s+" + Pattern.quote(suffix) + "\\s*\\]",
-            Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(text);
-        if (m.find()) {
-            return Integer.parseInt(m.group(1));
+            synchronized (getClassLoadingLock(name)) {
+                Class<?> loaded = findLoadedClass(name);
+                if (loaded == null) {
+                    try {
+                        loaded = findClass(name);
+                    } catch (ClassNotFoundException e) {
+                        loaded = super.loadClass(name, resolve);
+                    }
+                }
+                if (resolve) {
+                    resolveClass(loaded);
+                }
+                return loaded;
+            }
         }
-        return 0;
     }
 }
