@@ -2,15 +2,21 @@
   "testClassSimple" : "BSTManualTesting",
   "testDisplayName" : "testHeight()",
   "testId" : "BSTManualTesting#testHeight()",
-  "status" : "ABORTED"
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testHeight()]"
 }, {
   "testClassSimple" : "BSTManualTesting",
   "testDisplayName" : "testSize()",
   "testId" : "BSTManualTesting#testSize()",
-  "status" : "ABORTED"
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testSize()]"
 }, {
   "testClassSimple" : "BSTTesting",
   "testDisplayName" : "testInsertInts()",
   "testId" : "BSTTesting#testInsertInts()",
-  "status" : "ABORTED"
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testInsertInts()]"
 } ]

@@ -154,16 +154,17 @@ public class EvidenceHarvester {
 
                 // Get status for this run
                 String runKey = String.valueOf(runNumber);
-                JsonNode statusNode = testNode.get(runKey);
-                if (statusNode == null) {
+                JsonNode runNode = testNode.get(runKey);
+                if (runNode == null || !runNode.isObject()) {
                     continue;
                 }
 
-                TestStatus status = parseStatus(statusNode.asText(), warnings);
-                String cause = extractCause(statusNode.asText());
+                String statusStr = runNode.path("status").asText();
+                TestStatus status = parseStatus(statusStr, warnings);
+                String cause = extractCause(statusStr);
 
-                // Get evidence for this run
-                JsonNode evidenceNode = testNode.path("evidence").path(runKey);
+                // Get evidence for this run (nested inside the run node)
+                JsonNode evidenceNode = runNode.path("evidence");
 
                 Long durationMs = null;
                 String stackTrace = null;
