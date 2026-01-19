@@ -12,9 +12,16 @@ import java.nio.file.Path;
 import java.util.List;
 
 public final class Json {
+    // Pretty-printed mapper for regular JSON files
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
             .enable(SerializationFeature.INDENT_OUTPUT)
+            .configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, true);
+
+    // Compact mapper for JSONL files (one JSON object per line)
+    private static final ObjectMapper COMPACT_MAPPER = new ObjectMapper()
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .disable(SerializationFeature.INDENT_OUTPUT)
             .configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, true);
 
     private Json() {}
@@ -32,7 +39,7 @@ public final class Json {
         Files.createDirectories(out.getParent());
         try (BufferedWriter w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
             for (T r : records) {
-                w.write(MAPPER.writeValueAsString(r));
+                w.write(COMPACT_MAPPER.writeValueAsString(r));
                 w.newLine();
             }
         }

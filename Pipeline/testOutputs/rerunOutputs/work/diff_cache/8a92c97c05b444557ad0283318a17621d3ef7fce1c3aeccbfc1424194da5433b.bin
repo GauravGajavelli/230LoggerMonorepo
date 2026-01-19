@@ -1,0 +1,10 @@
+1;
+INSERT
+120,120
+0,
+5,
+	public void insert(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+

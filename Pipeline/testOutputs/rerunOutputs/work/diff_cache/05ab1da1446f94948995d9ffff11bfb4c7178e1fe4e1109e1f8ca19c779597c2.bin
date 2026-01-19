@@ -1,0 +1,16 @@
+2;
+INSERT
+123,123
+0,
+6,
+		} else {
+			if (root.data.equals(i)) {
+				return;
+			} else if (root.data > i) {
+				
+			}
+DELETE
+124,130
+1,
+		
+0,
