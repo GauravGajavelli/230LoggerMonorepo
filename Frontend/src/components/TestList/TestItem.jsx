@@ -1,4 +1,5 @@
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
+import { CategoryBadge } from './CategoryBadge';
 
 /**
  * Individual test result item
@@ -7,18 +8,38 @@ import { ArrowUp, ArrowDown } from 'lucide-react';
  * @param {import('../../types').TestResult} props.test
  * @param {boolean} props.isSelected
  * @param {() => void} props.onClick
+ * @param {'stillFailing' | 'regression' | 'costlyDetour' | null} [props.highlightCategory] - Highlight category if test needs attention
+ * @param {number | null} [props.originRun] - Origin run number for highlighted tests
+ * @param {() => void} [props.onJumpToOrigin] - Callback to jump to origin run
  */
-export function TestItem({ test, isSelected, onClick }) {
+export function TestItem({ test, isSelected, onClick, highlightCategory, originRun, onJumpToOrigin }) {
   const isPassing = test.status === 'pass';
   const isError = test.status === 'error';
   const isSkip = test.status === 'skip';
 
-  // Determine background color based on status
+  // Determine background color based on status and highlight category
   const getBgClass = () => {
     if (isPassing) return 'bg-green-900/20 hover:bg-green-900/30';
     if (isError) return 'bg-yellow-900/20 hover:bg-yellow-900/30';
     if (isSkip) return 'bg-gray-700/20 hover:bg-gray-700/30';
+    // Highlighted failures get slightly different backgrounds
+    if (highlightCategory === 'costlyDetour') return 'bg-yellow-900/20 hover:bg-yellow-900/30';
     return 'bg-red-900/20 hover:bg-red-900/30';
+  };
+
+  // Get left border class for highlighted tests
+  const getBorderClass = () => {
+    if (!highlightCategory) return '';
+    switch (highlightCategory) {
+      case 'stillFailing':
+        return 'border-l-4 border-l-red-500';
+      case 'regression':
+        return 'border-l-4 border-l-orange-500';
+      case 'costlyDetour':
+        return 'border-l-4 border-l-yellow-500';
+      default:
+        return '';
+    }
   };
 
   // Determine status dot color
@@ -59,28 +80,54 @@ export function TestItem({ test, isSelected, onClick }) {
     }
   };
 
+  // Handle origin jump click
+  const handleOriginClick = (e) => {
+    e.stopPropagation(); // Don't trigger the main onClick
+    onJumpToOrigin?.();
+  };
+
   return (
     <div
       onClick={onClick}
       className={`
         px-3 py-2 rounded-lg cursor-pointer transition
         ${getBgClass()}
+        ${getBorderClass()}
         ${isSelected ? 'ring-2 ring-blue-500' : ''}
       `}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           {/* Status dot */}
-          <span className={`w-2 h-2 rounded-full ${getDotClass()}`} />
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${getDotClass()}`} />
 
           {/* Test name */}
-          <span className="font-mono text-sm text-gray-200">
+          <span className="font-mono text-sm text-gray-200 truncate">
             {test.name}
           </span>
+
+          {/* Category badge for highlighted tests */}
+          {highlightCategory && (
+            <CategoryBadge category={highlightCategory} size="compact" />
+          )}
         </div>
 
-        {/* Change indicator */}
-        {renderChangeIndicator()}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Origin jump button for highlighted tests */}
+          {highlightCategory && originRun && onJumpToOrigin && (
+            <button
+              onClick={handleOriginClick}
+              className="flex items-center gap-0.5 text-xs text-blue-400 hover:text-blue-300 transition"
+              title={`Jump to run ${originRun}`}
+            >
+              origin
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          )}
+
+          {/* Change indicator */}
+          {renderChangeIndicator()}
+        </div>
       </div>
 
       {/* Previous status subtitle */}

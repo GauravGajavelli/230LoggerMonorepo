@@ -12,13 +12,15 @@ import { EpisodeSegments } from './EpisodeSegments';
  * @param {string} props.currentEpisodeId - Current episode derived from submission
  * @param {(episodeId: string) => void} props.onEpisodeClick
  * @param {import('../../types').FlatRunData[]} [props.allRuns] - Flat list of all runs for hover popup
+ * @param {number | null} [props.highlightedOriginRun] - Run number to highlight as origin
  */
 export function TimelineBar({
   episodes,
   playback,
   currentEpisodeId,
   onEpisodeClick,
-  allRuns
+  allRuns,
+  highlightedOriginRun
 }) {
   const {
     isPlaying,
@@ -58,6 +60,7 @@ export function TimelineBar({
             allRuns={allRuns}
             globalRunIndex={currentIndex}
             onRunClick={(index) => playback.jumpTo(index)}
+            highlightedOriginRun={highlightedOriginRun}
           />
         </div>
 

@@ -25,10 +25,10 @@ export function PlaybackHeader({ context, testSummary, currentEpisode, currentEp
         {/* Left: Title and context */}
         <div>
           <h1 className="text-xl font-semibold text-white">
-            CSSE 230 – {context.assignmentName}
+            CSSE 230 – {context.assignmentName || 'Assignment'}
           </h1>
           <p className="text-sm text-gray-400 mt-0.5">
-            Student: {context.studentDisplayName} • Submitted: {formatDate(context.submittedAt)}
+            Student: {context.studentDisplayName || context.studentId || 'Student'} • Submitted: {formatDate(new Date(context.submittedAt))}
           </p>
         </div>
 

@@ -11,6 +11,7 @@ import { useState, useMemo } from 'react';
  * @param {import('../../types').FlatRunData[]} [props.allRuns] - Flat list of all runs
  * @param {number} [props.globalRunIndex] - Current global run index
  * @param {(globalIndex: number) => void} [props.onRunClick] - Callback when run is clicked
+ * @param {number | null} [props.highlightedOriginRun] - Run number to highlight as origin
  */
 export function EpisodeSegments({
   episodes,
@@ -19,7 +20,8 @@ export function EpisodeSegments({
   onEpisodeClick,
   allRuns,
   globalRunIndex,
-  onRunClick
+  onRunClick,
+  highlightedOriginRun
 }) {
   const [hoveredEpisodeId, setHoveredEpisodeId] = useState(null);
 
@@ -28,6 +30,14 @@ export function EpisodeSegments({
     if (!hoveredEpisodeId || !allRuns) return [];
     return allRuns.filter(r => r.episodeId === hoveredEpisodeId);
   }, [hoveredEpisodeId, allRuns]);
+
+  // Determine which episode contains the highlighted origin run
+  const episodeContainsHighlight = useMemo(() => {
+    if (!highlightedOriginRun || !allRuns) return {};
+    const runData = allRuns.find(r => r.runNumber === highlightedOriginRun);
+    if (!runData) return {};
+    return { [runData.episodeId]: true };
+  }, [highlightedOriginRun, allRuns]);
 
   if (!episodes || episodes.length === 0 || totalDuration === 0) {
     return <div className="flex-1 h-8 bg-gray-800 rounded-lg" />;
@@ -41,6 +51,9 @@ export function EpisodeSegments({
         const isCurrent = episode.id === currentEpisodeId;
         const isEven = index % 2 === 0;
         const isHovered = episode.id === hoveredEpisodeId;
+        const hasOrigin = episodeContainsHighlight[episode.id];
+        const isFirst = index === 0;
+        const isLast = index === episodes.length - 1;
 
         return (
           <div
@@ -58,6 +71,9 @@ export function EpisodeSegments({
                 hover:brightness-110
                 ${isEven ? 'bg-gray-700' : 'bg-gray-700/80'}
                 ${isCurrent ? 'ring-2 ring-blue-500 ring-inset' : ''}
+                ${hasOrigin ? 'ring-2 ring-yellow-400 ring-inset' : ''}
+                ${isFirst ? 'rounded-l-lg' : ''}
+                ${isLast ? 'rounded-r-lg' : ''}
               `}
               title={episode.label}
             >
@@ -75,6 +91,7 @@ export function EpisodeSegments({
                 <div className="flex gap-1">
                   {hoveredRuns.map((runData, idx) => {
                     const isCurrent = runData.globalIndex === globalRunIndex;
+                    const isOrigin = runData.runNumber === highlightedOriginRun;
                     return (
                       <button
                         key={runData.run.runId}
@@ -85,7 +102,8 @@ export function EpisodeSegments({
                         className={`w-6 h-6 rounded text-xs font-medium transition
                           ${isCurrent
                             ? 'bg-blue-500 text-white'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}
+                          ${isOrigin ? 'ring-2 ring-yellow-400' : ''}`}
                       >
                         {idx + 1}
                       </button>

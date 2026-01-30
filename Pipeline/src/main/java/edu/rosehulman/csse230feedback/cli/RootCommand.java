@@ -7,11 +7,11 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true,
         version = "csse230-feedback-ingestor 0.1.0",
         description = "Ingest CSSE230 logger artifacts and rerun tests for enriched feedback.",
-        subcommands = { IngestCommand.class, RerunCommand.class }
+        subcommands = { IngestCommand.class, RerunCommand.class, PrepareCommand.class }
 )
 public class RootCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use a subcommand. Try: csse230-feedback ingest --help or csse230-feedback rerun --help");
+        System.out.println("Use a subcommand. Try: csse230-feedback ingest --help, csse230-feedback rerun --help, or csse230-feedback prepare --help");
     }
 }

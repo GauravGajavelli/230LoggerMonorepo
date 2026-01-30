@@ -1,6 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { StackTraceViewer } from '../FeedbackDrawer/StackTraceViewer';
 import { FeedbackContent } from '../FeedbackDrawer/FeedbackContent';
+import { OriginSection } from './OriginSection';
 
 /**
  * Inline feedback panel card showing stack trace and AI feedback
@@ -12,15 +13,28 @@ import { FeedbackContent } from '../FeedbackDrawer/FeedbackContent';
  * @param {boolean} props.isLoadingFeedback
  * @param {() => void} props.onClose
  * @param {(location: { file: string, line: number }) => void} [props.onJumpToCode]
+ * @param {import('../../types').TestHistory | null} [props.testHistory] - Test history for origin info
+ * @param {number | null} [props.originRun] - Origin run number
+ * @param {number} [props.currentRun] - Current run number
+ * @param {() => void} [props.onJumpToOrigin] - Callback to jump to origin
+ * @param {(runNumber: number) => void} [props.onClickSparklineRun] - Callback when sparkline cell is clicked
  */
 export function FeedbackPanel({
   selectedTest,
   feedback,
   isLoadingFeedback,
   onClose,
-  onJumpToCode
+  onJumpToCode,
+  testHistory,
+  originRun,
+  currentRun,
+  onJumpToOrigin,
+  onClickSparklineRun
 }) {
   const isPassing = selectedTest?.status === 'pass';
+
+  // Determine if this is a regression (test was passing before)
+  const isRegression = testHistory?.failureIntervals?.some(i => i.isRegression) ?? false;
 
   return (
     <div>
@@ -52,6 +66,18 @@ export function FeedbackPanel({
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {/* Origin Section - shows failure timeline and jump button */}
+      {testHistory && !isPassing && (
+        <OriginSection
+          testHistory={testHistory}
+          originRun={originRun}
+          currentRun={currentRun}
+          isRegression={isRegression}
+          onJumpToOrigin={onJumpToOrigin}
+          onClickRun={onClickSparklineRun}
+        />
+      )}
 
       {/* Content area */}
       <div className="p-6 max-h-80 overflow-auto">

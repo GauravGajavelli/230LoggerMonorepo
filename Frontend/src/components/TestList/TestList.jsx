@@ -19,8 +19,11 @@ import { sortTests } from '../../utils/testSorting';
  * @param {() => void} [props.runSelection.stepRunForward]
  * @param {() => void} [props.runSelection.stepRunBackward]
  * @param {import('../../types').TestRun} [props.runSelection.currentRun]
+ * @param {(testId: string) => 'stillFailing' | 'regression' | 'costlyDetour' | null} [props.getHighlightCategory] - Get highlight category for a test
+ * @param {(testId: string) => number | null} [props.getOriginRun] - Get origin run number for a test
+ * @param {(runNumber: number, testId: string) => void} [props.onJumpToOrigin] - Callback to jump to origin run
  */
-export function TestList({ tests, selectedTestId, onTestSelect, maxHeight = '300px', runSelection }) {
+export function TestList({ tests, selectedTestId, onTestSelect, maxHeight = '300px', runSelection, getHighlightCategory, getOriginRun, onJumpToOrigin }) {
   const { changed, other } = useMemo(() => sortTests(tests), [tests]);
   const showRunSelector = runSelection && runSelection.totalRuns > 1;
 
@@ -54,14 +57,21 @@ export function TestList({ tests, selectedTestId, onTestSelect, maxHeight = '300
             </span>
           </div>
           <div className="px-2 pb-2 space-y-1">
-            {changed.map(test => (
-              <TestItem
-                key={test.id}
-                test={test}
-                isSelected={selectedTestId === test.id}
-                onClick={() => onTestSelect(test.id)}
-              />
-            ))}
+            {changed.map(test => {
+              const highlightCategory = getHighlightCategory?.(test.id) || null;
+              const originRun = getOriginRun?.(test.id) || null;
+              return (
+                <TestItem
+                  key={test.id}
+                  test={test}
+                  isSelected={selectedTestId === test.id}
+                  onClick={() => onTestSelect(test.id)}
+                  highlightCategory={highlightCategory}
+                  originRun={originRun}
+                  onJumpToOrigin={originRun && onJumpToOrigin ? () => onJumpToOrigin(originRun, test.id) : undefined}
+                />
+              );
+            })}
           </div>
         </div>
       )}
@@ -75,14 +85,21 @@ export function TestList({ tests, selectedTestId, onTestSelect, maxHeight = '300
             </span>
           </div>
           <div className="px-2 pb-2 space-y-1">
-            {other.map(test => (
-              <TestItem
-                key={test.id}
-                test={test}
-                isSelected={selectedTestId === test.id}
-                onClick={() => onTestSelect(test.id)}
-              />
-            ))}
+            {other.map(test => {
+              const highlightCategory = getHighlightCategory?.(test.id) || null;
+              const originRun = getOriginRun?.(test.id) || null;
+              return (
+                <TestItem
+                  key={test.id}
+                  test={test}
+                  isSelected={selectedTestId === test.id}
+                  onClick={() => onTestSelect(test.id)}
+                  highlightCategory={highlightCategory}
+                  originRun={originRun}
+                  onJumpToOrigin={originRun && onJumpToOrigin ? () => onJumpToOrigin(originRun, test.id) : undefined}
+                />
+              );
+            })}
           </div>
         </div>
       )}

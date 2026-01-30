@@ -122,4 +122,61 @@
  * @property {number} totalTests
  */
 
+/**
+ * @typedef {Object} FailureInterval
+ * @property {number} startRun - Run number where test started failing
+ * @property {number|null} endRun - Run number where test was fixed (null if still failing)
+ * @property {number} duration - Number of runs in this failure interval
+ * @property {boolean} isLingering - True if still failing at final run
+ * @property {boolean} isRegression - True if test was previously passing
+ * @property {number} [effortTimeMs] - Optional: time spent while failing
+ * @property {number} [runsWhileFailing] - Optional: runs while failing
+ */
+
+/**
+ * @typedef {Object} TestHistory
+ * @property {string} testId
+ * @property {string} testName
+ * @property {Object<number, string>} statusByRun - Status at each run number (map from run number to status)
+ * @property {FailureInterval[]} failureIntervals - All failure periods
+ * @property {boolean} isLingeringFailure - True if still failing at final run
+ * @property {boolean} isRegression - Had at least one regression (pass→fail)
+ * @property {number} recursCount - Number of failure intervals (how many times test failed)
+ * @property {number} flipsWithin - Total pass↔fail transitions
+ * @property {number} totalFailedRuns - Count of runs where test failed
+ * @property {number} meaningfulnessScore - Computed score for ranking
+ * @property {string|null} highlightCategory - "stillFailing" | "regression" | "costlyDetour" | null
+ */
+
+/**
+ * @typedef {Object} FailureHighlights
+ * @property {string[]} stillFailing - Test IDs of tests still failing
+ * @property {string[]} regressions - Test IDs of tests with regressions
+ * @property {string[]} costlyDetours - Test IDs of tests that were costly detours
+ */
+
+/**
+ * @typedef {Object} FileContent
+ * @property {string} name - e.g., "BinarySearchTree.java"
+ * @property {string} language - e.g., "java"
+ * @property {string} content - Full file content
+ */
+
+/**
+ * @typedef {Object} CodeSnapshot
+ * @property {number} runNumber
+ * @property {FileContent[]} files
+ */
+
+/**
+ * @typedef {Object} FrontendOutput
+ * @property {SubmissionContext} context
+ * @property {Episode[]} episodes
+ * @property {EpisodeTestData[]} episodeTestData
+ * @property {Feedback[]} feedback
+ * @property {TestHistory[]} testHistories
+ * @property {FailureHighlights} failureHighlights
+ * @property {CodeSnapshot[]} [codeSnapshots] - Optional code snapshots per run
+ */
+
 export {};

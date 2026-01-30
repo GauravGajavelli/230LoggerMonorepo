@@ -1,0 +1,49 @@
+{
+  "schemaVersion" : 1,
+  "createdAtUtc" : "2026-01-30T11:59:05.650205Z",
+  "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs",
+  "runTarPath" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/run.tar",
+  "runTarSha256" : "cb1f0ea33016d9b8b3d93a066931b41b3bd57da65a4e36a81fc1036f2e86cbbb",
+  "extractedFiles" : [ {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/e2e-test/work/run_tar_extracted/diffs_0_.tar.zip",
+    "sizeBytes" : 8413
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/e2e-test/work/run_tar_extracted/testRunInfo.json",
+    "sizeBytes" : 7047
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/e2e-test/work/run_tar_extracted/diffs_13_.tar.zip",
+    "sizeBytes" : 5434
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/e2e-test/work/run_tar_extracted/diffs_3_.tar.zip",
+    "sizeBytes" : 6139
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testOutputs/e2e-test/work/run_tar_extracted/error-logs.txt",
+    "sizeBytes" : 0
+  } ],
+  "diffArchives" : [ {
+    "filename" : "diffs_0_.tar.zip",
+    "baselineRunNumber" : 0,
+    "sha256" : "fe59e0efa2b345f862a0389b335d7a02da580830a9a8fdabaa6c2c195ee061ec",
+    "baselineCount" : 4,
+    "patchCount" : 7,
+    "minPatchRunNumber" : 1,
+    "maxPatchRunNumber" : 2
+  }, {
+    "filename" : "diffs_13_.tar.zip",
+    "baselineRunNumber" : 13,
+    "sha256" : "53f49f0fb0d27b686c89eb7a97acf6b53467f1915b87b4a1a9672b09f723e9be",
+    "baselineCount" : 4,
+    "patchCount" : 4,
+    "minPatchRunNumber" : 13,
+    "maxPatchRunNumber" : 13
+  }, {
+    "filename" : "diffs_3_.tar.zip",
+    "baselineRunNumber" : 3,
+    "sha256" : "619806ce985c05d5c0575baf102b32483d2fe228ccde9dfe72deb35bfd6ed4c3",
+    "baselineCount" : 4,
+    "patchCount" : 15,
+    "minPatchRunNumber" : 3,
+    "maxPatchRunNumber" : 12
+  } ],
+  "warnings" : [ ]
+}

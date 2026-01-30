@@ -130,6 +130,17 @@
   color: #f87171;
 }
 
+/* Error line highlighting (yellow) for jump-to-origin */
+.line-error-highlight {
+  background: rgba(234, 179, 8, 0.3) !important; /* yellow-500 with opacity */
+  animation: none !important; /* Override any fade animations */
+}
+
+.line-error-highlight .code-line-content {
+  border-left: 3px solid rgb(234, 179, 8) !important;
+  padding-left: calc(0.5em - 3px);
+}
+
 /* Tab glow effects for diff indication */
 .tab-glow-green {
   box-shadow: inset 0 -2px 8px -2px rgba(34, 197, 94, 0.4);

@@ -1,0 +1,504 @@
+{
+  "context" : {
+    "studentId" : "student123",
+    "assignmentName" : "AVLTree",
+    "submittedAt" : "2026-01-19T16:10:54.337462Z",
+    "totalEpisodes" : 6,
+    "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs"
+  },
+  "episodes" : [ {
+    "id" : "episode-1",
+    "startTime" : "2026-01-19 05:14:59.214",
+    "endTime" : "2026-01-19 05:16:16.741",
+    "label" : "Episode 1",
+    "dominantCategory" : "BSTManualTesting"
+  }, {
+    "id" : "episode-2",
+    "startTime" : "2026-01-19 06:01:54.902",
+    "endTime" : "2026-01-19 06:01:54.902",
+    "label" : "Episode 2",
+    "dominantCategory" : "BSTManualTesting"
+  }, {
+    "id" : "episode-3",
+    "startTime" : "2026-01-19 06:15:06.454",
+    "endTime" : "2026-01-19 06:15:06.454",
+    "label" : "Episode 3",
+    "dominantCategory" : "BSTManualTesting"
+  }, {
+    "id" : "episode-4",
+    "startTime" : "2026-01-19 06:20:44.085",
+    "endTime" : "2026-01-19 06:20:44.085",
+    "label" : "Episode 4",
+    "dominantCategory" : "BSTManualTesting"
+  }, {
+    "id" : "episode-5",
+    "startTime" : "2026-01-19 06:30:25.288",
+    "endTime" : "2026-01-19 06:31:31.825",
+    "label" : "Episode 5",
+    "dominantCategory" : "BSTManualTesting"
+  }, {
+    "id" : "episode-6",
+    "startTime" : "2026-01-19 08:36:16.065",
+    "endTime" : "2026-01-19 08:36:43.295",
+    "label" : "Episode 6",
+    "dominantCategory" : "BSTManualTesting"
+  } ],
+  "episodeTestData" : [ {
+    "episodeId" : "episode-1",
+    "runs" : [ {
+      "runNumber" : 2,
+      "timestamp" : "2026-01-19 05:14:59.214",
+      "summary" : {
+        "total" : 3,
+        "passed" : 2,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "errorMessage" : "expected: <[]> but was: <BinarySearchTree@6111ba37>",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@6111ba37>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)\n\tat org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)\n\tat BSTTesting.testInsertInts(BSTTesting.java:31)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "expected" : "[]",
+        "actual" : "BinarySearchTree@6111ba37",
+        "durationMs" : -1
+      } ]
+    }, {
+      "runNumber" : 3,
+      "timestamp" : "2026-01-19 05:16:16.741",
+      "summary" : {
+        "total" : 3,
+        "passed" : 2,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "previousStatus" : "fail",
+        "errorMessage" : "expected: <[]> but was: <BinarySearchTree@1e7f2e0f>",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@1e7f2e0f>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)\n\tat org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)\n\tat BSTTesting.testInsertInts(BSTTesting.java:31)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "expected" : "[]",
+        "actual" : "BinarySearchTree@1e7f2e0f",
+        "durationMs" : -1
+      } ]
+    } ]
+  }, {
+    "episodeId" : "episode-2",
+    "runs" : [ {
+      "runNumber" : 6,
+      "timestamp" : "2026-01-19 06:01:54.902",
+      "summary" : {
+        "total" : 3,
+        "passed" : 2,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "previousStatus" : "fail",
+        "errorMessage" : "expected: <[]> but was: <BinarySearchTree@149f5761>",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@149f5761>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)\n\tat org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)\n\tat BSTTesting.testInsertInts(BSTTesting.java:31)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "expected" : "[]",
+        "actual" : "BinarySearchTree@149f5761",
+        "durationMs" : -1
+      } ]
+    } ]
+  }, {
+    "episodeId" : "episode-3",
+    "runs" : [ {
+      "runNumber" : 7,
+      "timestamp" : "2026-01-19 06:15:06.454",
+      "summary" : {
+        "total" : 3,
+        "passed" : 2,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "previousStatus" : "fail",
+        "errorMessage" : "expected: <[]> but was: <BinarySearchTree@15dc339f>",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@15dc339f>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)\n\tat org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)\n\tat BSTTesting.testInsertInts(BSTTesting.java:31)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "expected" : "[]",
+        "actual" : "BinarySearchTree@15dc339f",
+        "durationMs" : -1
+      } ]
+    } ]
+  }, {
+    "episodeId" : "episode-4",
+    "runs" : [ {
+      "runNumber" : 8,
+      "timestamp" : "2026-01-19 06:20:44.085",
+      "summary" : {
+        "total" : 3,
+        "passed" : 2,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "previousStatus" : "fail",
+        "errorMessage" : "expected: <[]> but was: <BinarySearchTree@2503ec73>",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@2503ec73>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)\n\tat org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)\n\tat BSTTesting.testInsertInts(BSTTesting.java:31)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "expected" : "[]",
+        "actual" : "BinarySearchTree@2503ec73",
+        "durationMs" : -1
+      } ]
+    } ]
+  }, {
+    "episodeId" : "episode-5",
+    "runs" : [ {
+      "runNumber" : 9,
+      "timestamp" : "2026-01-19 06:30:25.288",
+      "summary" : {
+        "total" : 3,
+        "passed" : 2,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "previousStatus" : "fail",
+        "errorMessage" : "expected: <[2, 4, 5, 7, 10]> but was: <[5, 2, 4, 7, 10]>",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: expected: <[2, 4, 5, 7, 10]> but was: <[5, 2, 4, 7, 10]>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)\n\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)\n\tat org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)\n\tat BSTTesting.testInsertInts(BSTTesting.java:43)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "expected" : "[2, 4, 5, 7, 10]",
+        "actual" : "[5, 2, 4, 7, 10]",
+        "durationMs" : -1
+      } ]
+    }, {
+      "runNumber" : 10,
+      "timestamp" : "2026-01-19 06:31:31.825",
+      "summary" : {
+        "total" : 3,
+        "passed" : 3,
+        "failed" : 0,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "pass",
+        "changedThisRun" : true,
+        "previousStatus" : "fail",
+        "durationMs" : 0
+      } ]
+    } ]
+  }, {
+    "episodeId" : "episode-6",
+    "runs" : [ {
+      "runNumber" : 11,
+      "timestamp" : "2026-01-19 08:36:16.065",
+      "summary" : {
+        "total" : 4,
+        "passed" : 3,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
+        "name" : "testPreOrderIteratorConcurrentModificationException()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "errorMessage" : "Did not throw ConcurrentModificationException",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: Did not throw ConcurrentModificationException\n\tat org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)\n\tat org.junit.jupiter.api.Assertions.fail(Assertions.java:138)\n\tat BSTConcurrencyTesting.testPreOrderIteratorConcurrentModificationException(BSTConcurrencyTesting.java:55)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "durationMs" : -1
+      }, {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      } ]
+    }, {
+      "runNumber" : 12,
+      "timestamp" : "2026-01-19 08:36:32.986",
+      "summary" : {
+        "total" : 4,
+        "passed" : 3,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
+        "name" : "testPreOrderIteratorConcurrentModificationException()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "previousStatus" : "fail",
+        "errorMessage" : "Did not throw ConcurrentModificationException",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: Did not throw ConcurrentModificationException\n\tat org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)\n\tat org.junit.jupiter.api.Assertions.fail(Assertions.java:138)\n\tat BSTConcurrencyTesting.testPreOrderIteratorConcurrentModificationException(BSTConcurrencyTesting.java:55)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "durationMs" : -1
+      }, {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      } ]
+    }, {
+      "runNumber" : 13,
+      "timestamp" : "2026-01-19 08:36:43.295",
+      "summary" : {
+        "total" : 4,
+        "passed" : 3,
+        "failed" : 1,
+        "errored" : 0,
+        "skipped" : 0
+      },
+      "results" : [ {
+        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
+        "name" : "testPreOrderIteratorConcurrentModificationException()",
+        "status" : "fail",
+        "changedThisRun" : false,
+        "previousStatus" : "fail",
+        "errorMessage" : "Did not throw ConcurrentModificationException",
+        "stackTrace" : "org.opentest4j.AssertionFailedError: Did not throw ConcurrentModificationException\n\tat org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)\n\tat org.junit.jupiter.api.Assertions.fail(Assertions.java:138)\n\tat BSTConcurrencyTesting.testPreOrderIteratorConcurrentModificationException(BSTConcurrencyTesting.java:55)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)\n\tat org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)\n\tat org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)\n\tat org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)\n\tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1597)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)\n\tat org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)\n\tat org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)\n\tat edu.rosehulman.csse230feedback.runner.JUnitPlatformRunner.runTests(JUnitPlatformRunner.java:108)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.processRun(WorkspaceRunnerService.java:175)\n\tat edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService.run(WorkspaceRunnerService.java:106)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:105)\n\tat edu.rosehulman.csse230feedback.cli.RerunCommand.call(RerunCommand.java:13)\n\tat picocli.CommandLine.executeUserObject(CommandLine.java:2045)\n\tat picocli.CommandLine.access$1500(CommandLine.java:148)\n\tat picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2465)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2457)\n\tat picocli.CommandLine$RunLast.handle(CommandLine.java:2419)\n\tat picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2277)\n\tat picocli.CommandLine$RunLast.execute(CommandLine.java:2421)\n\tat picocli.CommandLine.execute(CommandLine.java:2174)\n\tat edu.rosehulman.csse230feedback.cli.Main.main(Main.java:9)\n",
+        "durationMs" : -1
+      }, {
+        "id" : "BSTManualTesting#testHeight()",
+        "name" : "testHeight()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTManualTesting#testSize()",
+        "name" : "testSize()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      }, {
+        "id" : "BSTTesting#testInsertInts()",
+        "name" : "testInsertInts()",
+        "status" : "pass",
+        "changedThisRun" : false,
+        "previousStatus" : "pass",
+        "durationMs" : 0
+      } ]
+    } ]
+  } ],
+  "feedback" : [ ],
+  "testHistories" : [ {
+    "testId" : "BSTManualTesting#testSize()",
+    "testName" : "testSize()",
+    "statusByRun" : {
+      "2" : "pass",
+      "3" : "pass",
+      "6" : "pass",
+      "7" : "pass",
+      "8" : "pass",
+      "9" : "pass",
+      "10" : "pass",
+      "11" : "pass",
+      "12" : "pass",
+      "13" : "pass"
+    },
+    "failureIntervals" : [ ],
+    "isLingeringFailure" : false,
+    "isRegression" : false
+  }, {
+    "testId" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
+    "testName" : "testPreOrderIteratorConcurrentModificationException()",
+    "statusByRun" : {
+      "11" : "fail",
+      "12" : "fail",
+      "13" : "fail"
+    },
+    "failureIntervals" : [ {
+      "startRun" : 11
+    } ],
+    "isLingeringFailure" : true,
+    "isRegression" : false
+  }, {
+    "testId" : "BSTTesting#testInsertInts()",
+    "testName" : "testInsertInts()",
+    "statusByRun" : {
+      "2" : "fail",
+      "3" : "fail",
+      "6" : "fail",
+      "7" : "fail",
+      "8" : "fail",
+      "9" : "fail",
+      "10" : "pass",
+      "11" : "pass",
+      "12" : "pass",
+      "13" : "pass"
+    },
+    "failureIntervals" : [ {
+      "startRun" : 2,
+      "endRun" : 9
+    } ],
+    "isLingeringFailure" : false,
+    "isRegression" : false
+  }, {
+    "testId" : "BSTManualTesting#testHeight()",
+    "testName" : "testHeight()",
+    "statusByRun" : {
+      "2" : "pass",
+      "3" : "pass",
+      "6" : "pass",
+      "7" : "pass",
+      "8" : "pass",
+      "9" : "pass",
+      "10" : "pass",
+      "11" : "pass",
+      "12" : "pass",
+      "13" : "pass"
+    },
+    "failureIntervals" : [ ],
+    "isLingeringFailure" : false,
+    "isRegression" : false
+  } ]
+}

@@ -2,14 +2,38 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 import { useTimelineHighlights } from '../hooks/useTimelineHighlights';
 import { FileTabs } from './FileTabs';
-import { getFileContent } from '../data/mockData';
+
+/**
+ * Helper to get code for a file (or first file as default)
+ * @param {Object} submission - Submission object with files array
+ * @param {string} [fileName] - File name to get content for
+ * @returns {string} File content or empty string
+ */
+function getFileContent(submission, fileName) {
+  if (!submission) return '';
+
+  // Support old format with single code string
+  if (!submission.files) {
+    return submission.code || '';
+  }
+
+  // New format with files array
+  const file = fileName
+    ? submission.files.find(f => f.name === fileName)
+    : submission.files[0];
+  return file?.content || '';
+}
 
 /**
  * Main component for single-view code timeline playback
  * Shows code at one point in time with green highlights for added lines
  * and optional deleted lines with red strikethrough
+ *
+ * @param {Object} props
+ * @param {Object} props.playback - Playback state with currentSubmission and previousSubmission
+ * @param {{ file: string, line: number } | null} [props.errorHighlight] - Error line to highlight
  */
-export function CodeTimelineViewer({ submissions, playback }) {
+export function CodeTimelineViewer({ playback, errorHighlight }) {
   const [showDeletedLines, setShowDeletedLines] = useState(false);
   const [highlightKey, setHighlightKey] = useState(0);
   const [openFiles, setOpenFiles] = useState([]);
@@ -115,6 +139,63 @@ export function CodeTimelineViewer({ submissions, playback }) {
     setHighlightKey(prev => prev + 1);
   }, [currentIndex, activeFile]);
 
+  // Scroll to first change when snapshot changes (only within the code container)
+  useEffect(() => {
+    if (!codeContainerRef.current || mergedLines.length === 0) return;
+
+    // Find first changed line index
+    const firstChangeIndex = mergedLines.findIndex(line => line.isAdded || line.isDeleted);
+    if (firstChangeIndex === -1) return;
+
+    // Use requestAnimationFrame to ensure DOM has updated
+    requestAnimationFrame(() => {
+      const container = codeContainerRef.current;
+      const lineElements = container?.querySelectorAll('.code-timeline-line');
+      const targetElement = lineElements?.[firstChangeIndex];
+
+      if (targetElement && container) {
+        // Calculate scroll position to center the element within the container only
+        const containerHeight = container.clientHeight;
+        const elementTop = targetElement.offsetTop;
+        const elementHeight = targetElement.offsetHeight;
+        const targetScrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+
+        container.scrollTo({
+          top: Math.max(0, targetScrollTop),
+          behavior: 'smooth'
+        });
+      }
+    });
+  }, [mergedLines, highlightKey]);
+
+  // Scroll to error highlight when set (takes priority over change scroll)
+  useEffect(() => {
+    if (!errorHighlight || !codeContainerRef.current) return;
+
+    requestAnimationFrame(() => {
+      const container = codeContainerRef.current;
+      const lineElements = container?.querySelectorAll('.code-timeline-line');
+      const targetElement = lineElements?.[errorHighlight.line - 1];
+
+      if (targetElement && container) {
+        // Scroll to line, centering it in the container
+        const containerHeight = container.clientHeight;
+        const elementTop = targetElement.offsetTop;
+        const targetScrollTop = elementTop - (containerHeight / 2);
+        container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
+      }
+    });
+  }, [errorHighlight]);
+
+  // Check if a line should have error highlighting
+  const isErrorLine = (lineNumber) => {
+    if (!errorHighlight) return false;
+    // For now, just check line number match - file matching can be added when
+    // the data model consistently uses matching file names
+    // In production, you'd also verify: activeFile?.includes(errorHighlight.file?.replace('.java', ''))
+    return lineNumber === errorHighlight.line;
+  };
+
   return (
     <div className="h-[500px] w-full flex flex-col">
       {/* Header */}
@@ -201,7 +282,9 @@ export function CodeTimelineViewer({ submissions, playback }) {
 
                   // Determine line class
                   let lineClass = 'code-timeline-line';
-                  if (line.isDeleted) {
+                  if (isErrorLine(line.lineNumber)) {
+                    lineClass += ' line-error-highlight'; // yellow highlight for error line
+                  } else if (line.isDeleted) {
                     lineClass += ' line-deleted';
                   } else if (line.isAdded) {
                     lineClass += ' line-added';

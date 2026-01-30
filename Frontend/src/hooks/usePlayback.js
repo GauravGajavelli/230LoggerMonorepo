@@ -71,6 +71,22 @@ export function usePlayback(submissions) {
     setCurrentIndex(Math.max(0, Math.min(index, submissions.length - 1)));
   }, [submissions.length]);
 
+  /**
+   * Jump to a specific run by run number
+   * This finds the submission with the matching runNumber property
+   * @param {number} runNumber - The run number to jump to
+   * @returns {boolean} - True if jump was successful
+   */
+  const jumpToRunNumber = useCallback((runNumber) => {
+    const index = submissions.findIndex(s => s.runNumber === runNumber);
+    if (index !== -1) {
+      setIsPlaying(false);
+      setCurrentIndex(index);
+      return true;
+    }
+    return false;
+  }, [submissions]);
+
   const cycleSpeed = useCallback(() => {
     setSpeed(prev => {
       const currentIdx = speedOptions.indexOf(prev);
@@ -102,6 +118,7 @@ export function usePlayback(submissions) {
     stepForward,
     stepBackward,
     jumpTo,
+    jumpToRunNumber,
     setSpeed,
     cycleSpeed,
     speedOptions
