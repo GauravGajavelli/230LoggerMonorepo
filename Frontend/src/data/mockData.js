@@ -20,47 +20,105 @@ export const mockSubmissions = [
     studentId: 'S001',
     assignmentId: 'avl',
     timestamp: '2024-01-15T14:30:00Z',
-    code: `public class AVLTree<T extends Comparable<T>> {
+    files: [
+      {
+        name: 'AVLTree.java',
+        language: 'java',
+        content: `public class AVLTree<T extends Comparable<T>> {
     private Node root;
-    
+
     private class Node {
         T data;
         Node left, right;
         int height;
-        
+
         Node(T data) {
             this.data = data;
             this.height = 1;
         }
     }
-    
+
     public void insert(T value) {
         root = insertRec(root, value);
     }
-    
+
     private Node insertRec(Node node, T value) {
         if (node == null) {
             return new Node(value);
         }
-        
+
         int cmp = value.compareTo(node.data);
         if (cmp < 0) {
             node.left = insertRec(node.left, value);
         } else if (cmp > 0) {
             node.right = insertRec(node.right, value);
         }
-        
+
         return node;  // Missing height update and balancing!
     }
-    
+
     public int height() {
         return height(root);
     }
-    
+
     private int height(Node node) {
         return node == null ? 0 : node.height;
     }
-}`,
+}`
+      },
+      {
+        name: 'TreeNode.java',
+        language: 'java',
+        content: `public class TreeNode<T> {
+    T data;
+    TreeNode<T> left;
+    TreeNode<T> right;
+    int height;
+
+    public TreeNode(T data) {
+        this.data = data;
+        this.height = 1;
+        this.left = null;
+        this.right = null;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+}`
+      },
+      {
+        name: 'AVLTreeTest.java',
+        language: 'java',
+        content: `import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AVLTreeTest {
+
+    @Test
+    public void testInsert() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(5);
+        assertEquals(2, tree.height());
+    }
+
+    @Test
+    public void testBalanceAfterRightInsertions() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assertTrue("Tree height <= 2 for 3 elements", tree.height() <= 2);
+    }
+}`
+      }
+    ],
     testResults: {
       passed: 3,
       failed: 5,
@@ -116,50 +174,116 @@ export const mockSubmissions = [
     studentId: 'S001',
     assignmentId: 'avl',
     timestamp: '2024-01-15T15:45:00Z',
-    code: `public class AVLTree<T extends Comparable<T>> {
+    files: [
+      {
+        name: 'AVLTree.java',
+        language: 'java',
+        content: `public class AVLTree<T extends Comparable<T>> {
     private Node root;
-    
+
     private class Node {
         T data;
         Node left, right;
         int height;
-        
+
         Node(T data) {
             this.data = data;
             this.height = 1;
         }
     }
-    
+
     public void insert(T value) {
         root = insertRec(root, value);
     }
-    
+
     private Node insertRec(Node node, T value) {
         if (node == null) {
             return new Node(value);
         }
-        
+
         int cmp = value.compareTo(node.data);
         if (cmp < 0) {
             node.left = insertRec(node.left, value);
         } else if (cmp > 0) {
             node.right = insertRec(node.right, value);
         }
-        
+
         // Added height update
         node.height = 1 + Math.max(height(node.left), height(node.right));
-        
+
         return node;  // Still missing balancing
     }
-    
+
     public int height() {
         return height(root);
     }
-    
+
     private int height(Node node) {
         return node == null ? 0 : node.height;
     }
-}`,
+}`
+      },
+      {
+        name: 'TreeNode.java',
+        language: 'java',
+        content: `public class TreeNode<T> {
+    T data;
+    TreeNode<T> left;
+    TreeNode<T> right;
+    int height;
+
+    public TreeNode(T data) {
+        this.data = data;
+        this.height = 1;
+        this.left = null;
+        this.right = null;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+}`
+      },
+      {
+        name: 'AVLTreeTest.java',
+        language: 'java',
+        content: `import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AVLTreeTest {
+
+    @Test
+    public void testInsert() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(5);
+        assertEquals(2, tree.height());
+    }
+
+    @Test
+    public void testBalanceAfterRightInsertions() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assertTrue("Tree height <= 2 for 3 elements", tree.height() <= 2);
+    }
+
+    @Test
+    public void testHeightUpdate() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(10);
+        tree.insert(20);
+        assertEquals(2, tree.height());
+    }
+}`
+      }
+    ],
     testResults: {
       passed: 4,
       failed: 4,
@@ -202,41 +326,45 @@ export const mockSubmissions = [
     studentId: 'S001',
     assignmentId: 'avl',
     timestamp: '2024-01-15T16:20:00Z',
-    code: `public class AVLTree<T extends Comparable<T>> {
+    files: [
+      {
+        name: 'AVLTree.java',
+        language: 'java',
+        content: `public class AVLTree<T extends Comparable<T>> {
     private Node root;
-    
+
     private class Node {
         T data;
         Node left, right;
         int height;
-        
+
         Node(T data) {
             this.data = data;
             this.height = 1;
         }
     }
-    
+
     public void insert(T value) {
         root = insertRec(root, value);
     }
-    
+
     private Node insertRec(Node node, T value) {
         if (node == null) {
             return new Node(value);
         }
-        
+
         int cmp = value.compareTo(node.data);
         if (cmp < 0) {
             node.left = insertRec(node.left, value);
         } else if (cmp > 0) {
             node.right = insertRec(node.right, value);
         }
-        
+
         node.height = 1 + Math.max(height(node.left), height(node.right));
-        
+
         // Added balance check and rotation
         int balance = getBalance(node);
-        
+
         // Left heavy
         if (balance > 1) {
             return rotateRight(node);
@@ -245,48 +373,120 @@ export const mockSubmissions = [
         if (balance < -1) {
             return rotateLeft(node);
         }
-        
+
         return node;
     }
-    
+
     private int getBalance(Node node) {
         return node == null ? 0 : height(node.left) - height(node.right);
     }
-    
+
     private Node rotateRight(Node y) {
         Node x = y.left;
         Node T2 = x.right;
-        
+
         x.right = y;
         y.left = T2;
-        
+
         y.height = 1 + Math.max(height(y.left), height(y.right));
         x.height = 1 + Math.max(height(x.left), height(x.right));
-        
+
         return x;
     }
-    
+
     private Node rotateLeft(Node x) {
         Node y = x.right;
         Node T2 = y.left;
-        
+
         y.left = x;
         x.right = T2;
-        
+
         x.height = 1 + Math.max(height(x.left), height(x.right));
         y.height = 1 + Math.max(height(y.left), height(y.right));
-        
+
         return y;
     }
-    
+
     public int height() {
         return height(root);
     }
-    
+
     private int height(Node node) {
         return node == null ? 0 : node.height;
     }
-}`,
+}`
+      },
+      {
+        name: 'TreeNode.java',
+        language: 'java',
+        content: `public class TreeNode<T> {
+    T data;
+    TreeNode<T> left;
+    TreeNode<T> right;
+    int height;
+
+    public TreeNode(T data) {
+        this.data = data;
+        this.height = 1;
+        this.left = null;
+        this.right = null;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+}`
+      },
+      {
+        name: 'AVLTreeTest.java',
+        language: 'java',
+        content: `import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AVLTreeTest {
+
+    @Test
+    public void testInsert() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(5);
+        assertEquals(2, tree.height());
+    }
+
+    @Test
+    public void testBalanceAfterRightInsertions() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assertTrue("Tree height <= 2 for 3 elements", tree.height() <= 2);
+    }
+
+    @Test
+    public void testLeftRotation() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        // Root should now be 2
+    }
+
+    @Test
+    public void testRightRotation() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(3);
+        tree.insert(2);
+        tree.insert(1);
+        // Root should now be 2
+    }
+}`
+      }
+    ],
     testResults: {
       passed: 6,
       failed: 2,
@@ -315,103 +515,169 @@ export const mockSubmissions = [
     studentId: 'S001',
     assignmentId: 'avl',
     timestamp: '2024-01-15T17:00:00Z',
-    code: `public class AVLTree<T extends Comparable<T>> {
+    files: [
+      {
+        name: 'AVLTree.java',
+        language: 'java',
+        content: `public class AVLTree<T extends Comparable<T>> {
     private Node root;
-    
+
     private class Node {
         T data;
         Node left, right;
         int height;
-        
+
         Node(T data) {
             this.data = data;
             this.height = 1;
         }
     }
-    
+
     public void insert(T value) {
         root = insertRec(root, value);
     }
-    
+
     private Node insertRec(Node node, T value) {
         if (node == null) {
             return new Node(value);
         }
-        
+
         int cmp = value.compareTo(node.data);
         if (cmp < 0) {
             node.left = insertRec(node.left, value);
         } else if (cmp > 0) {
             node.right = insertRec(node.right, value);
         }
-        
+
         node.height = 1 + Math.max(height(node.left), height(node.right));
-        
+
         int balance = getBalance(node);
-        
+
         // Left Left Case
         if (balance > 1 && value.compareTo(node.left.data) < 0) {
             return rotateRight(node);
         }
-        
+
         // Right Right Case
         if (balance < -1 && value.compareTo(node.right.data) > 0) {
             return rotateLeft(node);
         }
-        
+
         // Left Right Case
         if (balance > 1 && value.compareTo(node.left.data) > 0) {
             node.left = rotateLeft(node.left);
             return rotateRight(node);
         }
-        
+
         // Right Left Case
         if (balance < -1 && value.compareTo(node.right.data) < 0) {
             node.right = rotateRight(node.right);
             return rotateLeft(node);
         }
-        
+
         return node;
     }
-    
+
     private int getBalance(Node node) {
         return node == null ? 0 : height(node.left) - height(node.right);
     }
-    
+
     private Node rotateRight(Node y) {
         Node x = y.left;
         Node T2 = x.right;
-        
+
         x.right = y;
         y.left = T2;
-        
+
         y.height = 1 + Math.max(height(y.left), height(y.right));
         x.height = 1 + Math.max(height(x.left), height(x.right));
-        
+
         return x;
     }
-    
+
     private Node rotateLeft(Node x) {
         Node y = x.right;
         Node T2 = y.left;
-        
+
         y.left = x;
         x.right = T2;
-        
+
         x.height = 1 + Math.max(height(x.left), height(x.right));
         y.height = 1 + Math.max(height(y.left), height(y.right));
-        
+
         return y;
     }
-    
+
     public int height() {
         return height(root);
     }
-    
+
     private int height(Node node) {
         return node == null ? 0 : node.height;
     }
-}`,
+}`
+      },
+      {
+        name: 'TreeNode.java',
+        language: 'java',
+        content: `public class TreeNode<T> {
+    T data;
+    TreeNode<T> left;
+    TreeNode<T> right;
+    int height;
+
+    public TreeNode(T data) {
+        this.data = data;
+        this.height = 1;
+        this.left = null;
+        this.right = null;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+}`
+      },
+      {
+        name: 'AVLTreeTest.java',
+        language: 'java',
+        content: `import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AVLTreeTest {
+
+    @Test
+    public void testInsert() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(5);
+        assertEquals(2, tree.height());
+    }
+
+    @Test
+    public void testAllRotationCases() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        // LL case
+        tree.insert(30);
+        tree.insert(20);
+        tree.insert(10);
+        // RR case
+        tree.insert(40);
+        tree.insert(50);
+        // LR case
+        tree.insert(25);
+        // RL case
+        tree.insert(35);
+        assertTrue(tree.height() <= 4);
+    }
+}`
+      }
+    ],
     testResults: {
       passed: 8,
       failed: 0,
@@ -425,31 +691,35 @@ export const mockSubmissions = [
     studentId: 'S001',
     assignmentId: 'avl',
     timestamp: '2024-01-15T18:30:00Z',
-    code: `public class AVLTree<T extends Comparable<T>> {
+    files: [
+      {
+        name: 'AVLTree.java',
+        language: 'java',
+        content: `public class AVLTree<T extends Comparable<T>> {
     private Node root;
     private int size;
-    
+
     private class Node {
         T data;
         Node left, right;
         int height;
-        
+
         Node(T data) {
             this.data = data;
             this.height = 1;
         }
     }
-    
+
     public void insert(T value) {
         root = insertRec(root, value);
         size++;
     }
-    
+
     private Node insertRec(Node node, T value) {
         if (node == null) {
             return new Node(value);
         }
-        
+
         int cmp = value.compareTo(node.data);
         if (cmp < 0) {
             node.left = insertRec(node.left, value);
@@ -458,40 +728,40 @@ export const mockSubmissions = [
         } else {
             return node; // Duplicate - don't insert
         }
-        
+
         node.height = 1 + Math.max(height(node.left), height(node.right));
-        
+
         int balance = getBalance(node);
-        
+
         // Left Left Case
         if (balance > 1 && value.compareTo(node.left.data) < 0) {
             return rotateRight(node);
         }
-        
+
         // Right Right Case
         if (balance < -1 && value.compareTo(node.right.data) > 0) {
             return rotateLeft(node);
         }
-        
+
         // Left Right Case
         if (balance > 1 && value.compareTo(node.left.data) > 0) {
             node.left = rotateLeft(node.left);
             return rotateRight(node);
         }
-        
+
         // Right Left Case
         if (balance < -1 && value.compareTo(node.right.data) < 0) {
             node.right = rotateRight(node.right);
             return rotateLeft(node);
         }
-        
+
         return node;
     }
-    
+
     public boolean contains(T value) {
         return containsRec(root, value);
     }
-    
+
     private boolean containsRec(Node node, T value) {
         if (node == null) return false;
         int cmp = value.compareTo(node.data);
@@ -499,49 +769,135 @@ export const mockSubmissions = [
         if (cmp > 0) return containsRec(node.right, value);
         return true;
     }
-    
+
     public int size() {
         return size;
     }
-    
+
     private int getBalance(Node node) {
         return node == null ? 0 : height(node.left) - height(node.right);
     }
-    
+
     private Node rotateRight(Node y) {
         Node x = y.left;
         Node T2 = x.right;
-        
+
         x.right = y;
         y.left = T2;
-        
+
         y.height = 1 + Math.max(height(y.left), height(y.right));
         x.height = 1 + Math.max(height(x.left), height(x.right));
-        
+
         return x;
     }
-    
+
     private Node rotateLeft(Node x) {
         Node y = x.right;
         Node T2 = y.left;
-        
+
         y.left = x;
         x.right = T2;
-        
+
         x.height = 1 + Math.max(height(x.left), height(x.right));
         y.height = 1 + Math.max(height(y.left), height(y.right));
-        
+
         return y;
     }
-    
+
     public int height() {
         return height(root);
     }
-    
+
     private int height(Node node) {
         return node == null ? 0 : node.height;
     }
-}`,
+}`
+      },
+      {
+        name: 'TreeNode.java',
+        language: 'java',
+        content: `public class TreeNode<T> {
+    T data;
+    TreeNode<T> left;
+    TreeNode<T> right;
+    int height;
+
+    public TreeNode(T data) {
+        this.data = data;
+        this.height = 1;
+        this.left = null;
+        this.right = null;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+}`
+      },
+      {
+        name: 'AVLTreeTest.java',
+        language: 'java',
+        content: `import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AVLTreeTest {
+
+    @Test
+    public void testInsert() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(5);
+        assertEquals(2, tree.height());
+    }
+
+    @Test
+    public void testContains() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(10);
+        tree.insert(20);
+        assertTrue(tree.contains(10));
+        assertTrue(tree.contains(20));
+        assertFalse(tree.contains(30));
+    }
+
+    @Test
+    public void testSize() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        assertEquals(0, tree.size());
+        tree.insert(10);
+        assertEquals(1, tree.size());
+        tree.insert(20);
+        assertEquals(2, tree.size());
+    }
+
+    @Test
+    public void testAllRotationCases() {
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.insert(30);
+        tree.insert(20);
+        tree.insert(10);
+        tree.insert(40);
+        tree.insert(50);
+        tree.insert(25);
+        tree.insert(35);
+        assertTrue(tree.height() <= 4);
+    }
+}`
+      }
+    ],
     testResults: {
       passed: 8,
       failed: 0,
@@ -718,4 +1074,21 @@ export function getSubmissions(studentId, assignmentId) {
   return mockSubmissions.filter(
     s => s.studentId === studentId && s.assignmentId === assignmentId
   );
+}
+
+// Helper to get code for a file (or first file as default)
+// Provides backward compatibility with old single-code submissions
+export function getFileContent(submission, fileName) {
+  if (!submission) return '';
+
+  // Support old format with single code string
+  if (!submission.files) {
+    return submission.code || '';
+  }
+
+  // New format with files array
+  const file = fileName
+    ? submission.files.find(f => f.name === fileName)
+    : submission.files[0];
+  return file?.content || '';
 }

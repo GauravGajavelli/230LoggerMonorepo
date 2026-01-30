@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 import { useTimelineHighlights } from '../hooks/useTimelineHighlights';
+import { FileTabs } from './FileTabs';
+import { getFileContent } from '../data/mockData';
 
 /**
  * Main component for single-view code timeline playback
@@ -10,6 +12,8 @@ import { useTimelineHighlights } from '../hooks/useTimelineHighlights';
 export function CodeTimelineViewer({ submissions, playback }) {
   const [showDeletedLines, setShowDeletedLines] = useState(false);
   const [highlightKey, setHighlightKey] = useState(0);
+  const [openFiles, setOpenFiles] = useState([]);
+  const [activeFile, setActiveFile] = useState(null);
   const codeContainerRef = useRef(null);
 
   const {
@@ -18,8 +22,86 @@ export function CodeTimelineViewer({ submissions, playback }) {
     previousSubmission
   } = playback;
 
-  const currentCode = currentSubmission?.code || '';
-  const previousCode = previousSubmission?.code || '';
+  // Get all files from current submission
+  const allFiles = currentSubmission?.files || [];
+
+  // Initialize open files when submission changes
+  useEffect(() => {
+    if (allFiles.length > 0) {
+      // If we have files open, try to keep them if they still exist
+      const existingFileNames = allFiles.map(f => f.name);
+      const stillValidFiles = openFiles.filter(name => existingFileNames.includes(name));
+
+      if (stillValidFiles.length === 0) {
+        // No valid files open, open the first one
+        setOpenFiles([allFiles[0].name]);
+        setActiveFile(allFiles[0].name);
+      } else {
+        // Keep valid files, ensure active file is still valid
+        setOpenFiles(stillValidFiles);
+        if (!stillValidFiles.includes(activeFile)) {
+          setActiveFile(stillValidFiles[0]);
+        }
+      }
+    } else if (!currentSubmission?.files && currentSubmission?.code) {
+      // Legacy single-file submission
+      setOpenFiles([]);
+      setActiveFile(null);
+    }
+  }, [currentSubmission?.id]);
+
+  // Get code for active file (or legacy single code)
+  const currentCode = getFileContent(currentSubmission, activeFile);
+  const previousCode = getFileContent(previousSubmission, activeFile);
+
+  // Compute per-file diff stats for tab glow effects
+  const fileDiffStats = useMemo(() => {
+    const stats = {};
+    openFiles.forEach(fileName => {
+      const currCode = getFileContent(currentSubmission, fileName);
+      const prevCode = getFileContent(previousSubmission, fileName);
+
+      // Simple line-based diff count
+      const currentLines = currCode ? currCode.split('\n') : [];
+      const prevLines = prevCode ? prevCode.split('\n') : [];
+      const prevSet = new Set(prevLines.map(l => l.trim()));
+      const currSet = new Set(currentLines.map(l => l.trim()));
+
+      let addedCount = 0, deletedCount = 0;
+      currentLines.forEach(line => {
+        if (!prevSet.has(line.trim()) && line.trim()) addedCount++;
+      });
+      prevLines.forEach(line => {
+        if (!currSet.has(line.trim()) && line.trim()) deletedCount++;
+      });
+
+      stats[fileName] = { addedCount, deletedCount };
+    });
+    return stats;
+  }, [openFiles, currentSubmission, previousSubmission]);
+
+  // Get language for syntax highlighting
+  const activeFileData = allFiles.find(f => f.name === activeFile);
+  const language = activeFileData?.language || 'java';
+
+  // Tab handlers
+  const handleFileSelect = (fileName) => setActiveFile(fileName);
+
+  const handleFileClose = (fileName) => {
+    if (openFiles.length <= 1) return; // Keep at least one tab open
+    const newOpen = openFiles.filter(f => f !== fileName);
+    setOpenFiles(newOpen);
+    if (activeFile === fileName && newOpen.length > 0) {
+      setActiveFile(newOpen[0]);
+    }
+  };
+
+  const handleFileOpen = (fileName) => {
+    if (!openFiles.includes(fileName)) {
+      setOpenFiles([...openFiles, fileName]);
+    }
+    setActiveFile(fileName);
+  };
 
   // Compute highlights
   const { mergedLines, addedCount, deletedCount } = useTimelineHighlights(
@@ -28,10 +110,10 @@ export function CodeTimelineViewer({ submissions, playback }) {
     showDeletedLines
   );
 
-  // Trigger re-animation when snapshot changes
+  // Trigger re-animation when snapshot or active file changes
   useEffect(() => {
     setHighlightKey(prev => prev + 1);
-  }, [currentIndex]);
+  }, [currentIndex, activeFile]);
 
   return (
     <div className="h-[500px] w-full flex flex-col">
@@ -63,15 +145,28 @@ export function CodeTimelineViewer({ submissions, playback }) {
         </label>
       </div>
 
+      {/* File tabs - only show if multiple files */}
+      {allFiles.length > 1 && (
+        <FileTabs
+          files={allFiles}
+          openFiles={openFiles}
+          activeFile={activeFile}
+          onFileSelect={handleFileSelect}
+          onFileClose={handleFileClose}
+          onFileOpen={handleFileOpen}
+          fileDiffStats={fileDiffStats}
+        />
+      )}
+
       {/* Code Viewer */}
       <div
         ref={codeContainerRef}
-        className="h-[350px] overflow-y-auto"
+        className="flex-1 overflow-y-auto"
       >
         <Highlight
           theme={themes.nightOwl}
           code={currentCode}
-          language="java"
+          language={language}
         >
           {({ className, style, tokens }) => (
             <pre

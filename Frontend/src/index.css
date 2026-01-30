@@ -130,6 +130,15 @@
   color: #f87171;
 }
 
+/* Tab glow effects for diff indication */
+.tab-glow-green {
+  box-shadow: inset 0 -2px 8px -2px rgba(34, 197, 94, 0.4);
+}
+
+.tab-glow-red {
+  box-shadow: inset 0 -2px 8px -2px rgba(239, 68, 68, 0.4);
+}
+
 /* Font settings */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
