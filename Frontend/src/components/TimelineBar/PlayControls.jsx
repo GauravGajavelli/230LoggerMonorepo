@@ -15,7 +15,7 @@ export function PlayControls({ isPlaying, speed, onPlayPause, onSpeedChange }) {
       {/* Play/Pause button */}
       <button
         onClick={onPlayPause}
-        className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition"
+        className="w-10 h-10 rounded-full bg-[#800000] hover:bg-[#a00000] flex items-center justify-center transition"
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
         {isPlaying ? (
@@ -29,7 +29,7 @@ export function PlayControls({ isPlaying, speed, onPlayPause, onSpeedChange }) {
       <select
         value={speed}
         onChange={(e) => onSpeedChange(Number(e.target.value))}
-        className="bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="bg-white border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#800000]"
       >
         <option value={0.25}>0.25x</option>
         <option value={0.5}>0.5x</option>

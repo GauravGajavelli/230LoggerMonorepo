@@ -40,11 +40,11 @@ export function EpisodeSegments({
   }, [highlightedOriginRun, allRuns]);
 
   if (!episodes || episodes.length === 0 || totalDuration === 0) {
-    return <div className="flex-1 h-8 bg-gray-800 rounded-lg" />;
+    return <div className="flex-1 h-8 bg-gray-200 rounded-lg" />;
   }
 
   return (
-    <div className="flex-1 h-8 bg-gray-800 rounded-lg flex overflow-hidden relative">
+    <div className="flex-1 h-8 bg-gray-200 rounded-lg flex overflow-hidden relative">
       {episodes.map((episode, index) => {
         const duration = episode.endTime - episode.startTime;
         const widthPercent = (duration / totalDuration) * 100;
@@ -68,16 +68,16 @@ export function EpisodeSegments({
               onClick={() => onEpisodeClick(episode.id)}
               className={`
                 h-full flex items-center cursor-pointer transition
-                hover:brightness-110
-                ${isEven ? 'bg-gray-700' : 'bg-gray-700/80'}
-                ${isCurrent ? 'ring-2 ring-blue-500 ring-inset' : ''}
-                ${hasOrigin ? 'ring-2 ring-yellow-400 ring-inset' : ''}
+                hover:brightness-95
+                ${isEven ? 'bg-gray-100' : 'bg-gray-50'}
+                ${isCurrent ? 'ring-2 ring-[#800000] ring-inset' : ''}
+                ${hasOrigin ? 'ring-2 ring-yellow-500 ring-inset' : ''}
                 ${isFirst ? 'rounded-l-lg' : ''}
                 ${isLast ? 'rounded-r-lg' : ''}
               `}
               title={episode.label}
             >
-              <span className="text-xs text-gray-300 truncate px-2">
+              <span className="text-xs text-gray-700 truncate px-2">
                 {episode.label}
               </span>
             </div>
@@ -85,9 +85,9 @@ export function EpisodeSegments({
             {/* Run popup on hover */}
             {isHovered && hoveredRuns.length > 0 && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2
-                              bg-gray-800 border border-gray-700 rounded-lg p-2 z-20
+                              bg-white border border-gray-200 rounded-lg p-2 z-20
                               whitespace-nowrap shadow-lg">
-                <div className="text-xs text-gray-400 mb-1">{episode.label}</div>
+                <div className="text-xs text-gray-600 mb-1">{episode.label}</div>
                 <div className="flex gap-1">
                   {hoveredRuns.map((runData, idx) => {
                     const isCurrent = runData.globalIndex === globalRunIndex;
@@ -101,9 +101,9 @@ export function EpisodeSegments({
                         }}
                         className={`w-6 h-6 rounded text-xs font-medium transition
                           ${isCurrent
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}
-                          ${isOrigin ? 'ring-2 ring-yellow-400' : ''}`}
+                            ? 'bg-[#800000] text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                          ${isOrigin ? 'ring-2 ring-yellow-500' : ''}`}
                       >
                         {idx + 1}
                       </button>

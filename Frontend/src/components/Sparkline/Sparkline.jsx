@@ -93,8 +93,8 @@ export function Sparkline({
             className={`
               ${width} ${height} rounded-sm transition-all
               ${getStatusColor(status)}
-              ${isHighlighted ? 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-slate-800' : ''}
-              ${isCurrent ? 'ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-800' : ''}
+              ${isHighlighted ? 'ring-2 ring-yellow-500 ring-offset-1 ring-offset-white' : ''}
+              ${isCurrent ? 'ring-2 ring-[#800000] ring-offset-1 ring-offset-white' : ''}
               ${isClickable ? 'cursor-pointer hover:opacity-80' : ''}
             `}
             onClick={() => onClickRun?.(runNumber)}

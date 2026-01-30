@@ -11,18 +11,18 @@ export function CategoryBadge({ category, size = 'normal' }) {
   const config = {
     stillFailing: {
       label: 'still failing',
-      bgColor: 'bg-red-800',
-      textColor: 'text-red-200'
+      bgColor: 'bg-red-100',
+      textColor: 'text-red-800'
     },
     regression: {
       label: 'recurring',
-      bgColor: 'bg-orange-800',
-      textColor: 'text-orange-200'
+      bgColor: 'bg-orange-100',
+      textColor: 'text-orange-800'
     },
     costlyDetour: {
       label: 'detour',
-      bgColor: 'bg-yellow-800',
-      textColor: 'text-yellow-200'
+      bgColor: 'bg-yellow-100',
+      textColor: 'text-yellow-800'
     }
   }[category];
 

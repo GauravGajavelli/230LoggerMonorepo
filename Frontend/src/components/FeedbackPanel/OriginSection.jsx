@@ -50,10 +50,10 @@ export function OriginSection({
   };
 
   return (
-    <div className="border-b border-slate-700 px-6 py-3 bg-slate-800/50">
+    <div className="border-b border-gray-200 px-6 py-3 bg-gray-50">
       <div className="flex items-center gap-2 mb-2">
-        <GitBranch className="w-4 h-4 text-yellow-500" />
-        <h4 className="text-sm font-medium text-slate-200">Failure Timeline</h4>
+        <GitBranch className="w-4 h-4 text-yellow-600" />
+        <h4 className="text-sm font-medium text-gray-900">Failure Timeline</h4>
       </div>
 
       {/* Sparkline */}
@@ -76,7 +76,7 @@ export function OriginSection({
           </span>
           {originRun && (
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm ring-2 ring-yellow-400 ring-offset-1 ring-offset-slate-800" />
+              <span className="w-2 h-2 rounded-sm ring-2 ring-yellow-500 ring-offset-1 ring-offset-white" />
               origin
             </span>
           )}
@@ -86,10 +86,10 @@ export function OriginSection({
       {/* Origin info and jump button */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm text-slate-300">
-            <span className="text-yellow-500 font-medium">Origin:</span> Run {originRun}
+          <div className="text-sm text-gray-700">
+            <span className="text-yellow-600 font-medium">Origin:</span> Run {originRun}
             {isRegression && (
-              <span className="ml-2 text-xs text-orange-400">(regression)</span>
+              <span className="ml-2 text-xs text-orange-600">(regression)</span>
             )}
           </div>
           <p className="text-xs text-gray-500 mt-0.5">
@@ -105,8 +105,8 @@ export function OriginSection({
               disabled={isAtOrigin}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition ${
                 isAtOrigin
-                  ? 'text-gray-500 cursor-not-allowed'
-                  : 'text-blue-400 hover:text-blue-300 hover:bg-blue-900/30'
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-[#800000] hover:text-[#a00000] hover:bg-red-50'
               }`}
             >
               <ArrowLeft className="w-4 h-4" />

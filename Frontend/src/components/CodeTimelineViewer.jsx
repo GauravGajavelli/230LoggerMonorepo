@@ -1,7 +1,25 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 import { useTimelineHighlights } from '../hooks/useTimelineHighlights';
 import { FileTabs } from './FileTabs';
+
+// Light theme for code highlighting
+const lightTheme = {
+  plain: {
+    color: "#1a1a1a",
+    backgroundColor: "#ffffff"
+  },
+  styles: [
+    { types: ["comment", "prolog", "doctype", "cdata"], style: { color: "#6a737d" } },
+    { types: ["punctuation"], style: { color: "#24292e" } },
+    { types: ["property", "tag", "boolean", "number", "constant", "symbol", "deleted"], style: { color: "#005cc5" } },
+    { types: ["selector", "attr-name", "string", "char", "builtin", "inserted"], style: { color: "#22863a" } },
+    { types: ["operator", "entity", "url"], style: { color: "#d73a49" } },
+    { types: ["atrule", "attr-value", "keyword"], style: { color: "#d73a49" } },
+    { types: ["function", "class-name"], style: { color: "#6f42c1" } },
+    { types: ["regex", "important", "variable"], style: { color: "#e36209" } }
+  ]
+};
 
 /**
  * Helper to get code for a file (or first file as default)
@@ -120,12 +138,12 @@ export function CodeTimelineViewer({ playback, errorHighlight }) {
     }
   };
 
-  const handleFileOpen = (fileName) => {
+  const handleFileOpen = useCallback((fileName) => {
     if (!openFiles.includes(fileName)) {
-      setOpenFiles([...openFiles, fileName]);
+      setOpenFiles(prev => [...prev, fileName]);
     }
     setActiveFile(fileName);
-  };
+  }, [openFiles]);
 
   // Compute highlights
   const { mergedLines, addedCount, deletedCount } = useTimelineHighlights(
@@ -187,6 +205,21 @@ export function CodeTimelineViewer({ playback, errorHighlight }) {
     });
   }, [errorHighlight]);
 
+  // Auto-switch to error file when errorHighlight is set
+  useEffect(() => {
+    if (!errorHighlight?.file || !allFiles.length) return;
+
+    // Find matching file in current submission
+    const matchingFile = allFiles.find(f =>
+      f.name === errorHighlight.file ||
+      f.name.toLowerCase().includes(errorHighlight.file.replace('.java', '').toLowerCase())
+    );
+
+    if (matchingFile && matchingFile.name !== activeFile) {
+      handleFileOpen(matchingFile.name);
+    }
+  }, [errorHighlight?.file, allFiles, activeFile, handleFileOpen]);
+
   // Check if a line should have error highlighting
   const isErrorLine = (lineNumber) => {
     if (!errorHighlight) return false;
@@ -199,20 +232,20 @@ export function CodeTimelineViewer({ playback, errorHighlight }) {
   return (
     <div className="h-[500px] w-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-750 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-3 bg-gray-100 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-medium text-slate-200">Task timeline</h2>
+          <h2 className="text-sm font-medium text-gray-900">Task timeline</h2>
           {addedCount > 0 && (
-            <span className="text-xs text-green-400">+{addedCount} lines</span>
+            <span className="text-xs text-green-600">+{addedCount} lines</span>
           )}
           {showDeletedLines && deletedCount > 0 && (
-            <span className="text-xs text-red-400">-{deletedCount} lines</span>
+            <span className="text-xs text-red-600">-{deletedCount} lines</span>
           )}
         </div>
 
         {/* Show Deleted Lines toggle */}
         <label className="flex items-center gap-2 cursor-pointer">
-          <span className="text-xs text-slate-400">Show deleted lines</span>
+          <span className="text-xs text-gray-600">Show deleted lines</span>
           <div className="relative">
             <input
               type="checkbox"
@@ -220,8 +253,8 @@ export function CodeTimelineViewer({ playback, errorHighlight }) {
               onChange={(e) => setShowDeletedLines(e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-slate-600 rounded-full peer peer-checked:bg-red-600 transition-colors"></div>
-            <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+            <div className="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-red-500 transition-colors"></div>
+            <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow"></div>
           </div>
         </label>
       </div>
@@ -242,10 +275,10 @@ export function CodeTimelineViewer({ playback, errorHighlight }) {
       {/* Code Viewer */}
       <div
         ref={codeContainerRef}
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto bg-white"
       >
         <Highlight
-          theme={themes.nightOwl}
+          theme={lightTheme}
           code={currentCode}
           language={language}
         >

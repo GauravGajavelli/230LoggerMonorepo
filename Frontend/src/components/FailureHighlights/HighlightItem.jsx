@@ -28,28 +28,28 @@ export function HighlightItem({
           icon: '🔴',
           label: 'still failing',
           borderColor: 'border-l-red-500',
-          bgColor: 'bg-red-900/20'
+          bgColor: 'bg-red-50'
         };
       case 'regression':
         return {
           icon: '🔄',
           label: 'recurring',
           borderColor: 'border-l-orange-500',
-          bgColor: 'bg-orange-900/20'
+          bgColor: 'bg-orange-50'
         };
       case 'costlyDetour':
         return {
           icon: '⏱️',
           label: 'costly detour',
           borderColor: 'border-l-yellow-500',
-          bgColor: 'bg-yellow-900/20'
+          bgColor: 'bg-yellow-50'
         };
       default:
         return {
           icon: '⚠️',
           label: 'attention',
           borderColor: 'border-l-gray-500',
-          bgColor: 'bg-gray-900/20'
+          bgColor: 'bg-gray-50'
         };
     }
   };
@@ -88,7 +88,7 @@ export function HighlightItem({
       className={`
         rounded-lg border-l-4 ${config.borderColor} ${config.bgColor}
         transition-all
-        ${isSelected ? 'ring-2 ring-blue-500' : ''}
+        ${isSelected ? 'ring-2 ring-[#800000]' : ''}
       `}
     >
       <div className="px-3 py-2">
@@ -96,10 +96,10 @@ export function HighlightItem({
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={onSelect}
-            className="flex items-center gap-2 text-left hover:text-white transition flex-1 min-w-0"
+            className="flex items-center gap-2 text-left hover:text-gray-900 transition flex-1 min-w-0"
           >
             <span className="text-sm">{config.icon}</span>
-            <span className="font-mono text-sm text-gray-200 truncate">
+            <span className="font-mono text-sm text-gray-700 truncate">
               {testHistory.testName}
             </span>
           </button>
@@ -108,7 +108,7 @@ export function HighlightItem({
           {originRun && (
             <button
               onClick={onJumpToOrigin}
-              className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition whitespace-nowrap"
+              className="flex items-center gap-1 text-xs text-[#800000] hover:text-[#a00000] transition whitespace-nowrap"
               title={`Jump to run ${originRun}`}
             >
               Jump to origin

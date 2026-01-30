@@ -39,19 +39,19 @@ export function FeedbackPanel({
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
         <div className="flex items-center gap-3">
           {/* Status dot */}
           <span className={`w-2.5 h-2.5 rounded-full ${isPassing ? 'bg-green-500' : 'bg-red-500'}`} />
 
           {/* Test name */}
-          <span className="font-mono text-sm text-slate-200">
+          <span className="font-mono text-sm text-gray-900">
             {selectedTest?.name || 'No test selected'}
           </span>
 
           {/* Pattern badge */}
           {feedback?.pattern && (
-            <span className="px-2 py-0.5 bg-yellow-900/50 text-yellow-300 rounded text-xs font-medium">
+            <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">
               {feedback.pattern}
             </span>
           )}
@@ -60,7 +60,7 @@ export function FeedbackPanel({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-white transition p-1 rounded hover:bg-slate-700"
+          className="text-gray-500 hover:text-gray-900 transition p-1 rounded hover:bg-gray-100"
           aria-label="Close feedback panel"
         >
           <X className="w-5 h-5" />
@@ -95,7 +95,7 @@ export function FeedbackPanel({
             {/* Right: AI Feedback */}
             <div>
               {isLoadingFeedback ? (
-                <div className="flex flex-col items-center justify-center h-32 text-slate-400">
+                <div className="flex flex-col items-center justify-center h-32 text-gray-500">
                   <Loader2 className="w-6 h-6 animate-spin mb-2" />
                   <span className="text-sm">Analyzing error pattern...</span>
                 </div>
@@ -105,7 +105,7 @@ export function FeedbackPanel({
                   onJumpToCode={onJumpToCode}
                 />
               ) : (
-                <div className="flex items-center justify-center h-32 text-slate-500 text-sm">
+                <div className="flex items-center justify-center h-32 text-gray-500 text-sm">
                   {isPassing
                     ? 'This test is passing. Select a failing test to see feedback.'
                     : 'No feedback available for this test.'}
@@ -114,7 +114,7 @@ export function FeedbackPanel({
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-32 text-slate-500 text-sm">
+          <div className="flex items-center justify-center h-32 text-gray-500 text-sm">
             Select a test to view details
           </div>
         )}

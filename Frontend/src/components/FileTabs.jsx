@@ -36,11 +36,11 @@ export function FileTabs({
   }, [dropdownOpen]);
 
   return (
-    <div className="flex items-center border-b border-slate-700 bg-slate-800/50">
+    <div className="flex items-center border-b border-gray-200 bg-gray-50">
       {/* Scrollable tab container */}
       <div
         ref={scrollRef}
-        className="flex-1 flex overflow-x-auto scrollbar-thin scrollbar-thumb-slate-600"
+        className="flex-1 flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300"
         style={{ scrollbarWidth: 'thin' }}
       >
         {openFiles.map(fileName => {
@@ -61,10 +61,10 @@ export function FileTabs({
               key={fileName}
               onClick={() => onFileSelect(fileName)}
               className={`group flex items-center gap-2 px-3 py-2 text-sm
-                whitespace-nowrap border-r border-slate-700 transition
+                whitespace-nowrap border-r border-gray-200 transition
                 ${isActive
-                  ? 'bg-slate-700 text-slate-100'
-                  : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200'}
+                  ? 'bg-white text-gray-900'
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'}
                 ${glowClass}`}
             >
               <span className="truncate max-w-[150px]">{fileName}</span>
@@ -75,7 +75,7 @@ export function FileTabs({
                     e.stopPropagation();
                     onFileClose(fileName);
                   }}
-                  className={`p-0.5 rounded hover:bg-slate-600 transition
+                  className={`p-0.5 rounded hover:bg-gray-200 transition
                     ${isActive ? 'opacity-70 hover:opacity-100' : 'opacity-0 group-hover:opacity-70'}`}
                 >
                   <X size={14} />
@@ -91,14 +91,14 @@ export function FileTabs({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 transition"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition"
             title="Open file"
           >
             <Plus size={16} />
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-700
+            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200
                           rounded-lg shadow-lg z-20 min-w-[160px] py-1">
               {availableToOpen.map(file => (
                 <button
@@ -107,8 +107,8 @@ export function FileTabs({
                     onFileOpen(file.name);
                     setDropdownOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-sm text-left text-slate-300
-                           hover:bg-slate-700 transition"
+                  className="w-full px-3 py-2 text-sm text-left text-gray-700
+                           hover:bg-gray-100 transition"
                 >
                   {file.name}
                 </button>

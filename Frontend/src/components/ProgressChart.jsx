@@ -44,7 +44,7 @@ export function ProgressChart({ dataPoints, globalRunIndex = 0, height = 80, onR
 
   return (
     <div className="p-4">
-      <h3 className="text-sm font-medium text-slate-200 mb-3">
+      <h3 className="text-sm font-medium text-gray-900 mb-3">
         Progress Over Time
       </h3>
 
@@ -71,11 +71,11 @@ export function ProgressChart({ dataPoints, globalRunIndex = 0, height = 80, onR
                 // Determine bar color
                 let barColorClass;
                 if (isCurrentRun) {
-                  barColorClass = 'bg-blue-500';
+                  barColorClass = 'bg-green-500';
                 } else if (isPastRun) {
-                  barColorClass = 'bg-gray-600';
+                  barColorClass = 'bg-green-300';
                 } else {
-                  barColorClass = 'bg-gray-700';
+                  barColorClass = 'bg-gray-200';
                 }
 
                 return (
@@ -88,9 +88,9 @@ export function ProgressChart({ dataPoints, globalRunIndex = 0, height = 80, onR
                   >
                     {/* Tooltip */}
                     {isHovered && (
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-xs text-gray-200 px-2 py-1 rounded whitespace-nowrap z-10 border border-gray-700">
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white text-xs text-gray-900 px-2 py-1 rounded whitespace-nowrap z-10 border border-gray-200 shadow-lg">
                         <div className="font-medium">{group.label}</div>
-                        <div className="text-gray-400">
+                        <div className="text-gray-600">
                           Run {runIdx + 1}: {run.passCount}/{run.totalTests} passing
                         </div>
                       </div>

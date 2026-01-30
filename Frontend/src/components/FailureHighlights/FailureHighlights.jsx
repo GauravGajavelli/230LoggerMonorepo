@@ -67,25 +67,25 @@ export function FailureHighlights({
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
       {/* Header */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="w-full flex items-center justify-between px-4 py-3 border-b border-slate-700 hover:bg-slate-700/50 transition"
+        className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-200 hover:bg-gray-50 transition"
       >
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-yellow-500" />
-          <h3 className="text-sm font-medium text-slate-200">
+          <AlertTriangle className="w-4 h-4 text-yellow-600" />
+          <h3 className="text-sm font-medium text-gray-900">
             Summary
           </h3>
-          <span className="px-1.5 py-0.5 text-xs bg-yellow-900/50 text-yellow-300 rounded">
+          <span className="px-1.5 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded">
             {totalHighlights}
           </span>
         </div>
         {isCollapsed ? (
-          <ChevronDown className="w-4 h-4 text-gray-400" />
+          <ChevronDown className="w-4 h-4 text-gray-500" />
         ) : (
-          <ChevronUp className="w-4 h-4 text-gray-400" />
+          <ChevronUp className="w-4 h-4 text-gray-500" />
         )}
       </button>
 

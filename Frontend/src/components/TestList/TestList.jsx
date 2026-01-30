@@ -29,12 +29,12 @@ export function TestList({ tests, selectedTestId, onTestSelect, maxHeight = '300
 
   return (
     <div
-      className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700"
+      className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
       style={{ maxHeight }}
     >
       {/* Header */}
-      <div className="px-3 py-2 border-b border-slate-700 space-y-2">
-        <h3 className="text-sm font-medium text-slate-200">Test Results</h3>
+      <div className="px-3 py-2 border-b border-gray-200 space-y-2">
+        <h3 className="text-sm font-medium text-gray-900">Test Results</h3>
         {showRunSelector && (
           <RunSelector
             currentRunIndex={runSelection.selectedRunIndex}

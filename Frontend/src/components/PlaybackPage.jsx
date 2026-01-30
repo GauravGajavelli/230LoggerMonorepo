@@ -287,10 +287,10 @@ export function PlaybackPage() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-400">Loading playback data...</p>
+          <div className="animate-spin w-8 h-8 border-2 border-[#800000] border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-600">Loading playback data...</p>
         </div>
       </div>
     );
@@ -299,9 +299,9 @@ export function PlaybackPage() {
   // Show error state
   if (error && allRuns.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-400 mb-2">Error loading data</p>
+          <p className="text-red-600 mb-2">Error loading data</p>
           <p className="text-gray-500 text-sm">{error.message}</p>
         </div>
       </div>
@@ -309,7 +309,7 @@ export function PlaybackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-6">
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-6">
         <PlaybackHeader
@@ -338,7 +338,7 @@ export function PlaybackPage() {
         {/* Top row: Code Viewer + Sidebar */}
         <div className="flex gap-4">
           {/* Code Viewer Card */}
-          <div className="flex-1 bg-slate-800 rounded-lg overflow-hidden">
+          <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
             {hasCodeSnapshots() && codePlayback.currentSubmission ? (
               <CodeTimelineViewer
                 playback={codePlayback}
@@ -357,7 +357,7 @@ export function PlaybackPage() {
           {/* Sidebar cards */}
           <div className="w-72 space-y-4">
             {/* Test Results Card */}
-            <div className="bg-slate-800 rounded-lg overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <TestList
                 tests={currentTests}
                 selectedTestId={selectedTestId}
@@ -371,7 +371,7 @@ export function PlaybackPage() {
             </div>
 
             {/* Progress Chart Card */}
-            <div className="bg-slate-800 rounded-lg overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <ProgressChart
                 dataPoints={progressDataPoints}
                 globalRunIndex={playback.currentIndex}
@@ -383,7 +383,7 @@ export function PlaybackPage() {
         </div>
 
         {/* Timeline Card - unified controls */}
-        <div className="bg-slate-800 rounded-lg overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
           <TimelineBar
             episodes={episodes}
             playback={playback}
@@ -396,7 +396,7 @@ export function PlaybackPage() {
 
         {/* Feedback Panel Card (conditional) */}
         {showFeedbackPanel && selectedTest && (
-          <div className="bg-slate-800 rounded-lg overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
             <FeedbackPanel
               selectedTest={selectedTest}
               feedback={feedback}

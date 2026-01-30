@@ -19,12 +19,12 @@ export function TestItem({ test, isSelected, onClick, highlightCategory, originR
 
   // Determine background color based on status and highlight category
   const getBgClass = () => {
-    if (isPassing) return 'bg-green-900/20 hover:bg-green-900/30';
-    if (isError) return 'bg-yellow-900/20 hover:bg-yellow-900/30';
-    if (isSkip) return 'bg-gray-700/20 hover:bg-gray-700/30';
+    if (isPassing) return 'bg-green-50 hover:bg-green-100';
+    if (isError) return 'bg-yellow-50 hover:bg-yellow-100';
+    if (isSkip) return 'bg-gray-50 hover:bg-gray-100';
     // Highlighted failures get slightly different backgrounds
-    if (highlightCategory === 'costlyDetour') return 'bg-yellow-900/20 hover:bg-yellow-900/30';
-    return 'bg-red-900/20 hover:bg-red-900/30';
+    if (highlightCategory === 'costlyDetour') return 'bg-yellow-50 hover:bg-yellow-100';
+    return 'bg-red-50 hover:bg-red-100';
   };
 
   // Get left border class for highlighted tests
@@ -93,7 +93,7 @@ export function TestItem({ test, isSelected, onClick, highlightCategory, originR
         px-3 py-2 rounded-lg cursor-pointer transition
         ${getBgClass()}
         ${getBorderClass()}
-        ${isSelected ? 'ring-2 ring-blue-500' : ''}
+        ${isSelected ? 'ring-2 ring-[#800000]' : ''}
       `}
     >
       <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ export function TestItem({ test, isSelected, onClick, highlightCategory, originR
           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${getDotClass()}`} />
 
           {/* Test name */}
-          <span className="font-mono text-sm text-gray-200 truncate">
+          <span className="font-mono text-sm text-gray-900 truncate">
             {test.name}
           </span>
 
@@ -117,7 +117,7 @@ export function TestItem({ test, isSelected, onClick, highlightCategory, originR
           {highlightCategory && originRun && onJumpToOrigin && (
             <button
               onClick={handleOriginClick}
-              className="flex items-center gap-0.5 text-xs text-blue-400 hover:text-blue-300 transition"
+              className="flex items-center gap-0.5 text-xs text-[#800000] hover:text-[#a00000] transition"
               title={`Jump to run ${originRun}`}
             >
               origin

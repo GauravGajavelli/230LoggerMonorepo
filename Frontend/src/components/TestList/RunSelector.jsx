@@ -25,7 +25,7 @@ export function RunSelector({
   };
 
   return (
-    <div className="flex items-center justify-between text-xs text-gray-400">
+    <div className="flex items-center justify-between text-xs text-gray-600">
       <div className="flex items-center gap-2">
         <span className="text-gray-500">Run:</span>
         <div className="flex items-center gap-1">
@@ -34,8 +34,8 @@ export function RunSelector({
             disabled={isFirstRun}
             className={`w-5 h-5 flex items-center justify-center rounded transition-colors ${
               isFirstRun
-                ? 'text-gray-600 cursor-not-allowed'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700'
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             }`}
             aria-label="Previous run"
           >
@@ -43,7 +43,7 @@ export function RunSelector({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className="text-gray-300 min-w-[4ch] text-center">
+          <span className="text-gray-700 min-w-[4ch] text-center">
             {currentRunIndex + 1} of {totalRuns}
           </span>
           <button
@@ -51,8 +51,8 @@ export function RunSelector({
             disabled={isLatestRun}
             className={`w-5 h-5 flex items-center justify-center rounded transition-colors ${
               isLatestRun
-                ? 'text-gray-600 cursor-not-allowed'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700'
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             }`}
             aria-label="Next run"
           >

@@ -20,29 +20,29 @@ export function PlaybackHeader({ context, testSummary, currentEpisode, currentEp
   };
 
   return (
-    <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+    <header className="bg-[#800000] border-b border-[#600000] px-6 py-4 rounded-lg">
       <div className="flex items-center justify-between">
         {/* Left: Title and context */}
         <div>
           <h1 className="text-xl font-semibold text-white">
             CSSE 230 – {context.assignmentName || 'Assignment'}
           </h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-200 mt-0.5">
             Student: {context.studentDisplayName || context.studentId || 'Student'} • Submitted: {formatDate(new Date(context.submittedAt))}
           </p>
         </div>
 
         {/* Right: Episode and test status */}
         <div className="flex items-center gap-4">
-          <div className="bg-gray-800 rounded px-3 py-1.5 font-mono text-sm text-gray-300">
+          <div className="bg-white/20 rounded px-3 py-1.5 font-mono text-sm text-white">
             Episode {currentEpisodeIndex + 1}/{context.totalEpisodes}
           </div>
-          <div className={`bg-gray-800 rounded px-3 py-1.5 font-mono text-sm ${
+          <div className={`bg-white/20 rounded px-3 py-1.5 font-mono text-sm ${
             testSummary.passed === testSummary.total
-              ? 'text-green-400'
+              ? 'text-green-300'
               : testSummary.failed > 0
-                ? 'text-red-400'
-                : 'text-gray-300'
+                ? 'text-red-300'
+                : 'text-white'
           }`}>
             {testSummary.passed}/{testSummary.total} passing
           </div>

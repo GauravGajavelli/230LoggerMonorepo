@@ -65,7 +65,7 @@ export function TimelineBar({
         </div>
 
         {/* Snapshot counter */}
-        <div className="text-sm font-mono text-gray-400 whitespace-nowrap">
+        <div className="text-sm font-mono text-gray-600 whitespace-nowrap">
           Snapshot {currentIndex + 1} of {totalCount}
         </div>
       </div>
