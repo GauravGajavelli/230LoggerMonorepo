@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Code block styling */
+.code-line {
+  display: table-row;
+}
+
+.code-line-number {
+  display: table-cell;
+  text-align: right;
+  padding-right: 1em;
+  user-select: none;
+  opacity: 0.5;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.code-line-content {
+  display: table-cell;
+  padding-left: 0.5em;
+}
+
+/* Diff highlighting */
+.diff-added {
+  background-color: rgba(34, 197, 94, 0.15);
+  border-left: 3px solid #22c55e;
+}
+
+.diff-removed {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-left: 3px solid #ef4444;
+}
+
+.diff-context {
+  border-left: 3px solid transparent;
+}
+
+/* Timeline segment colors */
+.timeline-pass { background-color: #22c55e; }
+.timeline-fail { background-color: #ef4444; }
+.timeline-edit { background-color: #f59e0b; }
+.timeline-error { background-color: #6b7280; }
+.timeline-gap { background-color: #374151; }
+
+/* Animations */
+@keyframes pulse-border {
+  0%, 100% { border-color: #3b82f6; }
+  50% { border-color: #60a5fa; }
+}
+
+.playing {
+  animation: pulse-border 1s infinite;
+}
+
+/* Timeline code viewer styles */
+.code-timeline-line {
+  display: table-row;
+}
+
+.code-timeline-line .code-line-number {
+  display: table-cell;
+  text-align: right;
+  padding-right: 1em;
+  user-select: none;
+  opacity: 0.5;
+  width: 1%;
+  white-space: nowrap;
+  min-width: 3em;
+}
+
+.code-timeline-line .code-line-content {
+  display: table-cell;
+  padding-left: 0.5em;
+  white-space: pre;
+}
+
+/* Green highlight fade animation for added lines */
+@keyframes highlight-fade {
+  0% { background-color: rgba(34, 197, 94, 0.35); }
+  100% { background-color: transparent; }
+}
+
+.line-added {
+  animation: highlight-fade 2s ease-out forwards;
+}
+
+.line-added .code-line-content {
+  border-left: 3px solid #22c55e;
+  padding-left: calc(0.5em - 3px);
+}
+
+/* Deleted lines styling */
+.line-deleted {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.line-deleted .code-line-number {
+  opacity: 0.3;
+}
+
+.line-deleted .code-line-content {
+  border-left: 3px solid #ef4444;
+  padding-left: calc(0.5em - 3px);
+}
+
+.line-deleted-text {
+  text-decoration: line-through;
+  opacity: 0.6;
+  color: #f87171;
+}
+
+/* Font settings */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+}
