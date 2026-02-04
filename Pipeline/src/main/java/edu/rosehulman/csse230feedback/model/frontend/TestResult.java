@@ -1,6 +1,7 @@
 package edu.rosehulman.csse230feedback.model.frontend;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record TestResult(
@@ -13,5 +14,7 @@ public record TestResult(
     String stackTrace,
     String expected,
     String actual,
-    Long durationMs
+    Long durationMs,
+    List<String> diffCategories,
+    String diffExplanation
 ) {}

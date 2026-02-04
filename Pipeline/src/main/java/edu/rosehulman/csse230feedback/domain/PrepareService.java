@@ -1,11 +1,15 @@
 package edu.rosehulman.csse230feedback.domain;
 
+import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
 import edu.rosehulman.csse230feedback.model.IngestionManifest;
 import edu.rosehulman.csse230feedback.model.RunRecord;
+import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
 import edu.rosehulman.csse230feedback.model.frontend.*;
 import edu.rosehulman.csse230feedback.prepare.*;
 import edu.rosehulman.csse230feedback.util.Json;
+import edu.rosehulman.csse230feedback.model.frontend.ErrorEvolution;
+import edu.rosehulman.csse230feedback.model.frontend.StruggleProfile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,7 +50,22 @@ public class PrepareService {
             manifest = Json.mapper().readValue(manifestPath.toFile(), IngestionManifest.class);
         }
 
-        // 4. Build RunWithTests list
+        // 4. Load optional category mappings
+        Path testCategoriesPath = opts.inputDir().resolve("test_categories.json");
+        TestCategoryMapping testCategories = null;
+        if (Files.exists(testCategoriesPath)) {
+            testCategories = Json.mapper().readValue(testCategoriesPath.toFile(), TestCategoryMapping.class);
+            System.out.println("Loaded test categories from test_categories.json");
+        }
+
+        Path diffCategoriesPath = opts.inputDir().resolve("diff_categories.json");
+        DiffCategoryMapping diffCategories = null;
+        if (Files.exists(diffCategoriesPath)) {
+            diffCategories = Json.mapper().readValue(diffCategoriesPath.toFile(), DiffCategoryMapping.class);
+            System.out.println("Loaded diff categories from diff_categories.json");
+        }
+
+        // 5. Build RunWithTests list
         List<EpisodeSplitter.RunWithTests> runsWithTests = new ArrayList<>();
         for (RunRecord run : runs) {
             List<EnrichedTestResult> enrichedTests = enrichedData.get(run.runNumber());
@@ -66,17 +85,20 @@ public class PrepareService {
             ));
         }
 
-        // 5. Split into episodes
+        // 6. Split into episodes
         EpisodeSplitter splitter = new EpisodeSplitter(
             opts.idleThresholdMs(),
             opts.categoryShiftWindow()
         );
         List<EpisodeSplitter.EpisodeBoundary> episodeBoundaries = splitter.splitIntoEpisodes(runsWithTests);
 
-        // 6. Transform data
+        // 7. Transform data
         StatusChangeTracker tracker = new StatusChangeTracker();
         DataTransformer transformer = new DataTransformer();
         TestCategoryAnalyzer categoryAnalyzer = new TestCategoryAnalyzer();
+
+        // Make testCategories effectively final for use in lambda
+        final TestCategoryMapping finalTestCategories = testCategories;
 
         List<Episode> episodes = new ArrayList<>();
         List<EpisodeTestData> episodeTestData = new ArrayList<>();
@@ -94,11 +116,16 @@ public class PrepareService {
                 continue;
             }
 
-            // Extract dominant category
+            // Extract dominant category - prefer loaded categories
             List<EnrichedTestResult> allTestsInEpisode = episodeRuns.stream()
                 .flatMap(r -> r.tests().stream())
                 .toList();
-            String dominantCategory = categoryAnalyzer.extractDominantCategory(allTestsInEpisode);
+            String dominantCategory;
+            if (finalTestCategories != null) {
+                dominantCategory = findDominantCategoryFromMapping(allTestsInEpisode, finalTestCategories);
+            } else {
+                dominantCategory = categoryAnalyzer.extractDominantCategory(allTestsInEpisode);
+            }
 
             // Create episode metadata
             String startTime = episodeRuns.get(0).timestamp();
@@ -114,7 +141,8 @@ public class PrepareService {
                     run.runNumber(),
                     run.timestamp(),
                     run.tests(),
-                    tracker
+                    tracker,
+                    diffCategories
                 );
                 testRuns.add(testRun);
             }
@@ -122,11 +150,16 @@ public class PrepareService {
             episodeTestData.add(new EpisodeTestData(episodeId, testRuns));
         }
 
-        // 7. Generate test histories and failure highlights
-        List<TestHistory> testHistories = tracker.buildTestHistories();
+        // 8. Generate test histories and failure highlights
+        List<TestHistory> testHistories = tracker.buildTestHistories(testCategories);
         FailureHighlights failureHighlights = tracker.buildFailureHighlights(testHistories);
 
-        // 7b. Generate code snapshots (if enabled)
+        // 8a. Enhance test histories with error evolution and struggle profiles
+        testHistories = enhanceTestHistories(
+            testHistories, tracker, testCategories, diffCategories
+        );
+
+        // 8b. Generate code snapshots (if enabled)
         List<CodeSnapshot> codeSnapshots = Collections.emptyList();
         if (opts.includeCodeSnapshots()) {
             Set<Integer> runNumbers = runsWithTests.stream()
@@ -137,7 +170,7 @@ public class PrepareService {
             codeSnapshots = snapshotGen.generateSnapshots(opts.inputDir(), runNumbers, warnings);
         }
 
-        // 8. Build submission context
+        // 9. Build submission context
         String studentId = opts.studentIdOverride();
         String assignmentName = opts.assignmentNameOverride();
         String repoRoot = manifest != null ? manifest.repoRoot() : "";
@@ -151,7 +184,7 @@ public class PrepareService {
             repoRoot
         );
 
-        // 9. Build output (empty feedback for MVP)
+        // 10. Build output (empty feedback for MVP)
         FrontendOutput output = new FrontendOutput(
             context,
             episodes,
@@ -162,11 +195,11 @@ public class PrepareService {
             codeSnapshots.isEmpty() ? null : codeSnapshots
         );
 
-        // 10. Write output
+        // 11. Write output
         Files.createDirectories(opts.outputFile().getParent());
         Json.writeJson(opts.outputFile(), output);
 
-        // 11. Calculate statistics
+        // 12. Calculate statistics
         int totalTests = (int) testHistories.size();
 
         return new PrepareResult(
@@ -219,5 +252,85 @@ public class PrepareService {
         }
 
         return enrichedData;
+    }
+
+    private String findDominantCategoryFromMapping(List<EnrichedTestResult> tests,
+                                                    TestCategoryMapping mapping) {
+        // Flatten all categories from all tests (a test can have multiple)
+        Map<String, Long> categoryCounts = tests.stream()
+            .flatMap(t -> mapping.getCategoriesForTest(t.testId()).stream())
+            .collect(Collectors.groupingBy(c -> c, Collectors.counting()));
+
+        return categoryCounts.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("Unknown");
+    }
+
+    /**
+     * Enhances test histories with error evolution and struggle profiles.
+     */
+    private List<TestHistory> enhanceTestHistories(
+            List<TestHistory> histories,
+            StatusChangeTracker tracker,
+            TestCategoryMapping testCategories,
+            DiffCategoryMapping diffCategories) {
+
+        // Build error evolutions from tracker data
+        ErrorEvolutionTracker errorTracker = new ErrorEvolutionTracker();
+        Map<String, Map<Integer, String[]>> errorHistory = tracker.getErrorHistory();
+        Map<String, Map<Integer, String>> statusHistory = tracker.getStatusHistory();
+
+        // Populate error tracker from recorded data
+        // errorInfo array: [0]=exceptionType, [1]=message, [2]=stackTrace
+        for (Map.Entry<String, Map<Integer, String[]>> entry : errorHistory.entrySet()) {
+            String testId = entry.getKey();
+            Map<Integer, String> statuses = statusHistory.get(testId);
+            for (Map.Entry<Integer, String[]> runEntry : entry.getValue().entrySet()) {
+                int run = runEntry.getKey();
+                String[] errorInfo = runEntry.getValue();
+                String status = statuses != null ? statuses.get(run) : "fail";
+                errorTracker.recordError(testId, run, status, errorInfo[0], errorInfo[1], errorInfo[2]);
+            }
+            // Also record the final status
+            if (statuses != null && !statuses.isEmpty()) {
+                int lastRun = Collections.max(statuses.keySet());
+                String lastStatus = statuses.get(lastRun);
+                errorTracker.recordError(testId, lastRun, lastStatus, null, null, null);
+            }
+        }
+
+        Map<String, ErrorEvolution> evolutions = errorTracker.buildAllEvolutions();
+
+        // Compute cross-test correlations
+        CrossTestCorrelator correlator = new CrossTestCorrelator();
+        Map<String, List<StruggleProfile.TestCorrelation>> correlations =
+            correlator.computeCorrelations(statusHistory, tracker.getTestNames(), testCategories);
+
+        // Generate struggle profiles
+        StruggleProfileGenerator profileGen = new StruggleProfileGenerator();
+
+        List<TestHistory> enhanced = new ArrayList<>();
+        for (TestHistory history : histories) {
+            String testId = history.testId();
+
+            ErrorEvolution evolution = evolutions.get(testId);
+            List<StruggleProfile.TestCorrelation> relatedTests = correlations.get(testId);
+
+            StruggleProfile profile = profileGen.generate(
+                testId,
+                history.statusByRun(),
+                history.failureIntervals(),
+                evolution,
+                relatedTests,
+                diffCategories,
+                history.meaningfulnessScore()
+            );
+
+            // Add the enhanced data to the history
+            enhanced.add(history.withStruggleData(evolution, profile));
+        }
+
+        return enhanced;
     }
 }

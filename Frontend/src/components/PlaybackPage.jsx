@@ -51,7 +51,6 @@ export function PlaybackPage() {
   // Derive current episode and run from global index
   const currentRunData = allRuns[playback.currentIndex] || allRuns[0];
   const currentEpisodeId = currentRunData?.episodeId || '';
-  const currentRunIndex = currentRunData?.run?.runIndex || 0;
   const currentRunNumber = currentRunData?.runNumber || 1;
   const currentEpisodeIndex = currentRunData?.episodeIndex || 0;
   const currentEpisode = episodes[currentEpisodeIndex] || episodes[0];
@@ -94,17 +93,21 @@ export function PlaybackPage() {
     return allRuns.filter(r => r.episodeId === currentEpisodeId);
   }, [allRuns, currentEpisodeId]);
 
+  // Find the array index of the current run within currentEpisodeRuns
+  const currentRunArrayIndex = useMemo(() => {
+    const index = currentEpisodeRuns.findIndex(r => r.globalIndex === playback.currentIndex);
+    return index >= 0 ? index : 0;
+  }, [currentEpisodeRuns, playback.currentIndex]);
+
   // Create a run selection interface that's controlled by playback
   const runSelection = useRunSelection(
     currentEpisodeId,
     currentEpisodeRuns.map(r => r.run),
-    currentRunIndex,
-    // Callback when user manually selects a run
-    (runIndex) => {
-      // Find the global index for this episode + run combination
-      const targetRun = allRuns.find(
-        r => r.episodeId === currentEpisodeId && r.run.runIndex === runIndex
-      );
+    currentRunArrayIndex,
+    // Callback when user manually selects a run via arrows
+    // arrayIndex is the index within currentEpisodeRuns (0, 1, 2, ...)
+    (arrayIndex) => {
+      const targetRun = currentEpisodeRuns[arrayIndex];
       if (targetRun) {
         playback.jumpTo(targetRun.globalIndex);
       }

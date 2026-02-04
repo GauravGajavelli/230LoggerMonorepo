@@ -1,5 +1,6 @@
 package edu.rosehulman.csse230feedback.prepare;
 
+import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
 import edu.rosehulman.csse230feedback.model.frontend.FailureHighlights;
 import edu.rosehulman.csse230feedback.model.frontend.FailureInterval;
 import edu.rosehulman.csse230feedback.model.frontend.TestHistory;
@@ -10,10 +11,31 @@ public class StatusChangeTracker {
     private final Map<String, String> currentStatus = new HashMap<>();
     private final Map<String, Map<Integer, String>> statusHistory = new HashMap<>();
     private final Map<String, String> testNames = new HashMap<>();
+    private final Map<String, Map<Integer, ErrorInfo>> errorHistory = new HashMap<>();
+
+    /**
+     * Internal record to store error information for a run.
+     */
+    private record ErrorInfo(String exceptionType, String message, String stackTrace) {}
 
     public void recordTest(String testId, String testName, int runNumber, String status) {
         testNames.put(testId, testName);
         statusHistory.computeIfAbsent(testId, k -> new TreeMap<>()).put(runNumber, status);
+    }
+
+    /**
+     * Records test result with error information for error evolution tracking.
+     */
+    public void recordTest(String testId, String testName, int runNumber, String status,
+                          String exceptionType, String errorMessage, String stackTrace) {
+        recordTest(testId, testName, runNumber, status);
+
+        // Track error info for failing tests
+        if (isFailing(status) && exceptionType != null) {
+            errorHistory
+                .computeIfAbsent(testId, k -> new TreeMap<>())
+                .put(runNumber, new ErrorInfo(exceptionType, errorMessage, stackTrace));
+        }
     }
 
     public String getPreviousStatus(String testId) {
@@ -29,7 +51,44 @@ public class StatusChangeTracker {
         return previous != null && !previous.equals(newStatus);
     }
 
+    /**
+     * Returns the status history for all tests (for cross-test correlation).
+     */
+    public Map<String, Map<Integer, String>> getStatusHistory() {
+        return Collections.unmodifiableMap(statusHistory);
+    }
+
+    /**
+     * Returns the test names map (testId -> displayName).
+     */
+    public Map<String, String> getTestNames() {
+        return Collections.unmodifiableMap(testNames);
+    }
+
+    /**
+     * Returns error history for ErrorEvolutionTracker integration.
+     * Returns map of testId -> (runNumber -> (exceptionType, message, stackTrace))
+     */
+    public Map<String, Map<Integer, String[]>> getErrorHistory() {
+        Map<String, Map<Integer, String[]>> result = new HashMap<>();
+        for (Map.Entry<String, Map<Integer, ErrorInfo>> entry : errorHistory.entrySet()) {
+            Map<Integer, String[]> testErrors = new TreeMap<>();
+            for (Map.Entry<Integer, ErrorInfo> runEntry : entry.getValue().entrySet()) {
+                ErrorInfo info = runEntry.getValue();
+                testErrors.put(runEntry.getKey(), new String[]{
+                    info.exceptionType(), info.message(), info.stackTrace()
+                });
+            }
+            result.put(entry.getKey(), testErrors);
+        }
+        return result;
+    }
+
     public List<TestHistory> buildTestHistories() {
+        return buildTestHistories(null);
+    }
+
+    public List<TestHistory> buildTestHistories(TestCategoryMapping categoryMapping) {
         List<TestHistory> histories = new ArrayList<>();
 
         for (Map.Entry<String, Map<Integer, String>> entry : statusHistory.entrySet()) {
@@ -49,6 +108,10 @@ public class StatusChangeTracker {
                 isLingeringFailure, recursCount, totalFailedRuns, intervals
             );
 
+            List<String> categories = categoryMapping != null
+                ? categoryMapping.getCategoriesForTest(testId)
+                : Collections.emptyList();
+
             histories.add(new TestHistory(
                 testId,
                 testNames.get(testId),
@@ -60,7 +123,8 @@ public class StatusChangeTracker {
                 flipsWithin,
                 totalFailedRuns,
                 meaningfulnessScore,
-                highlightCategory
+                highlightCategory,
+                categories.isEmpty() ? null : categories
             ));
         }
 

@@ -61,7 +61,7 @@
 * Hybrid:
 
   * rules first (exception types/timeouts)
-  * LLM for refinement on an “evidence pack”
+  * LLM for refinement on an "evidence pack"
 * Output per selected failure:
 
   * label bucket + confidence (High/Med/Low/Unknown) + evidence pointers (stack frame/diff)
@@ -69,7 +69,13 @@
 ### 7) Fix-pattern mapping inputs
 
 * (bug type × category × diff category) → recommended fix checklist/drills template
-* LLM can generate the wording, but it’s anchored to the above artifacts
+* LLM can generate the wording, but it's anchored to the above artifacts
+
+### 8) Conceptual struggle detection
+
+* Rule-based struggle analysis (struggle scores, error evolution tracking)
+* Phase 2 LLM conceptual analysis (per-student batched)
+* See [conceptual_struggle_detection.md](conceptual_struggle_detection.md) for full details
 
 ---
 
@@ -83,16 +89,39 @@
   * clickable tests
 * Episode “chapters” to collapse/expand and navigate (simple session grouping)
 
-### B) Failure “exhibit” panel (what makes it feel alive)
+### B) Failure "exhibit" panel (what makes it feel alive)
 
 For any failing test you click:
 
 * pass/fail history sparkline across runs
-* “jump to introduction” (origin run)
-* “show introducing diff”
+* "jump to introduction" (origin run)
+* "show introducing diff"
 * evidence: stack trace top frames, assertion expected/actual (if captured), failure kind
 * root-cause label + confidence
 * recommended fix pattern (short checklist)
+
+**UI Layout:**
+```
+┌─────────────────────────────────────────────────────┐
+│ FeedbackPanel (when you click a failing test)       │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  Stack Trace          │  AI Feedback                │
+│  ─────────────        │  ─────────────────────────  │
+│  NullPointerException │  Pattern: Null reference    │
+│  at BST.insert:42     │  (High confidence)          │
+│  ...                  │                             │
+│                       │  What's happening:          │
+│                       │  "The node variable is      │
+│                       │   null when..."             │
+│                       │                             │
+│                       │  Next steps:                │
+│                       │  1. Add null check at ln 42 │
+│                       │  2. Verify parent pointer   │
+│                       │                             │
+│                       │  Practice: [Null safety]    │
+└─────────────────────────────────────────────────────┘
+```
 
 ### C) Highlights view (“meaningful failures”)
 

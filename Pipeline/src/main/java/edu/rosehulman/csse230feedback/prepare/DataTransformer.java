@@ -1,9 +1,12 @@
 package edu.rosehulman.csse230feedback.prepare;
 
+import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
+import edu.rosehulman.csse230feedback.model.DiffCategoryMapping.DiffLabel;
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
 import edu.rosehulman.csse230feedback.model.TestStatus;
 import edu.rosehulman.csse230feedback.model.frontend.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DataTransformer {
@@ -11,18 +14,31 @@ public class DataTransformer {
     public TestResult transformTestResult(
         EnrichedTestResult enriched,
         StatusChangeTracker tracker,
-        int runNumber
+        int runNumber,
+        DiffCategoryMapping diffCategories
     ) {
         String testId = enriched.testId();
         String status = mapStatus(enriched.status());
         String previousStatus = tracker.getPreviousStatus(testId);
         boolean changedThisRun = tracker.hasStatusChanged(testId, status);
 
-        // Track this test in the tracker
-        tracker.recordTest(testId, enriched.testDisplayName(), runNumber, status);
+        // Track this test in the tracker (with error info for evolution tracking)
+        tracker.recordTest(testId, enriched.testDisplayName(), runNumber, status,
+                          enriched.exceptionType(), enriched.message(), enriched.stackTrace());
         tracker.updateCurrentStatus(testId, status);
 
         String errorMessage = extractFirstLine(enriched.message());
+
+        // Look up diff categories for this run
+        List<String> diffCats = Collections.emptyList();
+        String diffExplanation = null;
+        if (diffCategories != null) {
+            DiffLabel label = diffCategories.getLabelForRun(runNumber);
+            if (label != null) {
+                diffCats = label.categories();
+                diffExplanation = label.explanation();
+            }
+        }
 
         return new TestResult(
             testId,
@@ -34,7 +50,9 @@ public class DataTransformer {
             enriched.stackTrace(),
             enriched.expected(),
             enriched.actual(),
-            enriched.durationMs()
+            enriched.durationMs(),
+            diffCats.isEmpty() ? null : diffCats,
+            diffExplanation
         );
     }
 
@@ -61,11 +79,12 @@ public class DataTransformer {
         int runNumber,
         String timestamp,
         List<EnrichedTestResult> enrichedTests,
-        StatusChangeTracker tracker
+        StatusChangeTracker tracker,
+        DiffCategoryMapping diffCategories
     ) {
         List<TestResult> results = new ArrayList<>();
         for (EnrichedTestResult enriched : enrichedTests) {
-            results.add(transformTestResult(enriched, tracker, runNumber));
+            results.add(transformTestResult(enriched, tracker, runNumber, diffCategories));
         }
 
         TestSummary summary = calculateSummary(results);

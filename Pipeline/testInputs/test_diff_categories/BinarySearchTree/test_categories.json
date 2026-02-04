@@ -1,0 +1,109 @@
+{
+  "categories": {
+    "basic_insert": {
+      "description": "Core insert functionality - adding elements to the tree",
+      "tests": [
+        "BSTTesting#testInsertInts",
+        "BSTTesting#testInsertStrings",
+        "BSTTesting#testInsertReturnValueInt",
+        "BSTTesting#testInsertReturnValueString"
+      ]
+    },
+    "search_contains": {
+      "description": "Finding elements in the tree using contains()",
+      "tests": [
+        "BSTTesting#testContainsInts",
+        "BSTTesting#testContainsStrings"
+      ]
+    },
+    "deletion": {
+      "description": "Removing elements while maintaining BST property",
+      "tests": [
+        "BSTTesting#testRemove",
+        "BSTTesting#testRemoveReturnValue",
+        "BSTTesting#testRemoveAdvanced"
+      ]
+    },
+    "tree_properties": {
+      "description": "Tree structure queries - size, height, isEmpty",
+      "tests": [
+        "BSTTesting#testHeight",
+        "BSTTesting#testSize",
+        "BSTTesting#testIsEmpty",
+        "BSTManualTesting#testSize",
+        "BSTManualTesting#testHeight"
+      ]
+    },
+    "conversion": {
+      "description": "Converting tree to other representations",
+      "tests": [
+        "BSTTesting#testToArrayList",
+        "BSTTesting#testToArrayInts",
+        "BSTTesting#testToArrayStrings",
+        "BSTTesting#testToString"
+      ]
+    },
+    "iterators": {
+      "description": "Tree traversal via iterators",
+      "tests": [
+        "BSTTesting#testInefficientIterator",
+        "BSTTesting#testPreOrderIterator",
+        "BSTTesting#testIterator"
+      ]
+    },
+    "edge_cases": {
+      "description": "Exception handling and null checks",
+      "tests": [
+        "BSTTesting#testInsertExceptions",
+        "BSTTesting#testRemoveIllegalArgumentException"
+      ]
+    },
+    "efficiency": {
+      "description": "Performance and algorithmic efficiency",
+      "tests": [
+        "BSTTesting#testEfficiency"
+      ]
+    },
+    "concurrency": {
+      "description": "Optional: Concurrent modification handling (not graded)",
+      "tests": [
+        "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException",
+        "BSTConcurrencyTesting#testIterator",
+        "BSTConcurrencyTesting#testRemoveConcurrentModifcationException",
+        "BSTConcurrencyTesting#testRemoveInPreOrderIterator",
+        "BSTConcurrencyTesting#testRemoveInInOrderIterator"
+      ]
+    }
+  },
+  "testToCategories": {
+    "BSTTesting#testInsertInts": ["basic_insert"],
+    "BSTTesting#testInsertStrings": ["basic_insert"],
+    "BSTTesting#testInsertReturnValueInt": ["basic_insert"],
+    "BSTTesting#testInsertReturnValueString": ["basic_insert"],
+    "BSTTesting#testInsertExceptions": ["edge_cases"],
+    "BSTTesting#testHeight": ["tree_properties"],
+    "BSTTesting#testSize": ["tree_properties"],
+    "BSTTesting#testIsEmpty": ["tree_properties"],
+    "BSTTesting#testContainsInts": ["search_contains"],
+    "BSTTesting#testContainsStrings": ["search_contains"],
+    "BSTTesting#testToArrayList": ["conversion"],
+    "BSTTesting#testToArrayInts": ["conversion"],
+    "BSTTesting#testToArrayStrings": ["conversion"],
+    "BSTTesting#testToString": ["conversion"],
+    "BSTTesting#testInefficientIterator": ["iterators"],
+    "BSTTesting#testPreOrderIterator": ["iterators"],
+    "BSTTesting#testIterator": ["iterators"],
+    "BSTTesting#testRemove": ["deletion"],
+    "BSTTesting#testRemoveReturnValue": ["deletion"],
+    "BSTTesting#testRemoveIllegalArgumentException": ["edge_cases"],
+    "BSTTesting#testRemoveAdvanced": ["deletion"],
+    "BSTTesting#testEfficiency": ["efficiency", "tree_properties"],
+    "BSTManualTesting#testSize": ["tree_properties"],
+    "BSTManualTesting#testHeight": ["tree_properties"],
+    "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException": ["concurrency", "iterators"],
+    "BSTConcurrencyTesting#testIterator": ["concurrency", "iterators"],
+    "BSTConcurrencyTesting#testRemoveConcurrentModifcationException": ["concurrency", "deletion"],
+    "BSTConcurrencyTesting#testRemoveInPreOrderIterator": ["concurrency", "iterators"],
+    "BSTConcurrencyTesting#testRemoveInInOrderIterator": ["concurrency", "iterators"]
+  }
+}
