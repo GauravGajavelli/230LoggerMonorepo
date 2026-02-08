@@ -1,0 +1,733 @@
+=== Detailed Tar Health Check ===
+Run: Sat Feb  7 16:01:42 EST 2026
+
+=== allTar-BST ===
+  --- run49.tar (102912 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 38
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run60.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run48.tar (15360 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 9
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run59.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run02.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run16.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run17.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run03.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run29.tar (9216 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run15.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run01.tar (8192 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run28.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run10.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run04.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run38.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 5
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run39.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run05.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run11.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run07.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run13.tar (25600 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 7
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run12.tar (16384 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 9
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run06.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run37.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run22.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run08.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run34.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run20.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run21.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run35.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run09.tar (8192 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run31.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run25.tar (8192 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run19.tar (15872 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 8
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run18.tar (8192 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run24.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run30.tar (12800 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run26.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run32.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run33.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run27.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run40.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run54.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run55.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run41.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run57.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run43.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run42.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run56.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run52.tar (23040 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 10
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run46.tar (8192 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run53.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run45.tar (8192 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run51.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run50.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run44.tar (8704 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 4
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+
+=== allTar-StringHashSet ===
+  --- run49.tar (55808 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 28
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run60.tar (16896 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 6
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run48.tar (9728 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run59.tar (53760 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 24
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run02.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run16.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run03.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run29.tar (9216 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run15.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run01.tar (18944 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 7
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run28.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run10.tar (9728 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run04.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run38.tar (13312 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 4
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run39.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run11.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run07.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run13.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run12.tar (9728 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run06.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run37.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run36.tar (10240 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run22.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run08.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run34.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run20.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run21.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run09.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run25.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run19.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run18.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run24.tar (9728 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run30.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run26.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run32.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run33.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run27.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run40.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run54.tar (9728 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run55.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run41.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run43.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run42.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run56.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run52.tar (9728 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run46.tar (13824 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 4
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run53.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run45.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run51.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run50.tar (0 bytes) ---
+    CRITICAL: Empty or malformed tar file
+  --- run44.tar (9728 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+
+=== allTar-WarmupStretching ===
+  --- run49.tar (21504 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 4
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run60.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run48.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run58.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run59.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run02.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run16.tar (19968 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run17.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run03.tar (37376 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 17
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run29.tar (21504 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run15.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run01.tar (93184 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 72
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run14.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run28.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run10.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run04.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run38.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 4
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run39.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run05.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run11.tar (19968 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run07.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run13.tar (36352 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 10
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run12.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run06.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run23.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run37.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run36.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run22.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run08.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run34.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run20.tar (19968 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run21.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run35.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run09.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run31.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run25.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run19.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run18.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run24.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 4
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run30.tar (19968 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run26.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run32.tar (19456 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run33.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run27.tar (20992 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run40.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run54.tar (57344 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 35
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run55.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run41.tar (21504 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 6
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run57.tar (19968 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 2
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run43.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run42.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run56.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run52.tar (19456 bytes) ---
+    skipLogging: false
+    strikes: 0
+    prevRunNumber: 1
+    error-logs.txt: empty/none
+    STATUS: OK
+  --- run46.tar (19968 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run47.tar (21504 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run53.tar (19968 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run45.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run51.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run50.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+  --- run44.tar (20480 bytes) ---
+    skipLogging: true
+    strikes: 0
+    prevRunNumber: 3
+    error-logs.txt: empty/none
+    STATUS: WARNING (has data but skipLogging=true, strikes=0)
+

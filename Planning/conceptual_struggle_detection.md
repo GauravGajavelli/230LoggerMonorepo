@@ -30,23 +30,28 @@ A test that fails for 15 runs then passes represents significant struggle—but 
 
 ## Proposed Solution
 
-### Two-Phase Enhancement
+### Three-Phase Enhancement
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  PHASE 1: Rule-Based Struggle Detection                        │
+│  (unchanged)                                                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  PHASE 1.5: Semantic Enrichment (NEW)                          │
 │                                                                 │
-│  For each resolved failure interval:                           │
-│  - Count attempts to fix                                       │
-│  - Identify diff categories tried                              │
-│  - Find related tests affected                                 │
-│  - Calculate struggle score                                    │
+│  Per student, after diff categorization:                       │
+│  - Generate semantic descriptions per run                      │
+│  - Maintain rolling narrative                                  │
+│  - Detect struggle patterns                                    │
+│  - Generate episode summaries                                  │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │  PHASE 2: LLM Conceptual Analysis                              │
 │                                                                 │
-│  Per student (batched):                                        │
+│  (Enhanced with semantic log input)                            │
 │  - Identify conceptual gaps                                    │
 │  - Detect repeated mistake patterns                            │
 │  - Find breakthrough moments                                   │
@@ -64,8 +69,10 @@ A test that fails for 15 runs then passes represents significant struggle—but 
 |-------------|------------------|-------|
 | Test results per run | Yes | From testRunInfo.json |
 | Failure intervals | Yes | From error_detection algorithm |
-| Diff categories | **New** | From diff_labeling_prompt.md |
-| Test categories | **New** | From test_mapping_prompt.md |
+| Diff categories | Yes | From diff_labeling_prompt.md |
+| Test categories | Yes | From test_mapping_prompt.md |
+| **Semantic log** | **New** | **From semantic enrichment pass** |
+| **Episode semantics** | **New** | **From episode summarization** |
 
 ### Required Files Per Assignment
 
@@ -181,6 +188,46 @@ Track how errors change across runs for the same test:
 ```
 
 **Key Insight**: The full stack trace reveals that the NPE at run 3 was at line 45, while the NPE at run 5 was at line 52. This shows the student is fixing null checks **reactively** (one at a time) rather than understanding the full null flow.
+
+---
+
+## Semantic Log Structure
+
+The semantic log captures narrative understanding of the debugging journey:
+
+```json
+{
+  "semanticLog": {
+    "entries": [
+      {
+        "run": 5,
+        "diffCategories": ["null_check_added"],
+        "semanticDescription": "Added null check for root node before traversal",
+        "narrativeContext": "First attempt to address NullPointerException in insert",
+        "intent": "debugging",
+        "errorOutcomes": {
+          "testInsert": "NPE moved from line 42 to line 58"
+        }
+      }
+    ],
+    "currentNarrative": "Student is adding null checks reactively as each NPE surfaces, suggesting they don't have a mental model of the full null-flow through their tree traversal.",
+    "detectedPatterns": ["reactive_debugging"]
+  }
+}
+```
+
+### Struggle Patterns Vocabulary
+
+| Pattern | Detection Signal | Meaning |
+|---------|-----------------|---------|
+| `reactive_debugging` | Serial single-point fixes for same error type | Not understanding root cause |
+| `oscillating_fix` | Alternating between two approaches | Uncertain about correct solution |
+| `cascade_breakage` | Fixes cause new failures | Not understanding dependencies |
+| `productive_iteration` | Steady test improvement | Good debugging strategy |
+| `stuck` | Repeated similar attempts, no progress | May need help |
+| `breakthrough` | Sudden multi-test improvement | Key learning moment |
+
+---
 
 ### Error Pattern Detection
 
@@ -974,17 +1021,22 @@ record StruggleProfile(
 
 ### Cost Summary (Updated)
 
-| Component | Already Done | New Cost |
-|-----------|--------------|----------|
-| Test history computation | ✅ Free | $0 |
-| Failure intervals | ✅ Free | $0 |
-| Meaningfulness scores | ✅ Free | $0 |
-| Error evolution tracking | ✅ Free (code) | $0 |
-| Cross-test correlation | ✅ Free (code) | $0 |
-| Struggle profile generation | ✅ Free (code) | $0 |
-| Diff category labeling | LLM | $0.88 (GPT-4o-mini) |
-| Conceptual analysis | LLM | $0.14 (GPT-4o-mini) |
-| **Total** | | **$1.02** |
+| Component | Type | Cost |
+|-----------|------|------|
+| Test history computation | Code | $0 |
+| Failure intervals | Code | $0 |
+| Meaningfulness scores | Code | $0 |
+| Error evolution tracking | Code | $0 |
+| Cross-test correlation | Code | $0 |
+| Struggle profile generation | Code | $0 |
+| Diff category labeling | LLM | $0.88 |
+| **Semantic enrichment** | **LLM** | **~$0.60** |
+| **Episode summarization** | **LLM** | **~$0.10** |
+| Conceptual analysis | LLM | $0.14 |
+| **Total** | | **~$1.72** |
+
+*Semantic enrichment estimate: ~40 batches × $0.015/batch = $0.60*
+*Episode summarization: 1 call per student × $0.10 = $0.10*
 
 ### Verification Steps
 

@@ -1,0 +1,27 @@
+=== Tar Health Check ===
+Run: Sat Feb  7 16:01:42 EST 2026
+
+allTar-BST:
+  Total: 55
+  CRITICAL: 32 (58.1%)
+  WARNING:  20 (36.3%)
+  OK:       3 (5.4%)
+
+allTar-StringHashSet:
+  Total: 51
+  CRITICAL: 36 (70.5%)
+  WARNING:  12 (23.5%)
+  OK:       3 (5.8%)
+
+allTar-WarmupStretching:
+  Total: 60
+  CRITICAL: 0 (0%)
+  WARNING:  35 (58.3%)
+  OK:       25 (41.6%)
+
+=== TOTAL ===
+Total tar files: 166
+
+CRITICAL: 68 (40.9%) - No data captured, logging crashed
+WARNING:  67 (40.3%) - Has data but self-shutoff triggered
+OK:       31 (18.6%) - Normal operation

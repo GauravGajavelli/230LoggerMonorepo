@@ -1,0 +1,108 @@
+=== Logger Fail-Safe Statistics by Assignment ===
+Generated: 2026-02-07
+
+================================================================================
+SUMMARY TABLE
+================================================================================
+
+| Assignment        | n  | Runs (mean±SD)  | Size KB (mean±SD) | Diffs (mean±SD) |
+|-------------------|----|-----------------|--------------------|-----------------|
+| BST               | 20 | 4.70 ± 7.87     | 14.97 ± 20.14      | 1.35 ± 0.91     |
+| StringHashSet     | 12 | 2.75 ± 1.48     | 10.88 ± 2.69       | 1.00 ± 0.00     |
+| WarmupStretching  | 35 | 6.40 ± 12.69    | 24.00 ± 13.41      | 1.20 ± 0.62     |
+
+================================================================================
+DETAILED STATISTICS - WARNING TARS (fail-safe triggered)
+================================================================================
+
+=== allTar-BST (n=20 WARNING tars) ===
+  Runs at fail-safe:
+    mean=4.70, SD=7.87
+    min=1, median=2, max=38
+    Distribution: {1: 1, 2: 12, 3: 2, 4: 1, 5: 1, 7: 1, 9: 1, 38: 1}
+    MODE: 2 runs (60% of cases)
+
+  Size at fail-safe (KB):
+    mean=14.97, SD=20.14
+    min=8.0, median=8.5, max=100.5
+
+  Diff archives captured:
+    mean=1.35, SD=0.91
+    min=1, median=1, max=5
+
+=== allTar-StringHashSet (n=12 WARNING tars) ===
+  Runs at fail-safe:
+    mean=2.75, SD=1.48
+    min=2, median=2, max=7
+    Distribution: {2: 9, 4: 2, 7: 1}
+    MODE: 2 runs (75% of cases)
+
+  Size at fail-safe (KB):
+    mean=10.88, SD=2.69
+    min=9.0, median=9.5, max=18.5
+
+  Diff archives captured:
+    mean=1.00, SD=0.00
+    min=1, median=1, max=1
+
+=== allTar-WarmupStretching (n=35 WARNING tars) ===
+  Runs at fail-safe:
+    mean=6.40, SD=12.69
+    min=2, median=3, max=72
+    Distribution: {2: 5, 3: 24, 4: 2, 10: 1, 17: 1, 35: 1, 72: 1}
+    MODE: 3 runs (69% of cases)
+
+  Size at fail-safe (KB):
+    mean=24.00, SD=13.41
+    min=19.0, median=20.0, max=91.0
+
+  Diff archives captured:
+    mean=1.20, SD=0.62
+    min=1, median=1, max=4
+
+================================================================================
+COMPARISON: OK TARS (no fail-safe triggered)
+================================================================================
+
+=== allTar-BST (n=3 OK tars) ===
+  run19.tar: runs=8, size=15.5KB, diffs=2
+  run48.tar: runs=9, size=15.0KB, diffs=1
+  run52.tar: runs=10, size=22.5KB, diffs=3
+  → OK tars averaged 9 runs vs WARNING's median of 2
+
+=== allTar-StringHashSet (n=3 OK tars) ===
+  run49.tar: runs=28, size=54.5KB, diffs=3
+  run59.tar: runs=24, size=52.5KB, diffs=3
+  run60.tar: runs=6, size=16.5KB, diffs=1
+  → OK tars averaged 19.3 runs vs WARNING's median of 2
+
+=== allTar-WarmupStretching (n=25 OK tars) ===
+  23/25 have runs=1, size=19KB, diffs=1
+  2/25 have runs=4-6, size=21KB, diffs=1
+  → OK tars are mostly single-run submissions
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+1. FAIL-SAFE TRIGGER POINT:
+   - BST: Typically fails at run 2 (60% of cases)
+   - StringHashSet: Typically fails at run 2 (75% of cases)
+   - WarmupStretching: Typically fails at run 3 (69% of cases)
+
+2. SIZE AT FAILURE:
+   - BST: ~8-15 KB (median 8.5 KB)
+   - StringHashSet: ~9-10 KB (median 9.5 KB)
+   - WarmupStretching: ~20 KB (median 20 KB)
+
+3. CRITICAL OBSERVATION:
+   - The fail-safe triggers on the 2nd or 3rd run for most students
+   - This is NOT a timing/size limit issue
+   - This is the "run 2+" bug in the unzip/rebaseline logic
+
+4. OK vs WARNING PATTERN:
+   - WarmupStretching: OK tars are mostly runs=1 (never hit run 2)
+   - BST/StringHashSet: OK tars have MORE runs (8-28), suggesting
+     the bug is probabilistic or environment-dependent
+
+================================================================================

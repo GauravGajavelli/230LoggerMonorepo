@@ -26,14 +26,34 @@
 
   * `test_id → category` (+ optional “core-ness” weight if you add it)
 
-### 3) Episode artifacts (navigation layer, not “truth”)
+### 3) Episode artifacts (navigation layer)
 
 * **Episode boundaries** (time-gap + focus-window category shift)
 * **Episode aggregates**
-
   * top test categories, top diff categories
   * net test delta vs episode start
   * representative failing tests (e.g., fluctuated but ended failing)
+* **Episode semantics** (NEW - from semantic enrichment)
+  * summary: 1-2 sentence description
+  * dominant_intent: primary activity type
+  * concepts_addressed: topics worked on
+  * progress_assessment: productive / stuck / regressing / breakthrough
+
+### 3.5) Semantic enrichment (second LLM pass)
+
+* **SemanticRunEntry (per run with diffs)**
+  * semantic_description: what the change is accomplishing
+  * narrative_context: how it fits in the journey
+  * intent: debugging / extending / refactoring / experimenting
+  * error_outcomes: test → outcome summary
+
+* **SemanticLog (per student)**
+  * entries: list of SemanticRunEntry
+  * currentNarrative: rolling summary of journey
+  * detectedPatterns: struggle patterns observed
+
+* **Batch formation**: By token budget (~3000 tokens), not fixed run count
+* **Diff format**: Simplified unified diff with context + test outcomes + error state
 
 ### 4) Meaningful failure selection (the “what to highlight” engine)
 
