@@ -351,7 +351,9 @@ export function PlaybackPage() {
               <div className="h-[500px] flex items-center justify-center text-gray-500">
                 <div className="text-center">
                   <p className="text-lg font-medium mb-2">No Code Available</p>
-                  <p className="text-sm">Episode: {currentEpisode?.label}</p>
+                  <p className="text-sm">
+                    {currentEpisode?.semantics?.summary || `Episode: ${currentEpisode?.label}`}
+                  </p>
                 </div>
               </div>
             )}
@@ -374,7 +376,7 @@ export function PlaybackPage() {
             </div>
 
             {/* Progress Chart Card */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-visible shadow-sm">
               <ProgressChart
                 dataPoints={progressDataPoints}
                 globalRunIndex={playback.currentIndex}

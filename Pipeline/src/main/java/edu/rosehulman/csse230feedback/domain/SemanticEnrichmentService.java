@@ -10,6 +10,7 @@ import edu.rosehulman.csse230feedback.llm.LlmService;
 import edu.rosehulman.csse230feedback.llm.PromptLoader;
 import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
+import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
 import edu.rosehulman.csse230feedback.model.frontend.*;
 import edu.rosehulman.csse230feedback.prepare.EpisodeSplitter;
 import edu.rosehulman.csse230feedback.util.Json;
@@ -19,8 +20,8 @@ import java.util.*;
 
 public class SemanticEnrichmentService {
 
-    private static final int TOKEN_BUDGET = 3000;
-    private static final int MAX_DIFF_CHARS = 500;
+    private static final int TOKEN_BUDGET = 4000;
+    private static final int MAX_DIFF_CHARS = 1500;
 
     private final LlmService llmService;
     private final PromptLoader promptLoader;
@@ -36,13 +37,25 @@ public class SemanticEnrichmentService {
     ) {}
 
     /**
-     * Backward-compatible overload without diff data.
+     * Backward-compatible overload without diff data or test categories.
      */
     public SemanticEnrichmentResult enrich(
             List<EpisodeSplitter.RunWithTests> runsWithTests,
             List<Episode> episodes,
             String assignmentName) throws LlmException, IOException {
-        return enrich(runsWithTests, episodes, assignmentName, null, null);
+        return enrich(runsWithTests, episodes, assignmentName, null, null, null);
+    }
+
+    /**
+     * Backward-compatible overload without test categories.
+     */
+    public SemanticEnrichmentResult enrich(
+            List<EpisodeSplitter.RunWithTests> runsWithTests,
+            List<Episode> episodes,
+            String assignmentName,
+            DiffCategoryMapping diffCategories,
+            Map<Integer, String> patchesByRun) throws LlmException, IOException {
+        return enrich(runsWithTests, episodes, assignmentName, diffCategories, patchesByRun, null);
     }
 
     public SemanticEnrichmentResult enrich(
@@ -50,7 +63,14 @@ public class SemanticEnrichmentService {
             List<Episode> episodes,
             String assignmentName,
             DiffCategoryMapping diffCategories,
-            Map<Integer, String> patchesByRun) throws LlmException, IOException {
+            Map<Integer, String> patchesByRun,
+            TestCategoryMapping testCategories) throws LlmException, IOException {
+
+        // Pre-compute structural signals (passCountDelta, failCountDelta, newCategories)
+        Map<Integer, RunSignals> signalsByRun = computeRunSignals(runsWithTests, testCategories);
+
+        // Build test categories summary string for prompt injection
+        String testCategoriesSummary = buildTestCategoriesSummary(testCategories);
 
         // Form batches of runs within token budget
         List<List<EpisodeSplitter.RunWithTests>> batches = formBatches(runsWithTests, patchesByRun, diffCategories);
@@ -60,19 +80,31 @@ public class SemanticEnrichmentService {
         List<String> allPatterns = new ArrayList<>();
         String currentNarrative = "";
 
+        // Seed first batch narrative with assignment structure if test categories available
+        String firstBatchNarrative = "(first batch)";
+        if (testCategories != null && testCategories.categories() != null && !testCategories.categories().isEmpty()) {
+            StringBuilder sb = new StringBuilder("This is a ");
+            sb.append(assignmentName != null ? assignmentName : "programming");
+            sb.append(" assignment with ").append(testCategories.categories().size()).append(" test categories: ");
+            sb.append(String.join(", ", testCategories.categories().keySet()));
+            sb.append(". The student builds functionality incrementally across these categories.");
+            firstBatchNarrative = sb.toString();
+        }
+
         // Process each batch
         for (int i = 0; i < totalBatches; i++) {
             List<EpisodeSplitter.RunWithTests> batch = batches.get(i);
 
-            String inputData = formatBatchAsJson(batch, diffCategories, patchesByRun);
+            String inputData = formatBatchAsJson(batch, diffCategories, patchesByRun, signalsByRun);
             String promptContent = promptLoader.loadAndFill(
                 "semantic_enrichment_prompt.md",
                 Map.of(
                     "assignment_name", assignmentName != null ? assignmentName : "Unknown",
                     "batch_number", String.valueOf(i + 1),
                     "total_batches", String.valueOf(totalBatches),
-                    "narrative_so_far", currentNarrative.isEmpty() ? "(first batch)" : currentNarrative,
-                    "test_status_summary", buildTestStatusSummary(batch)
+                    "narrative_so_far", currentNarrative.isEmpty() ? firstBatchNarrative : currentNarrative,
+                    "test_status_summary", buildTestStatusSummary(batch),
+                    "test_categories", testCategoriesSummary
                 )
             );
 
@@ -104,10 +136,110 @@ public class SemanticEnrichmentService {
 
         // Episode summarization
         Map<String, EpisodeSemantics> episodeSemantics = summarizeEpisodes(
-            semanticLog, episodes, totalBatches + 1
+            semanticLog, episodes, totalBatches + 1, testCategoriesSummary
         );
 
         return new SemanticEnrichmentResult(semanticLog, episodeSemantics);
+    }
+
+    /**
+     * Pre-computed structural signals for a single run.
+     */
+    record RunSignals(int passCountDelta, int failCountDelta, List<String> newCategories) {}
+
+    /**
+     * Computes passCountDelta, failCountDelta, and newCategories for each run
+     * by comparing against the previous run's test results.
+     */
+    private Map<Integer, RunSignals> computeRunSignals(
+            List<EpisodeSplitter.RunWithTests> runs,
+            TestCategoryMapping testCategories) {
+
+        Map<Integer, RunSignals> signals = new LinkedHashMap<>();
+        Set<String> previouslyPassingTests = new HashSet<>();
+        Set<String> previouslyPassedCategories = new HashSet<>();
+
+        for (int i = 0; i < runs.size(); i++) {
+            EpisodeSplitter.RunWithTests run = runs.get(i);
+            Set<String> currentPassing = new HashSet<>();
+            for (EnrichedTestResult test : run.tests()) {
+                if ("SUCCESSFUL".equals(test.status().name())) {
+                    currentPassing.add(test.testId());
+                }
+            }
+
+            if (i == 0) {
+                // First run: everything is "new"
+                int passCount = currentPassing.size();
+                List<String> newCats = new ArrayList<>();
+                if (testCategories != null) {
+                    Set<String> catsInThisRun = new HashSet<>();
+                    for (String testId : currentPassing) {
+                        catsInThisRun.addAll(testCategories.getCategoriesForTest(testId));
+                    }
+                    newCats.addAll(catsInThisRun);
+                    previouslyPassedCategories.addAll(catsInThisRun);
+                }
+                signals.put(run.runNumber(), new RunSignals(passCount, 0, newCats));
+            } else {
+                // Compute deltas vs previous run
+                int newlyPassing = 0;
+                int newlyFailing = 0;
+
+                for (String testId : currentPassing) {
+                    if (!previouslyPassingTests.contains(testId)) {
+                        newlyPassing++;
+                    }
+                }
+                for (String testId : previouslyPassingTests) {
+                    if (!currentPassing.contains(testId)) {
+                        newlyFailing++;
+                    }
+                }
+
+                List<String> newCats = new ArrayList<>();
+                if (testCategories != null) {
+                    Set<String> catsInThisRun = new HashSet<>();
+                    for (String testId : currentPassing) {
+                        catsInThisRun.addAll(testCategories.getCategoriesForTest(testId));
+                    }
+                    for (String cat : catsInThisRun) {
+                        if (!previouslyPassedCategories.contains(cat)) {
+                            newCats.add(cat);
+                        }
+                    }
+                    previouslyPassedCategories.addAll(catsInThisRun);
+                }
+
+                signals.put(run.runNumber(), new RunSignals(newlyPassing, newlyFailing, newCats));
+            }
+
+            previouslyPassingTests = currentPassing;
+        }
+
+        return signals;
+    }
+
+    /**
+     * Builds a human-readable summary of test categories for prompt injection.
+     */
+    private String buildTestCategoriesSummary(TestCategoryMapping testCategories) {
+        if (testCategories == null || testCategories.categories() == null || testCategories.categories().isEmpty()) {
+            return "(no test category mapping available)";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, TestCategoryMapping.CategoryInfo> entry : testCategories.categories().entrySet()) {
+            sb.append("- **").append(entry.getKey()).append("**");
+            if (entry.getValue().description() != null) {
+                sb.append(": ").append(entry.getValue().description());
+            }
+            if (entry.getValue().tests() != null && !entry.getValue().tests().isEmpty()) {
+                sb.append(" (tests: ").append(String.join(", ", entry.getValue().tests())).append(")");
+            }
+            sb.append("\n");
+        }
+        return sb.toString().trim();
     }
 
     private List<List<EpisodeSplitter.RunWithTests>> formBatches(
@@ -137,7 +269,7 @@ public class SemanticEnrichmentService {
     private int estimateRunTokens(EpisodeSplitter.RunWithTests run,
                                    Map<Integer, String> patchesByRun,
                                    DiffCategoryMapping diffCategories) {
-        int chars = 50; // run header overhead (run number, timestamp, JSON structure)
+        int chars = 80; // run header overhead (run number, timestamp, structural signals, JSON structure)
         for (EnrichedTestResult test : run.tests()) {
             chars += 30; // test name
             if (test.cause() != null) chars += test.cause().length();
@@ -163,12 +295,24 @@ public class SemanticEnrichmentService {
 
     private String formatBatchAsJson(List<EpisodeSplitter.RunWithTests> batch,
                                       DiffCategoryMapping diffCategories,
-                                      Map<Integer, String> patchesByRun) throws IOException {
+                                      Map<Integer, String> patchesByRun,
+                                      Map<Integer, RunSignals> signalsByRun) throws IOException {
         ArrayNode runsArray = Json.mapper().createArrayNode();
         for (EpisodeSplitter.RunWithTests run : batch) {
             ObjectNode runNode = Json.mapper().createObjectNode();
             runNode.put("run", run.runNumber());
             runNode.put("timestamp", run.timestamp());
+
+            // Include structural signals
+            RunSignals signals = signalsByRun.get(run.runNumber());
+            if (signals != null) {
+                runNode.put("passCountDelta", signals.passCountDelta());
+                runNode.put("failCountDelta", signals.failCountDelta());
+                if (!signals.newCategories().isEmpty()) {
+                    ArrayNode newCatsArray = runNode.putArray("newCategories");
+                    signals.newCategories().forEach(newCatsArray::add);
+                }
+            }
 
             // Include diff categories if available
             if (diffCategories != null) {
@@ -258,15 +402,9 @@ public class SemanticEnrichmentService {
                     String narrativeContext = getTextOrNull(runNode, "narrative_context");
                     String intent = getTextOrNull(runNode, "intent");
 
-                    Map<String, String> errorOutcomes = null;
-                    if (runNode.has("error_outcomes")) {
-                        errorOutcomes = Json.mapper().convertValue(
-                            runNode.get("error_outcomes"), new TypeReference<>() {});
-                    }
-
                     entries.add(new SemanticRunEntry(
                         run, diffCategories, semanticDescription,
-                        narrativeContext, intent, errorOutcomes
+                        narrativeContext, intent
                     ));
                 }
             }
@@ -291,7 +429,7 @@ public class SemanticEnrichmentService {
 
     private Map<String, EpisodeSemantics> summarizeEpisodes(
             SemanticLog semanticLog, List<Episode> episodes,
-            int requestNumber) throws LlmException, IOException {
+            int requestNumber, String testCategoriesSummary) throws LlmException, IOException {
 
         // Build episode boundaries JSON
         ArrayNode episodeBoundaries = Json.mapper().createArrayNode();
@@ -312,7 +450,8 @@ public class SemanticEnrichmentService {
             "episode_summary_prompt.md",
             Map.of(
                 "semantic_log_json", semanticLogJson,
-                "episode_boundaries", episodeBoundariesJson
+                "episode_boundaries", episodeBoundariesJson,
+                "test_categories_summary", testCategoriesSummary
             )
         );
 

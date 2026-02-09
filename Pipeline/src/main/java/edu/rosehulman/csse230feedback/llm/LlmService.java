@@ -178,9 +178,10 @@ public class LlmService {
     private static LlmProvider createProvider(LlmConfig config) throws LlmException {
         return switch (config.provider()) {
             case "openai" -> new OpenAiProvider(config.resolvedApiKey());
+            case "anthropic" -> new AnthropicProvider(config.resolvedApiKey());
             default -> throw new LlmException(
                 "Unsupported LLM provider: " + config.provider() +
-                ". Supported: openai"
+                ". Supported: openai, anthropic"
             );
         };
     }

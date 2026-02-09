@@ -210,7 +210,8 @@ public class PrepareService {
                 SemanticEnrichmentService enricher = new SemanticEnrichmentService(llmService, promptLoader);
                 SemanticEnrichmentService.SemanticEnrichmentResult semResult = enricher.enrich(
                     runsWithTests, episodes, opts.assignmentNameOverride(),
-                    diffCategories, patchesByRun.isEmpty() ? null : patchesByRun
+                    diffCategories, patchesByRun.isEmpty() ? null : patchesByRun,
+                    testCategories
                 );
                 semanticLog = semResult.semanticLog();
 
@@ -261,12 +262,49 @@ public class PrepareService {
             repoRoot
         );
 
-        // 10. Build output (empty feedback for MVP)
+        // 9a. Generate AI feedback for highlighted tests (if LLM available)
+        List<Feedback> feedback = Collections.emptyList();
+        if (llmService != null) {
+            try {
+                PromptLoader feedbackPromptLoader = new PromptLoader(
+                    opts.inputDir().getParent() != null
+                        ? opts.inputDir().getParent().resolve("prompts")
+                        : Path.of("prompts")
+                );
+                if (!Files.exists(feedbackPromptLoader.promptsDir())) {
+                    feedbackPromptLoader = new PromptLoader(Path.of("prompts"));
+                }
+
+                FeedbackGenerationService feedbackService = new FeedbackGenerationService(
+                    llmService, feedbackPromptLoader
+                );
+
+                // Request number after semantic enrichment batches + episode summary
+                int feedbackRequestNum = llmService.stats().totalRequests() + 1;
+                int totalRequestsEstimate = feedbackRequestNum;
+
+                feedback = feedbackService.generate(
+                    failureHighlights,
+                    testHistories,
+                    semanticLog,
+                    testCategories,
+                    assignmentName,
+                    feedbackRequestNum,
+                    totalRequestsEstimate
+                );
+
+                System.out.println("Generated feedback for " + feedback.size() + " highlighted tests");
+            } catch (LlmException e) {
+                warnings.add("Feedback generation failed: " + e.getMessage());
+            }
+        }
+
+        // 10. Build output
         FrontendOutput output = new FrontendOutput(
             context,
             episodes,
             episodeTestData,
-            Collections.emptyList(), // Empty feedback for MVP
+            feedback,
             testHistories,
             failureHighlights,
             codeSnapshots.isEmpty() ? null : codeSnapshots,
