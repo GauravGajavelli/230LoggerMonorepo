@@ -1,5 +1,9 @@
 package edu.rosehulman.csse230feedback.domain;
 
+import edu.rosehulman.csse230feedback.llm.LlmConfig;
+import edu.rosehulman.csse230feedback.llm.LlmException;
+import edu.rosehulman.csse230feedback.llm.LlmService;
+import edu.rosehulman.csse230feedback.llm.PromptLoader;
 import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
 import edu.rosehulman.csse230feedback.model.IngestionManifest;
@@ -63,6 +67,45 @@ public class PrepareService {
         if (Files.exists(diffCategoriesPath)) {
             diffCategories = Json.mapper().readValue(diffCategoriesPath.toFile(), DiffCategoryMapping.class);
             System.out.println("Loaded diff categories from diff_categories.json");
+        }
+
+        // 4b. Load patches (code diffs) if available
+        Map<Integer, String> patchesByRun = PatchLoader.loadPatches(opts.inputDir());
+        if (!patchesByRun.isEmpty()) {
+            System.out.println("Loaded " + patchesByRun.size() + " code patches from patches_index.jsonl");
+        }
+
+        // 4a. Initialize LLM service (if LLM options are present)
+        LlmService llmService = null;
+        try {
+            // Load .env from Pipeline root (sibling to cache/)
+            Path cacheParent = opts.resolvedCacheDir().getParent();
+            Path dotEnvPath;
+            if (cacheParent != null && cacheParent.getParent() != null) {
+                dotEnvPath = cacheParent.getParent();
+            } else {
+                dotEnvPath = Path.of(".");
+            }
+            Path dotEnv = dotEnvPath.resolve(".env");
+
+            LlmConfig llmConfig = LlmConfig.load(
+                dotEnv,
+                opts.llmProvider(),
+                opts.llmModel(),
+                opts.llmApiKey()
+            );
+
+            llmService = LlmService.create(
+                llmConfig,
+                opts.resolvedCacheDir(),
+                opts.noCache(),
+                opts.clearCache(),
+                opts.dryRun()
+            );
+            System.out.println("LLM service initialized: " + llmConfig);
+        } catch (LlmException e) {
+            // LLM is not required for basic prepare — warn and continue
+            warnings.add("LLM service not available: " + e.getMessage());
         }
 
         // 5. Build RunWithTests list
@@ -150,6 +193,40 @@ public class PrepareService {
             episodeTestData.add(new EpisodeTestData(episodeId, testRuns));
         }
 
+        // 7a. Semantic enrichment (if LLM service available)
+        SemanticLog semanticLog = null;
+        if (llmService != null) {
+            try {
+                PromptLoader promptLoader = new PromptLoader(
+                    opts.inputDir().getParent() != null
+                        ? opts.inputDir().getParent().resolve("prompts")
+                        : Path.of("prompts")
+                );
+                // Also check Pipeline/prompts/ as a fallback
+                if (!java.nio.file.Files.exists(promptLoader.promptsDir())) {
+                    promptLoader = new PromptLoader(Path.of("prompts"));
+                }
+
+                SemanticEnrichmentService enricher = new SemanticEnrichmentService(llmService, promptLoader);
+                SemanticEnrichmentService.SemanticEnrichmentResult semResult = enricher.enrich(
+                    runsWithTests, episodes, opts.assignmentNameOverride(),
+                    diffCategories, patchesByRun.isEmpty() ? null : patchesByRun
+                );
+                semanticLog = semResult.semanticLog();
+
+                // 7b. Attach episode semantics
+                episodes = episodes.stream()
+                    .map(ep -> ep.withSemantics(semResult.episodeSemantics().get(ep.id())))
+                    .toList();
+
+                System.out.println("Semantic enrichment complete: " +
+                    semResult.semanticLog().entries().size() + " run entries, " +
+                    semResult.episodeSemantics().size() + " episode summaries");
+            } catch (LlmException e) {
+                warnings.add("Semantic enrichment failed: " + e.getMessage());
+            }
+        }
+
         // 8. Generate test histories and failure highlights
         List<TestHistory> testHistories = tracker.buildTestHistories(testCategories);
         FailureHighlights failureHighlights = tracker.buildFailureHighlights(testHistories);
@@ -192,14 +269,20 @@ public class PrepareService {
             Collections.emptyList(), // Empty feedback for MVP
             testHistories,
             failureHighlights,
-            codeSnapshots.isEmpty() ? null : codeSnapshots
+            codeSnapshots.isEmpty() ? null : codeSnapshots,
+            semanticLog
         );
 
         // 11. Write output
         Files.createDirectories(opts.outputFile().getParent());
         Json.writeJson(opts.outputFile(), output);
 
-        // 12. Calculate statistics
+        // 12. Finish LLM session (if active)
+        if (llmService != null) {
+            llmService.finish();
+        }
+
+        // 13. Calculate statistics
         int totalTests = (int) testHistories.size();
 
         return new PrepareResult(

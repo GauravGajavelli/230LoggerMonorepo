@@ -30,6 +30,10 @@ public final class Json {
         return MAPPER;
     }
 
+    public static ObjectMapper compactMapper() {
+        return COMPACT_MAPPER;
+    }
+
     public static void writeJson(Path out, Object value) throws IOException {
         Files.createDirectories(out.getParent());
         MAPPER.writeValue(out.toFile(), value);

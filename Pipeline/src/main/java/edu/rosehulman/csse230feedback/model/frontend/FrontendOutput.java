@@ -11,5 +11,14 @@ public record FrontendOutput(
     List<Feedback> feedback,
     List<TestHistory> testHistories,
     FailureHighlights failureHighlights,
-    List<CodeSnapshot> codeSnapshots
-) {}
+    List<CodeSnapshot> codeSnapshots,
+    SemanticLog semanticLog
+) {
+    public FrontendOutput(SubmissionContext context, List<Episode> episodes,
+                          List<EpisodeTestData> episodeTestData, List<Feedback> feedback,
+                          List<TestHistory> testHistories, FailureHighlights failureHighlights,
+                          List<CodeSnapshot> codeSnapshots) {
+        this(context, episodes, episodeTestData, feedback, testHistories,
+             failureHighlights, codeSnapshots, null);
+    }
+}

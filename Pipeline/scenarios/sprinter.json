@@ -1,0 +1,45 @@
+{
+  "id": "sprinter",
+  "name": "The Sprinter",
+  "description": "A fast but sloppy student who makes rapid initial progress, then hits a significant regression before recovering.",
+  "simulation": {
+    "seed": 77,
+    "runs": 15,
+    "difficulty": "medium",
+    "studentId": "sim-sprint-001",
+    "assignment": "BinarySearchTree",
+    "format": "prepare"
+  },
+  "progression": {
+    "breakthroughRun": 8,
+    "regressionRun": 12,
+    "regressionSeverity": 0.5,
+    "reactiveDebugCount": 1,
+    "oscillatingCount": 1,
+    "plateauStartRun": null,
+    "plateauEndRun": null,
+    "finalPhase": null,
+    "phaseSpeedMultiplier": 1.5
+  },
+  "expectations": {
+    "detectedPatterns": {
+      "mustInclude": ["incremental development"],
+      "mustNotInclude": ["compilation struggles"],
+      "mayInclude": ["regression cycles", "rapid implementation"]
+    },
+    "episodeAssessments": {
+      "dominant": "productive",
+      "maxStuckCount": 2,
+      "maxRegressingCount": 3,
+      "minBreakthroughCount": 1,
+      "minProductiveCount": 2
+    },
+    "intents": {
+      "dominant": "extending",
+      "minExtendingRatio": 0.3,
+      "maxDebuggingRatio": 0.5
+    },
+    "narrativeKeywords": ["rapid progress", "regression"],
+    "conceptsCovered": ["insertion", "tree traversal", "node deletion"]
+  }
+}

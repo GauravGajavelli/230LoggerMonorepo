@@ -41,6 +41,29 @@ public class PrepareCommand implements Callable<Integer> {
     @Option(names = {"--no-code"}, description = "Exclude code snapshots from output.")
     private boolean noCode = false;
 
+    // --- LLM options ---
+
+    @Option(names = {"--llm-provider"}, description = "LLM provider: openai, anthropic, google (default: from env or 'openai').")
+    private String llmProvider;
+
+    @Option(names = {"--llm-model"}, description = "LLM model name (default: from env or 'gpt-4o-mini').")
+    private String llmModel;
+
+    @Option(names = {"--llm-api-key"}, description = "LLM API key (overrides env var).")
+    private String llmApiKey;
+
+    @Option(names = {"--no-cache"}, description = "Skip cache reads, still write results for future use.")
+    private boolean noLlmCache = false;
+
+    @Option(names = {"--clear-cache"}, description = "Delete all cached LLM responses before running.")
+    private boolean clearCache = false;
+
+    @Option(names = {"--cache-dir"}, description = "Override LLM cache directory (default: cache/llm/).")
+    private Path cacheDir;
+
+    @Option(names = {"--dry-run"}, description = "Build prompts and estimate cost, but make no API calls.")
+    private boolean dryRun = false;
+
     @Override
     public Integer call() throws Exception {
         if (!Files.exists(input)) {
@@ -60,7 +83,14 @@ public class PrepareCommand implements Callable<Integer> {
             categoryShiftWindow,
             studentId,
             assignmentName,
-            includeCode && !noCode
+            includeCode && !noCode,
+            llmProvider,
+            llmModel,
+            llmApiKey,
+            noLlmCache,
+            clearCache,
+            cacheDir,
+            dryRun
         );
 
         PrepareService service = new PrepareService();

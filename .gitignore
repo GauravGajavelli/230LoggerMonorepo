@@ -4,3 +4,9 @@ node_modules
 
 .DS_Store
 .class
+
+# Environment and secrets
+.env
+
+# LLM cache
+cache/

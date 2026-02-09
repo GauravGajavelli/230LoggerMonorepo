@@ -1,0 +1,45 @@
+{
+  "id": "steady-learner",
+  "name": "The Steady Learner",
+  "description": "A methodical student who progresses smoothly through all BST concepts without major setbacks.",
+  "simulation": {
+    "seed": 42,
+    "runs": 20,
+    "difficulty": "easy",
+    "studentId": "sim-steady-001",
+    "assignment": "BinarySearchTree",
+    "format": "prepare"
+  },
+  "progression": {
+    "breakthroughRun": 15,
+    "regressionRun": null,
+    "regressionSeverity": 0.0,
+    "reactiveDebugCount": 0,
+    "oscillatingCount": 0,
+    "plateauStartRun": null,
+    "plateauEndRun": null,
+    "finalPhase": null,
+    "phaseSpeedMultiplier": 1.2
+  },
+  "expectations": {
+    "detectedPatterns": {
+      "mustInclude": ["incremental development"],
+      "mustNotInclude": ["compilation struggles"],
+      "mayInclude": ["test-driven progression"]
+    },
+    "episodeAssessments": {
+      "dominant": "productive",
+      "maxStuckCount": 0,
+      "maxRegressingCount": 1,
+      "minBreakthroughCount": 1,
+      "minProductiveCount": 3
+    },
+    "intents": {
+      "dominant": "extending",
+      "minExtendingRatio": 0.4,
+      "maxDebuggingRatio": 0.4
+    },
+    "narrativeKeywords": ["smooth progression", "steady improvement"],
+    "conceptsCovered": ["insertion", "tree traversal", "node deletion"]
+  }
+}

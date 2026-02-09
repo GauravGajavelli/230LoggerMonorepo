@@ -1,0 +1,45 @@
+{
+  "id": "abandoner",
+  "name": "The Abandoner",
+  "description": "A student who makes some progress on basic operations but gives up before tackling deletion and advanced topics.",
+  "simulation": {
+    "seed": 123,
+    "runs": 25,
+    "difficulty": "hard",
+    "studentId": "sim-abandon-001",
+    "assignment": "BinarySearchTree",
+    "format": "prepare"
+  },
+  "progression": {
+    "breakthroughRun": null,
+    "regressionRun": null,
+    "regressionSeverity": 0.0,
+    "reactiveDebugCount": 2,
+    "oscillatingCount": 1,
+    "plateauStartRun": 15,
+    "plateauEndRun": 25,
+    "finalPhase": 3,
+    "phaseSpeedMultiplier": 1.0
+  },
+  "expectations": {
+    "detectedPatterns": {
+      "mustInclude": ["trial-and-error debugging"],
+      "mustNotInclude": ["rapid completion"],
+      "mayInclude": ["incomplete implementation", "stalled progress"]
+    },
+    "episodeAssessments": {
+      "dominant": "stuck",
+      "maxStuckCount": null,
+      "maxRegressingCount": 2,
+      "minBreakthroughCount": 0,
+      "minProductiveCount": 1
+    },
+    "intents": {
+      "dominant": "debugging",
+      "minExtendingRatio": 0.1,
+      "maxDebuggingRatio": 0.8
+    },
+    "narrativeKeywords": ["stalled", "incomplete"],
+    "conceptsCovered": ["insertion"]
+  }
+}

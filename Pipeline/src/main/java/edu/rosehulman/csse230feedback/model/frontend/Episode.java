@@ -8,5 +8,14 @@ public record Episode(
     String startTime,
     String endTime,
     String label,
-    String dominantCategory
-) {}
+    String dominantCategory,
+    EpisodeSemantics semantics
+) {
+    public Episode(String id, String startTime, String endTime, String label, String dominantCategory) {
+        this(id, startTime, endTime, label, dominantCategory, null);
+    }
+
+    public Episode withSemantics(EpisodeSemantics semantics) {
+        return new Episode(id, startTime, endTime, label, dominantCategory, semantics);
+    }
+}

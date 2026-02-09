@@ -1,0 +1,45 @@
+{
+  "id": "struggling-student",
+  "name": "The Struggling Student",
+  "description": "A student who faces persistent difficulties, gets stuck for extended periods, and only achieves a late breakthrough.",
+  "simulation": {
+    "seed": 99,
+    "runs": 40,
+    "difficulty": "hard",
+    "studentId": "sim-struggle-001",
+    "assignment": "BinarySearchTree",
+    "format": "prepare"
+  },
+  "progression": {
+    "breakthroughRun": 30,
+    "regressionRun": 20,
+    "regressionSeverity": 0.3,
+    "reactiveDebugCount": 3,
+    "oscillatingCount": 2,
+    "plateauStartRun": 12,
+    "plateauEndRun": 22,
+    "finalPhase": null,
+    "phaseSpeedMultiplier": 0.8
+  },
+  "expectations": {
+    "detectedPatterns": {
+      "mustInclude": ["trial-and-error debugging"],
+      "mustNotInclude": ["rapid completion"],
+      "mayInclude": ["regression cycles", "compilation struggles"]
+    },
+    "episodeAssessments": {
+      "dominant": "stuck",
+      "maxStuckCount": null,
+      "maxRegressingCount": null,
+      "minBreakthroughCount": 1,
+      "minProductiveCount": 2
+    },
+    "intents": {
+      "dominant": "debugging",
+      "minExtendingRatio": 0.1,
+      "maxDebuggingRatio": 0.8
+    },
+    "narrativeKeywords": ["struggling", "repeated failures", "eventual progress"],
+    "conceptsCovered": ["insertion", "tree traversal"]
+  }
+}
