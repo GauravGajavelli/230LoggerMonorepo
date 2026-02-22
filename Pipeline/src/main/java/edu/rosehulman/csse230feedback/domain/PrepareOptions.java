@@ -17,10 +17,18 @@ public record PrepareOptions(
     boolean noCache,
     boolean clearCache,
     Path cacheDir,
-    boolean dryRun
+    boolean dryRun,
+    Path ingestDir
 ) {
     public long idleThresholdMs() {
         return idleThresholdMinutes * 60 * 1000;
+    }
+
+    /**
+     * Returns ingestDir if set, otherwise falls back to inputDir.
+     */
+    public Path resolvedIngestDir() {
+        return ingestDir != null ? ingestDir : inputDir;
     }
 
     /**
@@ -31,7 +39,7 @@ public record PrepareOptions(
                           String assignmentNameOverride) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, true,
-             null, null, null, false, false, null, false);
+             null, null, null, false, false, null, false, null);
     }
 
     /**
@@ -42,7 +50,7 @@ public record PrepareOptions(
                           String assignmentNameOverride, boolean includeCodeSnapshots) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, includeCodeSnapshots,
-             null, null, null, false, false, null, false);
+             null, null, null, false, false, null, false, null);
     }
 
     /**

@@ -1,0 +1,67 @@
+6;
+INSERT
+0,0
+0,
+2,
+import java.util.Iterator;
+
+CHANGE
+8,10
+1,
+public class BinarySearchTree<T> {
+1,
+public class BinarySearchTree<T extends Comparable<T>> implements Iterable<T> {
+CHANGE
+42,44
+1,
+	
+6,
+
+	@Override
+	public Iterator<T> iterator() {
+		return null;
+	}
+
+CHANGE
+121,128
+2,
+		if (root == NULL_NODE) {
+			root = new Node(i);
+14,
+		this.root = insertHelper(root, i);
+	}
+
+	private Node insertHelper(Node cur, T i) {
+		if (cur == NULL_NODE) {
+			return new Node(i);
+		} else {
+			if (cur.data.equals(i)) {
+				return cur;
+			} else if (cur.data.compareTo(i) > 0) { // greater
+				cur.left = insertHelper(cur.left, i);
+			} else if (cur.data.compareTo(i) < 0) { // lesser
+				cur.right = insertHelper(cur.right, i);
+			}
+CHANGE
+124,143
+1,
+		
+1,
+		return cur;
+INSERT
+127,146
+0,
+13,
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		toStringHelper(s,root);
+		String result = s.toString().substring(0, Math.max(0,s.length() - 2));
+		return "["+result+"]";
+	}
+	private void toStringHelper(StringBuilder s, Node cur) {
+		if (cur == NULL_NODE) return;
+		toStringHelper(s,cur.left);
+		s.append(cur.data.toString()+", ");
+		toStringHelper(s,cur.right);
+	}
+

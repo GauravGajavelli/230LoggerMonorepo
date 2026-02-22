@@ -1,75 +1,75 @@
 # Critical tars (empty/malformed - no data captured)
 
 === allTar-BST ===
-run60.tar
-run02.tar
-run17.tar
-run03.tar
-run15.tar
-run28.tar
-run10.tar
-run04.tar
-run39.tar
-run05.tar
-run11.tar
-run07.tar
-run06.tar
-run37.tar
-run22.tar
-run08.tar
-run34.tar
-run21.tar
-run35.tar
-run31.tar
-run26.tar
-run32.tar
-run33.tar
-run40.tar
-run55.tar
-run41.tar
-run57.tar
-run42.tar
-run56.tar
-run53.tar
-run51.tar
-run50.tar
+run60.tar (NO_ENGAGEMENT: repo=6860800)
+run02.tar (NO_ENGAGEMENT: repo=6860800)
+run17.tar (NO_ENGAGEMENT: repo=6852608)
+run03.tar (NO_ENGAGEMENT: repo=6885376)
+run15.tar (NO_ENGAGEMENT: repo=6848512)
+run28.tar (NO_ENGAGEMENT: repo=6860800)
+run10.tar (NO_ENGAGEMENT: repo=6852608)
+run04.tar (NO_ENGAGEMENT: repo=6852608)
+run39.tar (LOGGER_BUG: repo=6889472)
+run05.tar (NO_ENGAGEMENT: repo=6864896)
+run11.tar (NO_ENGAGEMENT: repo=6856704)
+run07.tar (NO_ENGAGEMENT: repo=6856704)
+run06.tar (NO_ENGAGEMENT: repo=6856704)
+run37.tar (NO_ENGAGEMENT: repo=6860800)
+run22.tar (NO_ENGAGEMENT: repo=6864896)
+run08.tar (NO_ENGAGEMENT: repo=6852608)
+run34.tar (NO_ENGAGEMENT: repo=6885376)
+run21.tar (NO_ENGAGEMENT: repo=6852608)
+run35.tar (NO_ENGAGEMENT: repo=6848512)
+run31.tar (NO_ENGAGEMENT: repo=6852608)
+run26.tar (NO_ENGAGEMENT: repo=6856704)
+run32.tar (NO_ENGAGEMENT: repo=6856704)
+run33.tar (NO_ENGAGEMENT: repo=6864896)
+run40.tar (NO_ENGAGEMENT: repo=6860800)
+run55.tar (NO_ENGAGEMENT: repo=6856704)
+run41.tar (NO_ENGAGEMENT: repo=6848512)
+run57.tar (NO_ENGAGEMENT: repo=6856704)
+run42.tar (NO_ENGAGEMENT: repo=6852608)
+run56.tar (NO_ENGAGEMENT: repo=6877184)
+run53.tar (NO_ENGAGEMENT: repo=6852608)
+run51.tar (NO_ENGAGEMENT: repo=6860800)
+run50.tar (NO_ENGAGEMENT: repo=6848512)
 
 === allTar-StringHashSet ===
-run02.tar
-run16.tar
-run03.tar
-run15.tar
-run28.tar
-run04.tar
-run39.tar
-run11.tar
-run07.tar
-run13.tar
-run06.tar
-run37.tar
-run22.tar
-run08.tar
-run34.tar
-run20.tar
-run21.tar
-run09.tar
-run25.tar
-run19.tar
-run18.tar
-run30.tar
-run26.tar
-run32.tar
-run33.tar
-run27.tar
-run40.tar
-run55.tar
-run41.tar
-run43.tar
-run42.tar
-run56.tar
-run53.tar
-run45.tar
-run51.tar
-run50.tar
+run02.tar (NO_ENGAGEMENT: repo=6823936)
+run16.tar (NO_ENGAGEMENT: repo=6823936)
+run03.tar (NO_ENGAGEMENT: repo=6836224)
+run15.tar (NO_ENGAGEMENT: repo=6823936)
+run28.tar (NO_ENGAGEMENT: repo=6823936)
+run04.tar (NO_ENGAGEMENT: repo=6828032)
+run39.tar (NO_ENGAGEMENT: repo=6823936)
+run11.tar (NO_ENGAGEMENT: repo=6823936)
+run07.tar (NO_ENGAGEMENT: repo=6823936)
+run13.tar (NO_ENGAGEMENT: repo=6828032)
+run06.tar (NO_ENGAGEMENT: repo=6828032)
+run37.tar (NO_ENGAGEMENT: repo=6828032)
+run22.tar (NO_ENGAGEMENT: repo=6823936)
+run08.tar (NO_ENGAGEMENT: repo=6828032)
+run34.tar (NO_ENGAGEMENT: repo=6848512)
+run20.tar (NO_ENGAGEMENT: repo=6823936)
+run21.tar (NO_ENGAGEMENT: repo=6823936)
+run09.tar (NO_ENGAGEMENT: repo=6828032)
+run25.tar (NO_ENGAGEMENT: repo=6823936)
+run19.tar (NO_ENGAGEMENT: repo=6828032)
+run18.tar (NO_ENGAGEMENT: repo=6823936)
+run30.tar (NO_ENGAGEMENT: repo=6823936)
+run26.tar (NO_ENGAGEMENT: repo=6828032)
+run32.tar (NO_ENGAGEMENT: repo=6823936)
+run33.tar (NO_ENGAGEMENT: repo=6823936)
+run27.tar (NO_ENGAGEMENT: repo=6823936)
+run40.tar (NO_ENGAGEMENT: repo=6823936)
+run55.tar (NO_ENGAGEMENT: repo=6823936)
+run41.tar (NO_ENGAGEMENT: repo=6823936)
+run43.tar (NO_ENGAGEMENT: repo=6823936)
+run42.tar (NO_ENGAGEMENT: repo=6828032)
+run56.tar (NO_ENGAGEMENT: repo=6840320)
+run53.tar (NO_ENGAGEMENT: repo=6823936)
+run45.tar (NO_ENGAGEMENT: repo=6823936)
+run51.tar (NO_ENGAGEMENT: repo=6828032)
+run50.tar (NO_ENGAGEMENT: repo=6828032)
 
 === allTar-WarmupStretching ===

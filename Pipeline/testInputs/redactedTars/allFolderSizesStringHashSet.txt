@@ -1,0 +1,59 @@
+Here's an example of the command I ran using Prof boutell's name:
+du -sk stringhashset-202620-mboutell  | awk '{print  $1 * 1024 " bytes \t  run35"}'  >> allFolderSizes.txt
+
+
+You'll notice below there is no 'run35', that's because there was not folder named 'stringhashset-202620-mboutell'
+All the other missing 'run' numbers are for the same reason, no folder with that name.
+
+6860800 bytes 	  run01
+6823936 bytes 	  run02
+6836224 bytes 	  run03
+6828032 bytes 	  run04
+6828032 bytes 	  run06
+6823936 bytes 	  run07
+6828032 bytes 	  run08
+6828032 bytes 	  run09
+6844416 bytes 	  run10
+6823936 bytes 	  run11
+6848512 bytes 	  run12
+6828032 bytes 	  run13
+6823936 bytes 	  run15
+6823936 bytes 	  run16
+6823936 bytes 	  run18
+6828032 bytes 	  run19
+6823936 bytes 	  run20
+6823936 bytes 	  run21
+6823936 bytes 	  run22
+6848512 bytes 	  run24
+6823936 bytes 	  run25
+6828032 bytes 	  run26
+6823936 bytes 	  run27
+6823936 bytes 	  run28
+6848512 bytes 	  run29
+6823936 bytes 	  run30
+6823936 bytes 	  run32
+6823936 bytes 	  run33
+6848512 bytes 	  run34
+6848512 bytes 	  run36
+6828032 bytes 	  run37
+6881280 bytes 	  run38
+6823936 bytes 	  run39
+6823936 bytes 	  run40
+6823936 bytes 	  run41
+6828032 bytes 	  run42
+6823936 bytes 	  run43
+6844416 bytes 	  run44
+6823936 bytes 	  run45
+6848512 bytes 	  run46
+6770688 bytes 	  run47
+6848512 bytes 	  run48
+6901760 bytes 	  run49
+6828032 bytes 	  run50
+6828032 bytes 	  run51
+6848512 bytes 	  run52
+6823936 bytes 	  run53
+6848512 bytes 	  run54
+6823936 bytes 	  run55
+6840320 bytes 	  run56
+6901760 bytes 	  run59
+6856704 bytes 	  run60

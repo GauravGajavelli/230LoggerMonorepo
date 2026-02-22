@@ -1,0 +1,79 @@
+2;
+INSERT
+33,33
+0,
+35,
+
+	@Test
+	public void testPreOrderIteratorConcurrentModificationException() {
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		Iterator<Integer> iter;
+		Iterator<Integer> iter2;
+		b.insert(3);
+		b.insert(4);
+		b.insert(5);
+		b.insert(1);
+		b.insert(0);
+		b.insert(2);
+
+		try {
+			iter = b.preOrderIterator();
+			iter.next();
+			b.insert(99);
+			iter.next();
+			fail("Did not throw ConcurrentModificationException");
+		} catch (Exception e) {
+			if (!(e instanceof ConcurrentModificationException)) {
+				fail("Did not throw ConcurrentModificationException");
+			}
+		}
+
+		try {
+			iter = b.preOrderIterator();
+			iter.next();
+			b.insert(99);
+			iter2 = b.preOrderIterator();
+			iter2.next();
+		} catch (Exception e) {
+			fail("Threw ConcurrentModificationException when it should not have: iterators should be independent of each other.");
+		}
+	}
+DELETE
+35,70
+35,
+//	public void testPreOrderIteratorConcurrentModificationException() {
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		Iterator<Integer> iter;
+//		Iterator<Integer> iter2;
+//		b.insert(3);
+//		b.insert(4);
+//		b.insert(5);
+//		b.insert(1);
+//		b.insert(0);
+//		b.insert(2);
+//
+//		try {
+//			iter = b.preOrderIterator();
+//			iter.next();
+//			b.insert(99);
+//			iter.next();
+//			fail("Did not throw ConcurrentModificationException");
+//		} catch (Exception e) {
+//			if (!(e instanceof ConcurrentModificationException)) {
+//				fail("Did not throw ConcurrentModificationException");
+//			}
+//		}
+//
+//		try {
+//			iter = b.preOrderIterator();
+//			iter.next();
+//			b.insert(99);
+//			iter2 = b.preOrderIterator();
+//			iter2.next();
+//		} catch (Exception e) {
+//			fail("Threw ConcurrentModificationException when it should not have: iterators should be independent of each other.");
+//		}
+//	}
+//
+//	@Test
+0,

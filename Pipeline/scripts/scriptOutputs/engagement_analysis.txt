@@ -1,0 +1,103 @@
+=== Engagement Analysis ===
+Run: Tue Feb 10 01:44:37 EST 2026
+Baseline threshold: 32768 bytes above template size
+
+=== allTar-BST ===
+Baseline (template) size: 6852608 bytes
+
+run60: NO_ENGAGEMENT (repo=6860800, baseline=6852608, diff=8192)
+run02: NO_ENGAGEMENT (repo=6860800, baseline=6852608, diff=8192)
+run17: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run03: NO_ENGAGEMENT (repo=6885376, baseline=6852608, diff=32768)
+run15: NO_ENGAGEMENT (repo=6848512, baseline=6852608, diff=-4096)
+run28: NO_ENGAGEMENT (repo=6860800, baseline=6852608, diff=8192)
+run10: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run04: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run39: LOGGER_BUG (repo=6889472, baseline=6852608, diff=36864)
+run05: NO_ENGAGEMENT (repo=6864896, baseline=6852608, diff=12288)
+run11: NO_ENGAGEMENT (repo=6856704, baseline=6852608, diff=4096)
+run07: NO_ENGAGEMENT (repo=6856704, baseline=6852608, diff=4096)
+run06: NO_ENGAGEMENT (repo=6856704, baseline=6852608, diff=4096)
+run37: NO_ENGAGEMENT (repo=6860800, baseline=6852608, diff=8192)
+run22: NO_ENGAGEMENT (repo=6864896, baseline=6852608, diff=12288)
+run08: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run34: NO_ENGAGEMENT (repo=6885376, baseline=6852608, diff=32768)
+run21: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run35: NO_ENGAGEMENT (repo=6848512, baseline=6852608, diff=-4096)
+run31: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run26: NO_ENGAGEMENT (repo=6856704, baseline=6852608, diff=4096)
+run32: NO_ENGAGEMENT (repo=6856704, baseline=6852608, diff=4096)
+run33: NO_ENGAGEMENT (repo=6864896, baseline=6852608, diff=12288)
+run40: NO_ENGAGEMENT (repo=6860800, baseline=6852608, diff=8192)
+run55: NO_ENGAGEMENT (repo=6856704, baseline=6852608, diff=4096)
+run41: NO_ENGAGEMENT (repo=6848512, baseline=6852608, diff=-4096)
+run57: NO_ENGAGEMENT (repo=6856704, baseline=6852608, diff=4096)
+run42: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run56: NO_ENGAGEMENT (repo=6877184, baseline=6852608, diff=24576)
+run53: NO_ENGAGEMENT (repo=6852608, baseline=6852608, diff=0)
+run51: NO_ENGAGEMENT (repo=6860800, baseline=6852608, diff=8192)
+run50: NO_ENGAGEMENT (repo=6848512, baseline=6852608, diff=-4096)
+
+Summary for allTar-BST:
+  CRITICAL total: 32
+    No engagement: 31 (93.9%)
+    Logger bug:    1 (3.0%)
+
+=== allTar-StringHashSet ===
+Baseline (template) size: 6823936 bytes
+
+run02: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run16: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run03: NO_ENGAGEMENT (repo=6836224, baseline=6823936, diff=12288)
+run15: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run28: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run04: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run39: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run11: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run07: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run13: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run06: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run37: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run22: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run08: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run34: NO_ENGAGEMENT (repo=6848512, baseline=6823936, diff=24576)
+run20: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run21: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run09: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run25: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run19: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run18: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run30: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run26: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run32: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run33: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run27: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run40: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run55: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run41: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run43: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run42: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run56: NO_ENGAGEMENT (repo=6840320, baseline=6823936, diff=16384)
+run53: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run45: NO_ENGAGEMENT (repo=6823936, baseline=6823936, diff=0)
+run51: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+run50: NO_ENGAGEMENT (repo=6828032, baseline=6823936, diff=4096)
+
+Summary for allTar-StringHashSet:
+  CRITICAL total: 36
+    No engagement: 36 (97.2%)
+    Logger bug:    0 (0%)
+
+=== allTar-WarmupStretching ===
+(no repo size data available)
+
+
+
+=== OVERALL ENGAGEMENT ANALYSIS ===
+Total CRITICAL: 68
+  No engagement (likely never ran tests): 67 (98.5%)
+  Logger bug (student wrote code):        1 (1.4%)
+
+Interpretation:
+  - NO_ENGAGEMENT: Repo size within 32768 bytes of template
+  - LOGGER_BUG: Repo size > 32768 bytes above template

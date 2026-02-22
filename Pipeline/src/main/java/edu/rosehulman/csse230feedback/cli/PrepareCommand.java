@@ -64,6 +64,9 @@ public class PrepareCommand implements Callable<Integer> {
     @Option(names = {"--dry-run"}, description = "Build prompts and estimate cost, but make no API calls.")
     private boolean dryRun = false;
 
+    @Option(names = {"--ingest-dir"}, description = "Ingest output directory (contains runs.jsonl, manifest.json, archives/). If not set, reads from --input.")
+    private Path ingestDir;
+
     @Override
     public Integer call() throws Exception {
         if (!Files.exists(input)) {
@@ -74,6 +77,17 @@ public class PrepareCommand implements Callable<Integer> {
         if (!Files.isDirectory(input)) {
             System.err.println("Input must be a directory: " + input);
             return 2;
+        }
+
+        if (ingestDir != null) {
+            if (!Files.exists(ingestDir)) {
+                System.err.println("Ingest directory does not exist: " + ingestDir);
+                return 2;
+            }
+            if (!Files.isDirectory(ingestDir)) {
+                System.err.println("Ingest dir must be a directory: " + ingestDir);
+                return 2;
+            }
         }
 
         PrepareOptions opts = new PrepareOptions(
@@ -90,7 +104,8 @@ public class PrepareCommand implements Callable<Integer> {
             noLlmCache,
             clearCache,
             cacheDir,
-            dryRun
+            dryRun,
+            ingestDir
         );
 
         PrepareService service = new PrepareService();

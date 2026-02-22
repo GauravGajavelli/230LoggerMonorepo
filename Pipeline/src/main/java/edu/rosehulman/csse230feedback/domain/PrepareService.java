@@ -27,8 +27,8 @@ public class PrepareService {
     public PrepareResult prepare(PrepareOptions opts) throws IOException {
         List<String> warnings = new ArrayList<>();
 
-        // 1. Load runs.jsonl
-        Path runsJsonl = opts.inputDir().resolve("runs.jsonl");
+        // 1. Load runs.jsonl (from ingest output)
+        Path runsJsonl = opts.resolvedIngestDir().resolve("runs.jsonl");
         if (!Files.exists(runsJsonl)) {
             throw new IOException("runs.jsonl not found at: " + runsJsonl);
         }
@@ -47,30 +47,30 @@ public class PrepareService {
             throw new IOException("enriched_runs/ directory is empty");
         }
 
-        // 3. Load manifest.json
-        Path manifestPath = opts.inputDir().resolve("manifest.json");
+        // 3. Load manifest.json (from ingest output)
+        Path manifestPath = opts.resolvedIngestDir().resolve("manifest.json");
         IngestionManifest manifest = null;
         if (Files.exists(manifestPath)) {
             manifest = Json.mapper().readValue(manifestPath.toFile(), IngestionManifest.class);
         }
 
-        // 4. Load optional category mappings
-        Path testCategoriesPath = opts.inputDir().resolve("test_categories.json");
+        // 4. Load optional category mappings (from ingest output)
+        Path testCategoriesPath = opts.resolvedIngestDir().resolve("test_categories.json");
         TestCategoryMapping testCategories = null;
         if (Files.exists(testCategoriesPath)) {
             testCategories = Json.mapper().readValue(testCategoriesPath.toFile(), TestCategoryMapping.class);
             System.out.println("Loaded test categories from test_categories.json");
         }
 
-        Path diffCategoriesPath = opts.inputDir().resolve("diff_categories.json");
+        Path diffCategoriesPath = opts.resolvedIngestDir().resolve("diff_categories.json");
         DiffCategoryMapping diffCategories = null;
         if (Files.exists(diffCategoriesPath)) {
             diffCategories = Json.mapper().readValue(diffCategoriesPath.toFile(), DiffCategoryMapping.class);
             System.out.println("Loaded diff categories from diff_categories.json");
         }
 
-        // 4b. Load patches (code diffs) if available
-        Map<Integer, String> patchesByRun = PatchLoader.loadPatches(opts.inputDir());
+        // 4b. Load patches (code diffs) if available (from ingest output)
+        Map<Integer, String> patchesByRun = PatchLoader.loadPatches(opts.resolvedIngestDir());
         if (!patchesByRun.isEmpty()) {
             System.out.println("Loaded " + patchesByRun.size() + " code patches from patches_index.jsonl");
         }
@@ -245,7 +245,7 @@ public class PrepareService {
                 .collect(Collectors.toSet());
 
             CodeSnapshotGenerator snapshotGen = new CodeSnapshotGenerator();
-            codeSnapshots = snapshotGen.generateSnapshots(opts.inputDir(), runNumbers, warnings);
+            codeSnapshots = snapshotGen.generateSnapshots(opts.resolvedIngestDir(), runNumbers, warnings);
         }
 
         // 9. Build submission context

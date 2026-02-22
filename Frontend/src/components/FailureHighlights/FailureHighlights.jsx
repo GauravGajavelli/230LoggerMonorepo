@@ -48,7 +48,7 @@ export function FailureHighlights({
             Summary
           </h3>
           <span className="px-1.5 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded">
-            {MAX_VISIBLE}
+            {totalHighlights}
           </span>
         </div>
         {isCollapsed ? (
