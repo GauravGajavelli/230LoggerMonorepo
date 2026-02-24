@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tar:*)",
+      "Bash(bash Pipeline/scripts/verify_tar.sh --verbose /c/Users/gajavegs/WarmupAndStretchingSpring26/bin/testSupport/run.tar)",
+      "Bash(test:*)",
+      "Bash(bash Pipeline/scripts/verify_tar.sh --verbose /c/Users/gajavegs/WarmupAndStretchingSpring26/src/testSupport/run.tar)",
+      "Bash(echo:*)",
+      "Bash(echo === $proj ===:*)",
+      "Bash(done)",
+      "Bash(python3:*)",
+      "Bash(file:*)",
+      "Bash(ls:*)",
+      "Bash(echo === $d ===:*)",
+      "Bash(python:*)",
+      "Bash(pip install python-docx -q && python -c \"\nimport docx\ndoc = docx.Document\\(r'C:\\\\Users\\\\gajavegs\\\\230LoggerMonorepo\\\\Planning\\\\CSSE 230 Logger Setup Steps v3.docx'\\)\nfor para in doc.paragraphs:\n    if para.text.strip\\(\\):\n        print\\(f'[{para.style.name}] {para.text}'\\)\nfor t_idx, table in enumerate\\(doc.tables\\):\n    print\\(f'--- TABLE {t_idx} ---'\\)\n    for row in table.rows:\n        print\\(' | '.join\\(cell.text.strip\\(\\) for cell in row.cells\\)\\)\n\" 2>&1)",
+      "Bash(printf %s\\\\n:*)",
+      "Bash(bash:*)"
+    ]
+  }
+}

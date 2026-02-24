@@ -1,11 +1,20 @@
-# Spring 2026 Logger Fix: Timing Reset, SpeedTest Removal, and Close Observability
+# Spring 2026 Logger Fix: Complete Overhaul
 
 ## Overview
 
-This document describes the changes applied to the GraphSurfingSpring26 logger to fix the accumulated-timing/strike bug (root cause of 67 WARNING tars from prior assignments), remove the `@SpeedTest` annotation infrastructure, and add timing observability to `close()` and `beforeAll()`.
+This document records all changes applied to the Spring 2026 logger codebase. Changes were applied across three phases:
 
-**Applied to:** `GraphSurfingSpring26/src/testSupport/` and `GraphSurfingSpring26/src/graphs/`
-**Date:** 2026-02-23
+1. **Timing reset + SpeedTest removal + close observability** — initially applied to GraphSurfingSpring26, then propagated to all 6 assignments
+2. **Bug 2 fix (beforeAll() timing strikes on Windows)** — applied to WarmupAndStretchingSpring26, then propagated
+3. **Session I/O migration to LauncherSessionListener** — applied to all 6 assignments
+
+**Applied to:** All 6 Spring 2026 assignments:
+- `GraphSurfingSpring26` — Variant B; SpeedTest removal also applies here
+- `WarmupAndStretchingSpring26` — Variant A (has `BEFORE_ALL_MAX_TIME`, `cachedRepoSize`, `cachedTarTooBig`)
+- `BinaryHeapsSpring26` — Variant B
+- `BinarySearchTreeSpring26` — Variant B
+- `StringHashSetSpring26` — Variant B
+- `WarmupAndStretchingWithCompression` — Variant C (reference; Mac-only validation)
 
 ---
 
@@ -39,74 +48,71 @@ Each run writes 2 indices but only clears 1. By run 2, all 3 indices are true:
 
 Once `tooManyStrikes()` returns true, `setSkipLogging(true)` is a one-way latch with no recovery. The logger is permanently dead.
 
-### The CRITICAL Problem (68 / 166 tars)
+### Bug 2: beforeAll() Timing Strikes on Windows
 
-- 67 of 68: NO_ENGAGEMENT (students never modified code beyond the template)
-- 1 of 68: Genuine LOGGER_BUG (BST run39, empty tar despite code changes -- likely initialization crash before any tar was written, now addressed by `safeExecute()` wrappers)
+**Assignment:** WarmupAndStretchingSpring26 (8 test classes, all with `@ExtendWith`)
+**Symptom:** `skipLogging=true` after run 16; `strikes={1:true,2:true,0:false}`; `beforeAllInitDurationMs=375ms`
+
+Root cause had three components:
+1. `getCurrentTotalElapsedTime()` after `accumulateTime()` double-counts the interval (= old_accumulated + 2×interval), halving the effective threshold to ~250ms
+2. `getRepoFilesSize()` runs inside the timing window on every `beforeAll()` call (8× per run)
+3. Windows HDD + antivirus makes filesystem walks intermittently >250ms
+
+**Sticky loop:** when `tooManyStrikes()` fires in close, `skipLogging=true` is written to the tar. The next run reads it and bails early without writing, staying stuck.
 
 ---
 
 ## Changes Made
 
-### 1. LoggingSingleton.java -- New Methods
-
-Added after `restartTiming()`:
+### 1. LoggingSingleton.java — New Methods (all 6 assignments)
 
 ```java
 static void resetAccumulatedTime() {
     LoggingSingleton.accumulatedTime = 0;
 }
 
-static void setCloseDurationMs(long ms) {
-    ObjectNode node = (ObjectNode) LoggingSingleton.testRunInfo;
-    node.put("closeDurationMs", ms);
-    LoggingSingleton.testRunInfo = (JsonNode) node;
-}
+static void setCloseDurationMs(long ms) { ... }
 
-static void setBeforeAllInitDurationMs(long ms) {
-    ObjectNode node = (ObjectNode) LoggingSingleton.testRunInfo;
-    node.put("beforeAllInitDurationMs", ms);
-    LoggingSingleton.testRunInfo = (JsonNode) node;
-}
+static void setBeforeAllInitDurationMs(long ms) { ... }
 
-static void addCloseTiming(String operation, long ms) {
-    ObjectNode node = (ObjectNode) LoggingSingleton.testRunInfo;
-    ObjectNode timingNode = getOrCreateObjectNode(node, "closeTiming");
-    timingNode.put(operation, ms);
-    LoggingSingleton.testRunInfo = (JsonNode) node;
-}
+static void setBeforeAllTotalDurationMs(long ms) { ... }  // Variant A only
+
+static void addCloseTiming(String operation, long ms) { ... }
 ```
 
-### 2. LoggingExtension.java -- Timing Fix
+### 2. LoggingExtension.java — Timing Fix (all 6 assignments)
 
-**`beforeEach()`:** Replaced the SpeedTest annotation check with:
+**`beforeEach()`:** Added at the top:
 ```java
 LoggingSingleton.resetAccumulatedTime();
 ```
+This resets `accumulatedTime` to 0 before each test. Individual callback overhead (~5-20ms) never approaches the 500ms threshold.
 
-This resets `accumulatedTime` to 0 before each test. Individual callback overhead (~5-20ms) never approaches the 500ms threshold, so no strikes accumulate.
+### 3. LoggingExtension.java — beforeAll() Fix (Variant A — WarmupAndStretchingSpring26)
 
-**`accumulateAndCheckTiming()`:** Simplified to just `accumulateTime()` + `checkTiming()` (removed SpeedTest guard).
+Added to address Bug 2 (Windows timing strikes):
 
-**`checkTiming()`:** Removed early return for SpeedTest.
-
-### 3. LoggingExtension.java -- Close Observability
-
-**`beforeAll()`:** Added initialization timing around the init block:
 ```java
-if (!loggerInitialized) {
-    long initStart = System.nanoTime();
-    // ... existing init code ...
-    loggerInitialized = true;
-    LoggingSingleton.setBeforeAllInitDurationMs(
-            TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - initStart));
-}
+@Override
+public void beforeAll(ExtensionContext ctx) {
+    try {
+        LoggingSingleton.resetAccumulatedTime();        // reset before any timing
+        long beforeAllStart = System.nanoTime();
+        LoggingSingleton.restartTiming();
+        // ...
+        LoggingSingleton.setBeforeAllTotalDurationMs(
+                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - beforeAllStart));
+        accumulateAndCheckTiming(BEFORE_ALL_MAX_TIME);  // was ASYNC_MAX_TIME; 2000ms threshold
 ```
 
-**`close()`:** Added overall and per-operation timing:
+Also added `BEFORE_ALL_MAX_TIME = 2000` and caching for `cachedRepoSize` / `cachedTarTooBig` so filesystem walks only run once per JVM session.
+
+### 4. LoggingExtension.java — doSessionFlush() Observability (all 6 assignments)
+
+**`doSessionFlush()`** (formerly `close()`, then `afterAll()` — see section 5 below):
 - `long closeStart = System.nanoTime()` at the top
-- Switched main operations to `timedSafeExecute()` (unzipAndUntarDiffs, writeDiffs, tarAndZipDiffs, addPriorRebaslinedDiffs, copyErrorLogs)
-- Moved `setCloseDurationMs()` BEFORE `saveTestRunInfo()` so the value appears in the tar
+- Main operations wrapped in `timedSafeExecute()`: unzipAndUntarDiffs, writeDiffs, tarAndZipDiffs, addPriorRebaslinedDiffs, copyErrorLogs
+- `setCloseDurationMs()` called BEFORE `saveTestRunInfo()` so the value appears in the tar
 
 **New method `timedSafeExecute()`:**
 ```java
@@ -114,37 +120,75 @@ private List<String> timedSafeExecute(String operationName, ThrowingRunnable ope
     long opStart = System.nanoTime();
     List<String> errors = safeExecute(operationName, operation);
     long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - opStart);
-    try {
-        LoggingSingleton.addCloseTiming(operationName, durationMs);
-    } catch (Throwable ignored) {}
+    try { LoggingSingleton.addCloseTiming(operationName, durationMs); } catch (Throwable ignored) {}
     return errors;
 }
 ```
 
-### 4. SpeedTest.java -- Deleted
+### 5. Session I/O: LauncherSessionListener Migration (all 6 assignments)
 
-The `@SpeedTest` custom annotation (`@Retention(RUNTIME) @Target(METHOD)`) was deleted entirely. It is no longer needed since timing is now reset per-test unconditionally.
+**Problem with AfterAllCallback:** `afterAll()` ran once per test class (9× for WarmupAndStretchingSpring26), executing the full I/O pipeline each time. On Windows with antivirus, 9× file I/O per session accumulates timing strikes — same class of bug as Bug 2.
 
-### 5. Test Files -- @SpeedTest Annotations Removed
+**Solution:** `LauncherSessionListener.launcherSessionClosed()` fires exactly once after all test classes in a session complete.
+
+**New files (×6 assignments):**
+
+`src/testSupport/LoggingSessionListener.java`:
+```java
+package testSupport;
+import org.junit.platform.launcher.LauncherSession;
+import org.junit.platform.launcher.LauncherSessionListener;
+
+public class LoggingSessionListener implements LauncherSessionListener {
+    @Override
+    public void launcherSessionClosed(LauncherSession session) {
+        LoggingExtension.launcherSessionListenerFired = true;
+        LoggingExtension ext = LoggingExtension.instance;
+        if (ext == null) return;
+        ext.doSessionFlush();
+    }
+}
+```
+
+`src/META-INF/services/org.junit.platform.launcher.LauncherSessionListener`:
+```
+testSupport.LoggingSessionListener
+```
+
+Eclipse copies this to `bin/META-INF/services/` automatically during build. IntelliJ does the same via default resource patterns.
+
+**Changes to `LoggingExtension.java` (all 6):**
+- Removed `AfterAllCallback` import and from `implements` clause
+- Removed `static private boolean diffsInitialized`
+- Added: `static LoggingExtension instance;` and `static boolean launcherSessionListenerFired = false;`
+- After `loggerInitialized = true;`: added `instance = this;`
+- Shutdown hook updated to call `instance.doSessionFlush()` as fallback if `!launcherSessionListenerFired`
+- `afterAll()` removed; replaced by `void doSessionFlush()` with identical body minus the `diffsInitialized` guard (unconditional call)
+- Log messages updated: `"in afterAll"` → `"in launcherSessionClosed"`
+
+**`GraphSurfingSpring26/GraphSurfing.iml`:** Added `junit-platform-launcher-1.14.0.jar` to JUnit5 library (required for IntelliJ users who import via `.iml` directly).
+
+### 6. SpeedTest.java — Deleted (GraphSurfingSpring26 only)
+
+The `@SpeedTest` custom annotation was deleted entirely. Timing is now reset per-test unconditionally.
+
+**Test files with `@SpeedTest` removed:**
 
 | File | Annotations Removed |
 |------|-------------------|
-| `GraphSurfingMilestone1AMTest.java` | 2 (`testSuccessorIteratorIsLazy`, `testPredecessorIteratorIsLazy`) |
-| `GraphSurfingMilestone1ALTest.java` | 2 (`testSuccessorIteratorIsLazy`, `testPredecessorIteratorIsLazy`) |
-| `GraphSurfingMilestone1TestCore.java` | 2 (`helperTestSuccessorIteratorIsLazy`, `helperTestPredecessorIteratorIsLazy`) |
-| `GraphSurfingMilestone2TestCore.java` | 3 (`testWikiSurfingFindPath`, `testWikiSurfingFindChallengePair`, `testWikiSurfingSpeedTest`) |
-
-`import testSupport.SpeedTest;` was also removed from all four files.
+| `GraphSurfingMilestone1AMTest.java` | 2 |
+| `GraphSurfingMilestone1ALTest.java` | 2 |
+| `GraphSurfingMilestone1TestCore.java` | 2 |
+| `GraphSurfingMilestone2TestCore.java` | 3 |
 
 ---
 
 ## New testRunInfo.json Fields
 
-After these changes, `testRunInfo.json` inside `run.tar` will contain:
-
 ```json
 {
   "beforeAllInitDurationMs": 45,
+  "beforeAllTotalDurationMs": 52,
   "closeDurationMs": 230,
   "closeTiming": {
     "unzipAndUntarDiffs": 12,
@@ -156,7 +200,7 @@ After these changes, `testRunInfo.json` inside `run.tar` will contain:
 }
 ```
 
-These fields enable root-cause analysis of any future close-time failures without needing to reproduce the issue. If a tar is malformed or incomplete, `closeTiming` shows exactly which operation was slow or failed.
+`beforeAllTotalDurationMs` is present in Variant A only.
 
 ---
 
@@ -165,39 +209,55 @@ These fields enable root-cause analysis of any future close-time failures withou
 | Before | After |
 |--------|-------|
 | `accumulatedTime` grows across all callbacks in a JVM run | `accumulatedTime` resets to 0 before each test |
-| After ~25 callbacks, cumulative time > 500ms | Per-test callbacks measure ~5-20ms each, never approaching 500ms |
+| After ~25 callbacks, cumulative time > 500ms | Per-test callbacks measure ~5-20ms each |
 | Strikes accumulate, saturate by run 2 | No strikes accumulate |
 | `skipLogging=true` permanently | `skipLogging` remains `false` |
+| I/O pipeline runs N times per session (once per test class) | I/O pipeline runs exactly once via `launcherSessionClosed()` |
 
 ---
 
 ## Validation Checklist
 
-- [ ] Run test suite once -- verify `run.tar` created, `testRunInfo.json` contains `beforeAllInitDurationMs`, `closeDurationMs`, and `closeTiming`
-- [ ] Run test suite 3+ times -- verify `skipLogging` remains `false` and strikes remain empty
-- [ ] Run `verify_tar.sh` -- all 8 structural checks pass
-- [ ] Confirm `prevRunNumber` increments by exactly 1 per full suite execution
-- [ ] Spot-check that `closeTiming` values are reasonable (each operation < 500ms individually)
+- [ ] Build in Eclipse → confirm `bin/META-INF/services/org.junit.platform.launcher.LauncherSessionListener` exists
+- [ ] Delete existing `run.tar`. Run all test classes together (right-click project → Run As → JUnit Test)
+- [ ] Extract `run.tar`, inspect `testRunInfo.json`: all test classes present; `prevRunNumber = 1`; no timing strikes
+- [ ] Run again → `prevRunNumber = 2`; patches folder populated; `closeTiming` values reasonable (each < 500ms)
+- [ ] Run `verify_tar.sh` — all structural checks pass
+- [ ] Run 3+ times — verify `skipLogging` remains `false` and strikes remain empty
+- [ ] Run in IntelliJ to confirm SPI is discovered (no fallback to shutdown hook)
+- [ ] Windows: run 20+ times — verify no strike accumulation in beforeAll
 
 ---
 
 ## Files Modified
 
 ```
-GraphSurfingSpring26/
-  src/testSupport/
-    LoggingSingleton.java        -- Added 4 new methods
-    LoggingExtension.java        -- Timing fix, close observability, removed SpeedTest guards
-    SpeedTest.java               -- DELETED
-  src/graphs/
-    GraphSurfingMilestone1AMTest.java    -- Removed @SpeedTest + import
-    GraphSurfingMilestone1ALTest.java    -- Removed @SpeedTest + import
-    GraphSurfingMilestone1TestCore.java  -- Removed @SpeedTest + import
-    GraphSurfingMilestone2TestCore.java  -- Removed @SpeedTest + import
+All 6 assignments (src/testSupport/):
+    LoggingSingleton.java           — resetAccumulatedTime(), setCloseDurationMs(),
+                                      setBeforeAllInitDurationMs(), addCloseTiming()
+                                      + setBeforeAllTotalDurationMs() (Variant A only)
+    LoggingExtension.java           — timing fix, doSessionFlush() observability,
+                                      LauncherSessionListener migration
+    LoggingSessionListener.java     — NEW: SPI impl (launcherSessionClosed → doSessionFlush)
+
+All 6 assignments (src/META-INF/services/):
+    org.junit.platform.launcher.LauncherSessionListener  — NEW: SPI registration
+
+GraphSurfingSpring26/ (additional):
+    src/testSupport/SpeedTest.java              — DELETED
+    src/graphs/GraphSurfingMilestone1AMTest.java — Removed @SpeedTest + import
+    src/graphs/GraphSurfingMilestone1ALTest.java — Removed @SpeedTest + import
+    src/graphs/GraphSurfingMilestone1TestCore.java — Removed @SpeedTest + import
+    src/graphs/GraphSurfingMilestone2TestCore.java — Removed @SpeedTest + import
+    GraphSurfing.iml                            — Added junit-platform-launcher-1.14.0.jar
 ```
 
 ---
 
 ## Document History
-- Created: 2026-02-23
-- Status: Implementation complete, pending validation
+
+| Date | Change |
+|------|--------|
+| 2026-02-23 | Phase 1: Timing reset fix + SpeedTest removal + close observability applied to GraphSurfingSpring26 |
+| 2026-02-23 | Phase 2: Bug 2 (beforeAll Windows timing) fixed in WarmupAndStretchingSpring26; all fixes propagated to all 6 assignments |
+| 2026-02-23 | Phase 3: Session I/O migrated to LauncherSessionListener; afterAll() replaced by doSessionFlush(); LoggingSessionListener.java + SPI service file created for all 6 assignments |

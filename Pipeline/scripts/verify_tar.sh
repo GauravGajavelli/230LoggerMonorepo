@@ -9,7 +9,7 @@
 #
 # Options:
 #   --verbose, -v       Show extra detail per check
-#   --expect-runs N     Assert prevRunNumber == N (proves close-once-per-run)
+#   --expect-runs N     Assert prevRunNumber == N (proves flush-once-per-run via LauncherSessionListener)
 
 set -euo pipefail
 
@@ -141,7 +141,9 @@ verbose = os.environ.get("VERBOSE", "false") == "true"
 RESERVED_KEYS = {
     "prevRunNumber", "randomSeed", "redactDiffs", "rebaselining",
     "toIgnore", "skipLogging", "strikes", "prevBaselineRunNumber", "runTimes",
-    "schema_version"
+    "schema_version",
+    "beforeAllInitDurationMs", "beforeAllTotalDurationMs",
+    "closeDurationMs", "closeTiming",
 }
 
 REQUIRED_FIELDS = [
