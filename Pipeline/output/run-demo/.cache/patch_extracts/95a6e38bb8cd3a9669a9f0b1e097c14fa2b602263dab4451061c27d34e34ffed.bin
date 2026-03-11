@@ -1,0 +1,52 @@
+3;
+INSERT
+0,0
+0,
+2,
+import java.util.function.BooleanSupplier;
+
+INSERT
+120,122
+0,
+18,
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return this.size() == 0;
+	}
+
+	public boolean containsNonBST(T i) {
+		// TODO Auto-generated method stub
+		return containsNonBSTHelper(i, root);
+	}
+	private boolean containsNonBSTHelper(T i, Node cur) {
+		if (cur == NULL_NODE) {
+			return false;
+		}
+		if (cur.data.equals(i)) {
+			return true;
+		}
+		return containsNonBSTHelper(i, cur.left) || containsNonBSTHelper(i, cur.right);
+	}
+INSERT
+122,142
+0,
+19,
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		this.toStringHelper(root, sb);
+		sb.append("]");
+		return sb.toString();
+	}
+	
+	private void toStringHelper(Node cur, StringBuilder sb) {
+		if (cur == NULL_NODE) {
+			return;
+		}
+		this.toStringHelper(root.left, sb);
+		if (sb.length() == 1) {
+			sb.append(",");
+		}
+		sb.append(root.data.toString());
+		this.toStringHelper(root.right, sb);
+	}

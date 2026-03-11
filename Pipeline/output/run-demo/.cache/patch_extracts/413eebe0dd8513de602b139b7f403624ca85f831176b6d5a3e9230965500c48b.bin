@@ -1,0 +1,63 @@
+1;
+INSERT
+401,401
+0,
+58,
+
+	public boolean remove(T i) {
+		if (i == null) {
+			throw new IllegalArgumentException();
+		}
+		if (this.root == NULL_NODE) {
+			root = new Node(i);
+			return true;
+		}
+		boolean[] b = new boolean[1];
+		b[0] = false;
+		removeHelper(root, i, b);
+		return b[0];
+	}
+	
+	private Node removeHelper(Node cur, T i, boolean[] b) {
+		if (cur == NULL_NODE) {
+			return NULL_NODE;
+		}
+		int comparison = i.compareTo(cur.data);
+		if (comparison == 0) {
+			b[0] = true;
+			// Three cases:
+			if (cur.left != NULL_NODE && cur.right != NULL_NODE) { // cur has 2 children
+				//      1
+				//    2   5
+				//  3  4    6
+				// if you remove 1
+				//     2
+				//   3   4
+				//         5
+				//		     6
+				Node bottom = cur.left;
+				while (bottom.right != NULL_NODE) {
+					bottom = bottom.right;
+				}
+				bottom.right = cur.right;
+				Node toRet = cur.left;
+				cur.left = NULL_NODE;
+				cur.right = NULL_NODE;
+				return toRet;
+			} else if (cur.left != NULL_NODE) { // 1 child
+				return cur.left;
+			} else if (cur.right != NULL_NODE) { // 1 child
+				return cur.right;
+			} else { // no children
+				return NULL_NODE;
+			}
+		} else if (comparison < 0) { // i < cur.data
+			// it belongs left
+			Node newLeft = removeHelper(cur.left, i, b);
+			cur.left = newLeft;
+		} else { // i > cur.data
+			Node newRight = removeHelper(cur.right, i, b);
+			cur.right = newRight;
+		}
+		return cur;
+	}

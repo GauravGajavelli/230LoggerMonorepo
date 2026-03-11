@@ -12,13 +12,28 @@ public record FrontendOutput(
     List<TestHistory> testHistories,
     FailureHighlights failureHighlights,
     List<CodeSnapshot> codeSnapshots,
-    SemanticLog semanticLog
+    SemanticLog semanticLog,
+    List<TimelinePoint> timeline
 ) {
+    /**
+     * Convenience constructor without timeline (backwards compatibility).
+     */
     public FrontendOutput(SubmissionContext context, List<Episode> episodes,
                           List<EpisodeTestData> episodeTestData, List<Feedback> feedback,
                           List<TestHistory> testHistories, FailureHighlights failureHighlights,
                           List<CodeSnapshot> codeSnapshots) {
         this(context, episodes, episodeTestData, feedback, testHistories,
-             failureHighlights, codeSnapshots, null);
+             failureHighlights, codeSnapshots, null, null);
+    }
+
+    /**
+     * Convenience constructor without timeline (for semantic log variant).
+     */
+    public FrontendOutput(SubmissionContext context, List<Episode> episodes,
+                          List<EpisodeTestData> episodeTestData, List<Feedback> feedback,
+                          List<TestHistory> testHistories, FailureHighlights failureHighlights,
+                          List<CodeSnapshot> codeSnapshots, SemanticLog semanticLog) {
+        this(context, episodes, episodeTestData, feedback, testHistories,
+             failureHighlights, codeSnapshots, semanticLog, null);
     }
 }

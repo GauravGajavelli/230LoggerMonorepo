@@ -8,6 +8,7 @@ public record Feedback(
     String testId,
     String pattern,
     String confidence,
-    String explanation,
-    List<String> nextSteps
+    String explanation,   // synthesized prose paragraph (all contributing causes)
+    String suggestion,    // synthesized prose paragraph (primary fix first)
+    List<DiffEntry> diffs // chronologically ordered list of relevant code changes
 ) {}

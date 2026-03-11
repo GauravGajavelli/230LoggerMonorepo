@@ -1,14 +1,23 @@
 package edu.rosehulman.csse230feedback.prepare;
 
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
+import edu.rosehulman.csse230feedback.model.TestStatus;
 import java.util.*;
 
 public class EpisodeSplitter {
 
+    /**
+     * Describes one episode boundary (the span from startRunNumber to endRunNumber).
+     * triggeringTestId is the first test whose status changed, causing the boundary.
+     * For the final episode, all trigger fields are null.
+     */
     public record EpisodeBoundary(
         int startRunNumber,
         int endRunNumber,
-        String splitReason
+        String triggeringTestId,  // test whose status flip ends this episode (null for final)
+        String statusBefore,      // "pass" or "fail"
+        String statusAfter,       // "pass" or "fail"
+        String outcomeType        // "regression" | "fix" | null
     ) {}
 
     public record RunWithTests(
@@ -18,78 +27,100 @@ public class EpisodeSplitter {
         List<EnrichedTestResult> tests
     ) {}
 
-    private final long idleThresholdMs;
-    private final int categoryShiftWindow;
-    private final TestCategoryAnalyzer categoryAnalyzer;
-
+    /**
+     * Constructor kept for backwards compatibility with PrepareService.
+     * The idleThresholdMs and categoryShiftWindow params are no longer used —
+     * the new algorithm splits on test-outcome boundaries only.
+     */
     public EpisodeSplitter(long idleThresholdMs, int categoryShiftWindow) {
-        this.idleThresholdMs = idleThresholdMs;
-        this.categoryShiftWindow = categoryShiftWindow;
-        this.categoryAnalyzer = new TestCategoryAnalyzer();
+        // No-op: new algorithm does not use these parameters
     }
 
+    public EpisodeSplitter() {}
+
+    /**
+     * Splits runs into episodes using test-outcome-boundary detection.
+     * An episode boundary is created whenever any test's SUCCESSFUL/failing status
+     * flips between two consecutive runs.
+     */
     public List<EpisodeBoundary> splitIntoEpisodes(List<RunWithTests> runs) {
         if (runs.isEmpty()) {
             return Collections.emptyList();
         }
 
+        if (runs.size() == 1) {
+            return List.of(new EpisodeBoundary(
+                runs.get(0).runNumber(), runs.get(0).runNumber(),
+                null, null, null, null
+            ));
+        }
+
         List<EpisodeBoundary> episodes = new ArrayList<>();
         int episodeStart = runs.get(0).runNumber();
 
-        String previousCategory = null;
-        Long previousTimestamp = null;
-        int categoryShiftCounter = 0;
+        Map<String, TestStatus> previousStatusMap = buildStatusMap(runs.get(0));
 
-        for (int i = 0; i < runs.size(); i++) {
-            RunWithTests run = runs.get(i);
-            String dominantCategory = categoryAnalyzer.extractDominantCategory(run.tests());
+        for (int i = 1; i < runs.size(); i++) {
+            RunWithTests current = runs.get(i);
+            Map<String, TestStatus> currentStatusMap = buildStatusMap(current);
 
-            boolean shouldSplit = false;
-            String splitReason = null;
+            // Find the first test that flipped status
+            String triggeringTestId = null;
+            String statusBefore = null;
+            String statusAfter = null;
+            String outcomeType = null;
 
-            // Check idle gap trigger
-            if (previousTimestamp != null && run.timestampMs() != null) {
-                long timeSincePrevious = run.timestampMs() - previousTimestamp;
-                if (timeSincePrevious > idleThresholdMs) {
-                    shouldSplit = true;
-                    long minutes = timeSincePrevious / (60 * 1000);
-                    splitReason = String.format("Idle gap: %d minutes", minutes);
+            for (Map.Entry<String, TestStatus> entry : currentStatusMap.entrySet()) {
+                String testId = entry.getKey();
+                TestStatus newStatus = entry.getValue();
+                TestStatus prevStatus = previousStatusMap.get(testId);
+
+                if (prevStatus == null) continue; // newly appeared test
+
+                boolean prevPassing = prevStatus == TestStatus.SUCCESSFUL;
+                boolean newPassing = newStatus == TestStatus.SUCCESSFUL;
+
+                if (prevPassing != newPassing) {
+                    triggeringTestId = testId;
+                    statusBefore = prevPassing ? "pass" : "fail";
+                    statusAfter = newPassing ? "pass" : "fail";
+                    outcomeType = newPassing ? "fix" : "regression";
+                    break; // first flip triggers boundary
                 }
             }
 
-            // Check category shift trigger (with persistence window)
-            if (!shouldSplit && previousCategory != null && !dominantCategory.equals(previousCategory)) {
-                categoryShiftCounter++;
-                if (categoryShiftCounter >= categoryShiftWindow) {
-                    shouldSplit = true;
-                    splitReason = String.format("Category shift: %s → %s", previousCategory, dominantCategory);
-                    categoryShiftCounter = 0;
-                }
-            } else if (previousCategory != null && dominantCategory.equals(previousCategory)) {
-                categoryShiftCounter = 0;
-            }
-
-            // Create new episode if triggered
-            if (shouldSplit && i > 0) {
+            if (triggeringTestId != null) {
                 episodes.add(new EpisodeBoundary(
                     episodeStart,
                     runs.get(i - 1).runNumber(),
-                    splitReason
+                    triggeringTestId,
+                    statusBefore,
+                    statusAfter,
+                    outcomeType
                 ));
-                episodeStart = run.runNumber();
+                episodeStart = current.runNumber();
             }
 
-            previousCategory = dominantCategory;
-            previousTimestamp = run.timestampMs();
+            previousStatusMap = currentStatusMap;
         }
 
-        // Add final episode
+        // Final episode (no triggering test)
         episodes.add(new EpisodeBoundary(
             episodeStart,
             runs.get(runs.size() - 1).runNumber(),
-            null
+            null, null, null, null
         ));
 
         return episodes;
+    }
+
+    private Map<String, TestStatus> buildStatusMap(RunWithTests run) {
+        Map<String, TestStatus> map = new LinkedHashMap<>();
+        for (EnrichedTestResult test : run.tests()) {
+            if (test.testId() != null && test.status() != null) {
+                map.put(test.testId(), test.status());
+            }
+        }
+        return map;
     }
 }

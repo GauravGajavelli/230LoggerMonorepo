@@ -19,10 +19,26 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PrepareService {
+
+    /** Flexible parser that accepts 1–9 fractional second digits. */
+    private static final DateTimeFormatter TS_PARSER =
+        new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd HH:mm:ss")
+            .optionalStart()
+            .appendFraction(ChronoField.NANO_OF_SECOND, 1, 9, true)
+            .optionalEnd()
+            .toFormatter();
+    private static final DateTimeFormatter TIME_FMT =
+        DateTimeFormatter.ofPattern("h:mm a");
 
     public PrepareResult prepare(PrepareOptions opts) throws IOException {
         List<String> warnings = new ArrayList<>();
@@ -73,10 +89,22 @@ public class PrepareService {
             System.out.println("Loaded diff categories from diff_categories.json");
         }
 
-        // 4b. Load patches (code diffs) if available (from ingest output)
+        // 4b. Load patches (code diffs) — try archive-based loader first, fall back to flat files
+        Map<Integer, Map<String, String>> patchesByRunByFile = Collections.emptyMap();
+        try {
+            ArchivePatchExtractor archiveExtractor = new ArchivePatchExtractor();
+            patchesByRunByFile = archiveExtractor.loadPatches(opts.resolvedIngestDir());
+            if (!patchesByRunByFile.isEmpty()) {
+                System.out.println("Loaded archive patches for " + patchesByRunByFile.size() + " runs");
+            }
+        } catch (IOException e) {
+            warnings.add("Archive patch loading failed: " + e.getMessage());
+        }
+
+        // Also keep flat-file patches for SemanticEnrichmentService (uses old Map<Integer,String>)
         Map<Integer, String> patchesByRun = PatchLoader.loadPatches(opts.resolvedIngestDir());
         if (!patchesByRun.isEmpty()) {
-            System.out.println("Loaded " + patchesByRun.size() + " code patches from patches_index.jsonl");
+            System.out.println("Loaded " + patchesByRun.size() + " flat code patches from patches_index.jsonl");
         }
 
         // 4a. Initialize LLM service (if LLM options are present)
@@ -114,6 +142,7 @@ public class PrepareService {
 
         // 5. Build RunWithTests list
         List<EpisodeSplitter.RunWithTests> runsWithTests = new ArrayList<>();
+        Map<Integer, String> runTimestamps = new LinkedHashMap<>();
         for (RunRecord run : runs) {
             List<EnrichedTestResult> enrichedTests = enrichedData.get(run.runNumber());
             if (enrichedTests == null) {
@@ -130,9 +159,12 @@ public class PrepareService {
                 run.timestamp(),
                 enrichedTests
             ));
+            if (run.timestamp() != null) {
+                runTimestamps.put(run.runNumber(), run.timestamp());
+            }
         }
 
-        // 6. Split into episodes
+        // 6. Split into episodes using test-outcome-boundary algorithm
         EpisodeSplitter splitter = new EpisodeSplitter(
             opts.idleThresholdMs(),
             opts.categoryShiftWindow()
@@ -146,6 +178,7 @@ public class PrepareService {
 
         // Make testCategories effectively final for use in lambda
         final TestCategoryMapping finalTestCategories = testCategories;
+        final Map<Integer, Map<String, String>> finalPatchesByRunByFile = patchesByRunByFile;
 
         List<Episode> episodes = new ArrayList<>();
         List<EpisodeTestData> episodeTestData = new ArrayList<>();
@@ -179,7 +212,28 @@ public class PrepareService {
             String endTime = episodeRuns.get(episodeRuns.size() - 1).timestamp();
             String label = "Episode " + (i + 1);
 
-            episodes.add(new Episode(episodeId, startTime, endTime, label, dominantCategory));
+            // New fields: timeRange, edits, area, outcome, outcomeType, linkedTestId
+            String timeRange = formatTimeRange(startTime, endTime);
+
+            int edits = (int) episodeRuns.stream()
+                .filter(r -> finalPatchesByRunByFile.containsKey(r.runNumber()))
+                .count();
+
+            String area = deriveArea(episodeRuns, finalPatchesByRunByFile);
+
+            String outcome = null;
+            String outcomeType = boundary.outcomeType();
+            String linkedTestId = boundary.triggeringTestId();
+            if (linkedTestId != null && boundary.statusBefore() != null && boundary.statusAfter() != null) {
+                String shortName = shortTestName(linkedTestId);
+                String fromStatus = "pass".equals(boundary.statusBefore()) ? "passing" : "failing";
+                String toStatus = "pass".equals(boundary.statusAfter()) ? "passing" : "failing";
+                outcome = shortName + " went from " + fromStatus + " to " + toStatus;
+            }
+
+            Episode episode = new Episode(episodeId, startTime, endTime, label, dominantCategory)
+                .withDetails(timeRange, edits, area, outcome, outcomeType, linkedTestId);
+            episodes.add(episode);
 
             // Transform runs
             List<TestRun> testRuns = new ArrayList<>();
@@ -244,6 +298,11 @@ public class PrepareService {
             codeSnapshots = snapshotGen.generateSnapshots(opts.resolvedIngestDir(), runNumbers, warnings);
         }
 
+        // 8c. Generate timeline data
+        TimelineGenerator timelineGen = new TimelineGenerator();
+        List<TimelinePoint> timeline = timelineGen.generate(runsWithTests);
+        System.out.println("Generated " + timeline.size() + " timeline points");
+
         // 9. Build submission context
         String studentId = opts.studentIdOverride();
         String assignmentName = opts.assignmentNameOverride();
@@ -268,7 +327,6 @@ public class PrepareService {
                     llmService, feedbackPromptLoader
                 );
 
-                // Request number after semantic enrichment batches + episode summary
                 int feedbackRequestNum = llmService.stats().totalRequests() + 1;
                 int totalRequestsEstimate = feedbackRequestNum;
 
@@ -278,6 +336,7 @@ public class PrepareService {
                     semanticLog,
                     testCategories,
                     assignmentName,
+                    patchesByRunByFile,
                     feedbackRequestNum,
                     totalRequestsEstimate
                 );
@@ -297,12 +356,16 @@ public class PrepareService {
             testHistories,
             failureHighlights,
             codeSnapshots.isEmpty() ? null : codeSnapshots,
-            semanticLog
+            semanticLog,
+            timeline.isEmpty() ? null : timeline
         );
 
         // 11. Write output
         Files.createDirectories(opts.outputFile().getParent());
         Json.writeJson(opts.outputFile(), output);
+
+        // 11a. Print validation summary
+        printValidationSummary(episodes, timeline, feedback, testHistories);
 
         // 12. Finish LLM session (if active)
         if (llmService != null) {
@@ -321,14 +384,112 @@ public class PrepareService {
     }
 
     /**
-     * Resolves the prompt loader by trying multiple candidate directories in priority order:
-     * 1. Sibling "prompts/" next to the input dir's parent
-     * 2. Pipeline/prompts/ (relative to cwd)
-     * 3. ./prompts/ (relative to cwd)
+     * Prints a validation summary to stdout for quick verification.
+     */
+    private void printValidationSummary(List<Episode> episodes, List<TimelinePoint> timeline,
+                                         List<Feedback> feedback, List<TestHistory> testHistories) {
+        System.out.println("\n=== VALIDATION SUMMARY ===");
+        System.out.println("Episodes (" + episodes.size() + "):");
+        for (Episode ep : episodes) {
+            System.out.printf("  %s | %s | edits=%d | area=%s | outcome=%s | type=%s%n",
+                ep.id(), ep.timeRange() != null ? ep.timeRange() : "(no timeRange)",
+                ep.edits(), ep.area() != null ? ep.area() : "(none)",
+                ep.outcome() != null ? ep.outcome() : "(final)",
+                ep.outcomeType() != null ? ep.outcomeType() : "null");
+        }
+
+        System.out.println("\nTimeline (" + timeline.size() + " points, first 5):");
+        timeline.stream().limit(5).forEach(pt ->
+            System.out.printf("  %s | passing=%d failing=%d | event=%s%n",
+                pt.time(), pt.passing(), pt.failing(),
+                pt.event() != null ? pt.event() : "-"));
+
+        System.out.println("\nFeedback (" + feedback.size() + " items):");
+        feedback.stream().limit(2).forEach(fb -> {
+            System.out.printf("  %s | pattern=%s | diffs=%d%n",
+                fb.testId(), fb.pattern(),
+                fb.diffs() != null ? fb.diffs().size() : 0);
+            if (fb.explanation() != null) {
+                String exp = fb.explanation();
+                System.out.println("    explanation: " + exp.substring(0, Math.min(120, exp.length())) + "...");
+            }
+            if (fb.suggestion() != null) {
+                String sug = fb.suggestion();
+                System.out.println("    suggestion: " + sug.substring(0, Math.min(120, sug.length())) + "...");
+            }
+        });
+        System.out.println("==========================\n");
+    }
+
+    /**
+     * Formats a time range from two timestamp strings.
+     * Input: "2026-03-07 23:40:34.663" → Output: "11:40 PM – 11:52 PM"
+     */
+    private String formatTimeRange(String startTimestamp, String endTimestamp) {
+        String startFormatted = formatTime(startTimestamp);
+        String endFormatted = formatTime(endTimestamp);
+        if (startFormatted == null || endFormatted == null) return null;
+        return startFormatted + " \u2013 " + endFormatted;
+    }
+
+    private String formatTime(String timestamp) {
+        if (timestamp == null) return null;
+        try {
+            LocalDateTime dt = LocalDateTime.parse(timestamp, TS_PARSER);
+            return dt.format(TIME_FMT);
+        } catch (DateTimeParseException e) {
+            return timestamp;
+        }
+    }
+
+    /**
+     * Derives the area (implementation file name) from patches in this episode's runs.
+     * Prefers non-test files; falls back to any file.
+     */
+    private String deriveArea(List<EpisodeSplitter.RunWithTests> episodeRuns,
+                               Map<Integer, Map<String, String>> patchesByRunByFile) {
+        for (EpisodeSplitter.RunWithTests run : episodeRuns) {
+            Map<String, String> runPatches = patchesByRunByFile.get(run.runNumber());
+            if (runPatches == null) continue;
+            for (String fileKey : runPatches.keySet()) {
+                if (!fileKey.contains("Testing") && !fileKey.contains("Test.java")) {
+                    return extractFileName(fileKey);
+                }
+            }
+        }
+        // Fall back to any file
+        for (EpisodeSplitter.RunWithTests run : episodeRuns) {
+            Map<String, String> runPatches = patchesByRunByFile.get(run.runNumber());
+            if (runPatches != null && !runPatches.isEmpty()) {
+                return extractFileName(runPatches.keySet().iterator().next());
+            }
+        }
+        return null;
+    }
+
+    /** Extracts filename from fileKey like "BinarySearchTree.java.BinarySearchTree". */
+    private String extractFileName(String fileKey) {
+        int dotJava = fileKey.indexOf(".java");
+        if (dotJava >= 0) return fileKey.substring(0, dotJava + 5);
+        return fileKey;
+    }
+
+    /** Extracts the method name from a full testId like "ClassName#methodName()". */
+    private String shortTestName(String testId) {
+        int hash = testId.indexOf('#');
+        if (hash >= 0) {
+            String method = testId.substring(hash + 1);
+            if (method.endsWith("()")) method = method.substring(0, method.length() - 2);
+            return method;
+        }
+        return testId;
+    }
+
+    /**
+     * Resolves the prompt loader by trying multiple candidate directories in priority order.
      */
     private PromptLoader resolvePromptLoader(Path inputDir) {
         List<Path> candidates = new ArrayList<>();
-        // e.g. Pipeline/output/run-demo -> Pipeline/output/../prompts -> Pipeline/prompts
         if (inputDir.getParent() != null) {
             candidates.add(inputDir.getParent().resolve("prompts"));
         }
@@ -401,7 +562,6 @@ public class PrepareService {
 
     private String findDominantCategoryFromMapping(List<EnrichedTestResult> tests,
                                                     TestCategoryMapping mapping) {
-        // Flatten all categories from all tests (a test can have multiple)
         Map<String, Long> categoryCounts = tests.stream()
             .flatMap(t -> mapping.getCategoriesForTest(t.testId()).stream())
             .collect(Collectors.groupingBy(c -> c, Collectors.counting()));
@@ -421,13 +581,10 @@ public class PrepareService {
             TestCategoryMapping testCategories,
             DiffCategoryMapping diffCategories) {
 
-        // Build error evolutions from tracker data
         ErrorEvolutionTracker errorTracker = new ErrorEvolutionTracker();
         Map<String, Map<Integer, String[]>> errorHistory = tracker.getErrorHistory();
         Map<String, Map<Integer, String>> statusHistory = tracker.getStatusHistory();
 
-        // Populate error tracker from recorded data
-        // errorInfo array: [0]=exceptionType, [1]=message, [2]=stackTrace
         for (Map.Entry<String, Map<Integer, String[]>> entry : errorHistory.entrySet()) {
             String testId = entry.getKey();
             Map<Integer, String> statuses = statusHistory.get(testId);
@@ -437,7 +594,6 @@ public class PrepareService {
                 String status = statuses != null ? statuses.get(run) : "fail";
                 errorTracker.recordError(testId, run, status, errorInfo[0], errorInfo[1], errorInfo[2]);
             }
-            // Also record the final status
             if (statuses != null && !statuses.isEmpty()) {
                 int lastRun = Collections.max(statuses.keySet());
                 String lastStatus = statuses.get(lastRun);
@@ -447,12 +603,10 @@ public class PrepareService {
 
         Map<String, ErrorEvolution> evolutions = errorTracker.buildAllEvolutions();
 
-        // Compute cross-test correlations
         CrossTestCorrelator correlator = new CrossTestCorrelator();
         Map<String, List<StruggleProfile.TestCorrelation>> correlations =
             correlator.computeCorrelations(statusHistory, tracker.getTestNames(), testCategories);
 
-        // Generate struggle profiles
         StruggleProfileGenerator profileGen = new StruggleProfileGenerator();
 
         List<TestHistory> enhanced = new ArrayList<>();
@@ -472,7 +626,6 @@ public class PrepareService {
                 history.meaningfulnessScore()
             );
 
-            // Add the enhanced data to the history
             enhanced.add(history.withStruggleData(evolution, profile));
         }
 

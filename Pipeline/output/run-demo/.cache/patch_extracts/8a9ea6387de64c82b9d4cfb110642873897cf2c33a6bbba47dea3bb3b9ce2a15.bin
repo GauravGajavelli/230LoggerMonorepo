@@ -1,0 +1,75 @@
+6;
+CHANGE
+14,14
+1,
+public class BinarySearchTree<T> {
+1,
+public class BinarySearchTree<T extends Comparable<T>> {
+CHANGE
+319,319
+1,
+			 		flags.push(1);
+1,
+			 		flags.push(2);
+INSERT
+323,323
+0,
+11,
+			 	Node cur1 = stack.pop();
+				int flag1 = flags.pop();
+				if (cur1.right != NULL_NODE) { // only revisit if there's something to
+					if (cur == cur1) { // we shouldn't add this frame back as a 2; it's already being returned right here
+						stack.push(cur1.right);
+						flags.push(1);
+					} else {
+						stack.push(cur1);
+						flags.push(2);
+					}
+				}
+DELETE
+329,340
+1,
+		 		return cur.data;
+0,
+CHANGE
+331,341
+1,
+		 	return null;
+1,
+	 		return cur.data;
+INSERT
+335,345
+0,
+32,
+
+	// Ez, just do a comparison; if equal, return false
+	// If we find its spot
+	public boolean insert(T i) {
+		if (this.root == NULL_NODE) {
+			root = new Node(i);
+			return true;
+		}
+		boolean[] b = new boolean[1];
+		b[0] = false;
+		insertHelper(root, i, b);
+		return b[0];
+	}
+
+	private Node insertHelper(Node cur, T i, boolean[] b) {
+		if (cur == NULL_NODE) {
+			b[0] = true;
+			return new Node(i);
+		}
+		int comparison = i.compareTo(cur.data);
+		if (comparison == 0) {
+			return cur;
+		} else if (comparison < 0) { // i < cur.data
+			// it belongs left
+			Node newLeft = insertHelper(cur.left, i, b);
+			cur.left = newLeft;
+		} else { // i > cur.data
+			Node newRight = insertHelper(cur.right, i, b);
+			cur.right = newRight;
+		}
+		return cur;
+	}

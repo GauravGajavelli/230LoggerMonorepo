@@ -1,0 +1,33 @@
+4;
+DELETE
+406,406
+4,
+		if (this.root == NULL_NODE) {
+			root = new Node(i);
+			return true;
+		}
+0,
+CHANGE
+412,408
+1,
+		removeHelper(root, i, b);
+1,
+		root = removeHelper(root, i, b);
+CHANGE
+433,429
+3,
+				Node bottom = cur.left;
+				while (bottom.right != NULL_NODE) {
+					bottom = bottom.right;
+3,
+				Node bottom = cur.right;
+				while (bottom.left != NULL_NODE) {
+					bottom = bottom.left;
+CHANGE
+437,433
+2,
+				bottom.right = cur.right;
+				Node toRet = cur.left;
+2,
+				bottom.left = cur.left;
+				Node toRet = cur.right;

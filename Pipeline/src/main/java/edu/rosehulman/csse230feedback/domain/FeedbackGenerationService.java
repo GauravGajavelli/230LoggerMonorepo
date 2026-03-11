@@ -17,7 +17,7 @@ import java.util.*;
 
 /**
  * Generates natural-language feedback for highlighted (struggling) tests
- * using an LLM call with rich structured context.
+ * using an LLM call with rich structured context, including code diffs.
  */
 public class FeedbackGenerationService {
 
@@ -37,6 +37,7 @@ public class FeedbackGenerationService {
      * @param semanticLog semantic enrichment data (nullable)
      * @param testCategories test category mapping (nullable)
      * @param assignmentName assignment name for prompt context
+     * @param patchesByRunByFile runNumber → (fileKey → patchText) for code diff context
      * @param requestNumber current request number for LLM progress tracking
      * @param totalRequests total expected requests
      * @return list of Feedback records, one per highlighted test
@@ -47,6 +48,7 @@ public class FeedbackGenerationService {
             SemanticLog semanticLog,
             TestCategoryMapping testCategories,
             String assignmentName,
+            Map<Integer, Map<String, String>> patchesByRunByFile,
             int requestNumber,
             int totalRequests) throws LlmException, IOException {
 
@@ -72,8 +74,13 @@ public class FeedbackGenerationService {
             historyMap.put(th.testId(), th);
         }
 
+        // Build diffs per test (from patches)
+        Map<String, List<DiffEntry>> diffsPerTest = buildDiffsPerTest(
+            highlightedIds, historyMap, patchesByRunByFile, testHistories
+        );
+
         // Build input JSON with context per highlighted test
-        String inputData = buildInputJson(highlightedIds, historyMap, semanticLog, testCategories);
+        String inputData = buildInputJson(highlightedIds, historyMap, semanticLog, testCategories, diffsPerTest);
 
         // Build narrative context from semantic log
         String narrativeContext = "(no narrative context available)";
@@ -106,14 +113,192 @@ public class FeedbackGenerationService {
         );
 
         // Parse response into Feedback records
-        return parseFeedbackResponse(response.content());
+        List<Feedback> feedbackList = parseFeedbackResponse(response.content());
+
+        // Attach pre-built diffs to each Feedback item
+        return feedbackList.stream()
+            .map(fb -> {
+                List<DiffEntry> diffs = diffsPerTest.get(fb.testId());
+                if (diffs != null && !diffs.isEmpty()) {
+                    return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
+                                       fb.explanation(), fb.suggestion(), diffs);
+                }
+                return fb;
+            })
+            .toList();
+    }
+
+    /**
+     * Backwards-compatible overload without patchesByRunByFile.
+     */
+    public List<Feedback> generate(
+            FailureHighlights failureHighlights,
+            List<TestHistory> testHistories,
+            SemanticLog semanticLog,
+            TestCategoryMapping testCategories,
+            String assignmentName,
+            int requestNumber,
+            int totalRequests) throws LlmException, IOException {
+        return generate(failureHighlights, testHistories, semanticLog, testCategories,
+                        assignmentName, Collections.emptyMap(), requestNumber, totalRequests);
+    }
+
+    /**
+     * Builds DiffEntry objects per test by parsing the custom patch format
+     * for runs where each test's status changed.
+     */
+    private Map<String, List<DiffEntry>> buildDiffsPerTest(
+            Set<String> highlightedIds,
+            Map<String, TestHistory> historyMap,
+            Map<Integer, Map<String, String>> patchesByRunByFile,
+            List<TestHistory> allHistories) {
+
+        Map<String, List<DiffEntry>> result = new LinkedHashMap<>();
+        if (patchesByRunByFile == null || patchesByRunByFile.isEmpty()) return result;
+
+        // Build a map of runNumber → timestamp from all histories
+        // (we can derive timestamps from the run numbers if we have RunRecord data)
+        // Since we don't have timestamps here, we'll derive labels from run numbers
+        Map<Integer, String> runTimestamps = new LinkedHashMap<>();
+
+        for (String testId : highlightedIds) {
+            TestHistory th = historyMap.get(testId);
+            if (th == null || th.statusByRun() == null) continue;
+
+            // Find runs where this test's status changed
+            Map<Integer, String> statusByRun = th.statusByRun();
+            List<Integer> sortedRuns = new ArrayList<>(statusByRun.keySet());
+            Collections.sort(sortedRuns);
+
+            List<DiffEntry> diffs = new ArrayList<>();
+            String prevStatus = null;
+
+            for (int runNumber : sortedRuns) {
+                String currentStatus = statusByRun.get(runNumber);
+
+                if (prevStatus != null && !prevStatus.equals(currentStatus)) {
+                    // Status changed at this run — look for implementation patches
+                    Map<String, String> runPatches = patchesByRunByFile.get(runNumber);
+                    if (runPatches != null) {
+                        for (Map.Entry<String, String> patchEntry : runPatches.entrySet()) {
+                            String fileKey = patchEntry.getKey();
+                            // Only include implementation files, not test files
+                            if (!isTestFile(fileKey)) {
+                                String patchText = patchEntry.getValue();
+                                String fileName = extractFileName(fileKey);
+                                String label = "Run " + runNumber + " — " + fileName;
+                                DiffEntry entry = parsePatchToDiffEntry(label, patchText);
+                                if (entry != null) {
+                                    diffs.add(entry);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                prevStatus = currentStatus;
+            }
+
+            if (!diffs.isEmpty()) {
+                result.put(testId, diffs);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns true if the fileKey belongs to a test file (not the implementation).
+     */
+    private boolean isTestFile(String fileKey) {
+        return fileKey.contains("Testing") || fileKey.contains("Test.java");
+    }
+
+    /**
+     * Extracts the filename from a fileKey like "BinarySearchTree.java.BinarySearchTree".
+     */
+    private String extractFileName(String fileKey) {
+        int dotJava = fileKey.indexOf(".java");
+        if (dotJava >= 0) {
+            return fileKey.substring(0, dotJava + 5); // include ".java"
+        }
+        return fileKey;
+    }
+
+    /**
+     * Parses the custom DiffReplayer patch format into a DiffEntry.
+     * Format: N; (delta count), then for each delta: TYPE, srcPos,tgtPos,
+     * srcCount, src lines, tgtCount, tgt lines.
+     *
+     * Returns null if the patch is empty, "File created!", or "File too large!".
+     */
+    private DiffEntry parsePatchToDiffEntry(String label, String patchText) {
+        if (patchText == null || patchText.trim().isEmpty()) return null;
+
+        String[] lines = patchText.split("\n", -1);
+        if (lines.length == 0) return null;
+
+        String firstLine = lines[0].trim();
+        if ("File created!".equals(firstLine) || "File too large!".equals(firstLine)) {
+            return null;
+        }
+
+        List<String> before = new ArrayList<>();
+        List<String> after = new ArrayList<>();
+
+        try {
+            // Parse delta count from "N;" header
+            String header = firstLine.endsWith(";")
+                ? firstLine.substring(0, firstLine.length() - 1) : firstLine;
+            int numDeltas = Integer.parseInt(header);
+            if (numDeltas == 0) return null;
+
+            int idx = 1;
+            for (int d = 0; d < numDeltas && idx < lines.length; d++) {
+                // Type line: INSERT, DELETE, or CHANGE
+                String typeLine = lines[idx++].trim();
+
+                // Positions line: "srcPos,tgtPos"
+                if (idx >= lines.length) break;
+                idx++; // skip positions line
+
+                // Source lines
+                if (idx >= lines.length) break;
+                String srcCountLine = lines[idx++].trim().replace(",", "");
+                int srcCount = Integer.parseInt(srcCountLine.split(",")[0]);
+                for (int j = 0; j < srcCount && idx < lines.length; j++) {
+                    if ("DELETE".equals(typeLine) || "CHANGE".equals(typeLine)) {
+                        before.add(lines[idx]);
+                    }
+                    idx++;
+                }
+
+                // Target lines
+                if (idx >= lines.length) break;
+                String tgtCountLine = lines[idx++].trim().replace(",", "");
+                int tgtCount = Integer.parseInt(tgtCountLine.split(",")[0]);
+                for (int j = 0; j < tgtCount && idx < lines.length; j++) {
+                    if ("INSERT".equals(typeLine) || "CHANGE".equals(typeLine)) {
+                        after.add(lines[idx]);
+                    }
+                    idx++;
+                }
+            }
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            // Malformed patch — skip
+            return null;
+        }
+
+        if (before.isEmpty() && after.isEmpty()) return null;
+        return new DiffEntry(label, before.isEmpty() ? null : before, after.isEmpty() ? null : after);
     }
 
     private String buildInputJson(
             Set<String> highlightedIds,
             Map<String, TestHistory> historyMap,
             SemanticLog semanticLog,
-            TestCategoryMapping testCategories) throws IOException {
+            TestCategoryMapping testCategories,
+            Map<String, List<DiffEntry>> diffsPerTest) throws IOException {
 
         // Build a map of run -> semantic entry for quick lookup
         Map<Integer, SemanticRunEntry> semanticByRun = new LinkedHashMap<>();
@@ -193,12 +378,27 @@ public class FeedbackGenerationService {
                                 hint.put("description", desc);
                             }
                             semanticHints.add(hint);
-                            if (++count >= 5) break; // Limit to avoid token bloat
+                            if (++count >= 5) break;
                         }
                     }
                 }
                 if (semanticHints.isEmpty()) {
                     testNode.remove("semanticContext");
+                }
+            }
+
+            // Code diffs summary (run numbers only, to avoid token bloat)
+            List<DiffEntry> diffs = diffsPerTest.get(testId);
+            if (diffs != null && !diffs.isEmpty()) {
+                ArrayNode diffsNode = testNode.putArray("codeDiffs");
+                for (DiffEntry diff : diffs) {
+                    ObjectNode diffNode = Json.mapper().createObjectNode();
+                    diffNode.put("label", diff.label());
+                    int beforeCount = diff.before() != null ? diff.before().size() : 0;
+                    int afterCount = diff.after() != null ? diff.after().size() : 0;
+                    diffNode.put("removedLines", beforeCount);
+                    diffNode.put("addedLines", afterCount);
+                    diffsNode.add(diffNode);
                 }
             }
 
@@ -254,27 +454,19 @@ public class FeedbackGenerationService {
             String pattern = getTextOrNull(item, "pattern");
             String confidence = getTextOrNull(item, "confidence");
             String explanation = getTextOrNull(item, "explanation");
+            String suggestion = getTextOrNull(item, "suggestion");
 
-            List<String> nextSteps = new ArrayList<>();
-            if (item.has("nextSteps") && item.get("nextSteps").isArray()) {
-                for (JsonNode step : item.get("nextSteps")) {
-                    nextSteps.add(step.asText());
-                }
-            }
-
-            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps));
+            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null));
         }
     }
 
     /**
      * Recovers individual feedback objects from truncated JSON by finding
      * complete JSON objects that contain the required "testId" field.
-     * Handles pretty-printed JSON where { and "testId" are on separate lines.
      */
     private void extractFeedbackFromPartialJson(String content, List<Feedback> feedbackList) {
         String json = extractJson(content);
 
-        // Find each "testId" occurrence, then walk backwards to the opening brace
         int searchFrom = 0;
         while (searchFrom < json.length()) {
             int testIdPos = json.indexOf("\"testId\"", searchFrom);
@@ -289,7 +481,7 @@ public class FeedbackGenerationService {
             }
             if (objStart < 0) { searchFrom = testIdPos + 8; continue; }
 
-            // Find the matching closing brace by counting braces
+            // Find the matching closing brace
             int depth = 0;
             int objEnd = -1;
             boolean inString = false;
@@ -307,7 +499,7 @@ public class FeedbackGenerationService {
                 }
             }
 
-            if (objEnd < 0) break; // Incomplete object — stop
+            if (objEnd < 0) break;
 
             try {
                 String objStr = json.substring(objStart, objEnd);
@@ -317,15 +509,9 @@ public class FeedbackGenerationService {
                     String pattern = getTextOrNull(item, "pattern");
                     String confidence = getTextOrNull(item, "confidence");
                     String explanation = getTextOrNull(item, "explanation");
+                    String suggestion = getTextOrNull(item, "suggestion");
 
-                    List<String> nextSteps = new ArrayList<>();
-                    if (item.has("nextSteps") && item.get("nextSteps").isArray()) {
-                        for (JsonNode step : item.get("nextSteps")) {
-                            nextSteps.add(step.asText());
-                        }
-                    }
-
-                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps));
+                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null));
                 }
             } catch (Exception ignored) {
                 // Skip malformed object
@@ -344,12 +530,10 @@ public class FeedbackGenerationService {
         if (trimmed.startsWith("```")) {
             int firstNewline = trimmed.indexOf('\n');
             if (firstNewline >= 0) {
-                // Look for closing fence after the first line
                 int lastFence = trimmed.lastIndexOf("```");
                 if (lastFence > firstNewline) {
                     return trimmed.substring(firstNewline + 1, lastFence).trim();
                 }
-                // No closing fence (truncated response) — strip just the opening
                 return trimmed.substring(firstNewline + 1).trim();
             }
         }

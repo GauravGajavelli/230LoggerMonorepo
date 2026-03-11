@@ -1,0 +1,57 @@
+4;
+INSERT
+0,0
+0,
+2,
+import java.util.ArrayList;
+import java.util.Iterator;
+CHANGE
+155,157
+1,
+		if (sb.length() == 1) {
+1,
+		if (sb.length() != 1) {
+INSERT
+157,159
+0,
+1,
+			sb.append(" ");
+INSERT
+162,165
+0,
+35,
+	public ArrayList<T> toArrayList() {
+		ArrayList<T> list = new ArrayList<>();
+		this.toArrayListHelper(root, list);
+		return list;
+	}
+	
+	private void toArrayListHelper(Node cur, ArrayList list) {
+		if (cur == NULL_NODE) {
+			return;
+		}
+		this.toArrayListHelper(cur.left, list);
+		list.add(cur.data);
+		this.toArrayListHelper(cur.right, list);
+	}
+
+	public Object[] toArray() {
+		Object[] arr = new Object[this.size()];
+		this.toArrayHelper(root, arr, new int[] {0});
+		return arr;
+	}
+	
+	private void toArrayHelper(Node cur, Object[] arr, int[] idx) {
+		if (cur == NULL_NODE) {
+			return;
+		}
+		this.toArrayHelper(cur.left, arr, idx);
+		arr[idx[0]] = cur.data;
+		idx[0]++;
+		this.toArrayHelper(cur.right, arr, idx);
+	}
+
+	public Iterator inefficientIterator() {
+		ArrayList<T> list = this.toArrayList();
+		return list.iterator();
+	}

@@ -1,0 +1,57 @@
+2;
+INSERT
+161,161
+0,
+24,
+	@Test
+	public void testToArrayList(){
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		assertEquals(new ArrayList<Integer>(), b.toArrayList());
+		
+		BinarySearchTree.Node n1 = b.new Node(1);
+		BinarySearchTree.Node n2 = b.new Node(2);
+		BinarySearchTree.Node n3 = b.new Node(3);
+		BinarySearchTree.Node n4 = b.new Node(4);
+		BinarySearchTree.Node n5 = b.new Node(5);
+		BinarySearchTree.Node n6 = b.new Node(6);
+		b.setRoot(n1);
+		n1.setRight(n2);
+		n2.setRight(n3);
+		n1.setLeft(n4);
+		n4.setLeft(n5);
+		n5.setRight(n6);
+
+		ArrayList<Integer> temp = new ArrayList<Integer>();
+		temp.add(5);temp.add(6);temp.add(4);
+		temp.add(1);temp.add(2);temp.add(3);
+		assertEquals(temp, b.toArrayList());
+	}
+	
+DELETE
+162,186
+24,
+//	public void testToArrayList(){
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		assertEquals(new ArrayList<Integer>(), b.toArrayList());
+//		
+//		BinarySearchTree.Node n1 = b.new Node(1);
+//		BinarySearchTree.Node n2 = b.new Node(2);
+//		BinarySearchTree.Node n3 = b.new Node(3);
+//		BinarySearchTree.Node n4 = b.new Node(4);
+//		BinarySearchTree.Node n5 = b.new Node(5);
+//		BinarySearchTree.Node n6 = b.new Node(6);
+//		b.setRoot(n1);
+//		n1.setRight(n2);
+//		n2.setRight(n3);
+//		n1.setLeft(n4);
+//		n4.setLeft(n5);
+//		n5.setRight(n6);
+//
+//		ArrayList<Integer> temp = new ArrayList<Integer>();
+//		temp.add(5);temp.add(6);temp.add(4);
+//		temp.add(1);temp.add(2);temp.add(3);
+//		assertEquals(temp, b.toArrayList());
+//	}
+//	
+//	@Test
+0,
