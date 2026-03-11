@@ -1,0 +1,26 @@
+1;
+INSERT
+380,380
+0,
+21,
+
+	public boolean contains(T i) {
+		if (i == null) {
+			throw new IllegalArgumentException();
+		}
+		return containsHelper(root, i);;
+	}
+	
+	private boolean containsHelper(Node cur, T i) {
+		if (cur == NULL_NODE) {
+			return false;
+		}
+		int comparison = i.compareTo(cur.data);
+		if (comparison == 0) {
+			return true;
+		} else if (comparison < 0) { // i < cur.data
+			// it belongs left
+			return containsHelper(cur.left, i);
+		} // i > cur.data
+		return containsHelper(cur.right, i);	
+	}

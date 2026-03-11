@@ -1,0 +1,451 @@
+2;
+CHANGE
+385,385
+221,
+//	@Test
+//	public void testRemove() {
+//		// Doesn't test return value. Does rely on insert() and preOrderIterator()
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		assertEquals("[]", b.toString());
+//
+//		// remove just root
+//		b.insert(4);
+//		b.remove(4);
+//		assertEquals("[]", b.toString());
+//		points += 1;
+//
+//		// remove right child in simple tree
+//		b.insert(10);
+//		b.insert(4);
+//		b.insert(14);
+//		b.remove(14);
+//		
+//		Integer[] a = { 10, 4 };
+//		boolean[] bool = { true, false };
+//		Iterator<Integer> iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext(), "Expected: true");
+//		for (int k = 0; k < a.length; k++) {
+//			assertEquals(a[k], iter.next());
+//			assertEquals(bool[k], iter.hasNext());
+//		}
+//		points += 2;
+//
+//		// remove left child in simple tree
+//		b.insert(14);
+//
+//		b.remove(4);
+//		a[0] = 10;
+//		a[1] = 14;
+//		iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext(), "Expected: true");
+//		for (int k = 0; k < a.length; k++) {
+//			assertEquals(a[k], iter.next());
+//			assertEquals(bool[k], iter.hasNext());
+//		}
+//		points += 2;
+//
+//		// remove root in simple tree
+//		b.insert(4);
+//		b.remove(10);
+//		a[0] = 4;
+//		a[1] = 14;
+//		iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext(), "Expected: true");
+//		for (int k = 0; k < a.length; k++) {
+//			assertEquals(a[k], iter.next());
+//		}
+//		points += 3;
+//	}
+//
+//	
+//	@Test
+//	public void testRemoveReturnValue() {
+//		// Same as previous test, but testing return value also.
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		assertEquals("[]", b.toString());
+//		
+//		// removal from empty tree
+//		assertFalse(b.remove(7));
+//		points += 1;
+//
+//		// remove just root
+//		b.insert(4);
+//		assertTrue(b.remove(4));
+//		assertEquals("[]", b.toString());
+//		points += 2;
+//
+//		// remove right child in simple tree
+//		b.insert(10);
+//		b.insert(4);
+//		b.insert(14);
+//		assertTrue(b.remove(14));
+//		points += 2;
+//		
+//		Integer[] a = { 10, 4 };
+//		boolean[] bool = { true, false };
+//		Iterator<Integer> iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext());
+//		for (int k = 0; k < a.length; k++) {
+//			assertEquals(a[k], iter.next());
+//			assertEquals(bool[k], iter.hasNext());
+//		}
+//		
+//
+//		// remove left child in simple tree
+//		b.insert(14);
+//
+//		iter = b.preOrderIterator();
+//		assertTrue(b.remove(4));
+//		points += 2;
+//
+//		a[0] = 10;
+//		a[1] = 14;
+//		iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext());
+//		for (int k = 0; k < a.length; k++) {
+//			assertEquals(a[k], iter.next());
+//			assertEquals(bool[k], iter.hasNext());
+//		}
+//		
+//
+//		// remove root in simple tree
+//		b.insert(4);
+//		assertTrue(b.remove(10));
+//		a[0] = 4;
+//		a[1] = 14;
+//		iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext());
+//		for (int k = 0; k < a.length; k++) {
+//			assertEquals(a[k], iter.next());
+//			assertEquals(bool[k], iter.hasNext());
+//		}
+//		points += 3;
+//	}
+//	
+//	@Test
+//	public void testRemoveIllegalArgumentException() {
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		assertEquals("[]", b.toString());
+//		b.insert(10);
+//		b.insert(4);
+//		b.insert(14);
+//
+//		// Remove null element
+//		try {
+//			b.remove(null);
+//			fail("Did not throw IllegalArgumentException");
+//		} catch (Exception e) {
+//			if (!(e instanceof IllegalArgumentException)) {
+//				fail("Did not throw IllegalArgumentException");
+//			}
+//		}
+//		points += 1;
+//
+//	}
+//
+//	@Test
+//	public void testRemoveAdvanced() {
+//		// Remove leaf from complex tree.
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		b.insert(10);
+//		b.insert(15);
+//		b.insert(5);
+//		b.insert(2);
+//		b.insert(7);
+//		b.insert(1);
+//		b.insert(3);
+//		b.remove(7);
+//		assertEquals("[1, 2, 3, 5, 10, 15]", b.toString());
+//		Integer[] m = { 10, 5, 2, 1, 3, 15 };
+//		boolean boo[] = { true, true, true, true, true, false };
+//		Iterator<Integer> iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext());
+//		for (int k = 0; k < m.length; k++) {
+//			assertEquals(m[k], iter.next());
+//			assertEquals(boo[k], iter.hasNext());
+//		}
+//		points += 5;
+//
+//		// Remove node with 1 child from complex tree.
+//		b.remove(5);
+//		assertEquals("[1, 2, 3, 10, 15]", b.toString());
+//		Integer[] n = { 10, 2, 1, 3, 15 };
+//		boolean boo2[] = { true, true, true, true, false };
+//		iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext());
+//		for (int k = 0; k < n.length; k++) {
+//			assertEquals(n[k], iter.next());
+//			assertEquals(boo2[k], iter.hasNext());
+//		}
+//		points += 5;
+//
+//		// Remove node with 2 children from complex tree.
+//		b.remove(10);
+//		assertEquals("[1, 2, 3, 15]", b.toString());
+//		Integer[] p = { 3, 2, 1, 15 };
+//		boolean boo3[] = { true, true, true, false };
+//		iter = b.preOrderIterator();
+//		assertTrue(iter.hasNext());
+//		for (int k = 0; k < p.length; k++) {
+//			assertEquals(p[k], iter.next());
+//			assertEquals(boo3[k], iter.hasNext());
+//		}
+//		points += 3;
+//
+//		// removal of non-existing element
+//		assertFalse(b.remove(7));
+//		points += 3;
+//	}
+//
+//	@Test
+//	public void testEfficiency() {
+//		int size = 1000000;
+//		
+//		// 1. Create elements from 1..size so we know they are unique. 
+//		// give initial capacity since we know we will fill it. 
+//		ArrayList<Integer> nums = new ArrayList<Integer>(size); 
+//		for (int i = 0; i < size; i++) {
+//			nums.add(i);
+//		}
+//		// Randomize the order
+//		Collections.shuffle(nums);
+//		
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		for (int num : nums) {
+//			b.insert(num);
+//		}
+//		int height = b.height();
+//		
+//		System.out.printf("When n = %d elements, h(T) = %d\n", size, height);
+//		System.out.printf("Note: in our solution, n = 1000000 usually has a height of ~50, or ~2.5*log(1000000) after random inserts.\n");
+//		System.out.printf("If yours is much bigger, you should check your insert.\n");
+//		System.out.printf("If this method takes longer than a couple seconds to run, you should also check your insert.\n");
+//		// Quick sanity check: is height < 4* log_2(n) (this is a good buffer)
+//		assertTrue(height < 4 * Math.log(size) / Math.log(2));
+//	}
+55,
+	@Test
+	public void testRemove() {
+		// Doesn't test return value. Does rely on insert() and preOrderIterator()
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		assertEquals("[]", b.toString());
+
+		// remove just root
+		b.insert(4);
+		b.remove(4);
+		assertEquals("[]", b.toString());
+		points += 1;
+
+		// remove right child in simple tree
+		b.insert(10);
+		b.insert(4);
+		b.insert(14);
+		b.remove(14);
+		
+		Integer[] a = { 10, 4 };
+		boolean[] bool = { true, false };
+		Iterator<Integer> iter = b.preOrderIterator();
+		assertTrue(iter.hasNext(), "Expected: true");
+		for (int k = 0; k < a.length; k++) {
+			assertEquals(a[k], iter.next());
+			assertEquals(bool[k], iter.hasNext());
+		}
+		points += 2;
+
+		// remove left child in simple tree
+		b.insert(14);
+
+		b.remove(4);
+		a[0] = 10;
+		a[1] = 14;
+		iter = b.preOrderIterator();
+		assertTrue(iter.hasNext(), "Expected: true");
+		for (int k = 0; k < a.length; k++) {
+			assertEquals(a[k], iter.next());
+			assertEquals(bool[k], iter.hasNext());
+		}
+		points += 2;
+
+		// remove root in simple tree
+		b.insert(4);
+		b.remove(10);
+		a[0] = 4;
+		a[1] = 14;
+		iter = b.preOrderIterator();
+		assertTrue(iter.hasNext(), "Expected: true");
+		for (int k = 0; k < a.length; k++) {
+			assertEquals(a[k], iter.next());
+		}
+		points += 3;
+	}
+
+INSERT
+607,441
+0,
+166,
+	@Test
+	public void testRemoveReturnValue() {
+		// Same as previous test, but testing return value also.
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		assertEquals("[]", b.toString());
+		
+		// removal from empty tree
+		assertFalse(b.remove(7));
+		points += 1;
+
+		// remove just root
+		b.insert(4);
+		assertTrue(b.remove(4));
+		assertEquals("[]", b.toString());
+		points += 2;
+
+		// remove right child in simple tree
+		b.insert(10);
+		b.insert(4);
+		b.insert(14);
+		assertTrue(b.remove(14));
+		points += 2;
+		
+		Integer[] a = { 10, 4 };
+		boolean[] bool = { true, false };
+		Iterator<Integer> iter = b.preOrderIterator();
+		assertTrue(iter.hasNext());
+		for (int k = 0; k < a.length; k++) {
+			assertEquals(a[k], iter.next());
+			assertEquals(bool[k], iter.hasNext());
+		}
+		
+
+		// remove left child in simple tree
+		b.insert(14);
+
+		iter = b.preOrderIterator();
+		assertTrue(b.remove(4));
+		points += 2;
+
+		a[0] = 10;
+		a[1] = 14;
+		iter = b.preOrderIterator();
+		assertTrue(iter.hasNext());
+		for (int k = 0; k < a.length; k++) {
+			assertEquals(a[k], iter.next());
+			assertEquals(bool[k], iter.hasNext());
+		}
+		
+
+		// remove root in simple tree
+		b.insert(4);
+		assertTrue(b.remove(10));
+		a[0] = 4;
+		a[1] = 14;
+		iter = b.preOrderIterator();
+		assertTrue(iter.hasNext());
+		for (int k = 0; k < a.length; k++) {
+			assertEquals(a[k], iter.next());
+			assertEquals(bool[k], iter.hasNext());
+		}
+		points += 3;
+	}
+	
+	@Test
+	public void testRemoveIllegalArgumentException() {
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		assertEquals("[]", b.toString());
+		b.insert(10);
+		b.insert(4);
+		b.insert(14);
+
+		// Remove null element
+		try {
+			b.remove(null);
+			fail("Did not throw IllegalArgumentException");
+		} catch (Exception e) {
+			if (!(e instanceof IllegalArgumentException)) {
+				fail("Did not throw IllegalArgumentException");
+			}
+		}
+		points += 1;
+
+	}
+
+	@Test
+	public void testRemoveAdvanced() {
+		// Remove leaf from complex tree.
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		b.insert(10);
+		b.insert(15);
+		b.insert(5);
+		b.insert(2);
+		b.insert(7);
+		b.insert(1);
+		b.insert(3);
+		b.remove(7);
+		assertEquals("[1, 2, 3, 5, 10, 15]", b.toString());
+		Integer[] m = { 10, 5, 2, 1, 3, 15 };
+		boolean boo[] = { true, true, true, true, true, false };
+		Iterator<Integer> iter = b.preOrderIterator();
+		assertTrue(iter.hasNext());
+		for (int k = 0; k < m.length; k++) {
+			assertEquals(m[k], iter.next());
+			assertEquals(boo[k], iter.hasNext());
+		}
+		points += 5;
+
+		// Remove node with 1 child from complex tree.
+		b.remove(5);
+		assertEquals("[1, 2, 3, 10, 15]", b.toString());
+		Integer[] n = { 10, 2, 1, 3, 15 };
+		boolean boo2[] = { true, true, true, true, false };
+		iter = b.preOrderIterator();
+		assertTrue(iter.hasNext());
+		for (int k = 0; k < n.length; k++) {
+			assertEquals(n[k], iter.next());
+			assertEquals(boo2[k], iter.hasNext());
+		}
+		points += 5;
+
+		// Remove node with 2 children from complex tree.
+		b.remove(10);
+		assertEquals("[1, 2, 3, 15]", b.toString());
+		Integer[] p = { 3, 2, 1, 15 };
+		boolean boo3[] = { true, true, true, false };
+		iter = b.preOrderIterator();
+		assertTrue(iter.hasNext());
+		for (int k = 0; k < p.length; k++) {
+			assertEquals(p[k], iter.next());
+			assertEquals(boo3[k], iter.hasNext());
+		}
+		points += 3;
+
+		// removal of non-existing element
+		assertFalse(b.remove(7));
+		points += 3;
+	}
+
+	@Test
+	public void testEfficiency() {
+		int size = 1000000;
+		
+		// 1. Create elements from 1..size so we know they are unique. 
+		// give initial capacity since we know we will fill it. 
+		ArrayList<Integer> nums = new ArrayList<Integer>(size); 
+		for (int i = 0; i < size; i++) {
+			nums.add(i);
+		}
+		// Randomize the order
+		Collections.shuffle(nums);
+		
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		for (int num : nums) {
+			b.insert(num);
+		}
+		int height = b.height();
+		
+		System.out.printf("When n = %d elements, h(T) = %d\n", size, height);
+		System.out.printf("Note: in our solution, n = 1000000 usually has a height of ~50, or ~2.5*log(1000000) after random inserts.\n");
+		System.out.printf("If yours is much bigger, you should check your insert.\n");
+		System.out.printf("If this method takes longer than a couple seconds to run, you should also check your insert.\n");
+		// Quick sanity check: is height < 4* log_2(n) (this is a good buffer)
+		assertTrue(height < 4 * Math.log(size) / Math.log(2));
+	}
+	

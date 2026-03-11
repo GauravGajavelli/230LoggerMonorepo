@@ -1,0 +1,12 @@
+2;
+CHANGE
+155,155
+1,
+		if (sb.length() == 1) {
+1,
+		if (sb.length() != 1) {
+INSERT
+157,157
+0,
+1,
+			sb.append(" ");

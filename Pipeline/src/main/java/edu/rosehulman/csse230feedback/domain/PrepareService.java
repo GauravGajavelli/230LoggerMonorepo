@@ -37,14 +37,18 @@ public class PrepareService {
             throw new IOException("runs.jsonl contains no valid runs");
         }
 
-        // 2. Load enriched_runs/
+        // 2. Load enriched_runs/ (optional — falls back to basic test results from runs.jsonl)
         Path enrichedDir = opts.inputDir().resolve("enriched_runs");
-        if (!Files.exists(enrichedDir) || !Files.isDirectory(enrichedDir)) {
-            throw new IOException("enriched_runs/ directory not found at: " + enrichedDir);
-        }
-        Map<Integer, List<EnrichedTestResult>> enrichedData = loadEnrichedRuns(enrichedDir, warnings);
-        if (enrichedData.isEmpty()) {
-            throw new IOException("enriched_runs/ directory is empty");
+        Map<Integer, List<EnrichedTestResult>> enrichedData;
+        if (Files.exists(enrichedDir) && Files.isDirectory(enrichedDir)) {
+            enrichedData = loadEnrichedRuns(enrichedDir, warnings);
+            if (enrichedData.isEmpty()) {
+                warnings.add("enriched_runs/ directory is empty — falling back to basic test results");
+                enrichedData = buildEnrichedFromRuns(runs, warnings);
+            }
+        } else {
+            warnings.add("enriched_runs/ not found — using basic test results from runs.jsonl (no stack traces or durations)");
+            enrichedData = buildEnrichedFromRuns(runs, warnings);
         }
 
         // 3. Load manifest.json (from ingest output)
@@ -197,15 +201,7 @@ public class PrepareService {
         SemanticLog semanticLog = null;
         if (llmService != null) {
             try {
-                PromptLoader promptLoader = new PromptLoader(
-                    opts.inputDir().getParent() != null
-                        ? opts.inputDir().getParent().resolve("prompts")
-                        : Path.of("prompts")
-                );
-                // Also check Pipeline/prompts/ as a fallback
-                if (!java.nio.file.Files.exists(promptLoader.promptsDir())) {
-                    promptLoader = new PromptLoader(Path.of("prompts"));
-                }
+                PromptLoader promptLoader = resolvePromptLoader(opts.inputDir());
 
                 SemanticEnrichmentService enricher = new SemanticEnrichmentService(llmService, promptLoader);
                 SemanticEnrichmentService.SemanticEnrichmentResult semResult = enricher.enrich(
@@ -266,14 +262,7 @@ public class PrepareService {
         List<Feedback> feedback = Collections.emptyList();
         if (llmService != null) {
             try {
-                PromptLoader feedbackPromptLoader = new PromptLoader(
-                    opts.inputDir().getParent() != null
-                        ? opts.inputDir().getParent().resolve("prompts")
-                        : Path.of("prompts")
-                );
-                if (!Files.exists(feedbackPromptLoader.promptsDir())) {
-                    feedbackPromptLoader = new PromptLoader(Path.of("prompts"));
-                }
+                PromptLoader feedbackPromptLoader = resolvePromptLoader(opts.inputDir());
 
                 FeedbackGenerationService feedbackService = new FeedbackGenerationService(
                     llmService, feedbackPromptLoader
@@ -329,6 +318,41 @@ public class PrepareService {
             totalTests,
             warnings
         );
+    }
+
+    /**
+     * Resolves the prompt loader by trying multiple candidate directories in priority order:
+     * 1. Sibling "prompts/" next to the input dir's parent
+     * 2. Pipeline/prompts/ (relative to cwd)
+     * 3. ./prompts/ (relative to cwd)
+     */
+    private PromptLoader resolvePromptLoader(Path inputDir) {
+        List<Path> candidates = new ArrayList<>();
+        // e.g. Pipeline/output/run-demo -> Pipeline/output/../prompts -> Pipeline/prompts
+        if (inputDir.getParent() != null) {
+            candidates.add(inputDir.getParent().resolve("prompts"));
+        }
+        candidates.add(Path.of("Pipeline", "prompts"));
+        candidates.add(Path.of("prompts"));
+        for (Path candidate : candidates) {
+            if (Files.exists(candidate)) {
+                return new PromptLoader(candidate);
+            }
+        }
+        return new PromptLoader(Path.of("Pipeline", "prompts"));
+    }
+
+    private Map<Integer, List<EnrichedTestResult>> buildEnrichedFromRuns(List<RunRecord> runs, List<String> warnings) {
+        Map<Integer, List<EnrichedTestResult>> enrichedData = new HashMap<>();
+        for (RunRecord run : runs) {
+            if (run.tests() != null) {
+                List<EnrichedTestResult> enriched = run.tests().stream()
+                    .map(EnrichedTestResult::fromBasic)
+                    .toList();
+                enrichedData.put(run.runNumber(), enriched);
+            }
+        }
+        return enrichedData;
     }
 
     private List<RunRecord> loadRunsJsonl(Path runsJsonl, List<String> warnings) throws IOException {
