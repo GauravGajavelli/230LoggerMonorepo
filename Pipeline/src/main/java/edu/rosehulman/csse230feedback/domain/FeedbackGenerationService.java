@@ -63,6 +63,9 @@ public class FeedbackGenerationService {
         if (failureHighlights.costlyDetours() != null) {
             highlightedIds.addAll(failureHighlights.costlyDetours());
         }
+        if (failureHighlights.sustainedStruggles() != null) {
+            highlightedIds.addAll(failureHighlights.sustainedStruggles());
+        }
 
         if (highlightedIds.isEmpty()) {
             return Collections.emptyList();
@@ -116,16 +119,19 @@ public class FeedbackGenerationService {
         List<Feedback> feedbackList = parseFeedbackResponse(response.content());
 
         // Attach pre-built diffs to each Feedback item
-        return feedbackList.stream()
+        List<Feedback> withDiffs = feedbackList.stream()
             .map(fb -> {
                 List<DiffEntry> diffs = diffsPerTest.get(fb.testId());
                 if (diffs != null && !diffs.isEmpty()) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
-                                       fb.explanation(), fb.suggestion(), diffs);
+                                       fb.explanation(), fb.suggestion(), diffs, null);
                 }
                 return fb;
             })
             .toList();
+
+        // Group related feedbacks (shared-diff detection)
+        return groupRelatedFeedbacks(withDiffs, diffsPerTest);
     }
 
     /**
@@ -456,7 +462,7 @@ public class FeedbackGenerationService {
             String explanation = getTextOrNull(item, "explanation");
             String suggestion = getTextOrNull(item, "suggestion");
 
-            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null));
+            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null, null));
         }
     }
 
@@ -511,7 +517,7 @@ public class FeedbackGenerationService {
                     String explanation = getTextOrNull(item, "explanation");
                     String suggestion = getTextOrNull(item, "suggestion");
 
-                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null));
+                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null, null));
                 }
             } catch (Exception ignored) {
                 // Skip malformed object
@@ -526,21 +532,99 @@ public class FeedbackGenerationService {
     }
 
     private static String extractJson(String content) {
-        String trimmed = content.trim();
-        if (trimmed.startsWith("```")) {
-            int firstNewline = trimmed.indexOf('\n');
-            if (firstNewline >= 0) {
-                int lastFence = trimmed.lastIndexOf("```");
-                if (lastFence > firstNewline) {
-                    return trimmed.substring(firstNewline + 1, lastFence).trim();
-                }
-                return trimmed.substring(firstNewline + 1).trim();
-            }
-        }
-        return trimmed;
+        return Json.extractLlmJson(content);
     }
 
     private static String getTextOrNull(JsonNode node, String field) {
         return node.has(field) && !node.get(field).isNull() ? node.get(field).asText() : null;
+    }
+
+    /**
+     * Groups related feedbacks by shared diffs: two tests are in the same group
+     * if their diff entries share ≥2 run numbers.
+     * Each grouped Feedback gets relatedTestIds listing the other group members.
+     */
+    private List<Feedback> groupRelatedFeedbacks(List<Feedback> feedbacks,
+                                                   Map<String, List<DiffEntry>> diffsPerTest) {
+        // Build map: testId → Set<Integer> of diff run numbers
+        Map<String, Set<Integer>> runsByTest = new LinkedHashMap<>();
+        for (Feedback fb : feedbacks) {
+            Set<Integer> runs = new LinkedHashSet<>();
+            List<DiffEntry> diffs = diffsPerTest.get(fb.testId());
+            if (diffs != null) {
+                for (DiffEntry diff : diffs) {
+                    Integer runNum = extractRunNumber(diff.label());
+                    if (runNum != null) runs.add(runNum);
+                }
+            }
+            runsByTest.put(fb.testId(), runs);
+        }
+
+        // Union-Find grouping: for each pair, if overlap ≥ 2, merge into same group
+        List<String> ids = feedbacks.stream().map(Feedback::testId).toList();
+        Map<String, String> parent = new LinkedHashMap<>();
+        for (String id : ids) parent.put(id, id);
+
+        for (int i = 0; i < ids.size(); i++) {
+            for (int j = i + 1; j < ids.size(); j++) {
+                String a = ids.get(i), b = ids.get(j);
+                Set<Integer> runsA = runsByTest.getOrDefault(a, Collections.emptySet());
+                Set<Integer> runsB = runsByTest.getOrDefault(b, Collections.emptySet());
+                long overlap = runsA.stream().filter(runsB::contains).count();
+                if (overlap >= 2) {
+                    // Union: point b's root to a's root
+                    String rootA = find(parent, a);
+                    String rootB = find(parent, b);
+                    if (!rootA.equals(rootB)) {
+                        parent.put(rootB, rootA);
+                    }
+                }
+            }
+        }
+
+        // Build groups: root → list of members
+        Map<String, List<String>> groups = new LinkedHashMap<>();
+        for (String id : ids) {
+            String root = find(parent, id);
+            groups.computeIfAbsent(root, k -> new ArrayList<>()).add(id);
+        }
+
+        // Annotate each Feedback with its group members (excluding itself), null if singleton
+        Map<String, List<String>> relatedMap = new LinkedHashMap<>();
+        for (Map.Entry<String, List<String>> entry : groups.entrySet()) {
+            List<String> members = entry.getValue();
+            if (members.size() > 1) {
+                for (String id : members) {
+                    List<String> others = members.stream().filter(m -> !m.equals(id)).toList();
+                    relatedMap.put(id, others);
+                }
+            }
+        }
+
+        return feedbacks.stream()
+            .map(fb -> {
+                List<String> related = relatedMap.get(fb.testId());
+                if (related != null) {
+                    return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
+                        fb.explanation(), fb.suggestion(), fb.diffs(), related);
+                }
+                return fb;
+            })
+            .toList();
+    }
+
+    /** Extracts run number from a DiffEntry label like "Run 51 — BinarySearchTree.java". */
+    private static Integer extractRunNumber(String label) {
+        if (label == null) return null;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("Run (\\d+)").matcher(label);
+        return m.find() ? Integer.parseInt(m.group(1)) : null;
+    }
+
+    /** Union-Find path-compressed find. */
+    private static String find(Map<String, String> parent, String id) {
+        if (!parent.get(id).equals(id)) {
+            parent.put(id, find(parent, parent.get(id)));
+        }
+        return parent.get(id);
     }
 }

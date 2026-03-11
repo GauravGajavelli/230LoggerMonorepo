@@ -528,16 +528,7 @@ public class SemanticEnrichmentService {
     }
 
     private static String extractJson(String content) {
-        // Strip markdown code fences if present
-        String trimmed = content.trim();
-        if (trimmed.startsWith("```")) {
-            int firstNewline = trimmed.indexOf('\n');
-            int lastFence = trimmed.lastIndexOf("```");
-            if (firstNewline >= 0 && lastFence > firstNewline) {
-                return trimmed.substring(firstNewline + 1, lastFence).trim();
-            }
-        }
-        return trimmed;
+        return Json.extractLlmJson(content);
     }
 
     private static String getTextOrNull(JsonNode node, String field) {

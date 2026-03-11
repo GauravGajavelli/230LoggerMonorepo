@@ -67,6 +67,9 @@ public class PrepareCommand implements Callable<Integer> {
     @Option(names = {"--ingest-dir"}, description = "Ingest output directory (contains runs.jsonl, manifest.json, archives/). If not set, reads from --input.")
     private Path ingestDir;
 
+    @Option(names = {"--allow-basic-fallback"}, description = "Allow prepare to proceed without enriched_runs/ (no stack traces or durations). Default: fail if enriched_runs/ is absent.")
+    private boolean allowBasicFallback = false;
+
     @Override
     public Integer call() throws Exception {
         if (!Files.exists(input)) {
@@ -105,7 +108,8 @@ public class PrepareCommand implements Callable<Integer> {
             clearCache,
             cacheDir,
             dryRun,
-            ingestDir
+            ingestDir,
+            allowBasicFallback
         );
 
         PrepareService service = new PrepareService();

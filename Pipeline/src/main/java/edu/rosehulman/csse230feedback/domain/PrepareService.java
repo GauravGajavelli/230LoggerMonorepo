@@ -53,19 +53,29 @@ public class PrepareService {
             throw new IOException("runs.jsonl contains no valid runs");
         }
 
-        // 2. Load enriched_runs/ (optional — falls back to basic test results from runs.jsonl)
+        // 2. Load enriched_runs/ per-run, with per-run fallback to basic data
         Path enrichedDir = opts.inputDir().resolve("enriched_runs");
-        Map<Integer, List<EnrichedTestResult>> enrichedData;
+        Map<Integer, List<EnrichedTestResult>> enrichedData = new LinkedHashMap<>();
         if (Files.exists(enrichedDir) && Files.isDirectory(enrichedDir)) {
             enrichedData = loadEnrichedRuns(enrichedDir, warnings);
-            if (enrichedData.isEmpty()) {
-                warnings.add("enriched_runs/ directory is empty — falling back to basic test results");
-                enrichedData = buildEnrichedFromRuns(runs, warnings);
-            }
+        } else if (!opts.allowBasicFallback()) {
+            throw new IOException(
+                "enriched_runs/ not found at: " + enrichedDir + "\n" +
+                "Stack traces and test durations are required for feedback quality.\n" +
+                "Run the 'rerun' command first to generate enriched_runs/, then re-run prepare.\n" +
+                "To proceed without this data (degraded output), add: --allow-basic-fallback"
+            );
         } else {
-            warnings.add("enriched_runs/ not found — using basic test results from runs.jsonl (no stack traces or durations)");
-            enrichedData = buildEnrichedFromRuns(runs, warnings);
+            System.out.println("DEGRADED: enriched_runs/ not found — proceeding without stack traces or durations (--allow-basic-fallback set)");
         }
+        int enrichedCount = enrichedData.size();
+        // Fill in any missing runs from basic data
+        Map<Integer, List<EnrichedTestResult>> basicData = buildEnrichedFromRuns(runs, warnings);
+        for (RunRecord run : runs) {
+            enrichedData.computeIfAbsent(run.runNumber(), k -> basicData.get(k));
+        }
+        System.out.println("Enriched data: " + enrichedCount + "/" + runs.size()
+            + " runs have stack traces/durations; " + (runs.size() - enrichedCount) + " using basic fallback");
 
         // 3. Load manifest.json (from ingest output)
         Path manifestPath = opts.resolvedIngestDir().resolve("manifest.json");
@@ -342,6 +352,14 @@ public class PrepareService {
                 );
 
                 System.out.println("Generated feedback for " + feedback.size() + " highlighted tests");
+
+                // Refinement pass: strip intent narration from explanations
+                if (!feedback.isEmpty()) {
+                    PromptLoader feedbackRefinementLoader = resolvePromptLoader(opts.inputDir());
+                    FeedbackRefinementService refiner = new FeedbackRefinementService(llmService, feedbackRefinementLoader);
+                    feedback = refiner.refine(feedback, llmService.stats().totalRequests() + 1, totalRequestsEstimate + 1);
+                    System.out.println("Refinement pass complete");
+                }
             } catch (LlmException e) {
                 warnings.add("Feedback generation failed: " + e.getMessage());
             }

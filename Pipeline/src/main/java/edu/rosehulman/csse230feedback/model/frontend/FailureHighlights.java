@@ -7,5 +7,11 @@ import java.util.List;
 public record FailureHighlights(
     List<String> stillFailing,
     List<String> regressions,
-    List<String> costlyDetours
-) {}
+    List<String> costlyDetours,
+    List<String> sustainedStruggles
+) {
+    /** Backwards-compatible constructor without sustainedStruggles. */
+    public FailureHighlights(List<String> stillFailing, List<String> regressions, List<String> costlyDetours) {
+        this(stillFailing, regressions, costlyDetours, null);
+    }
+}

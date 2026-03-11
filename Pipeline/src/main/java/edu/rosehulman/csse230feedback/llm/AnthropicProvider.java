@@ -22,12 +22,12 @@ public class AnthropicProvider implements LlmProvider {
     private static final String API_VERSION = "2023-06-01";
     private static final Duration TIMEOUT = Duration.ofSeconds(120);
     private static final ObjectMapper JSON = new ObjectMapper();
-    private static final int MAX_TOKENS = 4096;
+    private static final int MAX_TOKENS = 8192;
 
     // Pricing per 1M tokens
     private static final Map<String, double[]> PRICING = Map.of(
         "claude-sonnet-4-5-20250929", new double[]{3.00, 15.00},
-        "claude-haiku-4-5-20251001", new double[]{0.80, 4.00},
+        "claude-haiku-4-5-20251001", new double[]{1.00, 5.00},
         "claude-3-5-sonnet-20241022", new double[]{3.00, 15.00},
         "claude-3-5-haiku-20241022", new double[]{0.80, 4.00},
         "claude-3-haiku-20240307", new double[]{0.25, 1.25}

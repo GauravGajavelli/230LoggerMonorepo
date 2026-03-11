@@ -48,4 +48,27 @@ public final class Json {
             }
         }
     }
+
+    /**
+     * Extracts JSON from an LLM response that may be wrapped in markdown fences.
+     * Also sanitizes a common haiku artifact: doubled closing quotes before delimiters.
+     */
+    public static String extractLlmJson(String content) {
+        String s = content.trim();
+        // Strip markdown fences
+        if (s.startsWith("```")) {
+            int firstNewline = s.indexOf('\n');
+            if (firstNewline >= 0) {
+                int lastFence = s.lastIndexOf("```");
+                if (lastFence > firstNewline) {
+                    s = s.substring(firstNewline + 1, lastFence).trim();
+                } else {
+                    s = s.substring(firstNewline + 1).trim();  // no closing fence
+                }
+            }
+        }
+        // Fix doubled closing quote: "text"", → "text",  (haiku artifact)
+        s = s.replaceAll("\"\"([,}\\]])", "\"$1");
+        return s;
+    }
 }

@@ -131,10 +131,14 @@ public class StatusChangeTracker {
         return histories;
     }
 
+    /** Maximum total feedback items across all highlight categories. */
+    private static final int MAX_FEEDBACK_ITEMS = 5;
+
     public FailureHighlights buildFailureHighlights(List<TestHistory> histories) {
         List<String> stillFailing = new ArrayList<>();
         List<String> regressions = new ArrayList<>();
         List<String> costlyDetours = new ArrayList<>();
+        List<TestHistory> sustainedCandidates = new ArrayList<>();
 
         for (TestHistory history : histories) {
             if (history.highlightCategory() == null) {
@@ -144,10 +148,27 @@ public class StatusChangeTracker {
                 case "stillFailing" -> stillFailing.add(history.testId());
                 case "regression" -> regressions.add(history.testId());
                 case "costlyDetour" -> costlyDetours.add(history.testId());
+                case "sustainedStruggle" -> sustainedCandidates.add(history);
             }
         }
 
-        return new FailureHighlights(stillFailing, regressions, costlyDetours);
+        // Budget = remaining slots after higher-priority categories fill first
+        int nonSustainedCount = stillFailing.size() + regressions.size() + costlyDetours.size();
+        int budget = Math.max(0, MAX_FEEDBACK_ITEMS - nonSustainedCount);
+
+        // Sort candidates by totalFailedRuns descending; take top `budget`
+        List<String> sustainedStruggles = sustainedCandidates.stream()
+            .sorted(Comparator.comparingInt(TestHistory::totalFailedRuns).reversed())
+            .limit(budget)
+            .map(TestHistory::testId)
+            .toList();
+
+        System.out.println("Feedback budget: " + nonSustainedCount + " priority items + "
+            + sustainedStruggles.size() + "/" + sustainedCandidates.size()
+            + " sustained-struggle candidates (cap=" + MAX_FEEDBACK_ITEMS + ")");
+
+        return new FailureHighlights(stillFailing, regressions, costlyDetours,
+            sustainedStruggles.isEmpty() ? null : sustainedStruggles);
     }
 
     private List<FailureInterval> computeFailureIntervals(Map<Integer, String> statusByRun) {
@@ -291,6 +312,15 @@ public class StatusChangeTracker {
             // Must be a regression (was passing before it failed) AND took long to fix
             if (interval.isRegression() && interval.duration() > 3) {
                 return "costlyDetour";
+            }
+        }
+
+        // "sustainedStruggle" candidate: single interval, no prior pass, ≥2 failed runs.
+        // Final selection is budget-capped in buildFailureHighlights() (max total feedback items).
+        if (!intervals.isEmpty() && recursCount == 1) {
+            FailureInterval interval = intervals.get(0);
+            if (!interval.isRegression() && interval.duration() >= 2) {
+                return "sustainedStruggle";
             }
         }
 

@@ -18,7 +18,9 @@ public record PrepareOptions(
     boolean clearCache,
     Path cacheDir,
     boolean dryRun,
-    Path ingestDir
+    Path ingestDir,
+    /** If false (default), prepare fails when enriched_runs/ is absent. Pass true to degrade gracefully. */
+    boolean allowBasicFallback
 ) {
     public long idleThresholdMs() {
         return idleThresholdMinutes * 60 * 1000;
@@ -39,7 +41,7 @@ public record PrepareOptions(
                           String assignmentNameOverride) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, true,
-             null, null, null, false, false, null, false, null);
+             null, null, null, false, false, null, false, null, false);
     }
 
     /**
@@ -50,7 +52,7 @@ public record PrepareOptions(
                           String assignmentNameOverride, boolean includeCodeSnapshots) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, includeCodeSnapshots,
-             null, null, null, false, false, null, false, null);
+             null, null, null, false, false, null, false, null, false);
     }
 
     /**
