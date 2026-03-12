@@ -388,7 +388,7 @@ export function PlaybackPage() {
         </div>
 
         {/* Timeline Card - unified controls */}
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
           <TimelineBar
             episodes={episodes}
             playback={playback}

@@ -105,6 +105,30 @@ public class CodeSnapshotGenerator {
             }
         }
 
+        // Generate run 0 baseline snapshot: state before any student edits, used as the
+        // "previous" side when diffing against run 1 or a range starting at run 1.
+        List<FileContent> baselineFiles = new ArrayList<>();
+        for (String fileKey : fileKeys) {
+            Optional<PatchPointer> anyPatch = allPatches.stream()
+                .filter(p -> p.fileKey().equals(fileKey))
+                .findFirst();
+            if (anyPatch.isPresent()) {
+                try {
+                    List<String> content = reconstructor.reconstructBaseline(
+                        archivesDir, anyPatch.get(), cacheDir, warnings);
+                    String fileName = fileKeyToFileName(fileKey);
+                    String language = detectLanguage(fileName);
+                    baselineFiles.add(new FileContent(fileName, language, String.join("\n", content)));
+                } catch (IOException e) {
+                    warnings.add("Failed to reconstruct baseline for " + fileKey + ": " + e.getMessage());
+                }
+            }
+        }
+        if (!baselineFiles.isEmpty()) {
+            baselineFiles.sort(Comparator.comparing(FileContent::name));
+            snapshots.add(0, new CodeSnapshot(0, baselineFiles));
+        }
+
         return snapshots;
     }
 

@@ -116,6 +116,20 @@ export function truncate(text, maxLength) {
 }
 
 /**
+ * Format a raw pipeline timestamp ("2026-03-07 23:40:34.663") to short time ("11:40 PM")
+ * @param {string} rawTs
+ * @returns {string}
+ */
+export function formatShortTime(rawTs) {
+  if (!rawTs) return null;
+  // Parse "YYYY-MM-DD HH:MM:SS.mmm" — treat as local time
+  const normalized = rawTs.replace(' ', 'T');
+  const date = new Date(normalized);
+  if (isNaN(date.getTime())) return null;
+  return date.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+/**
  * Parse stack trace and extract key info
  */
 export function parseStackTrace(stackTrace) {

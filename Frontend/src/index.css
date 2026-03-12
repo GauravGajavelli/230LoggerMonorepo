@@ -110,25 +110,6 @@
   padding-left: calc(0.5em - 3px);
 }
 
-/* Deleted lines styling */
-.line-deleted {
-  background-color: rgba(239, 68, 68, 0.15);
-}
-
-.line-deleted .code-line-number {
-  opacity: 0.3;
-}
-
-.line-deleted .code-line-content {
-  border-left: 3px solid #ef4444;
-  padding-left: calc(0.5em - 3px);
-}
-
-.line-deleted-text {
-  text-decoration: line-through;
-  opacity: 0.6;
-  color: #f87171;
-}
 
 /* Error line highlighting (yellow) for jump-to-origin */
 .line-error-highlight {
@@ -150,9 +131,127 @@
   box-shadow: inset 0 -2px 8px -2px rgba(239, 68, 68, 0.4);
 }
 
+/* Modal entrance animations */
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modal-scale-in {
+  from { transform: scale(0.94); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
 /* Font settings */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* DetailView responsive layout */
+.dv-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+  font-family: 'Instrument Sans', 'Segoe UI', sans-serif;
+}
+
+.dv-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Summary banner inner layout */
+.dv-summary-banner {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.dv-summary-bars {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .dv-columns {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .dv-sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 24px;
+  }
+
+  .dv-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* On desktop the sidebar is narrow — let bars wrap onto their own row */
+  .dv-summary-banner {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .dv-summary-bars {
+    flex-basis: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+/* Session timeline chart placement */
+.dv-chart-fullwidth  { display: none; }   /* hidden on mobile */
+.dv-sidebar-timeline { display: block; }  /* chart+chips card: mobile only */
+.dv-sidebar-chips    { display: none; }   /* chips-only card:  desktop only */
+
+@media (min-width: 1024px) {
+  .dv-chart-fullwidth  { display: block; }
+  .dv-sidebar-timeline { display: none; }
+  .dv-sidebar-chips    { display: block; }
+}
+
+/* Feedback notification indicators — sonar/ripple pulse */
+
+/* Starting box-shadow matches 0% keyframe so the ring blooms seamlessly from the dot */
+@keyframes pulse-amber {
+  0%   { transform: scale(0.92); box-shadow: 0 0 0 0   rgba(245, 158, 11, 0.7); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);   }
+  100% { transform: scale(0.92); box-shadow: 0 0 0 0   rgba(245, 158, 11, 0);   }
+}
+
+.feedback-unseen-tab {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #F59E0B;
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  animation: pulse-amber 1.5s infinite;
+  flex-shrink: 0;
+}
+
+.feedback-unseen-chip {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #F59E0B;
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  animation: pulse-amber 1.5s infinite;
+  flex-shrink: 0;
+}
+
+.feedback-seen {
+  display: inline-block;
+  color: #10B981;
+  font-size: 11px;
+  line-height: 1;
 }
 
 code, pre, .font-mono {

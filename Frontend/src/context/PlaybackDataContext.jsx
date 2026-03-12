@@ -8,6 +8,7 @@ import {
   getTestHistoriesFromData,
   getFailureHighlightsFromData
 } from '../utils/failureIntervals';
+import { formatShortTime } from '../utils/formatUtils';
 
 /**
  * @typedef {Object} PlaybackDataContextValue
@@ -107,7 +108,9 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
         failureHighlights: { stillFailing: [], regressions: [], costlyDetours: [] },
         feedbackMap: new Map(),
         codeSnapshotsByRun: new Map(),
-        context: null
+        context: null,
+        detailTests: [],
+        detailSummary: { failing: 0, improved: 0, passing: 0, total: 0 },
       };
     }
 
@@ -135,6 +138,50 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
       });
     }
 
+    // Build run → timestamp map for changedAt derivation
+    const runToTimestamp = new Map();
+    (frontendData.episodeTestData || []).forEach(ep =>
+      (ep.runs || []).forEach(r => runToTimestamp.set(r.runNumber, r.timestamp))
+    );
+
+    // Feedback keyed by testId
+    const feedbackByTestId = new Map(
+      (frontendData.feedback || []).map(fb => [fb.testId, fb])
+    );
+
+    // Derive detail-view test list from testHistories
+    const detailTests = (frontendData.testHistories || []).map(h => {
+      const status = h.isLingeringFailure ? 'failing'
+        : (h.failureIntervals?.length > 0) ? 'improved'
+        : 'passing';
+
+      const runs = Object.keys(h.statusByRun || {}).map(Number).sort((a, b) => a - b);
+      let lastChangeRun = null;
+      for (let i = 1; i < runs.length; i++) {
+        if (h.statusByRun[runs[i]] !== h.statusByRun[runs[i - 1]]) lastChangeRun = runs[i];
+      }
+      const rawTs = lastChangeRun ? runToTimestamp.get(lastChangeRun) : null;
+      const changedAt = rawTs ? formatShortTime(rawTs) : null;
+
+      const fb = feedbackByTestId.get(h.testId);
+      return {
+        id: h.testId,
+        name: h.testName,
+        status,
+        changedAt,
+        explanation: fb?.explanation || '',
+        suggestion: fb?.suggestion || '',
+        diffs: fb?.diffs || [],
+      };
+    });
+
+    const detailSummary = {
+      failing:  detailTests.filter(t => t.status === 'failing').length,
+      improved: detailTests.filter(t => t.status === 'improved').length,
+      passing:  detailTests.filter(t => t.status === 'passing').length,
+      total:    detailTests.length,
+    };
+
     return {
       episodes: frontendData.episodes || [],
       episodeTestData: frontendData.episodeTestData || [],
@@ -144,7 +191,9 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
       failureHighlights,
       feedbackMap,
       codeSnapshotsByRun,
-      context: frontendData.context || null
+      context: frontendData.context || null,
+      detailTests,
+      detailSummary,
     };
   }, [frontendData]);
 

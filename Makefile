@@ -11,7 +11,6 @@ demo: build
 	  -o Frontend/public/data/frontend.json \
 	  --assignment-name "Binary Search Tree" \
 	  --student-id "demo-student" \
-	  --no-code \
 	  --cache-dir Pipeline/cache/llm \
 	  --allow-basic-fallback \
 	  --clear-cache
@@ -22,6 +21,5 @@ demo-cached: build
 	  -o Frontend/public/data/frontend.json \
 	  --assignment-name "Binary Search Tree" \
 	  --student-id "demo-student" \
-	  --no-code \
 	  --cache-dir Pipeline/cache/llm \
 	  --allow-basic-fallback

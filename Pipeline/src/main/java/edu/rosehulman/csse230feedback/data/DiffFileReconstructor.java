@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.ArrayList;
 
 public class DiffFileReconstructor {
 
@@ -30,6 +31,17 @@ public class DiffFileReconstructor {
 
         // DiffReplayer expects UTF-8 baseline and patch files. The TAR entries are written as UTF-8.
         return DiffReplayer.replay(baselineFile, patchFile);
+    }
+
+    /**
+     * Returns the raw baseline content for a file (no patch applied).
+     * Used to generate a run-0 snapshot representing the state before any student edits.
+     */
+    public List<String> reconstructBaseline(Path archivesDir, PatchPointer ptr, Path cacheDir, List<String> warnings)
+            throws IOException {
+        Path archiveZip = archivesDir.resolve(ptr.archiveFilename());
+        Path baselineFile = extractor.materializeEntry(archiveZip, ptr.baselineEntry(), cacheDir, warnings);
+        return new ArrayList<>(Files.readAllLines(baselineFile, StandardCharsets.UTF_8));
     }
 
     /**

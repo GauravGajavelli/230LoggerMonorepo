@@ -240,8 +240,15 @@ export function EpisodeSegments({
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2
                               bg-white border border-gray-200 rounded-lg p-2 z-20
                               whitespace-nowrap shadow-lg max-w-xs">
-                <div className="text-xs font-medium text-gray-800 mb-1">
+                <div className="text-xs font-medium text-gray-800">
                   {getTooltipLabel(episode)}
+                </div>
+                <div className="text-xs text-gray-400 mb-1.5" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                  {(() => {
+                    const nums = hoveredRuns.map(r => r.runNumber);
+                    const lo = Math.min(...nums), hi = Math.max(...nums);
+                    return lo === hi ? `Run ${lo}` : `Runs ${lo}–${hi}`;
+                  })()}
                 </div>
                 {episode.semantics?.summary && (
                   <div className="text-xs text-gray-500 mb-1.5 whitespace-normal line-clamp-2">
