@@ -1,0 +1,93 @@
+2;
+CHANGE
+119,119
+1,
+//	
+42,
+	
+	@Test
+	public void testBasicToString(){
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		System.out.println("Empty tree: " + b.toString());
+		
+		BinarySearchTree.Node n1 = b.new Node(1);
+		BinarySearchTree.Node n2 = b.new Node(2);
+		BinarySearchTree.Node n3 = b.new Node(3);
+		BinarySearchTree.Node n4 = b.new Node(4);
+		BinarySearchTree.Node n5 = b.new Node(5);
+		BinarySearchTree.Node n6 = b.new Node(6);
+		b.setRoot(n1);
+		n1.setRight(n2);
+		n2.setRight(n3);
+		n1.setLeft(n4);
+		n4.setLeft(n5);
+		n5.setRight(n6);
+		System.out.println("Tree: " + b.toString());
+	}
+	
+	@Test
+	public void testToString(){
+		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+		assertEquals("[]", b.toString());
+		
+		BinarySearchTree.Node n1 = b.new Node(1);
+		BinarySearchTree.Node n2 = b.new Node(2);
+		BinarySearchTree.Node n3 = b.new Node(3);
+		BinarySearchTree.Node n4 = b.new Node(4);
+		BinarySearchTree.Node n5 = b.new Node(5);
+		BinarySearchTree.Node n6 = b.new Node(6);
+		b.setRoot(n1);
+		n1.setRight(n2);
+		n2.setRight(n3);
+		n1.setLeft(n4);
+		n4.setLeft(n5);
+		n5.setRight(n6);
+		assertEquals( "[5, 6, 4, 1, 2, 3]", b.toString());			
+	}
+	
+
+DELETE
+121,162
+41,
+//	public void testBasicToString(){
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		System.out.println("Empty tree: " + b.toString());
+//		
+//		BinarySearchTree.Node n1 = b.new Node(1);
+//		BinarySearchTree.Node n2 = b.new Node(2);
+//		BinarySearchTree.Node n3 = b.new Node(3);
+//		BinarySearchTree.Node n4 = b.new Node(4);
+//		BinarySearchTree.Node n5 = b.new Node(5);
+//		BinarySearchTree.Node n6 = b.new Node(6);
+//		b.setRoot(n1);
+//		n1.setRight(n2);
+//		n2.setRight(n3);
+//		n1.setLeft(n4);
+//		n4.setLeft(n5);
+//		n5.setRight(n6);
+//		System.out.println("Tree: " + b.toString());
+//	}
+//	
+//	@Test
+//	public void testToString(){
+//		BinarySearchTree<Integer> b = new BinarySearchTree<Integer>();
+//		assertEquals("[]", b.toString());
+//		
+//		BinarySearchTree.Node n1 = b.new Node(1);
+//		BinarySearchTree.Node n2 = b.new Node(2);
+//		BinarySearchTree.Node n3 = b.new Node(3);
+//		BinarySearchTree.Node n4 = b.new Node(4);
+//		BinarySearchTree.Node n5 = b.new Node(5);
+//		BinarySearchTree.Node n6 = b.new Node(6);
+//		b.setRoot(n1);
+//		n1.setRight(n2);
+//		n2.setRight(n3);
+//		n1.setLeft(n4);
+//		n4.setLeft(n5);
+//		n5.setRight(n6);
+//		assertEquals( "[5, 6, 4, 1, 2, 3]", b.toString());			
+//	}
+//	
+//
+//	@Test
+0,

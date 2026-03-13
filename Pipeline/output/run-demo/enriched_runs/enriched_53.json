@@ -1,0 +1,169 @@
+[ {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testBasicToString()",
+  "testId" : "BSTManualTesting#testBasicToString()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testContainsNonBST()",
+  "testId" : "BSTManualTesting#testContainsNonBST()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTManualTesting#testHeight()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testInefficientIterator()",
+  "testId" : "BSTManualTesting#testInefficientIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTManualTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIterator()",
+  "testId" : "BSTManualTesting#testIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testPreOrderIterator()",
+  "testId" : "BSTManualTesting#testPreOrderIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTManualTesting#testSize()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArray()",
+  "testId" : "BSTManualTesting#testToArray()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArrayList()",
+  "testId" : "BSTManualTesting#testToArrayList()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToString()",
+  "testId" : "BSTManualTesting#testToString()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testContainsInts()",
+  "testId" : "BSTTesting#testContainsInts()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testContainsStrings()",
+  "testId" : "BSTTesting#testContainsStrings()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testEfficiency()",
+  "testId" : "BSTTesting#testEfficiency()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTTesting#testHeight()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInefficientIterator()",
+  "testId" : "BSTTesting#testInefficientIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertExceptions()",
+  "testId" : "BSTTesting#testInsertExceptions()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertInts()",
+  "testId" : "BSTTesting#testInsertInts()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueInt()",
+  "testId" : "BSTTesting#testInsertReturnValueInt()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueString()",
+  "testId" : "BSTTesting#testInsertReturnValueString()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertStrings()",
+  "testId" : "BSTTesting#testInsertStrings()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testIterator()",
+  "testId" : "BSTTesting#testIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testPreOrderIterator()",
+  "testId" : "BSTTesting#testPreOrderIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testRemove()",
+  "testId" : "BSTTesting#testRemove()",
+  "status" : "FAILED",
+  "cause" : "org.opentest4j.AssertionFailedError: expected: <4> but was: <14>"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testRemoveAdvanced()",
+  "testId" : "BSTTesting#testRemoveAdvanced()",
+  "status" : "FAILED",
+  "cause" : "org.opentest4j.AssertionFailedError: expected: <3> but was: <15>"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testRemoveIllegalArgumentException()",
+  "testId" : "BSTTesting#testRemoveIllegalArgumentException()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testRemoveReturnValue()",
+  "testId" : "BSTTesting#testRemoveReturnValue()",
+  "status" : "FAILED",
+  "cause" : "org.opentest4j.AssertionFailedError: expected: <4> but was: <14>"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTTesting#testSize()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToArrayInts()",
+  "testId" : "BSTTesting#testToArrayInts()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToArrayList()",
+  "testId" : "BSTTesting#testToArrayList()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToArrayStrings()",
+  "testId" : "BSTTesting#testToArrayStrings()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToString()",
+  "testId" : "BSTTesting#testToString()",
+  "status" : "SUCCESSFUL"
+} ]

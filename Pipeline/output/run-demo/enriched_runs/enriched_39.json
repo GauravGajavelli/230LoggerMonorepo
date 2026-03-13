@@ -1,0 +1,57 @@
+[ {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testBasicToString()",
+  "testId" : "BSTManualTesting#testBasicToString()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testContainsNonBST()",
+  "testId" : "BSTManualTesting#testContainsNonBST()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTManualTesting#testHeight()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testInefficientIterator()",
+  "testId" : "BSTManualTesting#testInefficientIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTManualTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIterator()",
+  "testId" : "BSTManualTesting#testIterator()",
+  "status" : "FAILED",
+  "cause" : "org.opentest4j.AssertionFailedError: expected: <true> but was: <false>"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testPreOrderIterator()",
+  "testId" : "BSTManualTesting#testPreOrderIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTManualTesting#testSize()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArray()",
+  "testId" : "BSTManualTesting#testToArray()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArrayList()",
+  "testId" : "BSTManualTesting#testToArrayList()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToString()",
+  "testId" : "BSTManualTesting#testToString()",
+  "status" : "SUCCESSFUL"
+} ]

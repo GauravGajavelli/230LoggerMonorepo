@@ -1,0 +1,336 @@
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Stack;
+import java.util.function.BooleanSupplier;
+
+/**
+ * 
+ * Implementation of most of the Set interface operations using a Binary Search Tree
+ *
+ * @author Matt Boutell and <<< YOUR NAME HERE >>>.
+ * @param <T>
+ */
+
+public class BinarySearchTree<T> {
+	private Node root;
+	private int version;
+
+	// You will like NULL NODEs (a common software design pattern) once you get used to them.
+	private final Node NULL_NODE = new Node();
+
+	public BinarySearchTree() {
+		root = NULL_NODE;
+	}
+
+	public int size() {
+		return root.size();
+	}
+
+	public int height() {
+		return root.height();
+	}
+
+	// For manual tests only
+	void setRoot(Node n) {
+		this.root = n;
+	}
+	
+	public void printPreOrder() {
+		root.printPreOrder();
+	}
+	
+	public void printInOrder() {
+		root.printInOrder();
+	}
+	
+	public void printPostOrder() {
+		root.printPostOrder();
+	}
+	
+	// Not private, since we need access for manual testing.
+	class Node {
+		private T data;
+		private Node left;
+		private Node right;
+
+		public Node() {
+			this.data = null;
+			this.left = null;
+			this.right = null;
+		}
+
+		public void printPreOrder() {
+			if (this == NULL_NODE) return;
+			System.out.println(this.data.toString());
+			left.printPreOrder();
+			right.printPreOrder();
+		}
+
+		public void printInOrder() {
+			if (this == NULL_NODE) return;
+			left.printInOrder();
+			System.out.println(this.data.toString());
+			right.printInOrder();
+		}
+
+		public void printPostOrder() {
+			if (this == NULL_NODE) return;
+			left.printPostOrder();
+			right.printPostOrder();
+			System.out.println(this.data.toString());
+		}
+
+		public int size() {
+			if (this == NULL_NODE) {
+				return 0;
+			}
+			return (1 + left.size() + right.size());
+		}
+
+		public int height() {
+			if (this == NULL_NODE) {
+				return -1;
+			}
+			return (1 + Math.max(left.height(), right.height()));
+		}
+
+		public Node(T element) {
+			this.data = element;
+			this.left = NULL_NODE;
+			this.right = NULL_NODE;
+		}
+
+		public T getData() {
+			return this.data;
+		}
+
+		public Node getLeft() {
+			return this.left;
+		}
+
+
+		public Node getRight() {
+			return this.right;
+		}
+
+		// For manual testing
+		public void setLeft(Node left) {
+			this.left = left;
+		}
+		
+		public void setRight(Node right) {
+			this.right = right;
+		}
+		
+	}
+
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return this.size() == 0;
+	}
+
+	public boolean containsNonBST(T i) {
+		// TODO Auto-generated method stub
+		return containsNonBSTHelper(i, root);
+	}
+	private boolean containsNonBSTHelper(T i, Node cur) {
+		if (cur == NULL_NODE) {
+			return false;
+		}
+		if (cur.data.equals(i)) {
+			return true;
+		}
+		return containsNonBSTHelper(i, cur.left) || containsNonBSTHelper(i, cur.right);
+	}
+	// TODO: Implement your 3 iterator classes here, plus any other inner helper classes you'd like. 
+	 
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		this.toStringHelper(root, sb);
+		sb.append("]");
+		return sb.toString();
+	}
+	
+	private void toStringHelper(Node cur, StringBuilder sb) {
+		if (cur == NULL_NODE) {
+			return;
+		}
+		this.toStringHelper(cur.left, sb);
+		if (sb.length() != 1) {
+			sb.append(",");
+			sb.append(" ");
+		}
+		sb.append(cur.data.toString());
+		this.toStringHelper(cur.right, sb);
+	}
+
+	public ArrayList<T> toArrayList() {
+		ArrayList<T> list = new ArrayList<>();
+		this.toArrayListHelper(root, list);
+		return list;
+	}
+	
+	private void toArrayListHelper(Node cur, ArrayList list) {
+		if (cur == NULL_NODE) {
+			return;
+		}
+		this.toArrayListHelper(cur.left, list);
+		list.add(cur.data);
+		this.toArrayListHelper(cur.right, list);
+	}
+
+	public Object[] toArray() {
+		Object[] arr = new Object[this.size()];
+		this.toArrayHelper(root, arr, new int[] {0});
+		return arr;
+	}
+	
+	private void toArrayHelper(Node cur, Object[] arr, int[] idx) {
+		if (cur == NULL_NODE) {
+			return;
+		}
+		this.toArrayHelper(cur.left, arr, idx);
+		arr[idx[0]] = cur.data;
+		idx[0]++;
+		this.toArrayHelper(cur.right, arr, idx);
+	}
+
+	public Iterator<T> inefficientIterator() {
+		ArrayList<T> list = this.toArrayList();
+		return list.iterator();
+	}
+
+	public Iterator<T> preOrderIterator() {
+		return new preOrderIter(this);
+	}
+	
+	private class preOrderIter implements Iterator<T> {
+		private Stack<Node> stack;
+		private int version;
+		private BinarySearchTree<T> binarySearchTree;
+		
+		public preOrderIter(BinarySearchTree<T> binarySearchTree) {
+			stack = new Stack<Node>();
+			if (binarySearchTree.root != NULL_NODE) {
+				stack.push(binarySearchTree.root);
+			}
+			version = binarySearchTree.version;
+			this.binarySearchTree = binarySearchTree;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (binarySearchTree.version != this.version) {
+				return false;
+			}
+			return !stack.isEmpty();
+		}
+
+		@Override
+		public T next() {
+			if (binarySearchTree.version != this.version) {
+				return null;
+			}
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+			Node cur = stack.pop();
+			T toRet = cur.data;
+			if (cur.right != NULL_NODE) {
+				stack.push(cur.right);
+			}
+			if (cur.left != NULL_NODE) {
+				stack.push(cur.left);
+			}
+			return toRet;
+		}
+		
+	}
+
+	public Iterator<T> iterator() {
+		return new inOrderIter(this);
+	}
+	
+	private class inOrderIter implements Iterator<T> {
+		private Stack<Node> stack;
+		private Stack<Integer> flags;
+		private int version;
+		private BinarySearchTree<T> binarySearchTree;
+		
+		public inOrderIter(BinarySearchTree<T> binarySearchTree) {
+			stack = new Stack<Node>();
+			flags = new Stack<Integer>();
+			if (binarySearchTree.root != NULL_NODE) {
+				stack.push(binarySearchTree.root);
+				flags.push(1);
+			}
+			version = binarySearchTree.version;
+			this.binarySearchTree = binarySearchTree;
+			
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (binarySearchTree.version != this.version) {
+				return false;
+			}
+			return !stack.isEmpty();
+		}
+		
+		/*
+		 inOrderRec(Node cur) {
+		 	if (cur == NULL_NODE) {
+		 		return;
+		 	}
+		 	Node left = cur.left;   // 1 means we've to do this part
+		 	if (left != NULL_NODE) {
+		 		inOrderRec(left);
+		 	}
+		 	l.add(cur);
+		 	Node right = cur.right; // 2 means this part
+		 	if (right != NULL_NODE) {
+		 		inOrderRec(right);
+	 		}
+		 }
+		 * */
+
+		@Override
+		public T next() {
+			if (binarySearchTree.version != this.version) {
+				return null;
+			}
+			
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+
+			Node cur = stack.pop();
+			int flag = flags.pop();
+			
+			if (flag == 1) {
+				stack.push(cur);
+				flags.push(2); // when we see it again we'll know to remove for good
+				
+				Node left = cur.left;   // 1 means we've to do this part
+				Node prev = cur;
+			 	while (left != NULL_NODE) {
+			 		stack.push(left);
+			 		flags.push(1);
+			 		prev = left;
+			 		left = left.left;
+			 	}
+				return prev.data;
+			}
+		 	Node right = cur.right; // 2 means this part
+		 	if (right != NULL_NODE) {
+		 		stack.push(right);
+		 		flags.push(1);
+		 		return cur.data;
+	 		}
+		 	return null;
+		}
+		
+	}
+}

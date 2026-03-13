@@ -1,0 +1,29 @@
+2;
+INSERT
+0,0
+0,
+2,
+import java.util.function.BooleanSupplier;
+
+INSERT
+120,122
+0,
+18,
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return this.size() == 0;
+	}
+
+	public boolean containsNonBST(T i) {
+		// TODO Auto-generated method stub
+		return containsNonBSTHelper(i, root);
+	}
+	private boolean containsNonBSTHelper(T i, Node cur) {
+		if (cur == NULL_NODE) {
+			return false;
+		}
+		if (cur.equals(i)) {
+			return true;
+		}
+		return containsNonBSTHelper(i, cur.left) || containsNonBSTHelper(i, cur.right);
+	}

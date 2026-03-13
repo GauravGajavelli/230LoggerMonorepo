@@ -1,0 +1,22 @@
+[ {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testContainsNonBST()",
+  "testId" : "BSTManualTesting#testContainsNonBST()",
+  "status" : "FAILED",
+  "cause" : "org.opentest4j.AssertionFailedError: expected: <true> but was: <false>"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTManualTesting#testHeight()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTManualTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTManualTesting#testSize()",
+  "status" : "SUCCESSFUL"
+} ]

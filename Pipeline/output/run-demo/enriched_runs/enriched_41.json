@@ -1,0 +1,97 @@
+[ {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testBasicToString()",
+  "testId" : "BSTManualTesting#testBasicToString()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testContainsNonBST()",
+  "testId" : "BSTManualTesting#testContainsNonBST()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTManualTesting#testHeight()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testInefficientIterator()",
+  "testId" : "BSTManualTesting#testInefficientIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTManualTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIterator()",
+  "testId" : "BSTManualTesting#testIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testPreOrderIterator()",
+  "testId" : "BSTManualTesting#testPreOrderIterator()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTManualTesting#testSize()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArray()",
+  "testId" : "BSTManualTesting#testToArray()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArrayList()",
+  "testId" : "BSTManualTesting#testToArrayList()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToString()",
+  "testId" : "BSTManualTesting#testToString()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTTesting#testHeight()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertExceptions()",
+  "testId" : "BSTTesting#testInsertExceptions()",
+  "status" : "FAILED",
+  "cause" : "org.opentest4j.AssertionFailedError: Did not throw IllegalArgumentException"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertInts()",
+  "testId" : "BSTTesting#testInsertInts()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueInt()",
+  "testId" : "BSTTesting#testInsertReturnValueInt()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueString()",
+  "testId" : "BSTTesting#testInsertReturnValueString()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertStrings()",
+  "testId" : "BSTTesting#testInsertStrings()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTTesting#testSize()",
+  "status" : "SUCCESSFUL"
+} ]

@@ -1,0 +1,103 @@
+[ {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testContainsInts()",
+  "testId" : "BSTTesting#testContainsInts()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testContainsStrings()",
+  "testId" : "BSTTesting#testContainsStrings()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTTesting#testHeight()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInefficientIterator()",
+  "testId" : "BSTTesting#testInefficientIterator()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertExceptions()",
+  "testId" : "BSTTesting#testInsertExceptions()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertInts()",
+  "testId" : "BSTTesting#testInsertInts()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueInt()",
+  "testId" : "BSTTesting#testInsertReturnValueInt()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueString()",
+  "testId" : "BSTTesting#testInsertReturnValueString()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertStrings()",
+  "testId" : "BSTTesting#testInsertStrings()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTTesting#testIsEmpty()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testIterator()",
+  "testId" : "BSTTesting#testIterator()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testPreOrderIterator()",
+  "testId" : "BSTTesting#testPreOrderIterator()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTTesting#testSize()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToArrayInts()",
+  "testId" : "BSTTesting#testToArrayInts()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToArrayList()",
+  "testId" : "BSTTesting#testToArrayList()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToArrayStrings()",
+  "testId" : "BSTTesting#testToArrayStrings()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testToString()",
+  "testId" : "BSTTesting#testToString()",
+  "status" : "FAILED",
+  "cause" : "java.lang.NoClassDefFoundError: BinarySearchTree"
+} ]

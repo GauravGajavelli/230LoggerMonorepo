@@ -53,7 +53,7 @@ export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
             }}
           >
             {/* Line 1: number · area label  [feedback dot] */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <span style={{
                 width: 8, height: 8, borderRadius: '50%',
                 background: dotColor, flexShrink: 0, display: 'inline-block',

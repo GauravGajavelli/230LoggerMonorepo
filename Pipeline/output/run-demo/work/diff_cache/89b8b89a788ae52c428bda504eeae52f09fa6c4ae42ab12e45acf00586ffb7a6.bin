@@ -1,0 +1,15 @@
+2;
+DELETE
+406,406
+4,
+		if (this.root == NULL_NODE) {
+			root = new Node(i);
+			return true;
+		}
+0,
+CHANGE
+412,408
+1,
+		removeHelper(root, i, b);
+1,
+		root = removeHelper(root, i, b);

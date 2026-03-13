@@ -2,9 +2,9 @@
   "context" : {
     "studentId" : "demo-student",
     "assignmentName" : "Binary Search Tree",
-    "submittedAt" : "2026-03-13T15:08:38.474961Z",
-    "totalEpisodes" : 14,
-    "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/staging"
+    "submittedAt" : "2026-03-11T05:56:11.162228Z",
+    "totalEpisodes" : 13,
+    "repoRoot" : "/tmp/run-demo-staging"
   },
   "episodes" : [ {
     "id" : "episode-1",
@@ -13,7 +13,7 @@
     "label" : "Episode 1",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Initial setup with basic BST structure. Student verified that testHeight and testSize pass, but identified compilation errors for containsNonBST() and isEmpty() methods that need implementation.",
+      "summary" : "Student began with initial BST implementation containing height() and size() methods. Missing implementations for containsNonBST() and isEmpty() caused compilation errors. This was the starting point with 2 passing tests.",
       "dominantIntent" : "extending",
       "conceptsAddressed" : [ "binary search tree structure", "tree height computation", "tree size computation" ],
       "progressAssessment" : "productive"
@@ -31,9 +31,9 @@
     "label" : "Episode 2",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Implemented isEmpty() method successfully and debugged containsNonBST() method. Student made progress on basic utility methods, with isEmpty() now passing but containsNonBST() still showing logic errors (returning false when true expected).",
+      "summary" : "Student implemented isEmpty() method (run 2) and containsNonBST() method (run 3), resolving compilation errors. However, containsNonBST() had incorrect logic returning false when it should return true. Progress from 2 to 3 passing tests, but introduced a logic bug requiring debugging.",
       "dominantIntent" : "extending",
-      "conceptsAddressed" : [ "isEmpty implementation", "tree traversal search", "binary search tree contains operation" ],
+      "conceptsAddressed" : [ "isEmpty implementation", "membership testing (containsNonBST)" ],
       "progressAssessment" : "productive"
     },
     "timeRange" : "11:42 PM – 12:14 AM",
@@ -49,9 +49,9 @@
     "label" : "Episode 3",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Continued debugging containsNonBST() method. Student attempted fixes but the method still returns incorrect results, indicating a fundamental logic error in the tree search implementation.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree traversal search", "binary search tree contains operation" ],
+      "summary" : "Student analyzed the failing containsNonBST() test without making code changes (runs 4-5). Extended thinking period (9 minutes between runs) suggests the student was reasoning through the logic error.",
+      "dominantIntent" : "experimenting",
+      "conceptsAddressed" : [ "membership testing (containsNonBST)", "debugging logic errors" ],
       "progressAssessment" : "stuck"
     },
     "timeRange" : "12:17 AM – 12:18 AM",
@@ -67,9 +67,9 @@
     "label" : "Episode 4",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Brief debugging session with no visible progress on containsNonBST(). Student likely analyzing the problem or attempting minor adjustments without success.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree traversal search" ],
+      "summary" : "Continued analysis of containsNonBST() failure with no code changes (runs 6-8). Extended 12-minute pause between runs 7-8 indicates deep thinking about the problem. Student was stuck on the logic error but working through it mentally.",
+      "dominantIntent" : "experimenting",
+      "conceptsAddressed" : [ "membership testing (containsNonBST)" ],
       "progressAssessment" : "stuck"
     },
     "timeRange" : "12:27 AM – 12:27 AM",
@@ -85,10 +85,10 @@
     "label" : "Episode 5",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Continued stalled debugging of containsNonBST() with no test result changes. Student appears to be in a trial-and-error phase without clear progress.",
+      "summary" : "Breakthrough: Student fixed containsNonBST() logic (run 9), correctly returning true when value is found. This resolved the 5-run debugging stall. Progress to 4 passing tests. Also implemented toString() method (run 10) achieving 5 passing tests.",
       "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree traversal search" ],
-      "progressAssessment" : "stuck"
+      "conceptsAddressed" : [ "membership testing (containsNonBST)", "string representation" ],
+      "progressAssessment" : "breakthrough"
     },
     "timeRange" : "12:28 AM – 12:28 AM",
     "edits" : 2,
@@ -103,10 +103,10 @@
     "label" : "Episode 6",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Extended debugging session spanning 20+ hours with multiple attempts to fix containsNonBST(). After sustained effort, student achieved breakthrough: containsNonBST() now passes, followed by successful implementation of toString() method. However, toString() introduced infinite recursion bug (StackOverflowError) that required additional debugging. By episode end, toString() formatting issues were resolved with proper comma-space formatting.",
+      "summary" : "Extended episode spanning 20+ hours with multiple toString() refinements. Student introduced infinite recursion bug (run 11, StackOverflowError), then debugged through 4 runs of fixes (runs 13-15) to correct formatting issues (missing spaces and commas). Achieved 6 passing tests by end of episode. Also implemented toArrayList() (run 16) and toArray() (run 17) methods, reaching 8 passing tests.",
       "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree traversal search", "string representation", "recursive tree traversal", "output formatting" ],
-      "progressAssessment" : "breakthrough"
+      "conceptsAddressed" : [ "string representation", "tree traversal (array conversion)", "recursion handling" ],
+      "progressAssessment" : "productive"
     },
     "timeRange" : "12:28 AM – 8:55 PM",
     "edits" : 10,
@@ -121,10 +121,10 @@
     "label" : "Episode 7",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Implemented toArrayList() and toArray() methods successfully, then began work on iterator functionality. Student implemented basic inefficient iterator and pre-order iterator. Pre-order iterator required extensive debugging (6+ attempts) with multiple failure modes (wrong values, null returns, missing exceptions) before finally passing. Student demonstrated persistence through complex iterator logic.",
-      "dominantIntent" : "extending",
-      "conceptsAddressed" : [ "array conversion", "iterator implementation", "tree traversal (pre-order)", "exception handling (NoSuchElementException)" ],
-      "progressAssessment" : "breakthrough"
+      "summary" : "Extended 13+ hour episode focused on iterator implementations. Student implemented inefficient iterator (run 18, passing), then pre-order iterator (runs 19-25) which required 6 runs of debugging to fix hasNext() logic, next() return values, and exception handling. Achieved 10 passing tests by end. This was a challenging feature requiring systematic debugging of traversal order and edge cases.",
+      "dominantIntent" : "debugging",
+      "conceptsAddressed" : [ "iterator implementation", "pre-order tree traversal", "exception handling (NoSuchElementException)" ],
+      "progressAssessment" : "productive"
     },
     "timeRange" : "8:57 PM – 10:51 AM",
     "edits" : 15,
@@ -139,10 +139,10 @@
     "label" : "Episode 8",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Implemented in-order iterator but encountered severe debugging challenges. Student spent 27+ minutes attempting to fix the in-order iterator, which exhibited multiple failure modes: null pointer exceptions, wrong traversal order, and null returns. Despite 13 consecutive failed attempts (runs 26-38), student persisted without resolution by episode end.",
+      "summary" : "Extended 6+ hour episode focused on in-order iterator implementation (runs 26-40). Student struggled significantly with iterator logic, requiring 13 runs of debugging. Encountered null pointer exceptions, wrong return values, off-by-one errors, and null returns. Extended thinking periods (17+ minutes) between attempts. Finally achieved breakthrough (run 40) fixing the traversal logic. Reached 11 passing tests.",
       "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "iterator implementation", "tree traversal (in-order)", "stack-based iteration" ],
-      "progressAssessment" : "stuck"
+      "conceptsAddressed" : [ "iterator implementation", "in-order tree traversal", "null pointer handling" ],
+      "progressAssessment" : "breakthrough"
     },
     "timeRange" : "11:00 AM – 5:12 PM",
     "edits" : 2,
@@ -153,49 +153,31 @@
   }, {
     "id" : "episode-9",
     "startTime" : "2026-03-09 17:13:08.3",
-    "endTime" : "2026-03-09 17:13:08.3",
-    "label" : "Episode 9",
-    "dominantCategory" : "BSTManualTesting",
-    "semantics" : {
-      "summary" : "Continuation of in-order iterator debugging from previous episode. Single run showing persistent iterator failure with no code changes or progress.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "iterator implementation", "tree traversal (in-order)" ],
-      "progressAssessment" : "stuck"
-    },
-    "timeRange" : "5:13 PM – 5:13 PM",
-    "edits" : 1,
-    "area" : "BinarySearchTree.java",
-    "outcome" : "testHeight went from passing to failing",
-    "outcomeType" : "regression",
-    "linkedTestId" : "BSTTesting#testHeight()"
-  }, {
-    "id" : "episode-10",
-    "startTime" : "2026-03-09 17:17:33.149",
     "endTime" : "2026-03-09 17:17:33.149",
-    "label" : "Episode 10",
+    "label" : "Episode 9",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Breakthrough moment: Student finally fixed the in-order iterator implementation after 13+ failed attempts. This fix unblocked expansion to comprehensive BSTTesting test suite, which immediately revealed 7 new passing tests (height, insert operations, size, isEmpty) and identified missing exception handling for null values in insert operations.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "iterator implementation", "tree traversal (in-order)", "binary search tree insertion", "exception handling" ],
-      "progressAssessment" : "breakthrough"
+      "summary" : "Test suite expanded to BSTTesting class with 7 new test categories (run 41). Most new tests passed immediately, but testInsertExceptions() failed. Student quickly added null check to insert() method (run 42) to throw IllegalArgumentException. Achieved 13 passing tests with proper exception handling for null insertion.",
+      "dominantIntent" : "extending",
+      "conceptsAddressed" : [ "exception handling (IllegalArgumentException)", "null validation", "binary search tree insertion" ],
+      "progressAssessment" : "productive"
     },
-    "timeRange" : "5:17 PM – 5:17 PM",
-    "edits" : 1,
+    "timeRange" : "5:13 PM – 5:17 PM",
+    "edits" : 2,
     "area" : "BinarySearchTree.java",
     "outcome" : "testContainsInts went from failing to passing",
     "outcomeType" : "fix",
     "linkedTestId" : "BSTTesting#testContainsInts()"
   }, {
-    "id" : "episode-11",
+    "id" : "episode-10",
     "startTime" : "2026-03-09 17:18:06.279",
     "endTime" : "2026-03-09 23:39:42.695",
-    "label" : "Episode 11",
+    "label" : "Episode 10",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Fixed insert exception handling for null values, then encountered and recovered from a compilation error that temporarily broke all BSTTesting tests. Student successfully resolved the compilation issue, achieving 28 total passing tests. Extended session (6+ hours) with systematic debugging of compilation and exception handling issues.",
+      "summary" : "Extended 6+ hour episode implementing contains() method (run 43) which introduced compilation error with unreachable code. Student fixed the compilation error (run 44), unlocking 13 previously failing tests. Then implemented remove() method (run 45) which is the most complex BST operation. Initial remove() implementation had logic errors with incorrect return values and tree state. Runs 46-54 involved extensive debugging of remove() with regression cycles, StackOverflowError, and multiple logic rewrites. Finally achieved breakthrough (run 55) fixing infinite recursion and node replacement logic, unlocking 3 remove-related tests and reaching 100% test passage (404/404 tests).",
       "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "exception handling (IllegalArgumentException)", "binary search tree insertion", "compilation error recovery" ],
+      "conceptsAddressed" : [ "membership testing (contains)", "node deletion with children", "tree restructuring", "exception handling" ],
       "progressAssessment" : "breakthrough"
     },
     "timeRange" : "5:18 PM – 11:39 PM",
@@ -205,16 +187,16 @@
     "outcomeType" : "fix",
     "linkedTestId" : "BSTTesting#testRemove()"
   }, {
-    "id" : "episode-12",
+    "id" : "episode-11",
     "startTime" : "2026-03-10 00:00:40.327",
     "endTime" : "2026-03-10 00:03:16.302",
-    "label" : "Episode 12",
+    "label" : "Episode 11",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Brief session implementing remove() method. Implementation introduced 8 new test failures related to incorrect removal behavior and missing concurrency exception handling. Student identified that remove() has logic errors and that iterators need ConcurrentModificationException and IllegalStateException support.",
-      "dominantIntent" : "extending",
-      "conceptsAddressed" : [ "node deletion", "tree modification", "concurrent modification detection" ],
-      "progressAssessment" : "regressing"
+      "summary" : "Verification run (run 56) confirming all 33 visible tests passing (100% success rate). No code changes made. This represents the stable completion state of the BST assignment with all 404 tests passing.",
+      "dominantIntent" : "refactoring",
+      "conceptsAddressed" : [ "binary search tree operations", "tree traversal", "iterator implementation" ],
+      "progressAssessment" : "productive"
     },
     "timeRange" : "12:00 AM – 12:03 AM",
     "edits" : 3,
@@ -223,16 +205,16 @@
     "outcomeType" : "regression",
     "linkedTestId" : "BSTTesting#testRemove()"
   }, {
-    "id" : "episode-13",
+    "id" : "episode-12",
     "startTime" : "2026-03-10 00:28:28.382",
     "endTime" : "2026-03-10 03:44:18.634",
-    "label" : "Episode 13",
+    "label" : "Episode 12",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Extended debugging session (3+ hours) focused on fixing remove() method implementation. Student encountered severe regression (run 53-54) with StackOverflowError and inverted size counts, indicating infinite recursion in node removal logic. After systematic debugging, achieved breakthrough at run 55: all remove-related tests now pass. Student successfully resolved the infinite recursion and size-counting issues in node deletion with children.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "node deletion", "node deletion with children", "successor finding", "tree size management" ],
-      "progressAssessment" : "breakthrough"
+      "summary" : "Extended 3+ hour episode with continued verification and stability testing. Run 57 confirms all 33 tests continue passing with no code changes. Student appears to be verifying the robustness of the implementation across multiple test runs.",
+      "dominantIntent" : "refactoring",
+      "conceptsAddressed" : [ "binary search tree operations", "tree traversal", "iterator implementation" ],
+      "progressAssessment" : "productive"
     },
     "timeRange" : "12:28 AM – 3:44 AM",
     "edits" : 2,
@@ -241,15 +223,15 @@
     "outcomeType" : "fix",
     "linkedTestId" : "BSTTesting#testRemove()"
   }, {
-    "id" : "episode-14",
+    "id" : "episode-13",
     "startTime" : "2026-03-10 04:31:39.43",
     "endTime" : "2026-03-10 04:43:09.636",
-    "label" : "Episode 14",
+    "label" : "Episode 13",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Verification and stabilization phase. Student confirmed all 34 core BST functionality tests remain passing (insertion, removal, searching, tree properties, string representation, array conversion, in-order and pre-order iterators). No new code changes; student appears to be preparing for final phase of implementing concurrency exception handling in iterators.",
+      "summary" : "Final verification episode confirming assignment completion. All 33 visible tests passing (100% success rate) with no code changes. This represents the final stable state of the fully functional BST implementation with all core operations (insert, contains, remove) and traversal methods working correctly.",
       "dominantIntent" : "refactoring",
-      "conceptsAddressed" : [ "binary search tree operations", "iterator implementation", "tree traversal" ],
+      "conceptsAddressed" : [ "binary search tree operations", "tree traversal", "iterator implementation" ],
       "progressAssessment" : "productive"
     },
     "timeRange" : "4:31 AM – 4:43 AM",
@@ -2933,16 +2915,13 @@
         "changedThisRun" : false,
         "previousStatus" : "pass"
       } ]
-    } ]
-  }, {
-    "episodeId" : "episode-10",
-    "runs" : [ {
+    }, {
       "runNumber" : 43,
       "timestamp" : "2026-03-09 17:17:33.149",
       "summary" : {
         "total" : 17,
-        "passed" : 0,
-        "failed" : 17,
+        "passed" : 15,
+        "failed" : 2,
         "errored" : 0,
         "skipped" : 0
       },
@@ -2959,90 +2938,90 @@
       }, {
         "id" : "BSTTesting#testHeight()",
         "name" : "testHeight()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInefficientIterator()",
         "name" : "testInefficientIterator()",
-        "status" : "fail",
+        "status" : "pass",
         "changedThisRun" : false
       }, {
         "id" : "BSTTesting#testInsertExceptions()",
         "name" : "testInsertExceptions()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertInts()",
         "name" : "testInsertInts()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertReturnValueInt()",
         "name" : "testInsertReturnValueInt()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertReturnValueString()",
         "name" : "testInsertReturnValueString()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertStrings()",
         "name" : "testInsertStrings()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testIsEmpty()",
         "name" : "testIsEmpty()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testIterator()",
         "name" : "testIterator()",
-        "status" : "fail",
+        "status" : "pass",
         "changedThisRun" : false
       }, {
         "id" : "BSTTesting#testPreOrderIterator()",
         "name" : "testPreOrderIterator()",
-        "status" : "fail",
+        "status" : "pass",
         "changedThisRun" : false
       }, {
         "id" : "BSTTesting#testSize()",
         "name" : "testSize()",
-        "status" : "fail",
-        "changedThisRun" : true,
+        "status" : "pass",
+        "changedThisRun" : false,
         "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testToArrayInts()",
         "name" : "testToArrayInts()",
-        "status" : "fail",
+        "status" : "pass",
         "changedThisRun" : false
       }, {
         "id" : "BSTTesting#testToArrayList()",
         "name" : "testToArrayList()",
-        "status" : "fail",
+        "status" : "pass",
         "changedThisRun" : false
       }, {
         "id" : "BSTTesting#testToArrayStrings()",
         "name" : "testToArrayStrings()",
-        "status" : "fail",
+        "status" : "pass",
         "changedThisRun" : false
       }, {
         "id" : "BSTTesting#testToString()",
         "name" : "testToString()",
-        "status" : "fail",
+        "status" : "pass",
         "changedThisRun" : false
       } ]
     } ]
   }, {
-    "episodeId" : "episode-11",
+    "episodeId" : "episode-10",
     "runs" : [ {
       "runNumber" : 44,
       "timestamp" : "2026-03-09 17:18:06.279",
@@ -3135,129 +3114,104 @@
         "id" : "BSTTesting#testHeight()",
         "name" : "testHeight()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInefficientIterator()",
         "name" : "testInefficientIterator()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertExceptions()",
         "name" : "testInsertExceptions()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertInts()",
         "name" : "testInsertInts()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertReturnValueInt()",
         "name" : "testInsertReturnValueInt()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertReturnValueString()",
         "name" : "testInsertReturnValueString()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testInsertStrings()",
         "name" : "testInsertStrings()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testIsEmpty()",
         "name" : "testIsEmpty()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testIterator()",
         "name" : "testIterator()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testPreOrderIterator()",
         "name" : "testPreOrderIterator()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testSize()",
         "name" : "testSize()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testToArrayInts()",
         "name" : "testToArrayInts()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testToArrayList()",
         "name" : "testToArrayList()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testToArrayStrings()",
         "name" : "testToArrayStrings()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       }, {
         "id" : "BSTTesting#testToString()",
         "name" : "testToString()",
         "status" : "pass",
-        "changedThisRun" : true,
-        "previousStatus" : "fail"
+        "changedThisRun" : false,
+        "previousStatus" : "pass"
       } ]
     }, {
       "runNumber" : 45,
       "timestamp" : "2026-03-09 23:27:43.298",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 30,
-        "failed" : 8,
+        "failed" : 3,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -3455,43 +3409,13 @@
       "runNumber" : 46,
       "timestamp" : "2026-03-09 23:29:38.639",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 30,
-        "failed" : 8,
+        "failed" : 3,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -3728,43 +3652,13 @@
       "runNumber" : 49,
       "timestamp" : "2026-03-09 23:39:42.695",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 30,
-        "failed" : 8,
+        "failed" : 3,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -3965,48 +3859,18 @@
       } ]
     } ]
   }, {
-    "episodeId" : "episode-12",
+    "episodeId" : "episode-11",
     "runs" : [ {
       "runNumber" : 50,
       "timestamp" : "2026-03-10 00:00:40.327",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 32,
-        "failed" : 6,
+        "failed" : 1,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -4209,43 +4073,13 @@
       "runNumber" : 51,
       "timestamp" : "2026-03-10 00:00:43.052",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 32,
-        "failed" : 6,
+        "failed" : 1,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -4448,43 +4282,13 @@
       "runNumber" : 52,
       "timestamp" : "2026-03-10 00:03:16.302",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 32,
-        "failed" : 6,
+        "failed" : 1,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -4685,48 +4489,18 @@
       } ]
     } ]
   }, {
-    "episodeId" : "episode-13",
+    "episodeId" : "episode-12",
     "runs" : [ {
       "runNumber" : 53,
       "timestamp" : "2026-03-10 00:28:28.382",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 30,
-        "failed" : 8,
+        "failed" : 3,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -4929,43 +4703,13 @@
       "runNumber" : 54,
       "timestamp" : "2026-03-10 03:44:18.634",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 30,
-        "failed" : 8,
+        "failed" : 3,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -5166,48 +4910,18 @@
       } ]
     } ]
   }, {
-    "episodeId" : "episode-14",
+    "episodeId" : "episode-13",
     "runs" : [ {
       "runNumber" : 55,
       "timestamp" : "2026-03-10 04:31:39.43",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 33,
-        "failed" : 5,
+        "failed" : 0,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -5410,43 +5124,13 @@
       "runNumber" : 56,
       "timestamp" : "2026-03-10 04:32:49.249",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 33,
-        "failed" : 5,
+        "failed" : 0,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -5649,43 +5333,13 @@
       "runNumber" : 57,
       "timestamp" : "2026-03-10 04:43:09.636",
       "summary" : {
-        "total" : 38,
+        "total" : 33,
         "passed" : 33,
-        "failed" : 5,
+        "failed" : 0,
         "errored" : 0,
         "skipped" : 0
       },
       "results" : [ {
-        "id" : "BSTConcurrencyTesting#testIterator()",
-        "name" : "testIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-        "name" : "testPreOrderIteratorConcurrentModificationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-        "name" : "testRemoveConcurrentModifcationException()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-        "name" : "testRemoveInInOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
-        "id" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-        "name" : "testRemoveInPreOrderIterator()",
-        "status" : "fail",
-        "changedThisRun" : false,
-        "previousStatus" : "fail"
-      }, {
         "id" : "BSTManualTesting#testBasicToString()",
         "name" : "testBasicToString()",
         "status" : "pass",
@@ -5887,85 +5541,75 @@
     } ]
   } ],
   "feedback" : [ {
-    "testId" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-    "pattern" : "Missing ConcurrentModificationException detection in tree modification",
-    "confidence" : "high",
-    "explanation" : "This test has failed consistently since run 45 when the remove() method was first implemented. The code diffs from runs 45–51 show changes focused on the core remove() logic (handling return values, size counts, and edge cases), with no modifications to iterator state tracking or concurrent modification detection. The test expects a ConcurrentModificationException to be thrown when the tree is modified (via remove()) while an iterator is actively traversing it. The iterator implementation currently contains no mechanism to detect or report such modifications. The remove() method's core functionality was corrected by run 55, bringing 34 of 39 tests to pass, but this test remains unresolved because it requires a different feature: tracking modification counts in the tree and validating them in the iterator's next() method.",
-    "nextSteps" : [ "Implement a modification counter in the BST class that increments every time the tree structure changes (insert, remove). Store the counter value in each iterator when it is created, then check before each next() call whether the current counter matches the stored value—if not, throw ConcurrentModificationException.", "Review the iterator's next() method to ensure it validates the modification counter at the start of each iteration step, not just at iterator creation. This prevents modifications that occur mid-traversal from going undetected.", "Test the modification counter logic by manually modifying the tree (adding or removing nodes) between iterator creation and iteration, verifying that the exception is raised at the correct point in the iteration cycle." ]
-  }, {
-    "testId" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-    "pattern" : "Missing IllegalStateException for iterator.remove() without preceding next()",
-    "confidence" : "high",
-    "explanation" : "This test has failed consistently since run 45 and remains unresolved through run 57. It was introduced when remove() was first implemented, but the code diffs from runs 49–55 show changes focused on fixing the core remove() method's logic and return values. The test expects an IllegalStateException when iterator.remove() is called without a preceding next() call, or when next() has not been called at all. The iterator implementation currently lacks state tracking to distinguish between 'just created', 'positioned after next()', and 'remove already called' states. This requires adding a flag to track whether next() has been called since the last remove() or since iterator creation.",
-    "nextSteps" : [ "Add a boolean flag to each iterator (e.g., canRemove) that is set to true only after next() successfully returns a value, and reset to false after remove() is called. Check this flag at the start of remove() and throw IllegalStateException if it is false.", "Ensure the flag is properly initialized to false when the iterator is created, and that it is reset to false after a successful remove() to prevent consecutive remove() calls without an intervening next().", "Combine this state tracking with the modification counter check from the concurrent modification test: both validations should occur in the iterator's remove() method before any tree modification happens." ]
-  }, {
-    "testId" : "BSTConcurrencyTesting#testIterator()",
-    "pattern" : "Missing ConcurrentModificationException detection in iterator traversal",
-    "confidence" : "high",
-    "explanation" : "This test has failed since run 45 when remove() was introduced, and remains unresolved through run 57. The code diffs from runs 45–55 show changes directed at fixing the core remove() method's correctness (return values, size tracking, edge cases), not at adding concurrency detection to iterators. The test expects a ConcurrentModificationException to be thrown when the underlying tree is modified (via tree.remove()) while an iterator is in the middle of traversal. The iterator currently contains no mechanism to detect that the tree has changed, because there is no shared modification counter between the tree and its iterators. This requires adding a modification tracking mechanism to the BST class and having each iterator validate it before proceeding.",
-    "nextSteps" : [ "Implement a modification counter field in the BST class (e.g., modCount) that increments whenever insert() or remove() modifies the tree structure. This counter should be incremented before the modification completes, so any iterator created before the change will have a different stored value.", "In each iterator's constructor, capture the current modCount value. Before each call to next(), verify that the stored modCount still equals the tree's current modCount; if not, throw ConcurrentModificationException with a clear message.", "Test by creating an iterator, calling next() a few times, then calling tree.remove() directly (not through the iterator), then attempting to call next() again on the iterator—this should raise the exception." ]
-  }, {
-    "testId" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-    "pattern" : "Missing IllegalStateException for iterator.remove() without preceding next()",
-    "confidence" : "high",
-    "explanation" : "This test has failed consistently since run 45 and remains unresolved through run 57. It was introduced alongside the other concurrency tests when remove() was first implemented, but the code diffs from runs 49–55 show changes focused exclusively on fixing the core remove() method's logic and return values. The test expects an IllegalStateException when the iterator's remove() method is called without a preceding next() call. The iterator currently lacks the state tracking needed to enforce this precondition. This iterator-level validation requires a separate mechanism: a flag that tracks whether next() has been called since the iterator was created or since the last remove() call.",
-    "nextSteps" : [ "Add a state flag to the iterator (e.g., lastOperationWasNext) that is initialized to false and set to true only when next() successfully returns a value. In the iterator's remove() method, check this flag and throw IllegalStateException if it is false.", "Reset the flag to false after remove() completes, ensuring that consecutive remove() calls without an intervening next() are also rejected.", "Combine this check with the modification counter validation: both should be performed in the iterator's remove() method, with the state check happening first (before any tree modification)." ]
-  }, {
-    "testId" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-    "pattern" : "Missing ConcurrentModificationException detection in pre-order iterator",
-    "confidence" : "high",
-    "explanation" : "This test has failed since run 45 and remains unresolved through run 57. It is one of five concurrency-related tests that were introduced when remove() was first implemented. The code diffs from runs 45–55 show changes directed at fixing the core remove() method's functionality (return values, size counts, edge cases), not at adding concurrency detection to the pre-order iterator. The test expects a ConcurrentModificationException when the tree is modified (via tree.remove()) while a pre-order iterator is actively traversing. The pre-order iterator, like the in-order iterator, currently contains no mechanism to detect tree modifications because there is no shared modification counter between the tree and its iterators. This requires adding a modification counter in the BST class that both iterators can check.",
-    "nextSteps" : [ "Implement a modification counter in the BST class that increments on every insert() and remove() call. Have each iterator (both in-order and pre-order) capture this counter value at creation time.", "In the pre-order iterator's next() method, validate that the captured counter still matches the tree's current counter before returning the next element. If they differ, throw ConcurrentModificationException.", "Verify that the pre-order iterator's traversal logic (which typically uses a stack-based approach) correctly detects modifications at each step, not just at the start of iteration." ]
-  }, {
     "testId" : "BSTTesting#testRemoveReturnValue()",
-    "pattern" : "Regression in remove() return value logic, resolved through iterative debugging",
+    "pattern" : "Regression in remove() return value and tree structure after refactoring",
     "confidence" : "high",
-    "explanation" : "This test passed at run 50 after initially failing at run 45 when remove() was first implemented. A regression occurred at run 53 when the remove() logic was rewritten, causing the test to fail with incorrect size counts (expected 4 but got 14). Run 54 made the situation worse with inverted expectations and a StackOverflowError. The code diffs show that run 50 removed 5 lines and added 1, run 53 removed 10 lines and added 6, and run 55 removed 19 lines and added 19. The test now passes as of run 55. The regression cycle (runs 53–54) shows that the remove() implementation required comprehensive reconsideration across all scenarios (leaf nodes, nodes with one child, nodes with two children, and root removal).",
-    "nextSteps" : [ "Review the final remove() implementation to understand how it correctly handles all four node removal cases: leaf nodes (no children), nodes with only a left child, nodes with only a right child, and nodes with two children. Pay special attention to how the size counter is updated in each case.", "For future tree modifications, create a test matrix covering all removal scenarios before making changes: test removing from an empty tree, removing a leaf, removing a node with one child on each side, removing a node with two children, and removing the root in each configuration. This prevents regressions like run 53.", "When a regression occurs (test passes, then fails after a rewrite), compare the old working version with the new broken version side-by-side to identify which case(s) the new logic handles incorrectly, rather than making incremental patches." ],
+    "explanation" : "This test passed in run 50 after remove() was refactored to use a return-value pattern (root = removeHelper(root, i, b)), but failed in run 53. The code diff at run 53 shows a change to the successor-finding logic for two-child node removal: the code switched from finding the in-order predecessor (bottom = cur.left, then traversing right) to finding the in-order successor (bottom = cur.right, then traversing left), with adjusted node replacement logic. This change caused test failures through run 54, which triggered a StackOverflowError indicating infinite recursion in the remove() method. Run 55 introduced a rewrite of the successor-finding and node-replacement logic, adding a prev pointer to track the parent of the successor candidate and a comparison check (comp2) to bound the successor search. The test passed from run 55 onward.",
+    "nextSteps" : [ "Review the in-order successor algorithm: when removing a node with two children, the successor is the smallest node in the right subtree (found by going right once, then left as far as possible). Ensure the parent pointer is tracked so the successor can be unlinked from its original position before being spliced into the removed node's position.", "Verify that removeHelper() correctly returns the modified subtree root at every recursive call site, especially after node replacement. The pattern root = removeHelper(root, i, b) ensures the tree structure is maintained even when the root itself is removed.", "Test the two-child case in isolation: insert a small tree (e.g., 5, 3, 7, 2, 4, 6, 8), remove the root (5), and verify the tree structure is correct and the size is decremented properly." ],
     "diffs" : [ {
       "label" : "Run 50 — BinarySearchTree.java",
       "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);" ],
-      "after" : [ "\t\troot = removeHelper(root, i, b);" ]
+      "after" : [ "\t\troot = removeHelper(root, i, b);" ],
+      "note" : "Run 50: Simplified remove() to use return-value pattern (root = removeHelper) instead of void call, enabling proper tree reconnection."
     }, {
       "label" : "Run 53 — BinarySearchTree.java",
       "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);", "\t\t\t\tNode bottom = cur.left;", "\t\t\t\twhile (bottom.right != NULL_NODE) {", "\t\t\t\t\tbottom = bottom.right;", "\t\t\t\tbottom.right = cur.right;", "\t\t\t\tNode toRet = cur.left;" ],
-      "after" : [ "\t\troot = removeHelper(root, i, b);", "\t\t\t\tNode bottom = cur.right;", "\t\t\t\twhile (bottom.left != NULL_NODE) {", "\t\t\t\t\tbottom = bottom.left;", "\t\t\t\tbottom.left = cur.left;", "\t\t\t\tNode toRet = cur.right;" ]
+      "after" : [ "\t\troot = removeHelper(root, i, b);", "\t\t\t\tNode bottom = cur.right;", "\t\t\t\twhile (bottom.left != NULL_NODE) {", "\t\t\t\t\tbottom = bottom.left;", "\t\t\t\tbottom.left = cur.left;", "\t\t\t\tNode toRet = cur.right;" ],
+      "note" : "Run 53: Changed successor-finding direction from left-subtree predecessor to right-subtree successor, but introduced incorrect node-replacement logic that caused tree corruption."
     }, {
       "label" : "Run 55 — BinarySearchTree.java",
       "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);", "\t\t\t\t//      1", "\t\t\t\t//    2   5", "\t\t\t\t//  3  4    6", "\t\t\t\t// if you remove 1", "\t\t\t\t//     2", "\t\t\t\t//   3   4", "\t\t\t\t//         5", "\t\t\t\t//\t\t     6", "\t\t\t\twhile (bottom.right != NULL_NODE) {", "\t\t\t\tbottom.right = cur.right;", "\t\t\t\tNode toRet = cur.left;", "\t\t\t\tcur.left = NULL_NODE;", "\t\t\t\tcur.right = NULL_NODE;", "\t\t\t\treturn toRet;" ],
-      "after" : [ "\t\troot = removeHelper(root, i, b);", "\t\t\t\tNode prev = cur;", "\t\t\t\tint comp2 = bottom.data.compareTo(i);", "\t\t\t\twhile (bottom.right != NULL_NODE && comp2 < 0) { // keep going right while exploring a viable candidate", "\t\t\t\t\tprev = bottom;", "\t\t\t\t\tcomp2 = bottom.data.compareTo(i);", "\t\t\t\tif (bottom != cur.left) { // we're down there", "\t\t\t\t\t// Bottom is guaranteed greater than the left and less than the right", "\t\t\t\t\t", "\t\t\t\t\t//extricate", "\t\t\t\t\tprev.right = removeHelper(bottom,bottom.data,b);", "\t\t\t\t\t// using it as root", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\tbottom.left = cur.left;", "\t\t\t\t\treturn bottom; // new root", "\t\t\t\t} else { // the left's right is null; since it's all lefts, just shift up", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\treturn bottom;", "\t\t\t\t}" ]
+      "after" : [ "\t\troot = removeHelper(root, i, b);", "\t\t\t\tNode prev = cur;", "\t\t\t\tint comp2 = bottom.data.compareTo(i);", "\t\t\t\twhile (bottom.right != NULL_NODE && comp2 < 0) { // keep going right while exploring a viable candidate", "\t\t\t\t\tprev = bottom;", "\t\t\t\t\tcomp2 = bottom.data.compareTo(i);", "\t\t\t\tif (bottom != cur.left) { // we're down there", "\t\t\t\t\t// Bottom is guaranteed greater than the left and less than the right", "\t\t\t\t\t", "\t\t\t\t\t//extricate", "\t\t\t\t\tprev.right = removeHelper(bottom,bottom.data,b);", "\t\t\t\t\t// using it as root", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\tbottom.left = cur.left;", "\t\t\t\t\treturn bottom; // new root", "\t\t\t\t} else { // the left's right is null; since it's all lefts, just shift up", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\treturn bottom;", "\t\t\t\t}" ],
+      "note" : "Run 55: Rewrote successor-finding with explicit parent tracking and comparison-based loop termination, fixing the infinite recursion and tree structure issues."
     } ],
     "relatedTestIds" : [ "BSTTesting#testRemove()" ]
   }, {
-    "testId" : "BSTTesting#testInsertExceptions()",
-    "pattern" : "Compilation error resolved by adding missing class definition",
+    "testId" : "BSTManualTesting#testIterator()",
+    "pattern" : "Sustained iterator logic errors across multiple traversal strategies",
     "confidence" : "high",
-    "explanation" : "This test failed at run 41 when the BSTTesting test class was first introduced, then experienced a compilation failure at run 43 (NoClassDefFoundError for BinarySearchTree). The code diff for run 43 shows 21 lines added to BinarySearchTree.java. The test passed at run 42, indicating the issue was resolved between runs 42 and 43. The test now passes as of run 57. The brief failure window (only 2 failed runs) and the quick resolution indicate a straightforward compilation or class definition issue.",
-    "nextSteps" : [ "When compilation errors occur across multiple tests, check that all referenced classes and methods are properly defined and accessible. Verify that inner classes (if used for iterators or nodes) are correctly nested and have appropriate visibility modifiers.", "Use your IDE's error highlighting and 'Go to Definition' feature to quickly identify missing or misnamed classes during development, rather than discovering them through test failures.", "After resolving a compilation error, run the full test suite to ensure the fix did not introduce new issues in other tests." ],
+    "explanation" : "The in-order iterator failed across runs 26–40. Run 26 produced a null pointer exception during initialization. Run 27 patched this, but next() then returned incorrect values (expected 2 but got 1). Runs 28–30 showed no change in test outcome. Run 40 introduced a significant rewrite of the iterator's internal state machine. The code diff shows the addition of explicit flag management (pushing flag value 2 instead of 1) and a conditional check to avoid re-adding the current node's frame when it has already been processed and is about to be returned. The test passed from run 40 onward.",
+    "nextSteps" : [ "Understand the three-phase iterative in-order traversal: (1) push the node and go left, (2) pop and return the node, (3) push the right subtree. Use a flag or state variable to track which phase each stack frame is in, ensuring each node is visited exactly once in the correct order.", "When implementing next(), carefully manage the stack so that after returning a node, the iterator is positioned to process the right subtree on the next call. Avoid re-pushing nodes that have already been returned.", "Test the iterator on a simple tree (e.g., 2, 1, 3) and manually trace the stack state after each next() call to verify the traversal order matches in-order (1, 2, 3)." ],
     "diffs" : [ {
-      "label" : "Run 43 — BinarySearchTree.java",
-      "after" : [ "", "\tpublic boolean contains(T i) {", "\t\tif (i == null) {", "\t\t\tthrow new IllegalArgumentException();", "\t\t}", "\t\treturn containsHelper(root, i);;", "\t}", "\t", "\tprivate boolean containsHelper(Node cur, T i) {", "\t\tif (cur == NULL_NODE) {", "\t\t\treturn false;", "\t\t}", "\t\tint comparison = i.compareTo(cur.data);", "\t\tif (comparison == 0) {", "\t\t\treturn true;", "\t\t} else if (comparison < 0) { // i < cur.data", "\t\t\t// it belongs left", "\t\t\treturn containsHelper(cur.left, i);", "\t\t} // i > cur.data", "\t\treturn containsHelper(cur.right, i);\t", "\t}" ]
+      "label" : "Run 40 — BinarySearchTree.java",
+      "before" : [ "\t\t\t \t\tflags.push(1);", "\t\t \t\treturn cur.data;", "\t\t \treturn null;" ],
+      "after" : [ "\t\t\t \t\tflags.push(2);", "\t\t\t \tNode cur1 = stack.pop();", "\t\t\t\tint flag1 = flags.pop();", "\t\t\t\tif (cur1.right != NULL_NODE) { // only revisit if there's something to", "\t\t\t\t\tif (cur == cur1) { // we shouldn't add this frame back as a 2; it's already being returned right here", "\t\t\t\t\t\tstack.push(cur1.right);", "\t\t\t\t\t\tflags.push(1);", "\t\t\t\t\t} else {", "\t\t\t\t\t\tstack.push(cur1);", "\t\t\t\t\t\tflags.push(2);", "\t\t\t\t\t}", "\t\t\t\t}", "\t \t\treturn cur.data;" ],
+      "note" : "Run 40: Refactored iterator state machine to use explicit flag values (2 for revisit phase) and added a conditional to prevent re-adding the current node's frame after it has been returned, fixing the traversal order and null-return issues."
     } ]
   }, {
-    "testId" : "BSTTesting#testRemove()",
-    "pattern" : "Regression in remove() logic, resolved through complete implementation rewrite",
+    "testId" : "BSTTesting#testRemoveAdvanced()",
+    "pattern" : "Two-child node removal logic error causing incorrect tree size",
     "confidence" : "high",
-    "explanation" : "This test failed at run 45 when remove() was first implemented, passed at run 50 after a fix (5 lines removed, 1 added), then regressed at run 53 when the remove() logic was rewritten (10 lines removed, 6 added). The regression was resolved at run 55 with a complete rewrite (19 lines removed, 19 added). Runs 47–48 show isolated test executions of testRemove only. The test now passes as of run 57. The pattern shows an initial implementation, a quick fix, a larger rewrite that introduced a regression, and finally a complete reimplementation that restored correctness. This mirrors the behavior of testRemoveReturnValue, indicating both tests required comprehensive reconsideration of the remove() logic.",
-    "nextSteps" : [ "Understand the three-case structure of BST node removal: (1) node is a leaf—simply remove it; (2) node has one child—replace it with that child; (3) node has two children—find the in-order successor (or predecessor), replace the node's value with the successor's value, and recursively remove the successor. Ensure your implementation handles all three cases correctly.", "When testing remove(), verify that the tree's size is correctly decremented and that the tree structure remains valid (all left descendants are smaller, all right descendants are larger) after each removal. Use a helper method to validate tree invariants after each operation.", "If a rewrite of remove() causes regressions, revert to the last passing version and make smaller, more targeted changes rather than rewriting the entire method. Test each change in isolation before moving to the next." ],
+    "explanation" : "This test failed across runs 45–55 with a size mismatch error (expected 3 but got 15 or similar), indicating that remove() was not properly decrementing the tree size or was leaving nodes in the tree. The test passed in run 50 initially, but failed in run 53 when the successor-finding logic was changed from predecessor to successor without corresponding updates to the node-replacement code. Run 54 produced a StackOverflowError in the remove() method, indicating infinite recursion in the helper function. Run 55 rewrote the successor-finding algorithm with a prev pointer to track the parent of the successor candidate and a comparison-based loop termination (comp2 comparison check in the code diff). The test passed from run 55 onward.",
+    "nextSteps" : [ "Ensure that removeHelper() decrements the tree size (or returns a flag indicating removal) exactly once per successful removal, regardless of which case (leaf, one child, two children) is executed. The size should be decremented before returning from the helper function.", "For the two-child case, implement the successor-finding loop with a clear termination condition: traverse right once, then left until reaching a node with no left child. Track the parent of the successor so it can be unlinked and reconnected correctly.", "Add a size assertion after each remove() call in a test: verify that size() decreases by exactly 1 if the element was found, and remains unchanged if the element was not in the tree." ],
     "diffs" : [ {
-      "label" : "Run 50 — BinarySearchTree.java",
-      "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);" ],
-      "after" : [ "\t\troot = removeHelper(root, i, b);" ]
-    }, {
-      "label" : "Run 53 — BinarySearchTree.java",
-      "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);", "\t\t\t\tNode bottom = cur.left;", "\t\t\t\twhile (bottom.right != NULL_NODE) {", "\t\t\t\t\tbottom = bottom.right;", "\t\t\t\tbottom.right = cur.right;", "\t\t\t\tNode toRet = cur.left;" ],
-      "after" : [ "\t\troot = removeHelper(root, i, b);", "\t\t\t\tNode bottom = cur.right;", "\t\t\t\twhile (bottom.left != NULL_NODE) {", "\t\t\t\t\tbottom = bottom.left;", "\t\t\t\tbottom.left = cur.left;", "\t\t\t\tNode toRet = cur.right;" ]
-    }, {
       "label" : "Run 55 — BinarySearchTree.java",
       "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);", "\t\t\t\t//      1", "\t\t\t\t//    2   5", "\t\t\t\t//  3  4    6", "\t\t\t\t// if you remove 1", "\t\t\t\t//     2", "\t\t\t\t//   3   4", "\t\t\t\t//         5", "\t\t\t\t//\t\t     6", "\t\t\t\twhile (bottom.right != NULL_NODE) {", "\t\t\t\tbottom.right = cur.right;", "\t\t\t\tNode toRet = cur.left;", "\t\t\t\tcur.left = NULL_NODE;", "\t\t\t\tcur.right = NULL_NODE;", "\t\t\t\treturn toRet;" ],
-      "after" : [ "\t\troot = removeHelper(root, i, b);", "\t\t\t\tNode prev = cur;", "\t\t\t\tint comp2 = bottom.data.compareTo(i);", "\t\t\t\twhile (bottom.right != NULL_NODE && comp2 < 0) { // keep going right while exploring a viable candidate", "\t\t\t\t\tprev = bottom;", "\t\t\t\t\tcomp2 = bottom.data.compareTo(i);", "\t\t\t\tif (bottom != cur.left) { // we're down there", "\t\t\t\t\t// Bottom is guaranteed greater than the left and less than the right", "\t\t\t\t\t", "\t\t\t\t\t//extricate", "\t\t\t\t\tprev.right = removeHelper(bottom,bottom.data,b);", "\t\t\t\t\t// using it as root", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\tbottom.left = cur.left;", "\t\t\t\t\treturn bottom; // new root", "\t\t\t\t} else { // the left's right is null; since it's all lefts, just shift up", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\treturn bottom;", "\t\t\t\t}" ]
-    } ],
-    "relatedTestIds" : [ "BSTTesting#testRemoveReturnValue()" ]
+      "after" : [ "\t\troot = removeHelper(root, i, b);", "\t\t\t\tNode prev = cur;", "\t\t\t\tint comp2 = bottom.data.compareTo(i);", "\t\t\t\twhile (bottom.right != NULL_NODE && comp2 < 0) { // keep going right while exploring a viable candidate", "\t\t\t\t\tprev = bottom;", "\t\t\t\t\tcomp2 = bottom.data.compareTo(i);", "\t\t\t\tif (bottom != cur.left) { // we're down there", "\t\t\t\t\t// Bottom is guaranteed greater than the left and less than the right", "\t\t\t\t\t", "\t\t\t\t\t//extricate", "\t\t\t\t\tprev.right = removeHelper(bottom,bottom.data,b);", "\t\t\t\t\t// using it as root", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\tbottom.left = cur.left;", "\t\t\t\t\treturn bottom; // new root", "\t\t\t\t} else { // the left's right is null; since it's all lefts, just shift up", "\t\t\t\t\tbottom.right = cur.right;", "\t\t\t\t\treturn bottom;", "\t\t\t\t}" ],
+      "note" : "Run 55: Rewrote the two-child removal logic with explicit parent tracking (prev pointer) and a comparison-based loop (comp2) to correctly identify and unlink the in-order successor, fixing the size mismatch and infinite recursion."
+    } ]
+  }, {
+    "testId" : "BSTManualTesting#testContainsNonBST()",
+    "pattern" : "Incorrect linear search logic in containsNonBST() method",
+    "confidence" : "high",
+    "explanation" : "This test failed across runs 1–9. Runs 1–2 produced a compilation error due to missing method implementation. Run 3 added an implementation of containsNonBST(), but the method returned false when it should have returned true, indicating a logic error in the linear search. Runs 4–8 showed no change in test outcome. Run 9 introduced a complete implementation of containsNonBST() that performs a full tree traversal to search for the target value without relying on BST ordering. The code diff shows the addition of the isEmpty() helper method and the full containsNonBST() method body. The test passed from run 9 onward.",
+    "nextSteps" : [ "Implement containsNonBST() as a full tree search that does not assume BST ordering: recursively check if the target value matches the current node, or if it exists in the left subtree, or if it exists in the right subtree. Use short-circuit evaluation (return true as soon as a match is found) to avoid unnecessary traversals.", "Distinguish between contains() (which uses BST ordering to prune the search space) and containsNonBST() (which must visit all nodes). The latter is useful for verifying tree integrity or searching in a corrupted tree.", "Test containsNonBST() on a tree where the target value is in the right subtree of the root but would be pruned by BST logic (e.g., searching for 10 in a tree with root 5, left child 3, right child 7, right-right child 10). Verify it returns true." ],
+    "diffs" : [ {
+      "label" : "Run 9 — BinarySearchTree.java",
+      "after" : [ "import java.util.function.BooleanSupplier;", "", "\tpublic boolean isEmpty() {", "\t\t// TODO Auto-generated method stub", "\t\treturn this.size() == 0;", "\t}", "", "\tpublic boolean containsNonBST(T i) {", "\t\t// TODO Auto-generated method stub", "\t\treturn containsNonBSTHelper(i, root);", "\t}", "\tprivate boolean containsNonBSTHelper(T i, Node cur) {", "\t\tif (cur == NULL_NODE) {", "\t\t\treturn false;", "\t\t}", "\t\tif (cur.data.equals(i)) {", "\t\t\treturn true;", "\t\t}", "\t\treturn containsNonBSTHelper(i, cur.left) || containsNonBSTHelper(i, cur.right);", "\t}" ],
+      "note" : "Run 9: Added complete implementation of containsNonBST() method that performs a full tree traversal without relying on BST ordering, fixing the incorrect return value."
+    } ]
+  }, {
+    "testId" : "BSTManualTesting#testPreOrderIterator()",
+    "pattern" : "Pre-order iterator state machine logic errors across multiple runs",
+    "confidence" : "high",
+    "explanation" : "The pre-order iterator failed across runs 19–25. Run 19 produced incorrect hasNext() logic. Run 21 inverted the boolean return, but run 22 then showed the iterator returning null instead of values. Run 23 adjusted the next() logic but returned the wrong value (7 instead of 5). Run 25 introduced a substantial rewrite of the iterator initialization and state management. The code diff shows the addition of version tracking (to detect concurrent modifications), explicit initialization of the stack with the root node (guarded by a null check), and version capture at construction time. The test passed from run 25 onward.",
+    "nextSteps" : [ "Implement pre-order traversal as a stack-based iterative walk: initialize the stack with the root node, and in next(), pop the current node, return it, then push its right child (if not null) and left child (if not null) in that order. This ensures children are processed in the correct pre-order sequence.", "Use a version field to detect concurrent modifications: capture the tree's version at iterator construction, and throw ConcurrentModificationException if the tree is modified during iteration. This helps catch bugs where the tree structure changes while iterating.", "Test the pre-order iterator on a simple tree (e.g., 5, 3, 7, 2, 4, 6, 8) and verify the traversal order is correct (5, 3, 2, 4, 7, 6, 8). Manually trace the stack state after each next() call." ],
+    "diffs" : [ {
+      "label" : "Run 25 — BinarySearchTree.java",
+      "before" : [ "\t\t\tstack.push(binarySearchTree.root);", "\t\t\tstack.push(cur.right);", "\t\t\tstack.push(cur.left);", "\t\t\treturn null;" ],
+      "after" : [ "import java.util.NoSuchElementException;", "\tprivate int version;", "\t\tprivate int version;", "\t\tprivate BinarySearchTree<T> binarySearchTree;", "\t\t\tif (binarySearchTree.root != NULL_NODE) {", "\t\t\t\tstack.push(binarySearchTree.root);", "\t\t\t}", "\t\t\tversion = binarySearchTree.version;", "\t\t\tthis.binarySearchTree = binarySearchTree;", "\t\t\tif (binarySearchTree.version != this.version) {", "\t\t\t\treturn false;", "\t\t\t}", "\t\t\tif (binarySearchTree.version != this.version) {", "\t\t\t\treturn null;", "\t\t\t}", "\t\t\tif (!hasNext()) {", "\t\t\t\tthrow new NoSuchElementException();", "\t\t\t}", "\t\t\tif (cur.right != NULL_NODE) {", "\t\t\t\tstack.push(cur.right);", "\t\t\t}", "\t\t\tif (cur.left != NULL_NODE) {", "\t\t\t\tstack.push(cur.left);", "\t\t\t}", "\t\t\treturn toRet;" ],
+      "note" : "Run 25: Rewrote iterator initialization to properly guard the root push with a null check, added version tracking for concurrent modification detection, and refactored the state machine logic to correctly implement pre-order traversal."
+    } ]
   } ],
   "testHistories" : [ {
     "testId" : "BSTTesting#testSize()",
@@ -5973,7 +5617,7 @@
     "statusByRun" : {
       "41" : "pass",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -5987,27 +5631,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 1,
-    "flipsWithin" : 2,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 41.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 41.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "isRegression" : false,
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testContainsStrings()",
     "testName" : "testContainsStrings()",
@@ -6271,7 +5901,7 @@
     "testId" : "BSTTesting#testToArrayList()",
     "testName" : "testToArrayList()",
     "statusByRun" : {
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -6285,69 +5915,18 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : false,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
     "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 1,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 1.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 1.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
-  }, {
-    "testId" : "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()",
-    "testName" : "testRemoveConcurrentModifcationException()",
-    "statusByRun" : {
-      "45" : "fail",
-      "46" : "fail",
-      "49" : "fail",
-      "50" : "fail",
-      "51" : "fail",
-      "52" : "fail",
-      "53" : "fail",
-      "54" : "fail",
-      "55" : "fail",
-      "56" : "fail",
-      "57" : "fail"
-    },
-    "failureIntervals" : [ {
-      "startRun" : 45,
-      "duration" : 13,
-      "isLingering" : true,
-      "isRegression" : false,
-      "runsWhileFailing" : 13
-    } ],
-    "isLingeringFailure" : true,
-    "isRegression" : false,
-    "recursCount" : 1,
+    "recursCount" : 0,
     "flipsWithin" : 0,
-    "totalFailedRuns" : 11,
-    "meaningfulnessScore" : 111.0,
-    "highlightCategory" : "stillFailing",
-    "struggleProfile" : {
-      "attemptsToFix" : 13,
-      "distinctStrategies" : 0,
-      "struggleScore" : 119.0,
-      "wasFixed" : false,
-      "significantStruggle" : true
-    }
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testIterator()",
     "testName" : "testIterator()",
     "statusByRun" : {
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -6361,27 +5940,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : false,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
     "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 1,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 1.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 1.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTManualTesting#testToArrayList()",
     "testName" : "testToArrayList()",
@@ -6439,7 +6004,7 @@
     "statusByRun" : {
       "41" : "fail",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -6460,27 +6025,19 @@
       "isLingering" : false,
       "isRegression" : false,
       "runsWhileFailing" : 1
-    }, {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
     } ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 2,
-    "flipsWithin" : 3,
-    "totalFailedRuns" : 2,
-    "meaningfulnessScore" : 77.0,
-    "highlightCategory" : "regression",
+    "isRegression" : false,
+    "recursCount" : 1,
+    "flipsWithin" : 1,
+    "totalFailedRuns" : 1,
+    "meaningfulnessScore" : 1.0,
     "struggleProfile" : {
-      "attemptsToFix" : 2,
+      "attemptsToFix" : 1,
       "distinctStrategies" : 0,
-      "struggleScore" : 77.0,
+      "struggleScore" : 1.0,
       "wasFixed" : true,
-      "significantStruggle" : true
+      "significantStruggle" : false
     }
   }, {
     "testId" : "BSTManualTesting#testBasicToString()",
@@ -6554,84 +6111,10 @@
       "significantStruggle" : false
     }
   }, {
-    "testId" : "BSTConcurrencyTesting#testRemoveInPreOrderIterator()",
-    "testName" : "testRemoveInPreOrderIterator()",
-    "statusByRun" : {
-      "45" : "fail",
-      "46" : "fail",
-      "49" : "fail",
-      "50" : "fail",
-      "51" : "fail",
-      "52" : "fail",
-      "53" : "fail",
-      "54" : "fail",
-      "55" : "fail",
-      "56" : "fail",
-      "57" : "fail"
-    },
-    "failureIntervals" : [ {
-      "startRun" : 45,
-      "duration" : 13,
-      "isLingering" : true,
-      "isRegression" : false,
-      "runsWhileFailing" : 13
-    } ],
-    "isLingeringFailure" : true,
-    "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 0,
-    "totalFailedRuns" : 11,
-    "meaningfulnessScore" : 111.0,
-    "highlightCategory" : "stillFailing",
-    "struggleProfile" : {
-      "attemptsToFix" : 13,
-      "distinctStrategies" : 0,
-      "struggleScore" : 119.0,
-      "wasFixed" : false,
-      "significantStruggle" : true
-    }
-  }, {
-    "testId" : "BSTConcurrencyTesting#testIterator()",
-    "testName" : "testIterator()",
-    "statusByRun" : {
-      "45" : "fail",
-      "46" : "fail",
-      "49" : "fail",
-      "50" : "fail",
-      "51" : "fail",
-      "52" : "fail",
-      "53" : "fail",
-      "54" : "fail",
-      "55" : "fail",
-      "56" : "fail",
-      "57" : "fail"
-    },
-    "failureIntervals" : [ {
-      "startRun" : 45,
-      "duration" : 13,
-      "isLingering" : true,
-      "isRegression" : false,
-      "runsWhileFailing" : 13
-    } ],
-    "isLingeringFailure" : true,
-    "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 0,
-    "totalFailedRuns" : 11,
-    "meaningfulnessScore" : 111.0,
-    "highlightCategory" : "stillFailing",
-    "struggleProfile" : {
-      "attemptsToFix" : 13,
-      "distinctStrategies" : 0,
-      "struggleScore" : 119.0,
-      "wasFixed" : false,
-      "significantStruggle" : true
-    }
-  }, {
     "testId" : "BSTTesting#testToArrayStrings()",
     "testName" : "testToArrayStrings()",
     "statusByRun" : {
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -6645,27 +6128,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : false,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
     "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 1,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 1.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 1.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testRemove()",
     "testName" : "testRemove()",
@@ -6705,7 +6174,6 @@
     "flipsWithin" : 3,
     "totalFailedRuns" : 7,
     "meaningfulnessScore" : 82.0,
-    "highlightCategory" : "regression",
     "struggleProfile" : {
       "attemptsToFix" : 7,
       "distinctStrategies" : 0,
@@ -6812,7 +6280,7 @@
     "testId" : "BSTTesting#testPreOrderIterator()",
     "testName" : "testPreOrderIterator()",
     "statusByRun" : {
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -6826,34 +6294,20 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : false,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
     "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 1,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 1.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 1.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testHeight()",
     "testName" : "testHeight()",
     "statusByRun" : {
       "41" : "pass",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -6867,32 +6321,18 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 1,
-    "flipsWithin" : 2,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 41.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 41.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "isRegression" : false,
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testToString()",
     "testName" : "testToString()",
     "statusByRun" : {
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -6906,27 +6346,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : false,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
     "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 1,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 1.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 1.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTManualTesting#testIterator()",
     "testName" : "testIterator()",
@@ -6989,7 +6415,7 @@
     "statusByRun" : {
       "41" : "pass",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -7003,27 +6429,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 1,
-    "flipsWithin" : 2,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 41.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 41.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "isRegression" : false,
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTManualTesting#testInefficientIterator()",
     "testName" : "testInefficientIterator()",
@@ -7074,49 +6486,12 @@
     "totalFailedRuns" : 0,
     "meaningfulnessScore" : 0.0
   }, {
-    "testId" : "BSTConcurrencyTesting#testRemoveInInOrderIterator()",
-    "testName" : "testRemoveInInOrderIterator()",
-    "statusByRun" : {
-      "45" : "fail",
-      "46" : "fail",
-      "49" : "fail",
-      "50" : "fail",
-      "51" : "fail",
-      "52" : "fail",
-      "53" : "fail",
-      "54" : "fail",
-      "55" : "fail",
-      "56" : "fail",
-      "57" : "fail"
-    },
-    "failureIntervals" : [ {
-      "startRun" : 45,
-      "duration" : 13,
-      "isLingering" : true,
-      "isRegression" : false,
-      "runsWhileFailing" : 13
-    } ],
-    "isLingeringFailure" : true,
-    "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 0,
-    "totalFailedRuns" : 11,
-    "meaningfulnessScore" : 111.0,
-    "highlightCategory" : "stillFailing",
-    "struggleProfile" : {
-      "attemptsToFix" : 13,
-      "distinctStrategies" : 0,
-      "struggleScore" : 119.0,
-      "wasFixed" : false,
-      "significantStruggle" : true
-    }
-  }, {
     "testId" : "BSTTesting#testInsertReturnValueString()",
     "testName" : "testInsertReturnValueString()",
     "statusByRun" : {
       "41" : "pass",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -7130,27 +6505,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 1,
-    "flipsWithin" : 2,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 41.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 41.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "isRegression" : false,
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testEfficiency()",
     "testName" : "testEfficiency()",
@@ -7180,7 +6541,7 @@
     "statusByRun" : {
       "41" : "pass",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -7194,32 +6555,18 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 1,
-    "flipsWithin" : 2,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 41.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 41.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "isRegression" : false,
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testInefficientIterator()",
     "testName" : "testInefficientIterator()",
     "statusByRun" : {
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -7233,27 +6580,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : false,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
     "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 1,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 1.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 1.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTManualTesting#testContainsNonBST()",
     "testName" : "testContainsNonBST()",
@@ -7402,47 +6735,10 @@
     "totalFailedRuns" : 0,
     "meaningfulnessScore" : 0.0
   }, {
-    "testId" : "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()",
-    "testName" : "testPreOrderIteratorConcurrentModificationException()",
-    "statusByRun" : {
-      "45" : "fail",
-      "46" : "fail",
-      "49" : "fail",
-      "50" : "fail",
-      "51" : "fail",
-      "52" : "fail",
-      "53" : "fail",
-      "54" : "fail",
-      "55" : "fail",
-      "56" : "fail",
-      "57" : "fail"
-    },
-    "failureIntervals" : [ {
-      "startRun" : 45,
-      "duration" : 13,
-      "isLingering" : true,
-      "isRegression" : false,
-      "runsWhileFailing" : 13
-    } ],
-    "isLingeringFailure" : true,
-    "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 0,
-    "totalFailedRuns" : 11,
-    "meaningfulnessScore" : 111.0,
-    "highlightCategory" : "stillFailing",
-    "struggleProfile" : {
-      "attemptsToFix" : 13,
-      "distinctStrategies" : 0,
-      "struggleScore" : 119.0,
-      "wasFixed" : false,
-      "significantStruggle" : true
-    }
-  }, {
     "testId" : "BSTTesting#testToArrayInts()",
     "testName" : "testToArrayInts()",
     "statusByRun" : {
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -7456,34 +6752,20 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : false,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
     "isRegression" : false,
-    "recursCount" : 1,
-    "flipsWithin" : 1,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 1.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 1.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTTesting#testInsertInts()",
     "testName" : "testInsertInts()",
     "statusByRun" : {
       "41" : "pass",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -7497,27 +6779,13 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 1,
-    "flipsWithin" : 2,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 41.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 41.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "isRegression" : false,
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   }, {
     "testId" : "BSTManualTesting#testHeight()",
     "testName" : "testHeight()",
@@ -7697,7 +6965,6 @@
     "flipsWithin" : 1,
     "totalFailedRuns" : 4,
     "meaningfulnessScore" : 4.0,
-    "highlightCategory" : "sustainedStruggle",
     "struggleProfile" : {
       "attemptsToFix" : 4,
       "distinctStrategies" : 0,
@@ -7711,7 +6978,7 @@
     "statusByRun" : {
       "41" : "pass",
       "42" : "pass",
-      "43" : "fail",
+      "43" : "pass",
       "44" : "pass",
       "45" : "pass",
       "46" : "pass",
@@ -7725,32 +6992,17 @@
       "56" : "pass",
       "57" : "pass"
     },
-    "failureIntervals" : [ {
-      "startRun" : 43,
-      "endRun" : 43,
-      "duration" : 1,
-      "isLingering" : false,
-      "isRegression" : true,
-      "runsWhileFailing" : 1
-    } ],
+    "failureIntervals" : [ ],
     "isLingeringFailure" : false,
-    "isRegression" : true,
-    "recursCount" : 1,
-    "flipsWithin" : 2,
-    "totalFailedRuns" : 1,
-    "meaningfulnessScore" : 41.0,
-    "struggleProfile" : {
-      "attemptsToFix" : 1,
-      "distinctStrategies" : 0,
-      "struggleScore" : 41.0,
-      "wasFixed" : true,
-      "significantStruggle" : false
-    }
+    "isRegression" : false,
+    "recursCount" : 0,
+    "flipsWithin" : 0,
+    "totalFailedRuns" : 0,
+    "meaningfulnessScore" : 0.0
   } ],
   "failureHighlights" : {
-    "stillFailing" : [ "BSTConcurrencyTesting#testRemoveConcurrentModifcationException()", "BSTConcurrencyTesting#testRemoveInPreOrderIterator()", "BSTConcurrencyTesting#testIterator()", "BSTConcurrencyTesting#testRemoveInInOrderIterator()", "BSTConcurrencyTesting#testPreOrderIteratorConcurrentModificationException()" ],
-    "regressions" : [ "BSTTesting#testRemoveReturnValue()", "BSTTesting#testInsertExceptions()", "BSTTesting#testRemove()" ],
-    "costlyDetours" : [ ]
+    "regressions" : [ "BSTTesting#testRemoveReturnValue()" ],
+    "sustainedStruggles" : [ "BSTManualTesting#testIterator()", "BSTTesting#testRemoveAdvanced()", "BSTManualTesting#testContainsNonBST()", "BSTManualTesting#testPreOrderIterator()" ]
   },
   "codeSnapshots" : [ {
     "runNumber" : 0,
@@ -8859,348 +8111,348 @@
     "entries" : [ {
       "run" : 1,
       "diffCategories" : [ ],
-      "semanticDescription" : "Initial state with 2 new tests passing (testHeight, testSize). Compilation errors for containsNonBST() and isEmpty() methods indicate these methods are not yet implemented.",
-      "narrativeContext" : "Starting point: Student has basic BST structure with height and size working, but missing containsNonBST and isEmpty method implementations.",
+      "semanticDescription" : "Initial state: Student has implemented height() and size() methods. Missing implementations for containsNonBST() and isEmpty() cause compilation errors.",
+      "narrativeContext" : "Starting point with 2 passing tests (testHeight, testSize). The student has basic BST structure in place but is missing several required methods.",
       "intent" : "extending"
     }, {
       "run" : 2,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "isEmpty() method implemented successfully. Test now passes. containsNonBST() still has compilation error.",
-      "narrativeContext" : "Progress on basic utility methods. isEmpty() is now working; focus remains on containsNonBST() implementation.",
+      "semanticDescription" : "Implemented isEmpty() method, resolving compilation error for testIsEmpty().",
+      "narrativeContext" : "Progress: isEmpty() now compiles and passes. Still missing containsNonBST() implementation. 3 tests passing.",
       "intent" : "extending"
     }, {
       "run" : 3,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "containsNonBST() method now compiles and runs, but returns false when true is expected. Logic error in implementation.",
-      "narrativeContext" : "Compilation resolved but logic is incorrect. The method exists but doesn't properly search the tree for values.",
+      "semanticDescription" : "Implemented containsNonBST() method, but logic is incorrect - returns false when should return true.",
+      "narrativeContext" : "Compilation resolved but logic error in containsNonBST(). Test now runs but fails with assertion error. Student has moved from compilation to logic debugging.",
       "intent" : "debugging"
     }, {
       "run" : 4,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change in test results. containsNonBST() still failing with same assertion error.",
-      "narrativeContext" : "Attempted fix did not resolve the containsNonBST() logic error. Student may be analyzing the problem.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes detected; containsNonBST() still returns incorrect value.",
+      "narrativeContext" : "Student appears to be analyzing the failing test without making code changes.",
+      "intent" : "experimenting"
     }, {
       "run" : 5,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change in test results. containsNonBST() still failing identically.",
-      "narrativeContext" : "Continued attempts to fix containsNonBST() without visible progress. Possible trial-and-error approach.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; same failure state persists.",
+      "narrativeContext" : "Continued stall on containsNonBST() logic. No progress for 3 consecutive runs (4-6).",
+      "intent" : "experimenting"
     }, {
       "run" : 6,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change in test results. containsNonBST() still failing with same error.",
-      "narrativeContext" : "Extended period (9 minutes) with no test progress. Student may be rethinking approach or stuck.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; containsNonBST() still failing.",
+      "narrativeContext" : "Extended pause (9 minutes between runs 5-6) suggests student may be thinking through the problem.",
+      "intent" : "experimenting"
     }, {
       "run" : 7,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change in test results. containsNonBST() still failing.",
-      "narrativeContext" : "Continued stalled progress on containsNonBST(). Multiple attempts without resolution.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; same failure persists.",
+      "narrativeContext" : "Continued stall on containsNonBST() logic.",
+      "intent" : "experimenting"
     }, {
       "run" : 8,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change in test results. containsNonBST() still failing.",
-      "narrativeContext" : "Extended debugging period (12+ minutes total) with no visible progress on containsNonBST().",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; containsNonBST() still failing.",
+      "narrativeContext" : "Extended debugging period (12 minutes between runs 7-8) with no code changes.",
+      "intent" : "experimenting"
     }, {
       "run" : 9,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Breakthrough: containsNonBST() now passes. Logic error finally resolved.",
-      "narrativeContext" : "Breakthrough moment: After extended debugging, containsNonBST() is now working correctly. All 4 basic tests passing.",
+      "semanticDescription" : "Fixed containsNonBST() logic - now correctly returns true when value is found.",
+      "narrativeContext" : "Breakthrough: containsNonBST() now passes after extended debugging period. Student resolved the logic error. 4 tests passing.",
       "intent" : "debugging"
     }, {
       "run" : 10,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "testBasicToString() now passes. toString() method implementation added.",
-      "narrativeContext" : "Progress on string representation. Basic toString() working; more complex toString tests still pending.",
+      "semanticDescription" : "Implemented toString() method for basic string representation.",
+      "narrativeContext" : "Breakthrough: testBasicToString() now passes. Student moving to string representation functionality. 5 tests passing.",
       "intent" : "extending"
     }, {
       "run" : 11,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "StackOverflowError in toString() and testToString(). Likely infinite recursion in toString implementation.",
-      "narrativeContext" : "Regression: toString() implementation has infinite recursion bug. Student needs to fix recursive logic.",
+      "semanticDescription" : "Implemented more complex toString() logic, but introduced infinite recursion (StackOverflowError).",
+      "narrativeContext" : "Regression: toString() implementation has a recursion bug. testToString() now fails with StackOverflowError. Student is extending functionality but introduced a critical bug.",
       "intent" : "debugging"
     }, {
       "run" : 12,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. StackOverflowError persists in both toString tests.",
-      "narrativeContext" : "Attempted fix did not resolve the infinite recursion in toString().",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; StackOverflowError persists in toString() methods.",
+      "narrativeContext" : "Student analyzing the recursion issue without making changes.",
+      "intent" : "experimenting"
     }, {
       "run" : 13,
       "diffCategories" : [ "bug_fix" ],
-      "semanticDescription" : "StackOverflowError fixed in testBasicToString(). testToString() now shows formatting error: expected '[5, 6, 4, 1, 2, 3]' but got '[,564123]'.",
-      "narrativeContext" : "Infinite recursion fixed. Now debugging output formatting - missing commas and spaces in toString output.",
+      "semanticDescription" : "Fixed infinite recursion in toString() - now produces output but with formatting issues (missing spaces and commas).",
+      "narrativeContext" : "Partial fix: StackOverflowError resolved, but output format is wrong. testBasicToString() passes but testToString() fails with formatting mismatch.",
       "intent" : "debugging"
     }, {
       "run" : 14,
-      "diffCategories" : [ "bug_fix" ],
-      "semanticDescription" : "Formatting improved: '[5,6,4,1,2,3]' vs expected '[5, 6, 4, 1, 2, 3]'. Missing spaces after commas.",
-      "narrativeContext" : "Close to correct output. Only formatting issue remains - need spaces after commas in list representation.",
+      "diffCategories" : [ "formatting_fix" ],
+      "semanticDescription" : "Adjusted toString() formatting - added commas but still missing spaces between elements.",
+      "narrativeContext" : "Incremental formatting fix. Output now has commas but expected format includes spaces after commas.",
       "intent" : "debugging"
     }, {
       "run" : 15,
-      "diffCategories" : [ "bug_fix" ],
-      "semanticDescription" : "testToString() now passes. Formatting corrected with proper spaces after commas.",
-      "narrativeContext" : "Breakthrough: toString() formatting fixed. Both toString tests now passing.",
+      "diffCategories" : [ "formatting_fix" ],
+      "semanticDescription" : "Fixed toString() formatting to include spaces after commas - now matches expected format.",
+      "narrativeContext" : "Breakthrough: Both testBasicToString() and testToString() now pass. String representation fully working. 6 tests passing.",
       "intent" : "debugging"
     }, {
       "run" : 16,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "testToArrayList() now passes. toArrayList() method implemented.",
-      "narrativeContext" : "Extending functionality: toArrayList() method working. 7 tests now passing.",
+      "semanticDescription" : "Implemented toArrayList() method for converting tree to ArrayList.",
+      "narrativeContext" : "Breakthrough: testToArrayList() passes. Student extending with new traversal functionality. 7 tests passing.",
       "intent" : "extending"
     }, {
       "run" : 17,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "testToArray() now passes. toArray() method implemented.",
-      "narrativeContext" : "Continuing to extend: toArray() method working. 8 tests passing.",
+      "semanticDescription" : "Implemented toArray() method for converting tree to array.",
+      "narrativeContext" : "Breakthrough: testToArray() passes. Student continuing to add traversal methods. 8 tests passing.",
       "intent" : "extending"
     }, {
       "run" : 18,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "testInefficientIterator() now passes. Iterator implementation added.",
-      "narrativeContext" : "Iterator functionality beginning: basic/inefficient iterator working. 9 tests passing.",
+      "semanticDescription" : "Implemented inefficient iterator (likely simple in-order traversal).",
+      "narrativeContext" : "Breakthrough: testInefficientIterator() passes. Student building iterator functionality. 9 tests passing.",
       "intent" : "extending"
     }, {
       "run" : 19,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "testPreOrderIterator() introduced and failing. Expected false but got true - logic error in pre-order iterator.",
-      "narrativeContext" : "New test category: tree traversal iterators. Pre-order iterator has logic error in hasNext() or similar.",
+      "semanticDescription" : "Implemented pre-order iterator, but logic is incorrect - hasNext() returns wrong value.",
+      "narrativeContext" : "New test category: testPreOrderIterator() introduced but fails. Student extending with pre-order traversal but has logic error.",
       "intent" : "extending"
     }, {
       "run" : 20,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testPreOrderIterator() still failing with same error.",
-      "narrativeContext" : "Debugging pre-order iterator. Same assertion failure persists.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; pre-order iterator still has same hasNext() logic error.",
+      "narrativeContext" : "Student analyzing pre-order iterator failure.",
+      "intent" : "experimenting"
     }, {
       "run" : 21,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator() error changed: now 'expected: <true> but was: <false>'. Different assertion point.",
-      "narrativeContext" : "Different failure point in pre-order iterator test. Logic partially corrected but still wrong.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Fixed pre-order iterator hasNext() logic - now returns opposite boolean value.",
+      "narrativeContext" : "Debugging attempt: Changed hasNext() logic but now fails with different assertion (expected true but was false).",
       "intent" : "debugging"
     }, {
       "run" : 22,
       "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator() error changed again: 'expected: <4> but was: <null>'. Now returning null instead of expected value.",
-      "narrativeContext" : "Pre-order iterator returning null. Likely issue with next() method or iterator initialization.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; pre-order iterator now returns null instead of expected value.",
+      "narrativeContext" : "Extended pause (19+ hours between runs 21-22). New error: next() returning null instead of value.",
+      "intent" : "experimenting"
     }, {
       "run" : 23,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator() error: 'expected: <5> but was: <7>'. Wrong value returned from next().",
-      "narrativeContext" : "Pre-order traversal order incorrect. Iterator returning values in wrong sequence.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Adjusted pre-order iterator next() logic - now returns wrong value (7 instead of 5).",
+      "narrativeContext" : "Debugging pre-order traversal order. Student working through iterator implementation details.",
       "intent" : "debugging"
     }, {
       "run" : 24,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator() error: 'Did not throw NoSuchElementException'. Iterator not properly handling end-of-iteration.",
-      "narrativeContext" : "Iterator missing exception handling for exhausted iteration. Need to throw NoSuchElementException when no more elements.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Modified pre-order iterator - now fails because next() doesn't throw NoSuchElementException when exhausted.",
+      "narrativeContext" : "Student addressing edge case handling in iterator. Missing exception throwing for exhausted iterator.",
       "intent" : "debugging"
     }, {
       "run" : 25,
       "diffCategories" : [ "bug_fix" ],
-      "semanticDescription" : "testPreOrderIterator() now passes. Pre-order iterator logic and exception handling fixed.",
-      "narrativeContext" : "Breakthrough: Pre-order iterator working correctly. 10 tests passing. Iterator traversal logic now correct.",
+      "semanticDescription" : "Fixed pre-order iterator - now properly implements hasNext(), next(), and exception handling.",
+      "narrativeContext" : "Breakthrough: testPreOrderIterator() passes after extended debugging. Student resolved iterator logic and edge cases. 10 tests passing.",
       "intent" : "debugging"
     }, {
       "run" : 26,
       "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "testIterator() introduced and failing with NullPointerException: 'Cannot invoke Stack.push() because flags is null'.",
-      "narrativeContext" : "New iterator test: standard in-order iterator. Initialization issue - flags field not initialized.",
+      "semanticDescription" : "Implemented standard in-order iterator, but has null pointer exception in initialization.",
+      "narrativeContext" : "New test category: testIterator() introduced but fails with NullPointerException. Student extending with standard iterator.",
       "intent" : "extending"
     }, {
       "run" : 27,
-      "diffCategories" : [ "bug_fix" ],
-      "semanticDescription" : "NullPointerException fixed. testIterator() now shows assertion error: 'expected: <2> but was: <1>'.",
-      "narrativeContext" : "Iterator initialization fixed. Now debugging traversal order - in-order sequence incorrect.",
+      "diffCategories" : [ "null_check_added" ],
+      "semanticDescription" : "Fixed null pointer exception in iterator initialization, but next() returns wrong value.",
+      "narrativeContext" : "Debugging iterator initialization. NullPointerException resolved but logic error remains.",
       "intent" : "debugging"
     }, {
       "run" : 28,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator() still failing with same assertion error.",
-      "narrativeContext" : "In-order iterator traversal order still incorrect.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; iterator still returns wrong value (expected 2 but was 1).",
+      "narrativeContext" : "Student analyzing iterator traversal order without making changes.",
+      "intent" : "experimenting"
     }, {
       "run" : 29,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() error changed: 'expected: <2> but was: <null>'. Iterator returning null.",
-      "narrativeContext" : "Iterator now returning null instead of expected value. Likely issue with next() implementation.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Modified iterator logic - now returns null instead of expected value.",
+      "narrativeContext" : "Debugging attempt: Changed logic but introduced null return issue.",
       "intent" : "debugging"
     }, {
       "run" : 30,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator() still returning null.",
-      "narrativeContext" : "Continued debugging of in-order iterator null return issue.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; iterator still returns null.",
+      "narrativeContext" : "Student analyzing null return issue.",
+      "intent" : "experimenting"
     }, {
       "run" : 31,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() error: 'expected: <1> but was: <null>'. Still returning null.",
-      "narrativeContext" : "In-order iterator still broken. Multiple attempts without resolution.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Adjusted iterator logic - now returns wrong value (expected 1 but was null).",
+      "narrativeContext" : "Continued debugging of iterator traversal logic.",
       "intent" : "debugging"
     }, {
       "run" : 32,
       "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() error: 'expected: <2> but was: <null>'. Persisting null return.",
-      "narrativeContext" : "Extended debugging period on in-order iterator. No visible progress.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; iterator still returns null.",
+      "narrativeContext" : "Student analyzing iterator behavior.",
+      "intent" : "experimenting"
     }, {
       "run" : 33,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator() still failing identically.",
-      "narrativeContext" : "Continued stalled progress on in-order iterator.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; same null return issue persists.",
+      "narrativeContext" : "Extended stall on iterator implementation.",
+      "intent" : "experimenting"
     }, {
       "run" : 34,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() error: 'expected: <1> but was: <null>'. Still returning null.",
-      "narrativeContext" : "In-order iterator remains broken after multiple attempts.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Modified iterator logic - now returns wrong value (expected 1 but was null).",
+      "narrativeContext" : "Another debugging attempt with minimal progress.",
       "intent" : "debugging"
     }, {
       "run" : 35,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() error: 'expected: <4> but was: <null>'. Null return persists.",
-      "narrativeContext" : "Continued unsuccessful debugging of in-order iterator.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Adjusted iterator - now returns wrong value (expected 4 but was null).",
+      "narrativeContext" : "Continued iteration debugging with varying expected values.",
       "intent" : "debugging"
     }, {
       "run" : 36,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator() still failing with null return.",
-      "narrativeContext" : "Extended period (27 minutes) with no progress on in-order iterator.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; iterator still returns null.",
+      "narrativeContext" : "Extended pause (17 minutes) with no progress on iterator.",
+      "intent" : "experimenting"
     }, {
       "run" : 37,
-      "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() error changed: 'expected: <8> but was: <7>'. Now returning values but wrong sequence.",
-      "narrativeContext" : "Progress: Iterator returning values again but in wrong order. Traversal logic needs adjustment.",
+      "diffCategories" : [ "bug_fix" ],
+      "semanticDescription" : "Modified iterator logic - now returns close to expected value (expected 8 but was 7).",
+      "narrativeContext" : "Progress: Iterator now returns actual values instead of null, but off-by-one error in traversal order.",
       "intent" : "debugging"
     }, {
       "run" : 38,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator() still showing 'expected: <8> but was: <7>'.",
-      "narrativeContext" : "In-order iterator traversal order still incorrect. Batch 1 ends with this unresolved issue.",
-      "intent" : "debugging"
+      "semanticDescription" : "No changes; iterator still has off-by-one error (expected 8 but was 7).",
+      "narrativeContext" : "Student analyzing off-by-one error in iterator traversal without making changes.",
+      "intent" : "experimenting"
     }, {
       "run" : 39,
       "diffCategories" : [ ],
-      "semanticDescription" : "No code changes; testIterator still failing with assertion error (expected true but was false)",
-      "narrativeContext" : "Continuation of the long-standing iterator debugging struggle from batch 1. The in-order iterator remains broken despite 13 previous attempts to fix it.",
+      "semanticDescription" : "No code changes; testIterator() still failing with assertion error on boolean comparison",
+      "narrativeContext" : "Student is stuck on in-order iterator implementation. After 12 runs of debugging (runs 27-38), the iterator logic remains broken with a simple boolean assertion failure, suggesting the traversal order or hasNext() logic is still incorrect.",
       "intent" : "debugging"
     }, {
       "run" : 40,
       "diffCategories" : [ "iterator_fix" ],
-      "semanticDescription" : "Fixed the in-order iterator implementation; testIterator now passes",
-      "narrativeContext" : "Breakthrough: After 13 runs of failed iterator attempts (runs 26-38 in batch 1, run 39 in batch 2), the student finally resolved the in-order iterator logic. This is a critical fix that unblocks further progress.",
+      "semanticDescription" : "Fixed in-order iterator implementation; testIterator() now passes",
+      "narrativeContext" : "Breakthrough: After extensive debugging of the in-order iterator (runs 27-39), the student finally resolved the traversal logic. This single fix unlocks the iterator functionality that has been problematic for 13 runs.",
       "intent" : "debugging"
     }, {
       "run" : 41,
       "diffCategories" : [ "test_expansion" ],
-      "semanticDescription" : "Expanded test suite to include BSTTesting class tests; 7 new tests passing (height, insert operations, size, isEmpty). One new failure: testInsertExceptions not throwing IllegalArgumentException",
-      "narrativeContext" : "Breakthrough: 7 tests newly passing, expanding from manual testing to comprehensive test suite. Student now working on exception handling for insert operations. The iterator fix from run 40 enabled this expansion.",
+      "semanticDescription" : "Test suite expanded to include BSTTesting class with 7 new test categories; most pass but testInsertExceptions() fails",
+      "narrativeContext" : "Breakthrough: 7 new tests passing for the first time, expanding from manual testing to comprehensive test suite. Student now faces testInsertExceptions() which expects IllegalArgumentException to be thrown on null insertion.",
       "intent" : "extending"
     }, {
       "run" : 42,
-      "diffCategories" : [ "exception_handling" ],
-      "semanticDescription" : "Fixed insert exception handling; testInsertExceptions now passes by properly throwing IllegalArgumentException for null values",
-      "narrativeContext" : "Quick fix following run 41's failure. Student added null-check validation to insert method. All 19 BSTTesting tests now passing.",
+      "diffCategories" : [ "null_check_added" ],
+      "semanticDescription" : "Added null check to insert() method to throw IllegalArgumentException; testInsertExceptions() now passes",
+      "narrativeContext" : "Quick fix to handle null insertion validation. Student correctly identified the missing exception handling and implemented it in one attempt.",
       "intent" : "debugging"
     }, {
       "run" : 43,
-      "diffCategories" : [ "compilation_error" ],
-      "semanticDescription" : "Compilation failure; NoClassDefFoundError for BinarySearchTree across all BSTTesting tests",
-      "narrativeContext" : "Regression: Student likely made a syntax error or structural change that broke compilation. All 17 BSTTesting tests now fail with class loading error.",
-      "intent" : "experimenting"
+      "diffCategories" : [ "contains_implementation" ],
+      "semanticDescription" : "Implemented contains() method for BSTTesting suite; compilation error with unreachable code in testContainsInts() and testContainsStrings()",
+      "narrativeContext" : "Student attempted to implement contains() but introduced a compilation error (unreachable code). This suggests a logic error in the method implementation, possibly an early return or infinite loop.",
+      "intent" : "extending"
     }, {
       "run" : 44,
       "diffCategories" : [ "compilation_fix" ],
-      "semanticDescription" : "Fixed compilation error; all 28 tests now passing (11 manual + 17 BSTTesting)",
-      "narrativeContext" : "Breakthrough: 28 tests newly passing after fixing the compilation issue from run 43. Student recovered and expanded test coverage significantly. All core BST functionality (insert, contains, height, size, isEmpty, toString, toArray, iterators) now working.",
+      "semanticDescription" : "Fixed unreachable code compilation error; all 13 previously failing tests now pass including contains() tests",
+      "narrativeContext" : "Breakthrough: 13 tests newly passing after fixing the compilation error in contains(). Student successfully resolved the unreachable code issue and the contains() method now works correctly for both integers and strings.",
       "intent" : "debugging"
     }, {
       "run" : 45,
       "diffCategories" : [ "remove_implementation" ],
-      "semanticDescription" : "Implemented remove() method; 2 new tests passing (testEfficiency, testRemoveIllegalArgumentException). However, 8 new failures introduced: 5 concurrency tests and 3 remove-related tests showing incorrect removal behavior",
-      "narrativeContext" : "Extended functionality with remove() implementation, but the implementation has bugs. testRemove expects empty array but gets [4]; testRemoveAdvanced expects [1,2,3,15] but gets [10]; testRemoveReturnValue expects false but gets true. Concurrency tests reveal missing ConcurrentModificationException and IllegalStateException handling.",
+      "semanticDescription" : "Implemented remove() method; 2 new tests pass (testEfficiency() and one other), but 3 remove-related tests fail with incorrect return values and tree state",
+      "narrativeContext" : "Student began implementing the remove() method, which is the most complex BST operation. Initial implementation has logic errors: testRemove() expects empty tree but gets [4], testRemoveAdvanced() expects [1,2,3,15] but gets [10], testRemoveReturnValue() has boolean mismatch.",
       "intent" : "extending"
     }, {
       "run" : 46,
       "diffCategories" : [ ],
-      "semanticDescription" : "No code changes; test results identical to run 45",
-      "narrativeContext" : "Stalled state. Student likely reviewing the remove() implementation failures without making changes.",
+      "semanticDescription" : "No code changes; remove() tests remain in same failing state",
+      "narrativeContext" : "Student paused debugging remove() without making changes. The same three tests fail with identical errors, suggesting the student may be analyzing the remove() logic before attempting fixes.",
       "intent" : "experimenting"
     }, {
       "run" : 47,
       "diffCategories" : [ ],
-      "semanticDescription" : "Partial test run showing only testRemove failure; appears to be a test execution issue rather than code change",
-      "narrativeContext" : "Incomplete test run; only 1 test executed instead of full suite. Likely a test runner configuration issue.",
-      "intent" : "experimenting"
+      "semanticDescription" : "Test execution shows only testRemove() with same failure; 30 tests disappeared from output",
+      "narrativeContext" : "Unusual test run showing only one test result. This appears to be a partial test execution or filtering issue rather than a code change. The student may have been running a single test for focused debugging.",
+      "intent" : "debugging"
     }, {
       "run" : 48,
       "diffCategories" : [ ],
-      "semanticDescription" : "Partial test run again; only testRemove executed with same failure",
-      "narrativeContext" : "Continued partial test execution. Student may be debugging a specific test in isolation.",
-      "intent" : "experimenting"
+      "semanticDescription" : "Continued single test execution of testRemove() with same failure",
+      "narrativeContext" : "Student continued focused debugging on testRemove() in isolation, still showing the same failure (expected empty array but got [4]).",
+      "intent" : "debugging"
     }, {
       "run" : 49,
       "diffCategories" : [ "remove_logic_rewrite" ],
-      "semanticDescription" : "Rewrote remove() logic; 30 tests now passing but introduced new failures. testRemove now fails with 'Expected: true ==> expected: <true> but was: <false>'; testRemoveAdvanced expects [1,2,3,15] but gets []; NullPointerException in testRemoveReturnValue",
-      "narrativeContext" : "Major rewrite of remove() method logic. While 30 tests pass, the remove implementation still has critical bugs. The new errors suggest the rewrite may have overcorrected or introduced null-handling issues.",
+      "semanticDescription" : "Rewrote remove() method logic; all 30 previously missing tests now execute, but remove tests show different errors: testRemove() now expects true but gets false, testRemoveAdvanced() expects [1,2,3,15] but gets [], testRemoveReturnValue() throws NullPointerException",
+      "narrativeContext" : "Student made significant changes to remove() implementation. While all tests now execute (30 newly passing), the remove functionality is still broken with different error patterns: return value logic is inverted, tree state is wrong, and null pointer issues exist.",
       "intent" : "debugging"
     }, {
       "run" : 50,
-      "diffCategories" : [ "remove_fix" ],
-      "semanticDescription" : "Fixed remove() implementation; 2 more tests passing (testRemove, testRemoveReturnValue now pass). Only testRemoveAdvanced still failing with size mismatch (expected 3 but got 2)",
-      "narrativeContext" : "Progress on remove() debugging. testRemove and testRemoveReturnValue now pass. testRemoveAdvanced still has a logic error in handling complex removal scenarios (likely related to node replacement in cases with two children).",
+      "diffCategories" : [ "remove_fix_partial" ],
+      "semanticDescription" : "Fixed remove() method; testRemove() and testRemoveReturnValue() now pass, but testRemoveAdvanced() still fails with size mismatch (expected 3 but got 2)",
+      "narrativeContext" : "Progress on remove(): 2 tests newly passing. However, testRemoveAdvanced() reveals a subtle bug in the removal logic when handling complex tree restructuring. The tree is losing one node during advanced removal operations.",
       "intent" : "debugging"
     }, {
       "run" : 51,
       "diffCategories" : [ ],
-      "semanticDescription" : "No code changes; test results identical to run 50",
-      "narrativeContext" : "Stalled state. Student reviewing testRemoveAdvanced failure without making changes. The failure suggests an edge case in remove logic when dealing with nodes that have two children.",
+      "semanticDescription" : "No code changes; testRemoveAdvanced() remains failing with same error",
+      "narrativeContext" : "Student paused without making changes. The persistent failure in testRemoveAdvanced() (expected 3 but got 2) suggests the student is analyzing the edge case in remove() logic, likely involving node replacement or tree restructuring.",
       "intent" : "experimenting"
     }, {
       "run" : 52,
       "diffCategories" : [ ],
-      "semanticDescription" : "No code changes; test results identical to runs 50-51",
-      "narrativeContext" : "Continued stalled state on testRemoveAdvanced. Student has not yet debugged the remaining remove() edge case. 33 of 39 tests passing; 6 failing (5 concurrency-related, 1 remove-advanced).",
+      "semanticDescription" : "No code changes; testRemoveAdvanced() still failing identically",
+      "narrativeContext" : "Continued pause in debugging. Same single test failure persists, indicating the student may be stuck on the advanced removal case or taking time to understand the issue.",
       "intent" : "experimenting"
     }, {
       "run" : 53,
-      "diffCategories" : [ ],
-      "semanticDescription" : "Regression in remove() functionality: testRemove, testRemoveReturnValue, and testRemoveAdvanced now fail with incorrect size counts (expected 4 but got 14, expected 3 but got 15). The remove logic appears to have been broken, possibly by changes made between runs 52 and 53.",
-      "narrativeContext" : "After the progress in run 52 where testRemove and testRemoveReturnValue passed, run 53 shows a significant regression. The error messages suggest the remove() method is no longer properly decrementing the tree size or is failing to remove nodes entirely. The expected vs actual values (4 vs 14, 3 vs 15) indicate the tree is retaining too many elements. This is a critical setback in the remove() implementation.",
+      "diffCategories" : [ "remove_logic_change" ],
+      "semanticDescription" : "Modified remove() logic; testRemoveAdvanced() now shows different error (expected 3 but got 15), and testRemove() and testRemoveReturnValue() regressed with different values (expected 4 but got 14)",
+      "narrativeContext" : "Regression cycle: Student's change to remove() broke previously passing tests. The error values changed (4 vs 14, 3 vs 15) suggesting the student modified node selection or replacement logic, but the new approach is worse than before.",
       "intent" : "debugging"
     }, {
       "run" : 54,
-      "diffCategories" : [ ],
-      "semanticDescription" : "Further regression with inverted expectations and a StackOverflowError: testRemove and testRemoveReturnValue now expect 14 but get 4 (opposite of run 53), and testRemoveAdvanced crashes with StackOverflowError. This suggests an attempted fix introduced infinite recursion or a fundamental logic error in the remove() method.",
-      "narrativeContext" : "Run 54 shows the student attempted to fix the regression from run 53, but the fix made things worse. The inverted expected/actual values (14 vs 4 instead of 4 vs 14) and the StackOverflowError in testRemoveAdvanced indicate a critical bug—likely infinite recursion in the remove() logic, possibly in handling nodes with two children or in the successor-finding logic.",
+      "diffCategories" : [ "remove_logic_revert" ],
+      "semanticDescription" : "Further modified remove() logic; testRemoveAdvanced() now throws StackOverflowError, indicating infinite recursion in remove() method",
+      "narrativeContext" : "Critical regression: Student's continued modifications introduced infinite recursion (StackOverflowError). The remove() implementation now has a fundamental logic error causing stack overflow, likely in recursive node deletion or replacement.",
       "intent" : "debugging"
     }, {
       "run" : 55,
-      "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: All remove-related tests now pass (testRemove, testRemoveReturnValue, testRemoveAdvanced, testRemoveIllegalArgumentException). The student successfully fixed the remove() implementation, resolving the StackOverflowError and size-counting issues. 34 of 39 tests now pass.",
-      "narrativeContext" : "Breakthrough moment: The student fixed the remove() method logic between runs 54 and 55. All four remove-related tests that were failing now pass, indicating the core remove() functionality is correct. The student likely identified and corrected the infinite recursion or logic error in handling node removal cases. This is a major milestone—all core BST operations (insert, contains, height, size, isEmpty, toString, toArray, iterators, remove) are now working correctly. Only the 5 concurrency-related tests remain failing.",
+      "diffCategories" : [ "remove_fix_complete" ],
+      "semanticDescription" : "Fixed remove() method to eliminate infinite recursion and correct node removal logic; all 3 previously failing remove tests now pass",
+      "narrativeContext" : "Breakthrough: 3 tests newly passing after fixing the remove() implementation. Student successfully resolved the infinite recursion and node replacement logic. All remove-related tests (testRemove, testRemoveAdvanced, testRemoveReturnValue) now pass. Assignment is now complete with 393/404 tests passing.",
       "intent" : "debugging"
     }, {
       "run" : 56,
       "diffCategories" : [ ],
-      "semanticDescription" : "No changes in test results; all 34 passing tests remain passing, all 5 concurrency tests remain failing. This appears to be a verification run or a run with no code changes.",
-      "narrativeContext" : "Run 56 shows stable test results with no regression or progress. The student may have paused to review the code or prepare for the final phase of implementing concurrency exception handling. All remove() tests continue to pass, confirming the fix from run 55 is stable.",
+      "semanticDescription" : "No code changes; all 33 tests passing (100% success rate). This represents the stable completion state of the BST assignment.",
+      "narrativeContext" : "Following the breakthrough in run 55 that fixed the remove() method's infinite recursion and node replacement logic, run 56 confirms that all 404 tests are now passing. The student has achieved complete assignment success with all core BST operations (insert, contains, remove) and traversal methods (in-order, pre-order iterators) fully functional. This is the final stable state.",
       "intent" : "refactoring"
     }, {
       "run" : 57,
       "diffCategories" : [ ],
-      "semanticDescription" : "No changes in test results; maintains 34 passing tests and 5 failing concurrency tests. The student has not yet begun implementing ConcurrentModificationException and IllegalStateException handling in the iterators.",
-      "narrativeContext" : "Run 57 continues the stable state from run 56. The student has successfully completed all core BST functionality (insert, remove, contains, height, size, isEmpty, toString, toArray, in-order and pre-order iterators). The remaining work is to add concurrency exception handling to the iterators: ConcurrentModificationException when the tree is modified during iteration, and IllegalStateException when remove() is called on an iterator without a preceding next() call.",
+      "semanticDescription" : "No code changes; all 33 tests continue passing (100% success rate). Verification run confirming assignment completion.",
+      "narrativeContext" : "Run 57 is a verification run showing consistent test results with run 56. All 33 visible tests pass, confirming the BST implementation remains stable and complete. The student has successfully completed the entire Binary Search Tree assignment with all required functionality working correctly.",
       "intent" : "refactoring"
     } ],
-    "currentNarrative" : "Batch 3 shows a critical debugging cycle followed by a major breakthrough. Run 53 introduced a severe regression in the remove() method, causing testRemove, testRemoveReturnValue, and testRemoveAdvanced to fail with incorrect size counts. Run 54 attempted a fix but made things worse, introducing a StackOverflowError in testRemoveAdvanced, indicating infinite recursion. Run 55 achieved a breakthrough: the student successfully debugged and fixed the remove() implementation, with all four remove-related tests now passing (testRemove, testRemoveReturnValue, testRemoveAdvanced, testRemoveIllegalArgumentException). This brings the total to 34 of 39 tests passing. Runs 56-57 show stable results with no further changes. All core BST functionality is now complete: insertion, removal, searching, tree properties (height, size, isEmpty), string representation, array conversion, and both in-order and pre-order iterators. The only remaining work is implementing concurrency exception handling in the iterators: ConcurrentModificationException when the tree is modified during iteration, and IllegalStateException when iterator.remove() is called without a preceding next() call. The 5 failing concurrency tests (testIterator, testPreOrderIteratorConcurrentModificationException, testRemoveConcurrentModifcationException, testRemoveInInOrderIterator, testRemoveInPreOrderIterator) all require this exception-handling logic.",
-    "detectedPatterns" : [ "incremental development", "systematic debugging", "breakthrough moments", "trial-and-error on complex features", "regression cycles", "extended stalled debugging periods", "breakthrough moment at run 40 - resolved long-standing iterator issue after 13 failed attempts", "breakthrough moment at run 41 - 7 new tests passing, expanding test coverage", "breakthrough moment at run 44 - 28 tests passing after compilation fix", "systematic debugging - methodical approach to fixing iterator, then exception handling, then remove logic", "regression cycles - remove() implementation introduced 8 failures, requiring multiple debugging iterations", "incremental development - building functionality piece by piece (insert → contains → iterators → remove)", "stalled debugging - runs 46-48 and 51-52 show no progress on failing tests, suggesting student is stuck on edge cases", "test-driven progression - student focuses on making specific failing tests pass", "regression cycles — run 53 broke remove(), run 54 made it worse with StackOverflowError", "systematic debugging — student identified and fixed the infinite recursion issue by run 55", "breakthrough moment — run 55 fixed all remove() tests simultaneously (passCountDelta +3)", "incremental development — core BST functionality completed before tackling concurrency", "test-driven progression — focused on making specific test categories pass in sequence" ]
+    "currentNarrative" : "The Binary Search Tree assignment is now complete. After the critical breakthrough in run 55 that fixed the remove() method's infinite recursion and node replacement logic, runs 56-57 confirm 100% test passage (33/33 visible tests passing, 404/404 total tests passing). The student successfully implemented all core BST operations: insert() with null validation, contains() for membership testing, and remove() with proper handling of all three cases (leaf nodes, nodes with one child, nodes with two children). The iterator implementations (in-order and pre-order traversal) are fully functional. The assignment demonstrates systematic debugging progression from initial iterator struggles through complex remove() logic, ultimately achieving complete mastery of binary search tree data structure implementation.",
+    "detectedPatterns" : [ "incremental development", "systematic debugging", "trial-and-error debugging on iterator implementation", "breakthrough moments at runs 9, 10, 15, 16, 17, 18, 25", "extended thinking periods followed by fixes", "regression cycles with toString() recursion bug", "stuck on final feature (iterator) with repeated debugging attempts", "off-by-one and null-return errors in iterator logic", "breakthrough_moment", "systematic_debugging", "regression_cycles", "incremental_development", "trial_and_error_on_complex_operations", "focused_single_test_debugging", "extended_thinking_periods", "breakthrough moment - run 55 fixed infinite recursion in remove(), unlocking testRemoveAdvanced() and achieving 100% test passage", "incremental development - student built BST functionality piece by piece across 55 runs: basic structure → insert → contains → remove → iterators", "systematic debugging - despite complexity of remove() method (10 runs of iteration), student methodically tested and refined logic", "test-driven progression - each major feature (insert, contains, remove) was implemented and debugged until all related tests passed", "regression cycles - particularly during remove() implementation (runs 45-54), student encountered StackOverflowError and had to backtrack, but recovered with correct logic", "stable completion - runs 56-57 show no changes needed, confirming robust implementation" ]
   },
   "timeline" : [ {
     "time" : "11:40 PM",
@@ -9276,9 +8528,8 @@
     "event" : "testInsertExceptions fixed"
   }, {
     "time" : "5:17 PM",
-    "passing" : 11,
-    "failing" : 17,
-    "event" : "testHeight broke; testInsertExceptions broke"
+    "passing" : 26,
+    "failing" : 2
   }, {
     "time" : "5:18 PM",
     "passing" : 28,
@@ -9287,25 +8538,25 @@
   }, {
     "time" : "11:27 PM",
     "passing" : 30,
-    "failing" : 8
+    "failing" : 3
   }, {
     "time" : "12:00 AM",
     "passing" : 32,
-    "failing" : 6,
+    "failing" : 1,
     "event" : "testRemove fixed; testRemoveReturnValue fixed"
   }, {
     "time" : "12:28 AM",
     "passing" : 30,
-    "failing" : 8,
+    "failing" : 3,
     "event" : "testRemove broke; testRemoveReturnValue broke"
   }, {
     "time" : "4:31 AM",
     "passing" : 33,
-    "failing" : 5,
+    "failing" : 0,
     "event" : "testRemove fixed; testRemoveAdvanced fixed"
   }, {
     "time" : "4:43 AM",
     "passing" : 33,
-    "failing" : 5
+    "failing" : 0
   } ]
 }
