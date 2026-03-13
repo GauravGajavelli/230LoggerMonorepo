@@ -14,12 +14,15 @@ For each highlighted test below, generate feedback based on its error evolution,
 
 Each test entry may include a `codeDiffs` array summarizing the number of lines added/removed at each run where the test status changed.
 
+Each test entry may include a `relatedTests` array listing test IDs that belong to the same group — they share the same code changes and underlying bug. If `relatedTests` is present, cover all tests in the group within a single explanation. Your `testId` should be the primary test ID from the entry; mention the related tests by name in the explanation so the student knows they all stem from the same issue.
+
 **For each test, produce:**
 
 1. **pattern**: A short label describing the error pattern (e.g., "Recurring NullPointerException", "Stuck on IndexOutOfBounds", "Compilation error loop"). Use the error type + behavioral pattern.
 2. **confidence**: "high" if the error is consistent and clear, "medium" if the error type evolved or is ambiguous, "low" if there's insufficient data.
 3. **explanation**: A single prose paragraph covering ALL contributing code changes chronologically with interaction analysis. Factual — describe what the code changes show, no intent narration. Reference the test category and error progression. Be specific but not condescending.
 4. **nextSteps**: An ordered JSON array of 2–3 concrete steps. Frame each step around the underlying concept or technique the student needs to strengthen — useful to a student reviewing their work even after the assignment is complete, not just "do X to pass this test." Most impactful step first. Reference specific methods or concepts from the assignment. **Do NOT tell the student to look at their own passing run or implementation** — the goal is conceptual understanding, not reverse-engineering what happened to work. Describe the correct algorithm or technique directly.
+5. **diffNotes**: A JSON array of short captions, one per entry in `codeDiffs`, in the same order. Each caption is one sentence identifying the method or region changed and why it is relevant to this test's failure (e.g., `"Change in insert() — added base case that skipped the removeHelper return-value update"`). Omit `diffNotes` entirely if the test has no `codeDiffs`.
 
 **Guidelines:**
 - If `progressionSummary` shows the same error repeating, the student is stuck — suggest a different approach.
@@ -33,6 +36,10 @@ Each test entry may include a `codeDiffs` array summarizing the number of lines 
 - Keep language encouraging but direct. This is for a CS student, not a beginner.
 - Do NOT use the words "prolonged", "meaningfulness", or "struggle score". Instead of "prolonged struggle", prefer phrasing like "took several runs to resolve" or "required multiple attempts".
 - Do NOT include generic advice like "read the docs" or "ask your professor".
+
+**Never reference compilation errors in feedback.** If tests show ABORTED or ERROR status at some runs, do not tell the student to "fix compilation issues" — assume they already know how to compile their code. Treat those runs as non-informative runs where the test could not execute, not as bugs to fix. Feedback covers algorithmic correctness and test behavior only.
+
+**Student run history is canonical.** The `statusByRun` data reflects exactly what the student ran in their own environment. Do NOT assume the student intended to fix any test that does not appear in their run history. Do NOT reference tests the student never ran. The feedback must stay grounded in the actual sequence of runs the student performed.
 
 ## Mandatory Constraints
 
@@ -61,6 +68,9 @@ Return a JSON object with a single `feedback` array. Each element must have exac
         "Most impactful step targeting the underlying concept...",
         "Second step...",
         "Optional third step..."
+      ],
+      "diffNotes": [
+        "One sentence per codeDiff entry — what changed and why it relates to this test's failure"
       ]
     }
   ]

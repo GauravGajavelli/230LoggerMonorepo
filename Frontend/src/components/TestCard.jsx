@@ -49,13 +49,21 @@ function DiffBlock({ diff, onLabelClick }) {
         <div
           onClick={onLabelClick || undefined}
           style={{
-            color: '#64748B', marginBottom: 6, fontSize: 11,
+            color: '#64748B', marginBottom: diff.note ? 4 : 6, fontSize: 11,
             cursor: onLabelClick ? 'pointer' : 'default',
             textDecoration: onLabelClick ? 'underline' : 'none',
             textDecorationColor: '#475569',
           }}
         >
           {diff.label}{onLabelClick ? ' ↗' : ''}
+        </div>
+      )}
+      {diff.note && (
+        <div style={{
+          color: '#94A3B8', fontSize: 11, marginBottom: 8,
+          fontStyle: 'italic', whiteSpace: 'pre-wrap',
+        }}>
+          {diff.note}
         </div>
       )}
       {lines.map((l, i) => {
@@ -90,6 +98,7 @@ function DiffBlock({ diff, onLabelClick }) {
 export function TestCard({ test, forceOpen, onCiteClick }) {
   const [manualOpen, setManualOpen] = useState(false);
   const [diffIndex, setDiffIndex] = useState(0);
+  const [hoveredRun, setHoveredRun] = useState(null);
   const cardRef = useRef(null);
 
   const hasFeedback = !!(test.explanation || test.suggestion || test.nextSteps?.length || test.diffs?.length);
@@ -268,11 +277,28 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
                   .map(([run, status]) => {
                     const isPassing = status === 'pass' || status === 'SUCCESSFUL';
                     return (
-                      <span key={run} title={`Run ${run}: ${status}`} style={{
-                        width: 6, height: isPassing ? 14 : 20, borderRadius: 2,
-                        background: isPassing ? '#6EE7B7' : '#FCA5A5',
-                        flexShrink: 0,
-                      }} />
+                      <div key={run} style={{ position: 'relative' }}
+                           onMouseEnter={() => setHoveredRun(run)}
+                           onMouseLeave={() => setHoveredRun(null)}>
+                        <span style={{
+                          display: 'block', width: 6, height: isPassing ? 14 : 20, borderRadius: 2,
+                          background: isPassing ? '#6EE7B7' : '#FCA5A5',
+                          flexShrink: 0, cursor: 'default',
+                          outline: hoveredRun === run ? '2px solid #475569' : '2px solid transparent',
+                          outlineOffset: 1,
+                        }} />
+                        {hoveredRun === run && (
+                          <div style={{
+                            position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: '#1E293B', color: '#F8FAFC',
+                            fontSize: 11, padding: '3px 8px', borderRadius: 4,
+                            whiteSpace: 'nowrap', zIndex: 20, pointerEvents: 'none',
+                          }}>
+                            Run {run}: {isPassing ? 'pass' : 'fail'}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
               </div>

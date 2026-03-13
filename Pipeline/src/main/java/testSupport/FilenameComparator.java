@@ -3,6 +3,7 @@ import java.util.Comparator;
 import java.util.regex.Pattern;
 
 import java.util.regex.Matcher;
+import testSupport.LoggingExtension;
 
 //Ordering 
 	class FilenameComparator implements Comparator<String> {

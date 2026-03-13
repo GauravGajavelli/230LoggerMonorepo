@@ -150,21 +150,49 @@ public class WorkspaceRunnerService {
                 return;
             }
 
+            // Delete .java files for excluded test classes so they are never compiled or run
+            if (options.assignmentConfig() != null
+                    && !options.assignmentConfig().excludeTestClasses().isEmpty()) {
+                Path srcDir = workspace.toAbsolutePath().resolve("src");
+                for (String excludedClass : options.assignmentConfig().excludeTestClasses()) {
+                    try (Stream<Path> walk = Files.walk(srcDir)) {
+                        walk.filter(p -> p.getFileName().toString().equals(excludedClass + ".java"))
+                            .forEach(p -> {
+                                try {
+                                    Files.deleteIfExists(p);
+                                    warnings.add("Run " + runNumber + ": deleted excluded test class: "
+                                        + excludedClass + ".java");
+                                } catch (IOException ignore) {
+                                    // best-effort
+                                }
+                            });
+                    } catch (IOException e) {
+                        warnings.add("Run " + runNumber + ": error scanning src for excluded class "
+                            + excludedClass + ": " + e.getMessage());
+                    }
+                }
+            }
+
             updateStartTestRunInfo(workspace, runNumber, warnings);
 
             // Compile
             CompileResult compileResult = compiler.compile(workspace, options.depsDir());
             if (!compileResult.success()) {
-                resultBuilder.addError("Run " + runNumber + ": Compilation failed - " +
-                    String.join("; ", compileResult.errors()));
-                resultBuilder.addWarnings(warnings);
-                writeRunStatus(enrichedDir, new RunStatus(
-                    runNumber,
-                    "compile_failed",
-                    List.copyOf(compileResult.errors()),
-                    List.copyOf(warnings)
-                ));
-                return;
+                // Graceful degradation: exclude files with errors and retry
+                compileResult = retryWithoutFailingFiles(
+                    compiler, workspace, options.depsDir(), compileResult, runNumber, warnings);
+                if (!compileResult.success()) {
+                    resultBuilder.addError("Run " + runNumber + ": Compilation failed - " +
+                        String.join("; ", compileResult.errors()));
+                    resultBuilder.addWarnings(warnings);
+                    writeRunStatus(enrichedDir, new RunStatus(
+                        runNumber,
+                        "compile_failed",
+                        List.copyOf(compileResult.errors()),
+                        List.copyOf(warnings)
+                    ));
+                    return;
+                }
             }
             resultBuilder.incrementRunsCompiled();
 
@@ -203,6 +231,63 @@ public class WorkspaceRunnerService {
                 List.copyOf(warnings)
             ));
         }
+    }
+
+    /**
+     * When full compilation fails, iteratively excludes source files with errors and
+     * retries until compilation succeeds or no further progress can be made.
+     * This allows tests whose referenced methods are implemented to still compile and run,
+     * even when other test files reference methods not yet written (common in incremental
+     * student implementations).
+     *
+     * Records a warning for each excluded file so the partial compile is visible.
+     */
+    private CompileResult retryWithoutFailingFiles(
+            JavaCompilerRunner compiler, Path workspace, Path depsDir,
+            CompileResult failed, int runNumber, List<String> warnings) throws IOException {
+
+        Path absWorkspace = workspace.toAbsolutePath();
+        Path srcDir = absWorkspace.resolve("src");
+
+        List<String> allFiles;
+        try (Stream<Path> walk = Files.walk(srcDir)) {
+            allFiles = walk
+                .filter(Files::isRegularFile)
+                .filter(p -> p.toString().endsWith(".java"))
+                .map(p -> p.toAbsolutePath().toString())
+                .collect(Collectors.toList());
+        }
+
+        java.util.Set<String> excluded = new java.util.LinkedHashSet<>();
+        CompileResult current = failed;
+
+        // Iteratively exclude files with errors until compilation succeeds or no progress
+        while (!current.success()) {
+            java.util.Set<String> newFailingFiles = JavaCompilerRunner.errorFiles(current.stderr());
+            newFailingFiles.removeAll(excluded); // Only newly discovered failures
+            if (newFailingFiles.isEmpty()) break; // No progress possible
+
+            excluded.addAll(newFailingFiles);
+            for (String f : newFailingFiles) {
+                String rel = absWorkspace.relativize(Path.of(f)).toString();
+                warnings.add("Run " + runNumber + ": excluded from compilation (errors): " + rel);
+            }
+
+            List<String> retryFiles = allFiles.stream()
+                .filter(f -> !excluded.contains(f))
+                .collect(Collectors.toList());
+            if (retryFiles.isEmpty()) break; // Nothing left to compile
+
+            current = compiler.compileFileList(workspace, depsDir, retryFiles);
+        }
+
+        if (current.success() && !excluded.isEmpty()) {
+            int compiled = allFiles.size() - excluded.size();
+            warnings.add("Run " + runNumber + ": partial compile succeeded ("
+                + compiled + "/" + allFiles.size() + " files); "
+                + excluded.size() + " file(s) excluded");
+        }
+        return current;
     }
 
     private void writeRunStatus(Path enrichedDir, RunStatus status) {
@@ -320,8 +405,19 @@ public class WorkspaceRunnerService {
                 .resolve("META-INF")
                 .resolve("services");
             Files.createDirectories(servicesDir);
-            Path serviceFile = servicesDir.resolve("org.junit.jupiter.api.extension.Extension");
-            Files.writeString(serviceFile, "testSupport.LoggingExtension\n");
+            Files.writeString(
+                servicesDir.resolve("org.junit.jupiter.api.extension.Extension"),
+                "testSupport.LoggingExtension\n");
+
+            // Register LoggingSessionListener if compiled (needed for run.tar lifecycle)
+            Path sessionListenerClass = workspace.resolve("bin")
+                .resolve("testSupport")
+                .resolve("LoggingSessionListener.class");
+            if (Files.exists(sessionListenerClass)) {
+                Files.writeString(
+                    servicesDir.resolve("org.junit.platform.launcher.LauncherSessionListener"),
+                    "testSupport.LoggingSessionListener\n");
+            }
         } catch (IOException e) {
             warnings.add("Failed to enable LoggingExtension autodetection: " + e.getMessage());
         }

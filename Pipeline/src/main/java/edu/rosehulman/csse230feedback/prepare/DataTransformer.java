@@ -22,9 +22,15 @@ public class DataTransformer {
         String previousStatus = tracker.getPreviousStatus(testId);
         boolean changedThisRun = tracker.hasStatusChanged(testId, status);
 
-        // Track this test in the tracker (with error info for evolution tracking)
-        tracker.recordTest(testId, enriched.testDisplayName(), runNumber, status,
-                          enriched.exceptionType(), enriched.message(), enriched.stackTrace());
+        // Track this test in the tracker (with error info for evolution tracking).
+        // ABORTED (compilation failure) and DISABLED tests don't contribute to error evolution.
+        if ("error".equals(status) || "skip".equals(status)) {
+            tracker.recordTest(testId, enriched.testDisplayName(), runNumber, status,
+                              null, null, null);
+        } else {
+            tracker.recordTest(testId, enriched.testDisplayName(), runNumber, status,
+                              enriched.exceptionType(), enriched.message(), enriched.stackTrace());
+        }
         tracker.updateCurrentStatus(testId, status);
 
         String errorMessage = extractFirstLine(enriched.message());

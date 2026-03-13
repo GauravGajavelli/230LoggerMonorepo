@@ -29,16 +29,19 @@ export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
           || ep.id;
         const dotColor = epColor(index);
 
+        const linkedTestName = ep.linkedTestId ? testNameById[ep.linkedTestId] : null;
+
         return (
           <button
             key={ep.id}
             onClick={() => onJump(ep)}
             style={{
-              all: 'unset', display: 'inline-flex', alignItems: 'center', gap: 5,
+              all: 'unset', display: 'inline-flex', flexDirection: 'column',
               padding: '4px 10px 4px 7px', borderRadius: 6, cursor: 'pointer',
               fontSize: 11, fontFamily: "'IBM Plex Mono', monospace",
               background: bg, border: `1px solid ${border}`, color,
               transition: 'box-shadow .12s, border-color .12s', lineHeight: 1.3,
+              maxWidth: 260,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.08)';
@@ -49,21 +52,33 @@ export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
               e.currentTarget.style.borderColor = border;
             }}
           >
-            <span style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: dotColor, flexShrink: 0, display: 'inline-block',
-            }} />
-            <span style={{ color: dotColor, fontWeight: 600 }}>{index + 1}</span>
-            <span style={{ color: isRegression ? '#DC2626' : isFix ? '#2563EB' : '#94A3B8', fontWeight: 500 }}>·</span>
-            <span style={{ fontWeight: 500 }}>{areaLabel}</span>
-            {ep.linkedTestId && testNameById[ep.linkedTestId] && (
-              <span style={{ color: '#94A3B8', fontSize: 10 }}>
-                → {testNameById[ep.linkedTestId]}
-              </span>
-            )}
-            {ep.hasFeedback && (ep.feedbackOpened
-              ? <span className="feedback-seen" style={{ marginLeft: 4 }} title="Feedback reviewed">✓</span>
-              : <span className="feedback-unseen-chip" style={{ marginLeft: 4 }} title="Has feedback" />
+            {/* Line 1: number · area label  [feedback dot] */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, overflow: 'hidden' }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: dotColor, flexShrink: 0, display: 'inline-block',
+              }} />
+              <span style={{ color: dotColor, fontWeight: 600, flexShrink: 0 }}>{index + 1}</span>
+              <span style={{ color: isRegression ? '#DC2626' : isFix ? '#2563EB' : '#94A3B8', fontWeight: 500, flexShrink: 0 }}>·</span>
+              <span style={{
+                fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0,
+              }}>{areaLabel}</span>
+              {ep.hasFeedback && (ep.feedbackOpened
+                ? <span className="feedback-seen" style={{ marginLeft: 2, flexShrink: 0 }} title="Feedback reviewed">✓</span>
+                : <span className="feedback-unseen-chip" style={{ marginLeft: 2, flexShrink: 0 }} title="Has feedback" />
+              )}
+            </div>
+            {/* Line 2: → linked test name (only when present) */}
+            {linkedTestName && (
+              <div style={{ paddingLeft: 13, marginTop: 2, overflow: 'hidden' }}>
+                <span style={{
+                  color: '#94A3B8', fontSize: 10,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  display: 'block',
+                }}>
+                  → {linkedTestName}
+                </span>
+              </div>
             )}
           </button>
         );

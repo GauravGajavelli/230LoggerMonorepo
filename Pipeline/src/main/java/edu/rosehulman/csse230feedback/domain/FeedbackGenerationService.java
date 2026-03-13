@@ -7,6 +7,7 @@ import edu.rosehulman.csse230feedback.llm.LlmService;
 import edu.rosehulman.csse230feedback.llm.PromptLoader;
 import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
 import edu.rosehulman.csse230feedback.model.frontend.*;
+import edu.rosehulman.csse230feedback.prepare.StatusChangeTracker;
 import edu.rosehulman.csse230feedback.util.Json;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -23,10 +24,17 @@ public class FeedbackGenerationService {
 
     private final LlmService llmService;
     private final PromptLoader promptLoader;
+    private final boolean includeErrorMessages;
 
     public FeedbackGenerationService(LlmService llmService, PromptLoader promptLoader) {
+        this(llmService, promptLoader, false);
+    }
+
+    public FeedbackGenerationService(LlmService llmService, PromptLoader promptLoader,
+                                     boolean includeErrorMessages) {
         this.llmService = llmService;
         this.promptLoader = promptLoader;
+        this.includeErrorMessages = includeErrorMessages;
     }
 
     /**
@@ -82,8 +90,21 @@ public class FeedbackGenerationService {
             highlightedIds, historyMap, patchesByRunByFile, testHistories
         );
 
-        // Build input JSON with context per highlighted test
-        String inputData = buildInputJson(highlightedIds, historyMap, semanticLog, testCategories, diffsPerTest);
+        // Pre-group: collapse related tests (≥2 shared diff runs) to one primary per group.
+        // This happens BEFORE the LLM call so freed budget slots go to other candidates.
+        PreGroupResult preGroup = preGroupHighlights(highlightedIds, diffsPerTest);
+        Set<String> effectiveIds = preGroup.effectiveIds();
+        Map<String, List<String>> primaryToRelated = preGroup.primaryToRelated();
+
+        if (preGroup.hasGroups()) {
+            System.out.println("Pre-grouping: " + highlightedIds.size() + " highlighted → "
+                + effectiveIds.size() + " effective (after collapsing "
+                + preGroup.groupCount() + " group(s))");
+        }
+
+        // Build input JSON with context per effective (primary) test
+        String inputData = buildInputJson(effectiveIds, historyMap, semanticLog, testCategories,
+            diffsPerTest, primaryToRelated);
 
         // Build narrative context from semantic log
         String narrativeContext = "(no narrative context available)";
@@ -115,23 +136,24 @@ public class FeedbackGenerationService {
             totalRequests
         );
 
-        // Parse response into Feedback records
-        List<Feedback> feedbackList = parseFeedbackResponse(response.content());
+        // Parse response into Feedback records (includes per-diff notes)
+        ParseResult parseResult = parseFeedbackResponse(response.content());
+        List<Feedback> feedbackList = parseResult.feedbackList();
+        Map<String, List<String>> diffNotesByTestId = parseResult.diffNotes();
 
-        // Attach pre-built diffs to each Feedback item
-        List<Feedback> withDiffs = feedbackList.stream()
+        // Attach pre-built diffs (annotated with LLM notes) and relatedTestIds to each Feedback item
+        return feedbackList.stream()
             .map(fb -> {
-                List<DiffEntry> diffs = diffsPerTest.get(fb.testId());
-                if (diffs != null && !diffs.isEmpty()) {
-                    return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
-                                       fb.explanation(), fb.nextSteps(), diffs, null);
-                }
-                return fb;
+                List<DiffEntry> rawDiffs = diffsPerTest.get(fb.testId());
+                List<DiffEntry> annotated = annotateDiffs(rawDiffs, diffNotesByTestId.get(fb.testId()));
+                List<String> related = primaryToRelated.get(fb.testId());
+                return new Feedback(
+                    fb.testId(), fb.pattern(), fb.confidence(), fb.explanation(), fb.nextSteps(),
+                    (annotated != null && !annotated.isEmpty()) ? annotated : fb.diffs(),
+                    (related != null && !related.isEmpty()) ? related : null
+                );
             })
             .toList();
-
-        // Group related feedbacks (shared-diff detection)
-        return groupRelatedFeedbacks(withDiffs, diffsPerTest);
     }
 
     /**
@@ -299,12 +321,105 @@ public class FeedbackGenerationService {
         return new DiffEntry(label, before.isEmpty() ? null : before, after.isEmpty() ? null : after);
     }
 
+    /** Parsed LLM response: feedback items + per-test diff notes (testId → ordered note list). */
+    private record ParseResult(
+        List<Feedback> feedbackList,
+        Map<String, List<String>> diffNotes
+    ) {}
+
+    /** Result of pre-grouping: effective primaries, their related tests, and metadata. */
+    private record PreGroupResult(
+        Set<String> effectiveIds,
+        Map<String, List<String>> primaryToRelated,
+        int groupCount
+    ) {
+        boolean hasGroups() { return groupCount > 0; }
+    }
+
+    /**
+     * Pre-groups all highlighted tests by shared diff runs (≥2 overlap) using union-find.
+     * Returns the set of primaries (one per group, highest-priority member) capped at
+     * MAX_FEEDBACK_ITEMS, plus a map from primary → related secondaries.
+     * Priority order is preserved from the input set (LinkedHashSet insertion order).
+     */
+    private PreGroupResult preGroupHighlights(Set<String> highlightedIds,
+                                               Map<String, List<DiffEntry>> diffsPerTest) {
+        List<String> orderedIds = new ArrayList<>(highlightedIds);
+
+        // Build run-number sets from diffs for each test
+        Map<String, Set<Integer>> runsByTest = new LinkedHashMap<>();
+        for (String testId : orderedIds) {
+            Set<Integer> runs = new LinkedHashSet<>();
+            List<DiffEntry> diffs = diffsPerTest.get(testId);
+            if (diffs != null) {
+                for (DiffEntry diff : diffs) {
+                    Integer runNum = extractRunNumber(diff.label());
+                    if (runNum != null) runs.add(runNum);
+                }
+            }
+            runsByTest.put(testId, runs);
+        }
+
+        // Union-Find: lower index = higher priority → make it the root when merging
+        Map<String, Integer> indexMap = new LinkedHashMap<>();
+        for (int i = 0; i < orderedIds.size(); i++) indexMap.put(orderedIds.get(i), i);
+        Map<String, String> parent = new LinkedHashMap<>();
+        for (String id : orderedIds) parent.put(id, id);
+
+        for (int i = 0; i < orderedIds.size(); i++) {
+            for (int j = i + 1; j < orderedIds.size(); j++) {
+                String a = orderedIds.get(i), b = orderedIds.get(j);
+                Set<Integer> runsA = runsByTest.getOrDefault(a, Collections.emptySet());
+                Set<Integer> runsB = runsByTest.getOrDefault(b, Collections.emptySet());
+                long overlap = runsA.stream().filter(runsB::contains).count();
+                if (overlap >= 2) {
+                    String rootA = find(parent, a);
+                    String rootB = find(parent, b);
+                    if (!rootA.equals(rootB)) {
+                        // Higher priority (lower index) wins = becomes root
+                        if (indexMap.getOrDefault(rootA, Integer.MAX_VALUE)
+                                <= indexMap.getOrDefault(rootB, Integer.MAX_VALUE)) {
+                            parent.put(rootB, rootA);
+                        } else {
+                            parent.put(rootA, rootB);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build groups: root → all members (in priority order)
+        Map<String, List<String>> groups = new LinkedHashMap<>();
+        for (String id : orderedIds) {
+            groups.computeIfAbsent(find(parent, id), k -> new ArrayList<>()).add(id);
+        }
+
+        // Collect primaries (roots) in priority order, capped at MAX_FEEDBACK_ITEMS
+        Set<String> effectiveIds = new LinkedHashSet<>();
+        Map<String, List<String>> primaryToRelated = new LinkedHashMap<>();
+        int groupsCollapsed = 0;
+        for (String id : orderedIds) {
+            if (find(parent, id).equals(id)) { // id is its own root = primary
+                if (effectiveIds.size() >= StatusChangeTracker.MAX_FEEDBACK_ITEMS) break;
+                effectiveIds.add(id);
+                List<String> related = groups.get(id).stream()
+                    .filter(m -> !m.equals(id))
+                    .toList();
+                primaryToRelated.put(id, related);
+                if (!related.isEmpty()) groupsCollapsed++;
+            }
+        }
+
+        return new PreGroupResult(effectiveIds, primaryToRelated, groupsCollapsed);
+    }
+
     private String buildInputJson(
             Set<String> highlightedIds,
             Map<String, TestHistory> historyMap,
             SemanticLog semanticLog,
             TestCategoryMapping testCategories,
-            Map<String, List<DiffEntry>> diffsPerTest) throws IOException {
+            Map<String, List<DiffEntry>> diffsPerTest,
+            Map<String, List<String>> primaryToRelated) throws IOException {
 
         // Build a map of run -> semantic entry for quick lookup
         Map<Integer, SemanticRunEntry> semanticByRun = new LinkedHashMap<>();
@@ -327,6 +442,13 @@ public class FeedbackGenerationService {
             testNode.put("isLingeringFailure", th.isLingeringFailure());
             testNode.put("totalFailedRuns", th.totalFailedRuns());
 
+            // Related tests in the same group (share same underlying bug)
+            List<String> related = primaryToRelated.get(testId);
+            if (related != null && !related.isEmpty()) {
+                ArrayNode relatedArr = testNode.putArray("relatedTests");
+                related.forEach(relatedArr::add);
+            }
+
             // Categories
             if (th.categories() != null && !th.categories().isEmpty()) {
                 ArrayNode catsArray = testNode.putArray("categories");
@@ -342,14 +464,14 @@ public class FeedbackGenerationService {
                 evoNode.put("hadStackOverflow", th.errorEvolution().hadStackOverflow());
                 evoNode.put("distinctErrorTypes", th.errorEvolution().distinctErrorTypes());
 
-                // Include last error snapshot
+                // Include last error snapshot (errorType only; message excluded by default)
                 List<ErrorEvolution.ErrorSnapshot> seq = th.errorEvolution().sequence();
                 if (seq != null && !seq.isEmpty()) {
                     ErrorEvolution.ErrorSnapshot last = seq.get(seq.size() - 1);
                     ObjectNode lastError = evoNode.putObject("lastError");
                     lastError.put("run", last.run());
                     if (last.errorType() != null) lastError.put("errorType", last.errorType());
-                    if (last.message() != null) {
+                    if (includeErrorMessages && last.message() != null) {
                         String msg = last.message();
                         if (msg.length() > 200) msg = msg.substring(0, 200) + "...";
                         lastError.put("message", msg);
@@ -392,7 +514,8 @@ public class FeedbackGenerationService {
                 }
             }
 
-            // Code diffs summary (run numbers only, to avoid token bloat)
+            // Code diffs: include label, line counts, and up to 8 lines each of before/after
+            // so the LLM can write meaningful per-diff notes.
             List<DiffEntry> diffs = diffsPerTest.get(testId);
             if (diffs != null && !diffs.isEmpty()) {
                 ArrayNode diffsNode = testNode.putArray("codeDiffs");
@@ -403,6 +526,14 @@ public class FeedbackGenerationService {
                     int afterCount = diff.after() != null ? diff.after().size() : 0;
                     diffNode.put("removedLines", beforeCount);
                     diffNode.put("addedLines", afterCount);
+                    if (diff.before() != null && !diff.before().isEmpty()) {
+                        ArrayNode beforeArr = diffNode.putArray("before");
+                        diff.before().stream().limit(8).forEach(beforeArr::add);
+                    }
+                    if (diff.after() != null && !diff.after().isEmpty()) {
+                        ArrayNode afterArr = diffNode.putArray("after");
+                        diff.after().stream().limit(8).forEach(afterArr::add);
+                    }
                     diffsNode.add(diffNode);
                 }
             }
@@ -462,8 +593,9 @@ public class FeedbackGenerationService {
         return sb.toString().trim();
     }
 
-    private List<Feedback> parseFeedbackResponse(String responseContent) {
+    private ParseResult parseFeedbackResponse(String responseContent) {
         List<Feedback> feedbackList = new ArrayList<>();
+        Map<String, List<String>> diffNotes = new LinkedHashMap<>();
 
         try {
             String json = extractJson(responseContent);
@@ -472,18 +604,19 @@ public class FeedbackGenerationService {
             JsonNode feedbackNode = root.has("feedback") ? root.get("feedback") : root;
 
             if (feedbackNode != null && feedbackNode.isArray()) {
-                extractFeedbackItems(feedbackNode, feedbackList);
+                extractFeedbackItems(feedbackNode, feedbackList, diffNotes);
             }
         } catch (Exception e) {
             // JSON may be truncated — try to salvage complete objects via regex
             System.err.println("Warning: full JSON parse failed, attempting partial recovery: " + e.getMessage());
-            extractFeedbackFromPartialJson(responseContent, feedbackList);
+            extractFeedbackFromPartialJson(responseContent, feedbackList, diffNotes);
         }
 
-        return feedbackList;
+        return new ParseResult(feedbackList, diffNotes);
     }
 
-    private void extractFeedbackItems(JsonNode feedbackNode, List<Feedback> feedbackList) {
+    private void extractFeedbackItems(JsonNode feedbackNode, List<Feedback> feedbackList,
+                                       Map<String, List<String>> diffNotes) {
         for (JsonNode item : feedbackNode) {
             String testId = getTextOrNull(item, "testId");
             if (testId == null) continue;
@@ -492,6 +625,8 @@ public class FeedbackGenerationService {
             String confidence = getTextOrNull(item, "confidence");
             String explanation = getTextOrNull(item, "explanation");
             List<String> nextSteps = getStringListOrEmpty(item, "nextSteps");
+            List<String> notes = getStringListOrEmpty(item, "diffNotes");
+            if (!notes.isEmpty()) diffNotes.put(testId, notes);
 
             feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null));
         }
@@ -501,7 +636,8 @@ public class FeedbackGenerationService {
      * Recovers individual feedback objects from truncated JSON by finding
      * complete JSON objects that contain the required "testId" field.
      */
-    private void extractFeedbackFromPartialJson(String content, List<Feedback> feedbackList) {
+    private void extractFeedbackFromPartialJson(String content, List<Feedback> feedbackList,
+                                                  Map<String, List<String>> diffNotes) {
         String json = extractJson(content);
 
         int searchFrom = 0;
@@ -547,6 +683,8 @@ public class FeedbackGenerationService {
                     String confidence = getTextOrNull(item, "confidence");
                     String explanation = getTextOrNull(item, "explanation");
                     List<String> nextSteps = getStringListOrEmpty(item, "nextSteps");
+                    List<String> notes = getStringListOrEmpty(item, "diffNotes");
+                    if (!notes.isEmpty()) diffNotes.put(testId, notes);
 
                     feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null));
                 }
@@ -577,6 +715,24 @@ public class FeedbackGenerationService {
         List<String> result = new ArrayList<>();
         for (JsonNode element : node.get(field)) {
             if (!element.isNull()) result.add(element.asText());
+        }
+        return result;
+    }
+
+    /**
+     * Returns a copy of the diffs list with LLM-generated notes attached (by index).
+     * Diffs beyond the notes list keep a null note. Returns the original list unchanged
+     * if notes is null/empty.
+     */
+    private List<DiffEntry> annotateDiffs(List<DiffEntry> diffs, List<String> notes) {
+        if (diffs == null || diffs.isEmpty() || notes == null || notes.isEmpty()) return diffs;
+        List<DiffEntry> result = new ArrayList<>(diffs.size());
+        for (int i = 0; i < diffs.size(); i++) {
+            DiffEntry d = diffs.get(i);
+            String note = i < notes.size() ? notes.get(i) : null;
+            result.add(note != null && !note.isBlank()
+                ? new DiffEntry(d.label(), d.before(), d.after(), note)
+                : d);
         }
         return result;
     }

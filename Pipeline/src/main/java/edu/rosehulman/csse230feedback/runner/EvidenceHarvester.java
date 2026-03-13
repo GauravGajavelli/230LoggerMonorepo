@@ -28,7 +28,10 @@ public class EvidenceHarvester {
     // Reserved field names in testRunInfo.json (not test classes)
     private static final Set<String> RESERVED_FIELDS = Set.of(
         "prevRunNumber", "randomSeed", "redactDiffs", "rebaselining",
-        "toIgnore", "skipLogging", "strikes", "prevBaselineRunNumber", "runTimes"
+        "toIgnore", "skipLogging", "strikes", "prevBaselineRunNumber", "runTimes",
+        // schema_version 1.0+ fields
+        "schema_version", "closeTiming", "closeDurationMs",
+        "beforeAllInitDurationMs", "beforeAllTotalDurationMs"
     );
 
     /**
@@ -155,17 +158,11 @@ public class EvidenceHarvester {
                 // Get status for this run
                 String runKey = String.valueOf(runNumber);
                 JsonNode runNode = testNode.get(runKey);
-                if (runNode == null || !runNode.isObject()) {
+                if (runNode == null) {
                     continue;
                 }
 
-                String statusStr = runNode.path("status").asText();
-                TestStatus status = parseStatus(statusStr, warnings);
-                String cause = extractCause(statusStr);
-
-                // Get evidence for this run (nested inside the run node)
-                JsonNode evidenceNode = runNode.path("evidence");
-
+                String statusStr;
                 Long durationMs = null;
                 String stackTrace = null;
                 String exceptionType = null;
@@ -174,22 +171,35 @@ public class EvidenceHarvester {
                 String actual = null;
                 String uniqueId = null;
 
-                if (!evidenceNode.isMissingNode() && evidenceNode.isObject()) {
-                    durationMs = evidenceNode.has("durationMs") ?
-                        evidenceNode.get("durationMs").asLong() : null;
-                    stackTrace = evidenceNode.has("stackTrace") ?
-                        evidenceNode.get("stackTrace").asText() : null;
-                    exceptionType = evidenceNode.has("exceptionType") ?
-                        evidenceNode.get("exceptionType").asText() : null;
-                    message = evidenceNode.has("message") ?
-                        evidenceNode.get("message").asText() : null;
-                    expected = evidenceNode.has("expected") ?
-                        evidenceNode.get("expected").asText() : null;
-                    actual = evidenceNode.has("actual") ?
-                        evidenceNode.get("actual").asText() : null;
-                    uniqueId = evidenceNode.has("uniqueId") ?
-                        evidenceNode.get("uniqueId").asText() : null;
+                if (runNode.isTextual()) {
+                    // Schema v1.0+: run value is a plain status string ("SUCCESSFUL" or "FAILED: ...")
+                    statusStr = runNode.asText();
+                } else if (runNode.isObject()) {
+                    // Legacy format: { "status": "...", "evidence": { ... } }
+                    statusStr = runNode.path("status").asText();
+                    JsonNode evidenceNode = runNode.path("evidence");
+                    if (!evidenceNode.isMissingNode() && evidenceNode.isObject()) {
+                        durationMs = evidenceNode.has("durationMs") ?
+                            evidenceNode.get("durationMs").asLong() : null;
+                        stackTrace = evidenceNode.has("stackTrace") ?
+                            evidenceNode.get("stackTrace").asText() : null;
+                        exceptionType = evidenceNode.has("exceptionType") ?
+                            evidenceNode.get("exceptionType").asText() : null;
+                        message = evidenceNode.has("message") ?
+                            evidenceNode.get("message").asText() : null;
+                        expected = evidenceNode.has("expected") ?
+                            evidenceNode.get("expected").asText() : null;
+                        actual = evidenceNode.has("actual") ?
+                            evidenceNode.get("actual").asText() : null;
+                        uniqueId = evidenceNode.has("uniqueId") ?
+                            evidenceNode.get("uniqueId").asText() : null;
+                    }
+                } else {
+                    continue;
                 }
+
+                TestStatus status = parseStatus(statusStr, warnings);
+                String cause = extractCause(statusStr);
 
                 EnrichedTestResult result = EnrichedTestResult.create(
                     testClassName, testName, status, cause,

@@ -1,5 +1,7 @@
 package edu.rosehulman.csse230feedback.domain;
 
+import edu.rosehulman.csse230feedback.model.AssignmentConfig;
+
 import java.nio.file.Path;
 
 /**
@@ -40,7 +42,10 @@ public record RerunOptions(
     int compileTimeout,
 
     /** Timeout in seconds for test execution */
-    int testTimeout
+    int testTimeout,
+
+    /** Per-assignment configuration (excluded test classes, etc.). Null means no exclusions. */
+    AssignmentConfig assignmentConfig
 ) {
     /** Default Java version */
     public static final int DEFAULT_JAVA_VERSION = 17;
@@ -67,6 +72,7 @@ public record RerunOptions(
         private boolean keepWorkDir = false;
         private int compileTimeout = DEFAULT_COMPILE_TIMEOUT;
         private int testTimeout = DEFAULT_TEST_TIMEOUT;
+        private AssignmentConfig assignmentConfig;
 
         public Builder inputDir(Path inputDir) {
             this.inputDir = inputDir;
@@ -128,6 +134,11 @@ public record RerunOptions(
             return this;
         }
 
+        public Builder assignmentConfig(AssignmentConfig assignmentConfig) {
+            this.assignmentConfig = assignmentConfig;
+            return this;
+        }
+
         public RerunOptions build() {
             // Default workDir to outDir/work if not specified
             Path actualWorkDir = workDir != null ? workDir : outDir.resolve("work");
@@ -135,7 +146,7 @@ public record RerunOptions(
             return new RerunOptions(
                 inputDir, outDir, actualWorkDir, depsDir, testSupportDir,
                 javaHome, javaVersion, runNumber, testSelector, keepWorkDir,
-                compileTimeout, testTimeout
+                compileTimeout, testTimeout, assignmentConfig
             );
         }
     }

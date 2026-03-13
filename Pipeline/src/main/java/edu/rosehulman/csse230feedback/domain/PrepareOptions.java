@@ -1,5 +1,7 @@
 package edu.rosehulman.csse230feedback.domain;
 
+import edu.rosehulman.csse230feedback.model.AssignmentConfig;
+
 import java.nio.file.Path;
 
 public record PrepareOptions(
@@ -20,7 +22,11 @@ public record PrepareOptions(
     boolean dryRun,
     Path ingestDir,
     /** If false (default), prepare fails when enriched_runs/ is absent. Pass true to degrade gracefully. */
-    boolean allowBasicFallback
+    boolean allowBasicFallback,
+    /** If true, include raw lastError.message text in LLM input (default: false). */
+    boolean includeErrorMessages,
+    /** Per-assignment configuration (excluded test classes, etc.). Null means no exclusions. */
+    AssignmentConfig assignmentConfig
 ) {
     public long idleThresholdMs() {
         return idleThresholdMinutes * 60 * 1000;
@@ -41,7 +47,7 @@ public record PrepareOptions(
                           String assignmentNameOverride) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, true,
-             null, null, null, false, false, null, false, null, false);
+             null, null, null, false, false, null, false, null, false, false, null);
     }
 
     /**
@@ -52,7 +58,7 @@ public record PrepareOptions(
                           String assignmentNameOverride, boolean includeCodeSnapshots) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, includeCodeSnapshots,
-             null, null, null, false, false, null, false, null, false);
+             null, null, null, false, false, null, false, null, false, false, null);
     }
 
     /**

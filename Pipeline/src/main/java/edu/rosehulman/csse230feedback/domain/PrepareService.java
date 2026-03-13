@@ -4,11 +4,13 @@ import edu.rosehulman.csse230feedback.llm.LlmConfig;
 import edu.rosehulman.csse230feedback.llm.LlmException;
 import edu.rosehulman.csse230feedback.llm.LlmService;
 import edu.rosehulman.csse230feedback.llm.PromptLoader;
+import edu.rosehulman.csse230feedback.model.AssignmentConfig;
 import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
 import edu.rosehulman.csse230feedback.model.IngestionManifest;
 import edu.rosehulman.csse230feedback.model.RunRecord;
 import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
+import edu.rosehulman.csse230feedback.model.TestStatus;
 import edu.rosehulman.csse230feedback.model.frontend.*;
 import edu.rosehulman.csse230feedback.prepare.*;
 import edu.rosehulman.csse230feedback.util.Json;
@@ -71,11 +73,23 @@ public class PrepareService {
         int enrichedCount = enrichedData.size();
         // Fill in any missing runs from basic data
         Map<Integer, List<EnrichedTestResult>> basicData = buildEnrichedFromRuns(runs, warnings);
+        // Validate enriched data against original runs.jsonl; discard runs where rerun disagrees
+        enrichedData = validateAndCleanEnriched(enrichedData, basicData, runs, warnings);
         for (RunRecord run : runs) {
             enrichedData.computeIfAbsent(run.runNumber(), k -> basicData.get(k));
         }
         System.out.println("Enriched data: " + enrichedCount + "/" + runs.size()
             + " runs have stack traces/durations; " + (runs.size() - enrichedCount) + " using basic fallback");
+
+        // Apply per-assignment exclusions (filter excluded test classes from enrichedData and basicData)
+        AssignmentConfig assignmentConfig = opts.assignmentConfig() != null
+            ? opts.assignmentConfig() : AssignmentConfig.empty();
+        if (!assignmentConfig.excludeTestClasses().isEmpty()) {
+            filterExcludedTestClasses(enrichedData, assignmentConfig);
+            filterExcludedTestClasses(basicData, assignmentConfig);
+            System.out.println("Assignment config: excluding test classes: "
+                + assignmentConfig.excludeTestClasses());
+        }
 
         // 3. Load manifest.json (from ingest output)
         Path manifestPath = opts.resolvedIngestDir().resolve("manifest.json");
@@ -290,6 +304,10 @@ public class PrepareService {
 
         // 8. Generate test histories and failure highlights
         List<TestHistory> testHistories = tracker.buildTestHistories(testCategories);
+        // All highlights (uncapped sustained-struggle candidates) — used for feedback generation
+        // so freed slots from group-collapsing can go to other candidates.
+        FailureHighlights allHighlights = tracker.buildAllHighlights(testHistories);
+        // Budget-capped highlights — used as fallback when no LLM is available.
         FailureHighlights failureHighlights = tracker.buildFailureHighlights(testHistories);
 
         // 8a. Enhance test histories with error evolution and struggle profiles
@@ -333,7 +351,7 @@ public class PrepareService {
             try {
                 PromptLoader feedbackPromptLoader = resolvePromptLoader(opts.inputDir());
                 FeedbackGenerationService feedbackService = new FeedbackGenerationService(
-                    llmService, feedbackPromptLoader
+                    llmService, feedbackPromptLoader, opts.includeErrorMessages()
                 );
                 PromptLoader feedbackRefinementLoader = resolvePromptLoader(opts.inputDir());
                 FeedbackRefinementService refiner = new FeedbackRefinementService(llmService, feedbackRefinementLoader);
@@ -346,7 +364,7 @@ public class PrepareService {
                     int totalRequestsEstimate = feedbackRequestNum + 1; // generation + refinement
 
                     feedback = feedbackService.generate(
-                        failureHighlights,
+                        allHighlights,
                         testHistories,
                         semanticLog,
                         testCategories,
@@ -386,6 +404,20 @@ public class PrepareService {
                 }
             } catch (LlmException e) {
                 warnings.add("Feedback generation failed: " + e.getMessage());
+            }
+
+            // Post-process: filter highlights and clear dots for secondary (grouped) tests.
+            // The LLM only generated feedback for primaries, so only primaries get highlight dots.
+            if (!feedback.isEmpty()) {
+                Set<String> primaryIds = feedback.stream()
+                    .map(Feedback::testId)
+                    .collect(Collectors.toSet());
+                failureHighlights = rebuildHighlightsFromPrimaries(allHighlights, primaryIds);
+                // Clear highlightCategory on tests that had a dot but aren't primaries
+                testHistories = testHistories.stream()
+                    .map(th -> th.highlightCategory() != null && !primaryIds.contains(th.testId())
+                        ? th.withHighlightCategory(null) : th)
+                    .toList();
             }
         }
 
@@ -542,6 +574,95 @@ public class PrepareService {
             }
         }
         return new PromptLoader(Path.of("Pipeline", "prompts"));
+    }
+
+    /**
+     * Validates enriched data against the canonical runs.jsonl.
+     * If any test's pass/fail in the rerun disagrees with the original, the entire run's
+     * enriched data is discarded and replaced with basic fallback data.
+     */
+    private Map<Integer, List<EnrichedTestResult>> validateAndCleanEnriched(
+            Map<Integer, List<EnrichedTestResult>> enrichedData,
+            Map<Integer, List<EnrichedTestResult>> basicData,
+            List<RunRecord> runs,
+            List<String> warnings) {
+        Map<Integer, List<EnrichedTestResult>> result = new LinkedHashMap<>(enrichedData);
+        for (RunRecord runRecord : runs) {
+            int runNumber = runRecord.runNumber();
+            List<EnrichedTestResult> enrichedList = result.get(runNumber);
+            if (enrichedList == null || runRecord.tests() == null) continue;
+
+            // Build pass/fail map from rerun results
+            Map<String, Boolean> enrichedPassFail = new HashMap<>();
+            for (EnrichedTestResult e : enrichedList) {
+                enrichedPassFail.put(e.testId(), e.status() == TestStatus.SUCCESSFUL);
+            }
+
+            // Build pass/fail map from original runs.jsonl (treat non-SUCCESSFUL as non-pass)
+            Map<String, Boolean> originalPassFail = new HashMap<>();
+            for (var r : runRecord.tests()) {
+                originalPassFail.put(r.testId(), r.status() == TestStatus.SUCCESSFUL);
+            }
+
+            // Check for any disagreement between rerun and original
+            boolean discard = false;
+            for (Map.Entry<String, Boolean> origEntry : originalPassFail.entrySet()) {
+                String testId = origEntry.getKey();
+                Boolean origPass = origEntry.getValue();
+                Boolean enrichedPass = enrichedPassFail.get(testId);
+                if (enrichedPass != null && !enrichedPass.equals(origPass)) {
+                    warnings.add("Run " + runNumber + ": rerun disagrees with original for "
+                        + testId + " (original=" + (origPass ? "pass" : "fail")
+                        + ", rerun=" + (enrichedPass ? "pass" : "fail")
+                        + "), discarding enriched data for this run");
+                    discard = true;
+                    break;
+                }
+            }
+
+            if (discard) {
+                List<EnrichedTestResult> basic = basicData.get(runNumber);
+                if (basic != null) {
+                    result.put(runNumber, basic);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Removes excluded test class results from all runs in the given map (in-place).
+     */
+    private void filterExcludedTestClasses(Map<Integer, List<EnrichedTestResult>> data,
+                                            AssignmentConfig config) {
+        for (Map.Entry<Integer, List<EnrichedTestResult>> entry : data.entrySet()) {
+            List<EnrichedTestResult> filtered = entry.getValue().stream()
+                .filter(e -> !config.isExcluded(e.testClassSimple()))
+                .collect(Collectors.toList());
+            entry.setValue(filtered);
+        }
+    }
+
+    /**
+     * Rebuilds FailureHighlights keeping only test IDs present in primaryIds.
+     * Secondary tests (merged into a primary group) are removed so they don't get a highlight dot.
+     */
+    private FailureHighlights rebuildHighlightsFromPrimaries(FailureHighlights all, Set<String> primaryIds) {
+        List<String> stillFailing = filterToSet(all.stillFailing(), primaryIds);
+        List<String> regressions = filterToSet(all.regressions(), primaryIds);
+        List<String> costlyDetours = filterToSet(all.costlyDetours(), primaryIds);
+        List<String> sustainedStruggles = filterToSet(all.sustainedStruggles(), primaryIds);
+        return new FailureHighlights(
+            stillFailing.isEmpty() ? null : stillFailing,
+            regressions.isEmpty() ? null : regressions,
+            costlyDetours.isEmpty() ? null : costlyDetours,
+            sustainedStruggles.isEmpty() ? null : sustainedStruggles
+        );
+    }
+
+    private List<String> filterToSet(List<String> list, Set<String> keep) {
+        if (list == null) return Collections.emptyList();
+        return list.stream().filter(keep::contains).toList();
     }
 
     private Map<Integer, List<EnrichedTestResult>> buildEnrichedFromRuns(List<RunRecord> runs, List<String> warnings) {

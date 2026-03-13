@@ -37,7 +37,6 @@ class LoggingSingleton {
 	static private final String strikes = "strikes";
 	static private final String prevBaselineRunNumber = "prevBaselineRunNumber";
 	static private final String runTimes = "runTimes";
-    static private final String evidence = "evidence";
 
 	static private final int TIME_CHECK_WINDOW_SIZE = 3;
 	static private final int MAX_STRIKES = 2;
@@ -188,14 +187,13 @@ class LoggingSingleton {
 
     static void setTestRunNumberAndStatus(String testFileName, String testName, TestStatus status) {
     	ObjectNode added = (ObjectNode)LoggingSingleton.testRunInfo;
-
+        
     	int currentRunNumber = added.get(prevRunNumber).asInt(); // it's already incremented, presumably
-
+        
         ObjectNode testFileNameNode = getOrCreateObjectNode(added, testFileName);
         ObjectNode testNameNode = getOrCreateObjectNode(testFileNameNode, testName);
-        ObjectNode runNode = getOrCreateObjectNode(testNameNode, Integer.toString(currentRunNumber));
-        runNode.put("status", status.toString());
-
+        testNameNode.put(Integer.toString(currentRunNumber),status.toString());
+               
     	LoggingSingleton.testRunInfo = ((JsonNode)(added));
     }
 
@@ -206,8 +204,7 @@ class LoggingSingleton {
 
         ObjectNode testFileNameNode = getOrCreateObjectNode(added, testFileName);
         ObjectNode testNameNode = getOrCreateObjectNode(testFileNameNode, testName);
-        ObjectNode runNode = getOrCreateObjectNode(testNameNode, Integer.toString(currentRunNumber));
-        runNode.put("status", status.toString() + ": " + cause);
+        testNameNode.put(Integer.toString(currentRunNumber),status.toString()+": "+cause);
 
     	LoggingSingleton.testRunInfo = ((JsonNode)(added));
     }
@@ -259,11 +256,42 @@ class LoggingSingleton {
     	LoggingSingleton.startTime = System.nanoTime();
     }
 
+    static void resetAccumulatedTime() {
+    	LoggingSingleton.accumulatedTime = 0;
+    }
+
+    static void setCloseDurationMs(long ms) {
+    	ObjectNode node = (ObjectNode) LoggingSingleton.testRunInfo;
+    	node.put("closeDurationMs", ms);
+    	LoggingSingleton.testRunInfo = (JsonNode) node;
+    }
+
+    static void setBeforeAllInitDurationMs(long ms) {
+    	ObjectNode node = (ObjectNode) LoggingSingleton.testRunInfo;
+    	node.put("beforeAllInitDurationMs", ms);
+    	LoggingSingleton.testRunInfo = (JsonNode) node;
+    }
+
+    static void setBeforeAllTotalDurationMs(long ms) {
+    	ObjectNode node = (ObjectNode) LoggingSingleton.testRunInfo;
+    	node.put("beforeAllTotalDurationMs", ms);
+    	LoggingSingleton.testRunInfo = (JsonNode) node;
+    }
+
+    static void addCloseTiming(String operation, long ms) {
+    	ObjectNode node = (ObjectNode) LoggingSingleton.testRunInfo;
+    	ObjectNode timingNode = getOrCreateObjectNode(node, "closeTiming");
+    	timingNode.put(operation, ms);
+    	LoggingSingleton.testRunInfo = (JsonNode) node;
+    }
+
     static void accumulateTime() {
     	if (LoggingSingleton.startTime == null) {
     		throw new Error("Cannot accumulate time; never started timing");
     	}
-    	LoggingSingleton.accumulatedTime += System.nanoTime()-LoggingSingleton.startTime;
+    	long now = System.nanoTime();
+    	LoggingSingleton.accumulatedTime += now - LoggingSingleton.startTime;
+    	LoggingSingleton.startTime = now; // advance startTime so getCurrentTotalElapsedTime() doesn't re-add this interval
     }
 
     static void addStrike() {
@@ -326,34 +354,6 @@ class LoggingSingleton {
         strikesNode.put(Integer.toString(currentEntryIndex),struck);
 
     	LoggingSingleton.testRunInfo = ((JsonNode)(added));
-    }
-
-    static void setTestEvidence(String testFileName, String testName, String uniqueId, TestEvidence ev) {
-        ObjectNode root = (ObjectNode) LoggingSingleton.testRunInfo;
-
-        int currentRunNumber = root.get(prevRunNumber).asInt();
-
-        ObjectNode testFileNode = getOrCreateObjectNode(root, testFileName);
-        ObjectNode testNameNode = getOrCreateObjectNode(testFileNode, testName);
-
-        // Store evidence under: <testFile>/<testName>/<runNumber>/evidence
-        ObjectNode runNode = getOrCreateObjectNode(testNameNode, Integer.toString(currentRunNumber));
-
-        ObjectMapper om = LoggingSingleton.objectMapper;
-        ObjectNode evNode = om.createObjectNode();
-        evNode.put("durationMs", ev.durationMs);
-        if (ev.uniqueId != null) evNode.put("uniqueId", ev.uniqueId);
-
-        if (ev.exceptionType != null) evNode.put("exceptionType", ev.exceptionType);
-        if (ev.message != null) evNode.put("message", ev.message);
-        if (ev.stackTrace != null) evNode.put("stackTrace", ev.stackTrace);
-
-        if (ev.expected != null) evNode.put("expected", ev.expected);
-        if (ev.actual != null) evNode.put("actual", ev.actual);
-
-        runNode.set(evidence, evNode);
-
-        LoggingSingleton.testRunInfo = root;
     }
 
 }

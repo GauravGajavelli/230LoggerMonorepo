@@ -3,6 +3,8 @@ package edu.rosehulman.csse230feedback.cli;
 import edu.rosehulman.csse230feedback.domain.PrepareOptions;
 import edu.rosehulman.csse230feedback.domain.PrepareResult;
 import edu.rosehulman.csse230feedback.domain.PrepareService;
+import edu.rosehulman.csse230feedback.model.AssignmentConfig;
+import edu.rosehulman.csse230feedback.util.Json;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -70,6 +72,12 @@ public class PrepareCommand implements Callable<Integer> {
     @Option(names = {"--allow-basic-fallback"}, description = "Allow prepare to proceed without enriched_runs/ (no stack traces or durations). Default: fail if enriched_runs/ is absent.")
     private boolean allowBasicFallback = false;
 
+    @Option(names = {"--include-error-messages"}, description = "Include raw lastError.message text in LLM input (default: off; for debugging only).")
+    private boolean includeErrorMessages = false;
+
+    @Option(names = {"--assignment-config"}, description = "Path to per-assignment JSON config (e.g. Pipeline/assignments/bst.json) to exclude test classes.")
+    private Path assignmentConfigPath;
+
     @Override
     public Integer call() throws Exception {
         if (!Files.exists(input)) {
@@ -93,6 +101,15 @@ public class PrepareCommand implements Callable<Integer> {
             }
         }
 
+        AssignmentConfig assignmentConfig = null;
+        if (assignmentConfigPath != null) {
+            if (!Files.exists(assignmentConfigPath)) {
+                System.err.println("Assignment config file does not exist: " + assignmentConfigPath);
+                return 2;
+            }
+            assignmentConfig = Json.mapper().readValue(assignmentConfigPath.toFile(), AssignmentConfig.class);
+        }
+
         PrepareOptions opts = new PrepareOptions(
             input,
             output,
@@ -109,7 +126,9 @@ public class PrepareCommand implements Callable<Integer> {
             cacheDir,
             dryRun,
             ingestDir,
-            allowBasicFallback
+            allowBasicFallback,
+            includeErrorMessages,
+            assignmentConfig
         );
 
         PrepareService service = new PrepareService();

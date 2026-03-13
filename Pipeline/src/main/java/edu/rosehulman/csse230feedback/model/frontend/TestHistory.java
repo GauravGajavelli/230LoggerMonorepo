@@ -75,4 +75,15 @@ public record TestHistory(
             meaningfulnessScore, highlightCategory, categories, evolution, profile
         );
     }
+
+    /**
+     * Returns a copy with a different highlightCategory (use null to clear).
+     */
+    public TestHistory withHighlightCategory(String newCategory) {
+        return new TestHistory(
+            testId, testName, statusByRun, failureIntervals, isLingeringFailure,
+            isRegression, recursCount, flipsWithin, totalFailedRuns,
+            meaningfulnessScore, newCategory, categories, errorEvolution, struggleProfile
+        );
+    }
 }

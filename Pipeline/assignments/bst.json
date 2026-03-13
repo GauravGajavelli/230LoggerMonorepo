@@ -1,0 +1,4 @@
+{
+  "assignmentName": "Binary Search Tree",
+  "excludeTestClasses": ["BSTConcurrencyTesting"]
+}

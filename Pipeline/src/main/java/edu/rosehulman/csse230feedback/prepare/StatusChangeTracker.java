@@ -132,7 +132,38 @@ public class StatusChangeTracker {
     }
 
     /** Maximum total feedback items across all highlight categories. */
-    private static final int MAX_FEEDBACK_ITEMS = 5;
+    public static final int MAX_FEEDBACK_ITEMS = 5;
+
+    /**
+     * Like buildFailureHighlights but WITHOUT the budget cap on sustained-struggle candidates.
+     * Used as input to feedback generation: the grouping + budget cap happen inside
+     * FeedbackGenerationService after diff-based grouping collapses related tests.
+     */
+    public FailureHighlights buildAllHighlights(List<TestHistory> histories) {
+        List<String> stillFailing = new ArrayList<>();
+        List<String> regressions = new ArrayList<>();
+        List<String> costlyDetours = new ArrayList<>();
+        List<TestHistory> sustainedCandidates = new ArrayList<>();
+
+        for (TestHistory history : histories) {
+            if (history.highlightCategory() == null) continue;
+            switch (history.highlightCategory()) {
+                case "stillFailing" -> stillFailing.add(history.testId());
+                case "regression" -> regressions.add(history.testId());
+                case "costlyDetour" -> costlyDetours.add(history.testId());
+                case "sustainedStruggle" -> sustainedCandidates.add(history);
+            }
+        }
+
+        // All sustained candidates, sorted by totalFailedRuns descending (priority order)
+        List<String> allSustained = sustainedCandidates.stream()
+            .sorted(Comparator.comparingInt(TestHistory::totalFailedRuns).reversed())
+            .map(TestHistory::testId)
+            .toList();
+
+        return new FailureHighlights(stillFailing, regressions, costlyDetours,
+            allSustained.isEmpty() ? null : allSustained);
+    }
 
     public FailureHighlights buildFailureHighlights(List<TestHistory> histories) {
         List<String> stillFailing = new ArrayList<>();

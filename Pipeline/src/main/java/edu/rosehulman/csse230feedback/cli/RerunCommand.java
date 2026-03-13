@@ -3,6 +3,8 @@ package edu.rosehulman.csse230feedback.cli;
 import edu.rosehulman.csse230feedback.domain.RerunOptions;
 import edu.rosehulman.csse230feedback.domain.RerunResult;
 import edu.rosehulman.csse230feedback.domain.WorkspaceRunnerService;
+import edu.rosehulman.csse230feedback.model.AssignmentConfig;
+import edu.rosehulman.csse230feedback.util.Json;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -65,6 +67,10 @@ public class RerunCommand implements Callable<Integer> {
             description = "Test execution timeout in seconds (default: 300).")
     private int testTimeout = RerunOptions.DEFAULT_TEST_TIMEOUT;
 
+    @Option(names = {"--assignment-config"},
+            description = "Path to per-assignment JSON config (e.g. Pipeline/assignments/bst.json) to exclude test classes.")
+    private Path assignmentConfigPath;
+
     @Override
     public Integer call() throws Exception {
         // Validate input
@@ -84,6 +90,15 @@ public class RerunCommand implements Callable<Integer> {
         }
         Files.createDirectories(work);
 
+        AssignmentConfig assignmentConfig = null;
+        if (assignmentConfigPath != null) {
+            if (!Files.exists(assignmentConfigPath)) {
+                System.err.println("Assignment config file does not exist: " + assignmentConfigPath);
+                return 2;
+            }
+            assignmentConfig = Json.mapper().readValue(assignmentConfigPath.toFile(), AssignmentConfig.class);
+        }
+
         // Build options
         RerunOptions options = RerunOptions.builder()
                 .inputDir(input)
@@ -98,6 +113,7 @@ public class RerunCommand implements Callable<Integer> {
                 .keepWorkDir(keepWork)
                 .compileTimeout(compileTimeout)
                 .testTimeout(testTimeout)
+                .assignmentConfig(assignmentConfig)
                 .build();
 
         // Run the service

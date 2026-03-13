@@ -48,12 +48,9 @@ public class JavaCompilerRunner {
      * @throws IOException if compilation process fails to start
      */
     public CompileResult compile(Path workspace, Path depsDir) throws IOException {
-        // Convert to absolute paths to avoid issues when javac runs from workspace directory
         workspace = workspace.toAbsolutePath();
         Path srcDir = workspace.resolve("src");
-        Path binDir = workspace.resolve("bin");
 
-        // Find all Java files
         List<String> javaFiles;
         try (Stream<Path> walk = Files.walk(srcDir)) {
             javaFiles = walk
@@ -67,10 +64,25 @@ public class JavaCompilerRunner {
             return CompileResult.failure("", "No Java files found in src/", 1, List.of("No Java files found"));
         }
 
-        // Build classpath
+        return compileFileList(workspace, depsDir, javaFiles);
+    }
+
+    /**
+     * Compiles a specific subset of Java files into the workspace bin/ directory.
+     * Used for graceful degradation when some source files have compile errors.
+     *
+     * @param workspace Path to workspace root (contains src/ and bin/)
+     * @param depsDir Path to dependencies directory (JARs)
+     * @param javaFiles Explicit list of absolute .java file paths to compile
+     * @return CompileResult with success/failure and output
+     * @throws IOException if compilation process fails to start
+     */
+    public CompileResult compileFileList(Path workspace, Path depsDir, List<String> javaFiles) throws IOException {
+        workspace = workspace.toAbsolutePath();
+        Path binDir = workspace.resolve("bin");
+
         String classpath = buildClasspath(depsDir);
 
-        // Build command
         List<String> command = new ArrayList<>();
         command.add(getJavacPath());
         command.add("-source");
@@ -85,7 +97,6 @@ public class JavaCompilerRunner {
         command.add(binDir.toString());
         command.addAll(javaFiles);
 
-        // Execute
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.directory(workspace.toFile());
         pb.redirectErrorStream(false);
@@ -95,7 +106,6 @@ public class JavaCompilerRunner {
         StringBuilder stdout = new StringBuilder();
         StringBuilder stderr = new StringBuilder();
 
-        // Read output streams
         Thread stdoutThread = new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
@@ -147,6 +157,32 @@ public class JavaCompilerRunner {
             return CompileResult.failure(stdout.toString(), stderr.toString(), -1,
                 List.of("Compilation interrupted"));
         }
+    }
+
+    /**
+     * Extracts the set of .java file paths referenced in compiler error output.
+     */
+    public static java.util.Set<String> errorFiles(String compilerStderr) {
+        java.util.Set<String> files = new java.util.LinkedHashSet<>();
+        if (compilerStderr == null) return files;
+        for (String line : compilerStderr.split("\n")) {
+            // javac error lines start with: /absolute/path/to/File.java:NN: error:
+            int colon = line.indexOf(':');
+            if (colon > 1 && line.substring(colon + 1).stripLeading().startsWith("error:")) {
+                files.add(line.substring(0, colon));
+            } else if (colon > 1) {
+                // Try second colon: /path/File.java:NN: error: ...
+                String rest = line.substring(colon + 1);
+                int colon2 = rest.indexOf(':');
+                if (colon2 >= 0 && rest.substring(colon2 + 1).stripLeading().startsWith("error:")) {
+                    String candidate = line.substring(0, colon);
+                    if (candidate.endsWith(".java")) {
+                        files.add(candidate);
+                    }
+                }
+            }
+        }
+        return files;
     }
 
     /**
