@@ -36,7 +36,7 @@ const ChevronIcon = ({ open }) => (
 );
 
 /* ── Diff block (dark code style) ── */
-function DiffBlock({ diff }) {
+function DiffBlock({ diff, onLabelClick }) {
   const lines = [...(diff.before || []), '───', ...(diff.after || [])];
   return (
     <pre style={{
@@ -46,7 +46,17 @@ function DiffBlock({ diff }) {
       border: '1px solid #1E293B',
     }}>
       {diff.label && (
-        <div style={{ color: '#64748B', marginBottom: 6, fontSize: 11 }}>{diff.label}</div>
+        <div
+          onClick={onLabelClick || undefined}
+          style={{
+            color: '#64748B', marginBottom: 6, fontSize: 11,
+            cursor: onLabelClick ? 'pointer' : 'default',
+            textDecoration: onLabelClick ? 'underline' : 'none',
+            textDecorationColor: '#475569',
+          }}
+        >
+          {diff.label}{onLabelClick ? ' ↗' : ''}
+        </div>
       )}
       {lines.map((l, i) => {
         if (l === '───') return <div key={i} style={{ borderTop: '1px dashed #334155', margin: '6px 0' }} />;
@@ -79,6 +89,7 @@ function DiffBlock({ diff }) {
  */
 export function TestCard({ test, forceOpen, onCiteClick }) {
   const [manualOpen, setManualOpen] = useState(false);
+  const [diffIndex, setDiffIndex] = useState(0);
   const cardRef = useRef(null);
 
   const hasFeedback = !!(test.explanation || test.suggestion || test.nextSteps?.length || test.diffs?.length);
@@ -92,6 +103,8 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
       setManualOpen(true);
     }
   }, [forceOpen]);
+
+  useEffect(() => { setDiffIndex(0); }, [test.id]);
 
   const isFailing = test.status === 'failing';
   const isImproved = test.status === 'improved';
@@ -181,18 +194,40 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
             </div>
           )}
 
-          {/* Code diffs */}
-          {test.diffs && test.diffs.length > 0 && (
-            <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                            letterSpacing: '.08em', color: '#94A3B8', marginBottom: 4 }}>
-                Code change
+          {/* Code diffs — paginated */}
+          {test.diffs && test.diffs.length > 0 && (() => {
+            const diff = test.diffs[diffIndex];
+            const total = test.diffs.length;
+            const runNum = parseInt(diff?.label?.match(/Run (\d+)/)?.[1]);
+            return (
+              <div style={{ marginTop: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                                letterSpacing: '.08em', color: '#94A3B8' }}>
+                    Code change
+                  </div>
+                  {total > 1 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => setDiffIndex(i => Math.max(0, i - 1))}
+                        disabled={diffIndex === 0}
+                        style={{ all: 'unset', cursor: diffIndex === 0 ? 'default' : 'pointer',
+                                 color: diffIndex === 0 ? '#CBD5E1' : '#64748B', fontSize: 14, lineHeight: 1 }}>
+                        ‹
+                      </button>
+                      <span style={{ fontSize: 11, color: '#94A3B8' }}>{diffIndex + 1} / {total}</span>
+                      <button onClick={() => setDiffIndex(i => Math.min(total - 1, i + 1))}
+                        disabled={diffIndex === total - 1}
+                        style={{ all: 'unset', cursor: diffIndex === total - 1 ? 'default' : 'pointer',
+                                 color: diffIndex === total - 1 ? '#CBD5E1' : '#64748B', fontSize: 14, lineHeight: 1 }}>
+                        ›
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <DiffBlock diff={diff} onLabelClick={runNum ? () => onCiteClick(runNum) : null} />
               </div>
-              {test.diffs.map((diff, i) => (
-                <DiffBlock key={i} diff={diff} />
-              ))}
-            </div>
-          )}
+            );
+          })()}
 
           {/* What to work on — amber box */}
           {(test.nextSteps?.length > 0 || test.suggestion) && (
@@ -217,6 +252,30 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
                   <CitationText text={test.suggestion} onCiteClick={onCiteClick} />
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Run history */}
+          {test.statusByRun && Object.keys(test.statusByRun).length > 0 && (
+            <div style={{ marginTop: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                            letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
+                Run history ({Object.keys(test.statusByRun).length} runs)
+              </div>
+              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                {Object.entries(test.statusByRun)
+                  .sort(([a], [b]) => Number(a) - Number(b))
+                  .map(([run, status]) => {
+                    const isPassing = status === 'pass' || status === 'SUCCESSFUL';
+                    return (
+                      <span key={run} title={`Run ${run}: ${status}`} style={{
+                        width: 6, height: isPassing ? 14 : 20, borderRadius: 2,
+                        background: isPassing ? '#6EE7B7' : '#FCA5A5',
+                        flexShrink: 0,
+                      }} />
+                    );
+                  })}
+              </div>
             </div>
           )}
         </div>

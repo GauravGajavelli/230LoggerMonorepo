@@ -61,6 +61,11 @@ public class StruggleProfileGenerator {
             relatedTests
         );
 
+        // A test was fixed if none of its failure intervals are lingering (i.e., test is
+        // currently passing). This is independent of whether diff categories are available,
+        // so it remains correct in basic-fallback mode where winningFix may be null.
+        boolean wasFixed = failureIntervals.stream().noneMatch(FailureInterval::isLingering);
+
         return new StruggleProfile(
             attemptsToFix,
             diffAnalysis.distinctStrategies,
@@ -68,7 +73,8 @@ public class StruggleProfileGenerator {
             diffAnalysis.winningFix,
             relatedTests == null || relatedTests.isEmpty() ? null : relatedTests,
             round(struggleScore, 2),
-            errorEvolution
+            errorEvolution,
+            wasFixed
         );
     }
 

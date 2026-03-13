@@ -22,6 +22,7 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
   const [tab, setTab] = useState('issues');
   const [highlightedTestId, setHighlightedTestId] = useState(null);
   const [openedFeedbackIds, setOpenedFeedbackIds] = useState(new Set());
+  const [hoveredBarId, setHoveredBarId] = useState(null);
 
   /* ── Bucketed test lists ── */
   const failingTests  = useMemo(() => detailTests.filter(t => t.status === 'failing'), [detailTests]);
@@ -198,17 +199,30 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
             {/* Mini-bar of all tests */}
             <div className="dv-summary-bars">
               {[...detailTests]
-                .sort((a, b) => {
-                  const order = { failing: 0, improved: 1, passing: 2 };
-                  return order[a.status] - order[b.status];
-                })
+                .sort((a, b) => ({ failing: 0, improved: 1, passing: 2 }[a.status] - { failing: 0, improved: 1, passing: 2 }[b.status]))
                 .map((t) => (
-                  <span key={t.id} title={t.name} style={{
-                    width: 10, height: 28, borderRadius: 3,
-                    background: t.status === 'failing' ? '#FCA5A5'
-                      : t.status === 'improved' ? '#93C5FD'
-                      : '#6EE7B7',
-                  }} />
+                  <div key={t.id} style={{ position: 'relative' }}
+                       onMouseEnter={() => setHoveredBarId(t.id)}
+                       onMouseLeave={() => setHoveredBarId(null)}>
+                    <span style={{
+                      display: 'block', width: 10, height: 28, borderRadius: 3,
+                      background: t.status === 'failing' ? '#FCA5A5' : t.status === 'improved' ? '#93C5FD' : '#6EE7B7',
+                      outline: hoveredBarId === t.id ? '2px solid #475569' : '2px solid transparent',
+                      outlineOffset: 1,
+                      cursor: 'default',
+                    }} />
+                    {hoveredBarId === t.id && (
+                      <div style={{
+                        position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: '#1E293B', color: '#F8FAFC',
+                        fontSize: 11, padding: '3px 8px', borderRadius: 4,
+                        whiteSpace: 'nowrap', zIndex: 20, pointerEvents: 'none',
+                      }}>
+                        {t.name}
+                      </div>
+                    )}
+                  </div>
                 ))}
             </div>
             <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4, display: 'flex', gap: 10 }}>

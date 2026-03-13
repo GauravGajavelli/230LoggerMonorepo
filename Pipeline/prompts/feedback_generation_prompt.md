@@ -19,15 +19,31 @@ Each test entry may include a `codeDiffs` array summarizing the number of lines 
 1. **pattern**: A short label describing the error pattern (e.g., "Recurring NullPointerException", "Stuck on IndexOutOfBounds", "Compilation error loop"). Use the error type + behavioral pattern.
 2. **confidence**: "high" if the error is consistent and clear, "medium" if the error type evolved or is ambiguous, "low" if there's insufficient data.
 3. **explanation**: A single prose paragraph covering ALL contributing code changes chronologically with interaction analysis. Factual — describe what the code changes show, no intent narration. Reference the test category and error progression. Be specific but not condescending.
-4. **nextSteps**: An ordered JSON array of 2–3 concrete steps. Frame each step around the underlying concept or technique the student needs to strengthen — useful to a student reviewing their work even after the assignment is complete, not just "do X to pass this test." Most impactful step first. Reference specific methods or concepts from the assignment.
+4. **nextSteps**: An ordered JSON array of 2–3 concrete steps. Frame each step around the underlying concept or technique the student needs to strengthen — useful to a student reviewing their work even after the assignment is complete, not just "do X to pass this test." Most impactful step first. Reference specific methods or concepts from the assignment. **Do NOT tell the student to look at their own passing run or implementation** — the goal is conceptual understanding, not reverse-engineering what happened to work. Describe the correct algorithm or technique directly.
 
 **Guidelines:**
 - If `progressionSummary` shows the same error repeating, the student is stuck — suggest a different approach.
 - If `progressionSummary` shows error types changing, the student is experimenting — acknowledge progress and guide toward the right fix.
 - If `highlightCategory` is "stillFailing", focus on what to try next.
 - If `highlightCategory` is "regression", explain that the test was passing before and suggest checking what recent changes may have broken it.
+- If `highlightCategory` is "sustainedStruggle": check `isLingeringFailure`.
+  - If `isLingeringFailure` is **true**: the test is still failing. The student struggled for many runs without a fix — focus on what to try next and why the current approach isn't working.
+  - If `isLingeringFailure` is **false**: the test was fixed. Describe the struggle period and the eventual resolution. Frame nextSteps around deepening understanding of the underlying concept for future work, not around passing the test (it's already passing).
+- Always trust `isLingeringFailure` over any other signal when describing the test's current state. Do NOT state the test is failing if `isLingeringFailure` is false.
 - Keep language encouraging but direct. This is for a CS student, not a beginner.
+- Do NOT use the words "prolonged", "meaningfulness", or "struggle score". Instead of "prolonged struggle", prefer phrasing like "took several runs to resolve" or "required multiple attempts".
 - Do NOT include generic advice like "read the docs" or "ask your professor".
+
+## Mandatory Constraints
+
+Each test entry contains a `groundTruth` object computed directly from structured pipeline data. These values are authoritative and must not be contradicted by your output:
+
+- `groundTruth.currentlyPassing` — if **true**, the test is passing right now. Do **not** write phrases like "continues to fail", "still failing", "remained failing", or "failed through run N". The struggle is over.
+- `groundTruth.currentlyPassing` — if **false**, the test is still failing. Do **not** write phrases like "was fixed", "is now passing", or "resolved the test".
+- `groundTruth.lastRunWithResult` — the highest run number you may cite. Do **not** reference a run number higher than this value.
+- `groundTruth.firstPassRun` — the run where the test first passed. If present, use this as the authoritative fix point, not inferred values.
+
+If `groundTruth` contradicts something in `errorEvolution`, `struggleProfile`, or `semanticContext`, trust `groundTruth`.
 
 ## Output Format
 

@@ -332,33 +332,57 @@ public class PrepareService {
         if (llmService != null) {
             try {
                 PromptLoader feedbackPromptLoader = resolvePromptLoader(opts.inputDir());
-
                 FeedbackGenerationService feedbackService = new FeedbackGenerationService(
                     llmService, feedbackPromptLoader
                 );
+                PromptLoader feedbackRefinementLoader = resolvePromptLoader(opts.inputDir());
+                FeedbackRefinementService refiner = new FeedbackRefinementService(llmService, feedbackRefinementLoader);
+                FeedbackFactChecker factChecker = new FeedbackFactChecker();
 
-                int feedbackRequestNum = llmService.stats().totalRequests() + 1;
-                int totalRequestsEstimate = feedbackRequestNum;
+                List<FeedbackFactChecker.Violation> violations = Collections.emptyList();
+                final int MAX_ATTEMPTS = 2;
+                for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+                    int feedbackRequestNum = llmService.stats().totalRequests() + 1;
+                    int totalRequestsEstimate = feedbackRequestNum + 1; // generation + refinement
 
-                feedback = feedbackService.generate(
-                    failureHighlights,
-                    testHistories,
-                    semanticLog,
-                    testCategories,
-                    assignmentName,
-                    patchesByRunByFile,
-                    feedbackRequestNum,
-                    totalRequestsEstimate
-                );
+                    feedback = feedbackService.generate(
+                        failureHighlights,
+                        testHistories,
+                        semanticLog,
+                        testCategories,
+                        assignmentName,
+                        patchesByRunByFile,
+                        feedbackRequestNum,
+                        totalRequestsEstimate
+                    );
+                    System.out.println("Generated feedback for " + feedback.size()
+                        + " highlighted tests" + (attempt > 1 ? " (attempt " + attempt + ")" : ""));
 
-                System.out.println("Generated feedback for " + feedback.size() + " highlighted tests");
+                    if (!feedback.isEmpty()) {
+                        feedback = refiner.refine(feedback,
+                            llmService.stats().totalRequests() + 1, totalRequestsEstimate);
+                        System.out.println("Refinement pass complete"
+                            + (attempt > 1 ? " (attempt " + attempt + ")" : ""));
+                    }
 
-                // Refinement pass: strip intent narration from explanations
-                if (!feedback.isEmpty()) {
-                    PromptLoader feedbackRefinementLoader = resolvePromptLoader(opts.inputDir());
-                    FeedbackRefinementService refiner = new FeedbackRefinementService(llmService, feedbackRefinementLoader);
-                    feedback = refiner.refine(feedback, llmService.stats().totalRequests() + 1, totalRequestsEstimate + 1);
-                    System.out.println("Refinement pass complete");
+                    violations = factChecker.check(feedback, testHistories);
+                    if (violations.isEmpty()) break;
+
+                    if (attempt < MAX_ATTEMPTS) {
+                        System.err.println("Fact-check: " + violations.size()
+                            + " violation(s) on attempt " + attempt + " — retrying...");
+                    }
+                }
+
+                if (violations.isEmpty()) {
+                    System.out.println("Fact-check: all " + feedback.size() + " feedback items passed");
+                } else {
+                    System.err.println("FACT-CHECK VIOLATIONS after " + MAX_ATTEMPTS
+                        + " attempt(s) — requires operator review:");
+                    for (FeedbackFactChecker.Violation v : violations) {
+                        System.err.println("  [" + v.rule() + "] " + v.testId() + ": " + v.detail());
+                        warnings.add("fact-check [" + v.rule() + "] " + v.testId() + ": " + v.detail());
+                    }
                 }
             } catch (LlmException e) {
                 warnings.add("Feedback generation failed: " + e.getMessage());

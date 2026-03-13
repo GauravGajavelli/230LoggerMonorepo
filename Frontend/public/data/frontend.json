@@ -2,9 +2,9 @@
   "context" : {
     "studentId" : "demo-student",
     "assignmentName" : "Binary Search Tree",
-    "submittedAt" : "2026-03-11T05:56:11.162228Z",
+    "submittedAt" : "2026-03-13T14:30:48.758459Z",
     "totalEpisodes" : 12,
-    "repoRoot" : "/tmp/run-demo-staging"
+    "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/staging"
   },
   "episodes" : [ {
     "id" : "episode-1",
@@ -13,9 +13,9 @@
     "label" : "Episode 1",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Initial test run showing the starting state of the BST implementation. Student has basic methods working (height, size) but critical methods are missing (containsNonBST, isEmpty), causing compilation errors.",
+      "summary" : "Initial project setup with basic BST structure. Student verified that height and size methods work correctly, but identified compilation errors for unimplemented methods (containsNonBST, isEmpty). This is the starting point for incremental development.",
       "dominantIntent" : "extending",
-      "conceptsAddressed" : [ "tree height/size computation", "basic BST structure" ],
+      "conceptsAddressed" : [ "tree height computation", "tree size computation", "binary search tree structure" ],
       "progressAssessment" : "productive"
     },
     "timeRange" : "11:40 PM – 11:40 PM",
@@ -31,9 +31,9 @@
     "label" : "Episode 2",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Student implements isEmpty() method and begins work on containsNonBST(). Resolves one compilation error and gets containsNonBST to compile, but discovers logic errors in the search implementation. Spends ~32 minutes debugging the containsNonBST assertion failure.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree search without BST property", "basic utility methods" ],
+      "summary" : "Student implemented isEmpty() method and began work on containsNonBST(). Successfully resolved one compilation error, but containsNonBST has logic errors causing test failures. Extended debugging session with multiple attempts to fix the search algorithm.",
+      "dominantIntent" : "extending",
+      "conceptsAddressed" : [ "binary search tree search", "utility methods", "tree traversal" ],
       "progressAssessment" : "stuck"
     },
     "timeRange" : "11:42 PM – 12:14 AM",
@@ -49,9 +49,9 @@
     "label" : "Episode 3",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Continues debugging containsNonBST() with multiple failed attempts. No progress made on resolving the assertion error despite trying different approaches.",
+      "summary" : "Continued debugging containsNonBST() with multiple failed attempts. Student made several changes but test results remained unchanged, indicating the core logic issue was not resolved.",
       "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree search without BST property" ],
+      "conceptsAddressed" : [ "binary search tree search", "algorithm logic" ],
       "progressAssessment" : "stuck"
     },
     "timeRange" : "12:17 AM – 12:18 AM",
@@ -67,9 +67,9 @@
     "label" : "Episode 4",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Brief debugging session (~40 seconds) attempting to fix containsNonBST(). No test result changes.",
+      "summary" : "Brief debugging session for containsNonBST(). No progress made on the failing test.",
       "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree search without BST property" ],
+      "conceptsAddressed" : [ "binary search tree search" ],
       "progressAssessment" : "stuck"
     },
     "timeRange" : "12:27 AM – 12:27 AM",
@@ -85,9 +85,9 @@
     "label" : "Episode 5",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Very short session (~20 seconds) with no test result changes. Student appears to be reviewing or pausing work.",
-      "dominantIntent" : "experimenting",
-      "conceptsAddressed" : [ "tree search without BST property" ],
+      "summary" : "Short debugging attempt for containsNonBST(). Still no test result improvement.",
+      "dominantIntent" : "debugging",
+      "conceptsAddressed" : [ "binary search tree search" ],
       "progressAssessment" : "stuck"
     },
     "timeRange" : "12:28 AM – 12:28 AM",
@@ -103,9 +103,9 @@
     "label" : "Episode 6",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Extended debugging session spanning ~20 hours (with breaks). Student works through multiple iterations of containsNonBST() logic, experiences a major regression (run 8) where 3 previously passing tests fail, then achieves breakthrough (run 9) fixing containsNonBST and recovering all tests. Continues extending with toString() implementation (run 10), encounters StackOverflowError in toString recursion (run 11), debugs and fixes the infinite recursion (run 13), then fixes formatting issues (runs 14-15). Implements toArrayList() and toArray() methods successfully.",
+      "summary" : "Extended debugging period (20+ hours elapsed time) for containsNonBST() followed by a breakthrough. Student recovered from a regression that broke multiple tests and successfully fixed the containsNonBST logic. Also implemented toString() method but encountered infinite recursion bug requiring additional debugging. By episode end, 4 tests passing including the previously problematic containsNonBST.",
       "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "tree search without BST property", "string representation", "tree traversal", "collection conversion" ],
+      "conceptsAddressed" : [ "binary search tree search", "string representation", "recursive algorithms", "infinite recursion" ],
       "progressAssessment" : "breakthrough"
     },
     "timeRange" : "12:28 AM – 8:55 PM",
@@ -121,9 +121,9 @@
     "label" : "Episode 7",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Extended session spanning ~14 hours (with breaks). Student implements iterator functionality, starting with an inefficient iterator (run 18), then tackling pre-order iterator (runs 19-25) which requires debugging hasNext() logic, next() return values, and exception handling. Experiences major regression (run 23) affecting 9 tests, recovers (run 24), then fixes exception handling to complete pre-order iterator. Begins implementing standard in-order iterator (runs 26-40) which proves more challenging, with multiple regression cycles and persistent null return issues. Finally achieves breakthrough (run 40) fixing the iterator boolean logic and completing all manual tests.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "iterator implementation", "tree traversal (pre-order)", "tree traversal (in-order)", "exception handling" ],
+      "summary" : "Continued work on toString() formatting and implemented collection conversion methods (toArrayList, toArray). Fixed infinite recursion and formatting issues in toString. Implemented inefficient iterator and began work on tree traversal iterators (preorder). Encountered multiple regression cycles while debugging preorder iterator but recovered and achieved all tests passing by episode end.",
+      "dominantIntent" : "extending",
+      "conceptsAddressed" : [ "string representation", "collection conversion", "iterator implementation", "tree traversal (pre-order)", "exception handling" ],
       "progressAssessment" : "breakthrough"
     },
     "timeRange" : "8:57 PM – 10:51 AM",
@@ -139,10 +139,10 @@
     "label" : "Episode 8",
     "dominantCategory" : "BSTManualTesting",
     "semantics" : {
-      "summary" : "Extended session spanning ~6 hours. Student transitions to BSTTesting suite (run 41) which introduces new test categories. Implements input validation for insert method to throw IllegalArgumentException (run 42). Recovers from compilation errors in contains method (runs 43-44). Begins implementing the remove method (run 45) with partial success, then experiences critical regression (run 47) affecting 19 tests. Spends remaining time in recovery and debugging cycles (runs 48-51) attempting to fix remove logic, achieving partial success with testRemove passing but testRemoveAdvanced still failing.",
+      "summary" : "Implemented in-order iterator (testIterator) with extensive debugging. Student encountered multiple regression cycles and null pointer issues while developing the iterator logic. Extended debugging session (6+ hours) with trial-and-error approach. Achieved breakthrough at end with all manual testing tests passing, including proper iterator implementation and exception handling.",
       "dominantIntent" : "extending",
-      "conceptsAddressed" : [ "binary search tree insertion", "exception handling", "node deletion with children" ],
-      "progressAssessment" : "regressing"
+      "conceptsAddressed" : [ "iterator implementation", "tree traversal (in-order)", "exception handling", "null pointer debugging" ],
+      "progressAssessment" : "breakthrough"
     },
     "timeRange" : "11:00 AM – 5:12 PM",
     "edits" : 2,
@@ -157,9 +157,9 @@
     "label" : "Episode 9",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Brief session (~4 minutes) continuing remove method debugging. Student makes targeted fix to remove logic (run 53) changing the nature of the failure from size mismatch to value mismatch, indicating progress in understanding the node replacement strategy.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "node deletion with children" ],
+      "summary" : "Transitioned to automated test suite (BSTTesting). Implemented insert validation and exception handling. Most insert functionality working correctly (7 of 8 tests passing). Only testInsertExceptions failing, requiring refinement of null/duplicate value handling.",
+      "dominantIntent" : "extending",
+      "conceptsAddressed" : [ "binary search tree insertion", "exception handling", "input validation" ],
       "progressAssessment" : "productive"
     },
     "timeRange" : "5:13 PM – 5:17 PM",
@@ -175,10 +175,10 @@
     "label" : "Episode 10",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Extended session spanning ~6.5 hours. Student continues intensive debugging of remove method implementation. Experiences major regression (run 54) with StackOverflowError indicating infinite recursion in remove logic. Works through multiple iterations attempting to fix the recursive node replacement strategy. Makes steady progress through trial-and-error approach, eventually achieving breakthrough (run 55) where all 22 tests pass, completing the entire BST assignment.",
-      "dominantIntent" : "debugging",
-      "conceptsAddressed" : [ "node deletion with children", "tree recursion" ],
-      "progressAssessment" : "breakthrough"
+      "summary" : "Fixed exception handling for insert method, completing all insert tests. Then resolved compilation error in contains method (unreachable code issue) that was blocking 7 tests. Completed contains implementation for both integers and strings. Began implementing remove functionality but encountered multiple logic errors and regression cycles. By episode end, remove method partially working but with assertion errors indicating incorrect node deletion behavior.",
+      "dominantIntent" : "extending",
+      "conceptsAddressed" : [ "binary search tree insertion", "binary search tree search", "node deletion", "compilation error recovery", "exception handling" ],
+      "progressAssessment" : "productive"
     },
     "timeRange" : "5:18 PM – 11:39 PM",
     "edits" : 4,
@@ -193,10 +193,10 @@
     "label" : "Episode 11",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Extended verification session spanning ~3.5 hours. Student runs tests multiple times (runs 56-57) confirming that all 22 tests continue to pass consistently. No code changes made; this appears to be verification and confidence-building after completing the assignment.",
-      "dominantIntent" : "refactoring",
-      "conceptsAddressed" : [ "binary search tree operations" ],
-      "progressAssessment" : "productive"
+      "summary" : "Extensive debugging of remove method implementation (3+ hours). Student encountered multiple critical issues: incorrect return value logic, tree structure corruption, null pointer exceptions, and infinite recursion. Multiple regression cycles with recovery attempts. Rewrote remove algorithm several times with different approaches. By episode end, achieved breakthrough with all 22 tests passing after fixing the recursive base case and termination condition.",
+      "dominantIntent" : "debugging",
+      "conceptsAddressed" : [ "node deletion", "recursive algorithms", "tree structure integrity", "return value logic", "infinite recursion", "null pointer handling" ],
+      "progressAssessment" : "breakthrough"
     },
     "timeRange" : "12:00 AM – 3:44 AM",
     "edits" : 5,
@@ -211,9 +211,9 @@
     "label" : "Episode 12",
     "dominantCategory" : "BSTTesting",
     "semantics" : {
-      "summary" : "Final verification session (~11 minutes). Student confirms all 22 tests pass one final time, completing the assignment verification.",
+      "summary" : "Final verification and stability testing. Student confirmed that all 22 tests remain passing with no regressions. Completed the entire BST implementation with all functionality working correctly.",
       "dominantIntent" : "refactoring",
-      "conceptsAddressed" : [ "binary search tree operations" ],
+      "conceptsAddressed" : [ "binary search tree operations", "code stability" ],
       "progressAssessment" : "productive"
     },
     "timeRange" : "4:31 AM – 4:43 AM",
@@ -3847,10 +3847,10 @@
   } ],
   "feedback" : [ {
     "testId" : "BSTTesting#testRemoveReturnValue()",
-    "pattern" : "Regression in return value handling after refactoring",
+    "pattern" : "Return value logic error in remove method",
     "confidence" : "high",
-    "explanation" : "This test passed after the remove method implementation in run 45, but failed in run 54 when a refactoring removed 14 lines and added 3 lines. The test passed again after run 55's rewrite (19 lines removed, 19 added). The diff at run 54 shows a substantial reduction in code size relative to the lines added, which correlates with the test failure. The diff at run 55 shows a more balanced rewrite that restored the passing state. The pattern indicates that the changes at run 54 removed logic related to return value handling, and the changes at run 55 restored it.",
-    "nextSteps" : [ "Review the three cases of node removal (leaf, one child, two children) and ensure each case explicitly returns the correct node reference: for leaf nodes return null, for one-child nodes return the non-null child, and for two-child nodes return the node with the in-order successor value and recursively update the right subtree.", "Trace through a two-child removal scenario manually (e.g., removing a node with both left and right children) to verify that the return statement correctly propagates the restructured subtree back up the recursion chain.", "Add a simple test case in your own code that removes a node with two children and verifies the returned node is not null and has the correct value, to catch this regression early in future debugging." ],
+    "explanation" : "This test regressed immediately after the initial remove implementation at run 45, failing because the remove method was not returning the correct value (the removed node or its replacement). The error persisted through runs 45–50 despite multiple code adjustments. At run 51, a 5-line removal and 1-line addition to BinarySearchTree.java changed the return value logic. The test then passed consistently. The semantic context shows multiple remove-related tests were being debugged simultaneously. The fix at run 51 specifically modified how the method communicates the removed or promoted node back to the caller, which is essential for maintaining tree structure integrity when the caller needs to update parent pointers or verify the operation.",
+    "nextSteps" : [ "Review the contract of your remove method: it should return the node that replaces the removed node's position in the tree (either a child, a successor, or null). Ensure every code path—leaf removal, single-child removal, and two-child removal—returns the correct replacement node, not the removed node itself.", "Trace through a two-child removal scenario on paper: when removing a node with two children, you promote the in-order successor (or predecessor) to replace it. Verify that your return statement reflects the promoted node, not the original removed node, so the parent can correctly update its child pointer.", "Test your return logic by writing a small helper method that validates the tree structure after each remove operation—check that parent pointers are consistent and that the tree remains a valid BST. This will catch return value errors that cause structural corruption." ],
     "diffs" : [ {
       "label" : "Run 51 — BinarySearchTree.java",
       "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);" ],
@@ -3867,10 +3867,10 @@
     "relatedTestIds" : [ "BSTTesting#testRemove()" ]
   }, {
     "testId" : "BSTTesting#testRemove()",
-    "pattern" : "Regression in core removal logic after intermediate refactoring",
+    "pattern" : "Infinite recursion and tree structure corruption in remove method",
     "confidence" : "high",
-    "explanation" : "This test failed in run 45 with the initial remove implementation, then failed again in run 54 during a refactoring that removed 14 lines and added 3 lines. The test passed after run 55's comprehensive rewrite (19 lines removed, 19 added). The code diff at run 54 shows a substantial reduction in code relative to lines added, which correlates with the test failure. The diff at run 55 shows a more balanced set of changes that restored the passing state. The progression shows the remove implementation changed across these runs, with the run 54 changes correlating with test failure and the run 55 changes correlating with test recovery.",
-    "nextSteps" : [ "Verify that your remove method correctly identifies which case applies (leaf, one child, or two children) and handles each distinctly: use clear if-else branching rather than trying to unify the logic, as premature optimization often loses correctness.", "Test the removal of nodes with two children specifically by manually constructing a small tree, removing the root or an internal node with two children, and checking that the tree structure is preserved and all remaining nodes are still in BST order.", "Ensure the recursive calls to remove on the left and right subtrees are assigned back to this.left and this.right respectively, so that the tree structure is properly updated as the recursion unwinds." ],
+    "explanation" : "This test failed immediately at run 45 when remove was first implemented, then triggered compilation or execution errors at runs 47–48 (likely infinite recursion or null pointer dereference). The test remained failing through run 49. A 5-line removal and 1-line addition at run 50 resolved the issue. The semantic context indicates multiple remove-related tests were being debugged simultaneously. The fix at run 50 modified the recursive logic or base case handling. Subsequent code changes at runs 54–55 (14 lines removed, 3 added; then 19 lines removed and 19 added) further refined the implementation, but the fundamental fix came at run 50 when the infinite recursion or structural corruption was eliminated.",
+    "nextSteps" : [ "Examine your remove method's base cases and recursive calls carefully: ensure that each recursive call operates on a strictly smaller subtree (left or right child), and that you have a clear termination condition (e.g., when the node to remove is found or when you reach a null). Infinite recursion often occurs when the recursive call doesn't make progress toward the base case.", "For the two-child case, verify that after promoting the in-order successor (or predecessor), you recursively remove that successor from its original location in the right (or left) subtree. The recursive call must be on the correct child and must update the node's child pointer with the result of the recursive call.", "Add assertions or debug output to trace the recursion depth and node values during removal of a node with two children. This will help you spot if the recursion is revisiting the same node or failing to update parent pointers correctly." ],
     "diffs" : [ {
       "label" : "Run 50 — BinarySearchTree.java",
       "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);" ],
@@ -3887,10 +3887,10 @@
     "relatedTestIds" : [ "BSTTesting#testRemoveReturnValue()" ]
   }, {
     "testId" : "BSTManualTesting#testIterator()",
-    "pattern" : "Sustained assertion error in iterator traversal logic",
+    "pattern" : "Iterator initialization and traversal logic error",
     "confidence" : "high",
-    "explanation" : "This test has failed consistently across runs 26–40 with evolving error messages: a NullPointerException on the flags stack in run 26, an assertion error (expected 2, got 1) in run 27, and an assertion error (expected 2, got null) in run 29. A code change at run 40 (3 lines removed, 13 added) occurred after the test began failing but did not result in a passing test. The error messages shifted from null-pointer to assertion mismatches across the runs, indicating changes to the iterator implementation occurred between runs 26 and 40. The test has remained failing through run 40.",
-    "nextSteps" : [ "Examine the iterator's hasNext() and next() methods to ensure they correctly traverse the BST in in-order (left, root, right) sequence; a common mistake is forgetting to push the right subtree onto the stack after visiting a node, or visiting nodes in the wrong order.", "Manually trace through a small BST (e.g., 3 nodes: root with left and right children) using your iterator code step-by-step, writing down the stack state and the order of nodes returned by next(), to identify where the traversal deviates from the expected in-order sequence.", "Check that the iterator correctly handles the transition from processing the left subtree to the root to the right subtree; if using a stack-based approach, verify that you push the right child only after the root has been visited, not before." ],
+    "explanation" : "This test took 14 runs to resolve, spanning from run 26 to run 40. The error evolved from an initial NullPointerException in iterator initialization (run 26) to an assertion error expecting 2 but receiving 1 (run 27), then to a null return value (run 29). A regression occurred at run 28 affecting 10 tests, but the test recovered at run 29. The test remained failing through run 39 despite no visible code changes in the semantic context between runs 30 and 40. At run 40, a significant code change (3 lines removed, 13 lines added) resolved the issue. The 13-line addition at run 40 modified the traversal mechanism—either the initialization of the traversal stack or queue, or the logic for advancing to the next node.",
+    "nextSteps" : [ "Ensure your iterator correctly initializes its traversal state before the first call to next(). For an in-order traversal, this typically means pushing all left-child nodes onto a stack starting from the root. Verify that hasNext() correctly reflects whether there are unvisited nodes remaining, and that next() advances the iterator state before returning the current node's value.", "Implement a clear traversal algorithm on paper first: decide whether you're doing in-order, pre-order, or level-order traversal, and trace through a small tree (e.g., 3 nodes) to ensure your stack or queue operations are correct. Common mistakes include forgetting to push children after visiting a node, or returning the wrong node value.", "Test your iterator in isolation: create a simple tree, iterate through it, and verify the order of values matches your intended traversal. Use a separate method to print the tree in the same order and compare the outputs." ],
     "diffs" : [ {
       "label" : "Run 40 — BinarySearchTree.java",
       "before" : [ "\t\t\t \t\tflags.push(1);", "\t\t \t\treturn cur.data;", "\t\t \treturn null;" ],
@@ -3898,20 +3898,20 @@
     } ]
   }, {
     "testId" : "BSTManualTesting#testContainsNonBST()",
-    "pattern" : "Sustained logic error in non-BST search implementation",
+    "pattern" : "Logic error in non-BST search implementation",
     "confidence" : "high",
-    "explanation" : "This test has failed consistently since run 3 with the assertion error (expected true, got false). The containsNonBST method was implemented in run 9 (20 lines added). The test continued to fail through run 40 with no further changes to the method. The consistent failure across all runs indicates the method implementation has not been modified since run 9, and the test has remained in a failing state.",
-    "nextSteps" : [ "Rewrite containsNonBST to perform a full tree traversal (visiting every node) rather than using BST comparison logic; use a helper method that recursively checks the current node and then searches both left and right subtrees unconditionally, returning true if any node matches the target value.", "Test your implementation on a deliberately non-BST tree (e.g., a tree where the right child of the root is smaller than the root) to confirm it finds values that a BST search would miss due to incorrect pruning.", "Distinguish clearly between contains (which can assume BST ordering and prune branches) and containsNonBST (which must check all nodes); consider adding a comment in the code to remind yourself of this difference." ],
+    "explanation" : "This test failed for 8 runs starting from run 1 (initial implementation) through run 8, with the error consistently being an assertion failure (expected true, got false). The containsNonBST() method was implemented at run 3, which compiled but had incorrect logic. Runs 4–8 showed no code changes and no test result changes. At run 9, a 20-line addition to BinarySearchTree.java resolved the issue. The semantic context shows multiple methods were being implemented in early runs (isEmpty at run 2, containsNonBST at run 3). The containsNonBST method requires a search strategy that examines both left and right subtrees regardless of the comparison result, since the tree is not guaranteed to be a valid BST.",
+    "nextSteps" : [ "Understand the key difference between contains() and containsNonBST(): the former can eliminate half the tree based on BST ordering, but the latter must search both subtrees because the tree structure may not respect BST properties. Write containsNonBST() as a full tree search: check the current node, then recursively search both left and right children, returning true if the value is found in any subtree.", "Use a logical OR to combine results from both subtrees: return (current node matches) OR (found in left subtree) OR (found in right subtree). Ensure you don't short-circuit the search prematurely—both subtrees must be checked even if the current node matches.", "Test containsNonBST() on a deliberately unbalanced or invalid tree (e.g., a tree where the right child of a node is smaller than the node). Verify it finds values that a BST-based search would miss due to incorrect tree structure." ],
     "diffs" : [ {
       "label" : "Run 9 — BinarySearchTree.java",
       "after" : [ "import java.util.function.BooleanSupplier;", "", "\tpublic boolean isEmpty() {", "\t\t// TODO Auto-generated method stub", "\t\treturn this.size() == 0;", "\t}", "", "\tpublic boolean containsNonBST(T i) {", "\t\t// TODO Auto-generated method stub", "\t\treturn containsNonBSTHelper(i, root);", "\t}", "\tprivate boolean containsNonBSTHelper(T i, Node cur) {", "\t\tif (cur == NULL_NODE) {", "\t\t\treturn false;", "\t\t}", "\t\tif (cur.data.equals(i)) {", "\t\t\treturn true;", "\t\t}", "\t\treturn containsNonBSTHelper(i, cur.left) || containsNonBSTHelper(i, cur.right);", "\t}" ]
     } ]
   }, {
     "testId" : "BSTTesting#testRemoveAdvanced()",
-    "pattern" : "Sustained size assertion error in complex removal scenarios",
+    "pattern" : "Complex removal case handling (two-child nodes) with tree structure corruption",
     "confidence" : "high",
-    "explanation" : "This test has failed consistently since its introduction in run 45 with a size assertion error. The test remained failing through run 52. Between runs 51 and 52, no code changes were made to the remove method, yet the test was run again in run 52. The comprehensive rewrite in run 55 (19 lines removed, 19 added) resulted in the test passing. The diff at run 55 shows substantial changes to the remove method implementation, which correlates with the test transitioning from failing to passing.",
-    "nextSteps" : [ "Verify that your remove method decrements the size counter exactly once per successful removal, and only when a node is actually deleted (not when a recursive call returns null or when a node is restructured without being removed).", "Test your remove method with a sequence of removals on a larger tree (e.g., remove multiple nodes including some with two children) and print the size after each removal to confirm it decreases correctly; compare the final size with a manual count of remaining nodes.", "Check that when removing a node with two children, you correctly handle the in-order successor promotion: ensure the successor is removed from its original location (and size is decremented there) and not double-counted or left in the tree." ],
+    "explanation" : "This test took 10 attempts across 7 failed runs (runs 45–55) to resolve. It failed immediately at run 45 when remove was first implemented, then experienced a compilation or execution error at runs 47–48 and again at run 52. The semantic context shows that by run 51, simpler remove tests (testRemove and testRemoveReturnValue) had been fixed, but testRemoveAdvanced remained failing with an assertion error. At run 55, a substantial refactor (19 lines removed, 19 lines added) resolved the issue. The pattern indicates the code changes were focused on advanced removal scenarios—likely the two-child case where an in-order successor or predecessor must be promoted, including successor/predecessor selection, recursive removal of the successor, or tree restructuring after promotion.",
+    "nextSteps" : [ "Implement the two-child removal case step-by-step: (1) find the in-order successor (leftmost node in the right subtree) or predecessor (rightmost node in the left subtree), (2) copy its value to the node being removed, (3) recursively remove the successor/predecessor from its original location, and (4) update the node's right (or left) child pointer with the result of the recursive call. Verify each step independently.", "Trace through a concrete example on paper: remove a node with two children from a tree with at least 5 nodes. Draw the tree before and after, showing which node is promoted and how parent pointers are updated. Ensure the final tree is still a valid BST.", "Add a validation method that checks BST properties after each remove: for every node, all values in the left subtree are smaller and all values in the right subtree are larger. Run this after each test case to catch structural corruption early." ],
     "diffs" : [ {
       "label" : "Run 55 — BinarySearchTree.java",
       "before" : [ "\t\tif (this.root == NULL_NODE) {", "\t\t\troot = new Node(i);", "\t\t\treturn true;", "\t\t}", "\t\tremoveHelper(root, i, b);", "\t\t\t\t//      1", "\t\t\t\t//    2   5", "\t\t\t\t//  3  4    6", "\t\t\t\t// if you remove 1", "\t\t\t\t//     2", "\t\t\t\t//   3   4", "\t\t\t\t//         5", "\t\t\t\t//\t\t     6", "\t\t\t\twhile (bottom.right != NULL_NODE) {", "\t\t\t\tbottom.right = cur.right;", "\t\t\t\tNode toRet = cur.left;", "\t\t\t\tcur.left = NULL_NODE;", "\t\t\t\tcur.right = NULL_NODE;", "\t\t\t\treturn toRet;" ],
@@ -3975,6 +3975,7 @@
       "attemptsToFix" : 1,
       "distinctStrategies" : 0,
       "struggleScore" : 1.0,
+      "wasFixed" : true,
       "significantStruggle" : false
     }
   }, {
@@ -4033,6 +4034,7 @@
       "attemptsToFix" : 1,
       "distinctStrategies" : 0,
       "struggleScore" : 1.0,
+      "wasFixed" : true,
       "significantStruggle" : false
     }
   }, {
@@ -4094,6 +4096,7 @@
       "attemptsToFix" : 7,
       "distinctStrategies" : 0,
       "struggleScore" : 81.0,
+      "wasFixed" : true,
       "significantStruggle" : true
     }
   }, {
@@ -4137,6 +4140,7 @@
       "attemptsToFix" : 6,
       "distinctStrategies" : 0,
       "struggleScore" : 7.0,
+      "wasFixed" : true,
       "significantStruggle" : true
     }
   }, {
@@ -4249,6 +4253,7 @@
       "attemptsToFix" : 1,
       "distinctStrategies" : 0,
       "struggleScore" : 1.0,
+      "wasFixed" : true,
       "significantStruggle" : false
     }
   }, {
@@ -4299,6 +4304,7 @@
       "attemptsToFix" : 2,
       "distinctStrategies" : 0,
       "struggleScore" : 42.0,
+      "wasFixed" : true,
       "significantStruggle" : false
     }
   }, {
@@ -4365,6 +4371,7 @@
       "attemptsToFix" : 6,
       "distinctStrategies" : 0,
       "struggleScore" : 82.0,
+      "wasFixed" : true,
       "significantStruggle" : true
     }
   }, {
@@ -4401,6 +4408,7 @@
       "attemptsToFix" : 10,
       "distinctStrategies" : 0,
       "struggleScore" : 12.0,
+      "wasFixed" : true,
       "significantStruggle" : true
     }
   }, {
@@ -4436,6 +4444,7 @@
       "attemptsToFix" : 1,
       "distinctStrategies" : 0,
       "struggleScore" : 1.0,
+      "wasFixed" : true,
       "significantStruggle" : false
     }
   }, {
@@ -4545,6 +4554,7 @@
       "attemptsToFix" : 14,
       "distinctStrategies" : 0,
       "struggleScore" : 23.0,
+      "wasFixed" : true,
       "significantStruggle" : true
     }
   }, {
@@ -4748,6 +4758,7 @@
       "attemptsToFix" : 8,
       "distinctStrategies" : 0,
       "struggleScore" : 11.0,
+      "wasFixed" : true,
       "significantStruggle" : true
     }
   }, {
@@ -4964,6 +4975,7 @@
       "attemptsToFix" : 4,
       "distinctStrategies" : 0,
       "struggleScore" : 4.0,
+      "wasFixed" : true,
       "significantStruggle" : false
     }
   }, {
@@ -6129,323 +6141,323 @@
       "run" : 5,
       "diffCategories" : [ ],
       "semanticDescription" : "No change in test results. containsNonBST still failing.",
-      "narrativeContext" : "Multiple attempts at fixing containsNonBST without success. Student may be stuck on this logic.",
+      "narrativeContext" : "Continued debugging of containsNonBST without progress. Student may be exploring different approaches.",
       "intent" : "debugging"
     }, {
       "run" : 6,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change in test results. containsNonBST still failing.",
-      "narrativeContext" : "Continued unsuccessful attempts to fix containsNonBST. Long time gap (9 minutes) suggests student took a break.",
+      "semanticDescription" : "No change in test results. containsNonBST still failing with same error.",
+      "narrativeContext" : "Extended debugging period (9 minutes) with no test result changes. Student appears stuck on containsNonBST logic.",
       "intent" : "debugging"
     }, {
       "run" : 7,
       "diffCategories" : [ ],
       "semanticDescription" : "No change in test results. containsNonBST still failing.",
-      "narrativeContext" : "Still stuck on containsNonBST. Student continues iterating without progress.",
+      "narrativeContext" : "Continued unsuccessful debugging attempts. Student has been working on this single test for multiple runs.",
       "intent" : "debugging"
     }, {
       "run" : 8,
       "diffCategories" : [ ],
-      "semanticDescription" : "Regression: 3 previously passing tests now fail. Only testContainsNonBST shown in results.",
-      "narrativeContext" : "Major regression - student's changes broke previously working tests. This suggests an incorrect refactoring or major logic change.",
+      "semanticDescription" : "Regression: 3 previously passing tests now fail. Only containsNonBST test shown in output.",
+      "narrativeContext" : "Major regression - changes broke previously working tests. Student likely made a significant error in recent edits.",
       "intent" : "debugging"
     }, {
       "run" : 9,
       "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: 4 tests now pass including testContainsNonBST. All basic manual tests passing.",
-      "narrativeContext" : "Breakthrough moment: Student fixed containsNonBST and recovered the 3 broken tests. All basic functionality tests now pass.",
+      "semanticDescription" : "Breakthrough: 4 tests now pass including containsNonBST. Student recovered from regression and fixed the containsNonBST logic.",
+      "narrativeContext" : "Breakthrough moment: Student successfully debugged containsNonBST and recovered all previously passing tests. This represents a key moment of understanding the search algorithm.",
       "intent" : "debugging"
     }, {
       "run" : 10,
       "diffCategories" : [ ],
       "semanticDescription" : "testBasicToString() now passes. One additional test passing.",
-      "narrativeContext" : "Student implements toString() method. Basic string representation working.",
+      "narrativeContext" : "Student implements toString() method. Moving on to string representation functionality.",
       "intent" : "extending"
     }, {
       "run" : 11,
       "diffCategories" : [ ],
-      "semanticDescription" : "Regression: testBasicToString and testToString fail with StackOverflowError. toString() implementation has infinite recursion.",
-      "narrativeContext" : "toString() implementation has a critical bug causing stack overflow. Student needs to fix recursion logic.",
+      "semanticDescription" : "Regression: testBasicToString and testToString now fail with StackOverflowError. Infinite recursion in toString implementation.",
+      "narrativeContext" : "toString implementation has infinite recursion bug. Student needs to fix the recursive logic.",
       "intent" : "debugging"
     }, {
       "run" : 12,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. StackOverflowError persists in toString methods.",
-      "narrativeContext" : "Attempted fix did not resolve the stack overflow issue.",
+      "semanticDescription" : "No change. StackOverflowError persists in both toString tests.",
+      "narrativeContext" : "Attempted fix did not resolve the recursion issue.",
       "intent" : "debugging"
     }, {
       "run" : 13,
       "diffCategories" : [ ],
-      "semanticDescription" : "testBasicToString passes again (StackOverflowError fixed). testToString still fails with formatting issue.",
-      "narrativeContext" : "Fixed the infinite recursion in toString(). Now debugging output format - missing spaces in comma-separated list.",
+      "semanticDescription" : "testBasicToString passes again. StackOverflowError fixed. testToString now shows formatting error (missing spaces in output).",
+      "narrativeContext" : "Student fixed the infinite recursion but toString formatting is incorrect. Output is '[,564123]' instead of '[5, 6, 4, 1, 2, 3]'.",
       "intent" : "debugging"
     }, {
       "run" : 14,
       "diffCategories" : [ ],
-      "semanticDescription" : "testBasicToString still passes. testToString fails with formatting: expected spaces after commas.",
-      "narrativeContext" : "Formatting issue identified: output is '[5,6,4,1,2,3]' but should be '[5, 6, 4, 1, 2, 3]'. Simple fix needed.",
+      "semanticDescription" : "testBasicToString still passes. testToString formatting improved but still incorrect - missing spaces between elements.",
+      "narrativeContext" : "Student is refining the toString formatting. Output now '[5,6,4,1,2,3]' but needs spaces after commas.",
       "intent" : "debugging"
     }, {
       "run" : 15,
       "diffCategories" : [ ],
-      "semanticDescription" : "testToString now passes. Formatting issue fixed by adding spaces after commas.",
-      "narrativeContext" : "Fixed toString formatting. Both string representation tests now passing.",
+      "semanticDescription" : "testToString now passes. Formatting issue resolved with proper spacing.",
+      "narrativeContext" : "Student successfully fixed toString formatting. Both string representation tests now pass.",
       "intent" : "debugging"
     }, {
       "run" : 16,
       "diffCategories" : [ ],
       "semanticDescription" : "testToArrayList() now passes. One additional test passing.",
-      "narrativeContext" : "Student implements toArrayList() method. Collection conversion working.",
+      "narrativeContext" : "Student implements toArrayList() method. Expanding collection conversion functionality.",
       "intent" : "extending"
     }, {
       "run" : 17,
       "diffCategories" : [ ],
       "semanticDescription" : "testToArray() now passes. One additional test passing.",
-      "narrativeContext" : "Student implements toArray() method. Array conversion working.",
+      "narrativeContext" : "Student implements toArray() method. Both array and ArrayList conversion methods now working.",
       "intent" : "extending"
     }, {
       "run" : 18,
       "diffCategories" : [ ],
       "semanticDescription" : "testInefficientIterator() now passes. One additional test passing.",
-      "narrativeContext" : "Student implements an inefficient iterator. Basic iteration functionality working.",
+      "narrativeContext" : "Student implements an inefficient iterator. Moving into tree traversal functionality.",
       "intent" : "extending"
     }, {
       "run" : 19,
       "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator() fails with assertion error (expected false, got true). Iterator logic issue.",
-      "narrativeContext" : "Student attempts to implement pre-order iterator but hasNext() logic is incorrect.",
-      "intent" : "debugging"
+      "semanticDescription" : "testPreOrderIterator() introduced and fails. Expected false but got true.",
+      "narrativeContext" : "New test category: tree traversal iterators. PreOrder iterator has logic error.",
+      "intent" : "extending"
     }, {
       "run" : 20,
       "diffCategories" : [ ],
       "semanticDescription" : "No change. testPreOrderIterator still failing with same error.",
-      "narrativeContext" : "Attempted fix did not resolve the hasNext() logic issue.",
+      "narrativeContext" : "Debugging preorder iterator logic.",
       "intent" : "debugging"
     }, {
       "run" : 21,
       "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator fails with different error (expected true, got false). Logic inverted or changed.",
-      "narrativeContext" : "Student changed the logic but now it's inverted. hasNext() returning opposite of expected.",
+      "semanticDescription" : "testPreOrderIterator error changed from 'expected false but was true' to 'expected true but was false'. Logic inverted.",
+      "narrativeContext" : "Student attempted fix but inverted the logic. Different error suggests iterative debugging approach.",
       "intent" : "debugging"
     }, {
       "run" : 22,
       "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator fails with different error (expected 4, got null). next() returning null instead of value.",
-      "narrativeContext" : "Different error now - next() method returning null. Student may have changed implementation approach.",
+      "semanticDescription" : "testPreOrderIterator error changed to 'expected 4 but was null'. Now returning null instead of correct value.",
+      "narrativeContext" : "Student's fix changed the error type. Now dealing with null return value instead of boolean logic.",
       "intent" : "debugging"
     }, {
       "run" : 23,
       "diffCategories" : [ ],
-      "semanticDescription" : "Regression: 9 tests fail. Only testPreOrderIterator shown with different error (expected 5, got 7).",
-      "narrativeContext" : "Major regression - student's changes broke 9 previously passing tests. Significant logic error introduced.",
+      "semanticDescription" : "Regression: 9 tests fail. Only testPreOrderIterator shown with different error (expected 5 but was 7).",
+      "narrativeContext" : "Major regression - changes broke many tests. Student made a significant error affecting multiple test categories.",
       "intent" : "debugging"
     }, {
       "run" : 24,
       "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: 9 tests recovered. testPreOrderIterator still fails but with different error (Did not throw NoSuchElementException).",
-      "narrativeContext" : "Recovered from regression. Now debugging exception handling in iterator - missing NoSuchElementException when calling next() on exhausted iterator.",
+      "semanticDescription" : "Breakthrough: 9 tests recovered. testPreOrderIterator now fails with 'Did not throw NoSuchElementException' - different error type.",
+      "narrativeContext" : "Student recovered from regression. PreOrder iterator now has different issue - missing exception handling for exhausted iterator.",
       "intent" : "debugging"
     }, {
       "run" : 25,
       "diffCategories" : [ ],
-      "semanticDescription" : "testPreOrderIterator now passes. Exception handling fixed.",
-      "narrativeContext" : "Fixed NoSuchElementException handling in pre-order iterator. All manual tests now passing.",
+      "semanticDescription" : "testPreOrderIterator now passes. One additional test passing.",
+      "narrativeContext" : "Breakthrough: Student fixed the preorder iterator exception handling. All BSTManualTesting tests now pass.",
       "intent" : "debugging"
     }, {
       "run" : 26,
       "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() fails with NullPointerException (flags stack is null). New iterator test introduced.",
-      "narrativeContext" : "New test category: standard iterator (in-order). Student's iterator implementation has null initialization issue.",
+      "semanticDescription" : "testIterator() introduced and fails with NullPointerException in iterator initialization.",
+      "narrativeContext" : "New iterator test introduced. In-order iterator has null initialization issue.",
       "intent" : "extending"
     }, {
       "run" : 27,
       "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() fails with assertion error (expected 2, got 1). NullPointerException fixed but logic error remains.",
-      "narrativeContext" : "Fixed null initialization. Now debugging in-order iterator traversal logic.",
+      "semanticDescription" : "testIterator error changed from NullPointerException to assertion error (expected 2 but was 1).",
+      "narrativeContext" : "Student fixed null initialization but iterator logic is incorrect - returning wrong values.",
       "intent" : "debugging"
     }, {
       "run" : 28,
       "diffCategories" : [ ],
       "semanticDescription" : "Regression: 10 tests fail. Only testIterator shown with same assertion error.",
-      "narrativeContext" : "Major regression - student's changes broke 10 tests. Likely broke core functionality while fixing iterator.",
+      "narrativeContext" : "Changes to iterator broke other tests. Student made a breaking change.",
       "intent" : "debugging"
     }, {
       "run" : 29,
       "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator still fails (expected 2, got null).",
-      "narrativeContext" : "Recovered from regression. Iterator returning null instead of correct value.",
+      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator now fails with 'expected 2 but was null'.",
+      "narrativeContext" : "Student recovered from regression. Iterator now has null return issue instead of wrong value.",
       "intent" : "debugging"
     }, {
       "run" : 30,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator still failing with same error.",
-      "narrativeContext" : "Attempted fix did not resolve the null return issue.",
+      "semanticDescription" : "No change. testIterator still failing with null return.",
+      "narrativeContext" : "Debugging iterator null return issue.",
       "intent" : "debugging"
     }, {
       "run" : 31,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator still failing but with different expected value (expected 1, got null).",
-      "narrativeContext" : "Different test case now, but same null return issue persists.",
+      "semanticDescription" : "No change. testIterator error changed slightly (expected 1 but was null).",
+      "narrativeContext" : "Different test case within testIterator, still returning null.",
       "intent" : "debugging"
     }, {
       "run" : 32,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator still failing (expected 2, got null).",
-      "narrativeContext" : "Back to previous test case. Student cycling through different approaches without success.",
+      "semanticDescription" : "No change. testIterator still failing with null return (expected 2 but was null).",
+      "narrativeContext" : "Continued debugging of iterator null issue.",
       "intent" : "debugging"
     }, {
       "run" : 33,
       "diffCategories" : [ ],
       "semanticDescription" : "Regression: 10 tests fail. Only testIterator shown.",
-      "narrativeContext" : "Another regression - student's changes broke 10 tests again.",
+      "narrativeContext" : "Another breaking change affecting multiple tests.",
       "intent" : "debugging"
     }, {
       "run" : 34,
       "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator still fails (expected 1, got null).",
-      "narrativeContext" : "Recovered from regression again. Persistent issue with iterator returning null.",
+      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator fails with 'expected 1 but was null'.",
+      "narrativeContext" : "Student recovered from regression again. Still dealing with null return in iterator.",
       "intent" : "debugging"
     }, {
       "run" : 35,
       "diffCategories" : [ ],
-      "semanticDescription" : "Regression: 10 tests fail. testIterator shows different expected value (expected 4, got null).",
+      "semanticDescription" : "Regression: 10 tests fail. testIterator error changed to 'expected 4 but was null'.",
       "narrativeContext" : "Another regression cycle. Student's changes continue to break other tests.",
       "intent" : "debugging"
     }, {
       "run" : 36,
       "diffCategories" : [ ],
-      "semanticDescription" : "No change. testIterator still failing with same error.",
-      "narrativeContext" : "Long time gap (27 minutes). Student likely took a break to reconsider approach.",
+      "semanticDescription" : "No change. testIterator still failing with null return.",
+      "narrativeContext" : "Extended debugging period (27 minutes) with no progress.",
       "intent" : "debugging"
     }, {
       "run" : 37,
       "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator still fails but with different error (expected 8, got 7).",
-      "narrativeContext" : "Recovered from regression. Iterator now returning values but off-by-one error in traversal.",
+      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator now fails with 'expected 8 but was 7' - different error type.",
+      "narrativeContext" : "Student recovered from regression. Iterator now returning values but off by one.",
       "intent" : "debugging"
     }, {
       "run" : 38,
       "diffCategories" : [ ],
       "semanticDescription" : "Regression: 10 tests fail. testIterator shows same off-by-one error.",
-      "narrativeContext" : "Another regression cycle. Student's attempt to fix off-by-one broke other tests.",
+      "narrativeContext" : "Another regression cycle.",
       "intent" : "debugging"
     }, {
       "run" : 39,
       "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator fails with different error (expected true, got false).",
-      "narrativeContext" : "Recovered from regression. Different assertion now - boolean comparison issue in iterator.",
+      "semanticDescription" : "Breakthrough: 10 tests recovered. testIterator now fails with 'expected true but was false' - boolean logic error.",
+      "narrativeContext" : "Student recovered from regression. Iterator now has different type of error - boolean assertion.",
       "intent" : "debugging"
     }, {
       "run" : 40,
       "diffCategories" : [ ],
-      "semanticDescription" : "testIterator() now passes. All manual tests passing.",
-      "narrativeContext" : "Fixed the iterator boolean logic. All BSTManualTesting tests now passing. Major milestone achieved.",
+      "semanticDescription" : "testIterator now passes. One additional test passing. All BSTManualTesting tests now pass.",
+      "narrativeContext" : "Breakthrough: Student fixed the in-order iterator. All manual testing tests now passing.",
       "intent" : "debugging"
     }, {
       "run" : 41,
       "diffCategories" : [ ],
-      "semanticDescription" : "Breakthrough: 7 new tests pass from BSTTesting category. testInsertExceptions fails (Did not throw IllegalArgumentException).",
-      "narrativeContext" : "New test suite introduced: BSTTesting. Student's insert method not validating input properly. 11 tests fail (likely from test suite expansion).",
+      "semanticDescription" : "New test suite BSTTesting introduced. 7 new tests pass, 1 fails (testInsertExceptions). Tests for insert validation and return values.",
+      "narrativeContext" : "Breakthrough: Student moves to automated test suite. Most insert functionality working but exception handling for null/duplicate values needs work.",
       "intent" : "extending"
     }, {
       "run" : 42,
       "diffCategories" : [ ],
-      "semanticDescription" : "testInsertExceptions now passes. Exception validation implemented.",
-      "narrativeContext" : "Fixed insert validation to throw IllegalArgumentException for invalid input. All tests now passing.",
+      "semanticDescription" : "testInsertExceptions now passes. All BSTTesting tests now pass.",
+      "narrativeContext" : "Final breakthrough: Student fixed exception handling for insert method. All tests in batch 1 now passing.",
       "intent" : "debugging"
     }, {
       "run" : 43,
       "diffCategories" : [ "compilation_error_fix" ],
-      "semanticDescription" : "Fixed compilation error (unreachable code) in contains method, allowing 7 previously passing tests to run successfully again",
-      "narrativeContext" : "Student recovered from a compilation issue that was blocking test execution. The 'unreachable code' error suggests a control flow problem (likely an early return or exception that made subsequent code unreachable). This is a recovery from a regression introduced in the previous batch.",
+      "semanticDescription" : "Fixed compilation error (unreachable code) that was blocking testContainsInts and testContainsStrings. Breakthrough: 7 tests newly passing.",
+      "narrativeContext" : "Breakthrough moment: Student resolved a compilation blocker affecting binary search tree contains functionality. The unreachable code error suggests a control flow issue (likely an early return or exception) that was preventing proper method execution. Fixing this unblocked 7 previously failing tests.",
       "intent" : "debugging"
     }, {
       "run" : 44,
-      "diffCategories" : [ "compilation_error_fix" ],
-      "semanticDescription" : "Completed fix for contains method, resolving the unreachable code compilation error entirely",
-      "narrativeContext" : "Final cleanup of the compilation issue. The testContainsInts and testContainsStrings tests now pass, indicating the contains method is working correctly. This completes the recovery cycle.",
+      "diffCategories" : [ "contains_method_refinement" ],
+      "semanticDescription" : "Completed fix for contains functionality. testContainsInts and testContainsStrings now passing. 2 additional tests passing.",
+      "narrativeContext" : "Incremental progress on binary search tree contains method. The compilation error from run 43 is fully resolved, and the method now correctly implements contains logic for both integer and string comparisons.",
       "intent" : "debugging"
     }, {
       "run" : 45,
-      "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Implemented remove method for binary search tree, introducing new test category (testEfficiency, testRemove, testRemoveAdvanced, testRemoveReturnValue, testRemoveIllegalArgumentException)",
-      "narrativeContext" : "Breakthrough: Student began implementing the remove method, a complex operation in BSTs. Two new tests pass (testEfficiency and testRemoveIllegalArgumentException), but three remove-related tests fail with assertion errors indicating the remove logic is incomplete or incorrect. The failures show the method is partially working but not handling all cases correctly.",
+      "diffCategories" : [ "remove_method_implementation" ],
+      "semanticDescription" : "Implemented binary search tree remove functionality. testEfficiency newly passing. However, 3 remove-related tests now failing: testRemove, testRemoveAdvanced, testRemoveReturnValue with assertion errors indicating incorrect removal behavior.",
+      "narrativeContext" : "Student extended functionality by implementing the remove method, but the implementation has logic errors. Test failures show: (1) testRemove expects empty tree but gets [4], (2) testRemoveAdvanced expects [1,2,3,15] but gets [10], (3) testRemoveReturnValue expects false but gets true. These suggest the remove method is not properly deleting nodes or is deleting wrong nodes.",
       "intent" : "extending"
     }, {
       "run" : 46,
       "diffCategories" : [ ],
-      "semanticDescription" : "No code changes; test results remain identical to run 45",
-      "narrativeContext" : "Student appears to have paused or reviewed the code without making changes. The same three remove tests continue to fail with identical error messages.",
+      "semanticDescription" : "No code changes. Test results unchanged from run 45. Same 3 remove tests failing with identical errors.",
+      "narrativeContext" : "Stalled state - student may be analyzing the remove failures or preparing next attempt. No progress or regression.",
       "intent" : "experimenting"
     }, {
       "run" : 47,
       "diffCategories" : [ ],
-      "semanticDescription" : "Compilation or execution error caused 19 tests to fail; only testRemove visible in output",
-      "narrativeContext" : "Severe regression: 19 tests that were passing now fail. This suggests a critical code change that broke the entire test suite. The output only shows testRemove, indicating possible compilation failure or test harness issue.",
+      "semanticDescription" : "Compilation or test execution issue. Only testRemove shown in results with 19 tests now failing (likely compilation error preventing full test suite execution).",
+      "narrativeContext" : "Regression: Student likely introduced a syntax or logic error while attempting to fix remove functionality. The test suite is now partially broken, showing only 1 test result instead of the full suite.",
       "intent" : "debugging"
     }, {
       "run" : 48,
       "diffCategories" : [ ],
-      "semanticDescription" : "Continued investigation of remove method with no test result changes",
-      "narrativeContext" : "Student is still working on the remove method. The test output is minimal, suggesting the code may still have compilation issues or the test harness is still recovering.",
+      "semanticDescription" : "Persistent compilation/execution issue. Only testRemove visible, still failing with same error.",
+      "narrativeContext" : "Student is stuck with a broken state. The code likely has a compilation error or critical runtime issue preventing most tests from executing.",
       "intent" : "debugging"
     }, {
       "run" : 49,
-      "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Recovered from compilation error; all 19 previously failing tests now execute, but remove implementation has new issues (NullPointerException, incorrect return values)",
-      "narrativeContext" : "Recovery from the critical regression. The test suite is now executing again, but the remove method implementation has fundamental issues: it's returning wrong values, causing NullPointerExceptions, and not properly removing nodes. The error messages changed from assertion failures to runtime exceptions, indicating the logic flow is broken.",
+      "diffCategories" : [ "remove_method_rewrite" ],
+      "semanticDescription" : "Recovered from broken state. Full test suite now executing again (19 tests passing). However, remove implementation changed and now has different failures: testRemove expects true but gets false, testRemoveAdvanced expects [1,2,3,15] but gets [], testRemoveReturnValue has NullPointerException on root.data.",
+      "narrativeContext" : "Student rewrote the remove method to fix the compilation issue. The new implementation compiles but has different logic errors: (1) return value logic is inverted, (2) tree structure is being corrupted (all nodes deleted), (3) null pointer on root suggests improper handling of empty tree after removal. The NullPointerException indicates the method is setting root.data to null instead of properly removing nodes.",
       "intent" : "debugging"
     }, {
       "run" : 50,
-      "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Fixed testRemove test case; however, 19 other tests now fail (likely compilation or execution error)",
-      "narrativeContext" : "Partial success: testRemove now passes, but this change broke 19 other tests. This is a classic regression cycle where fixing one issue breaks others. The student likely made a change that fixed the remove logic but introduced a compilation error or broke other functionality.",
+      "diffCategories" : [ "remove_return_value_fix" ],
+      "semanticDescription" : "Fixed testRemove (now passing). However, 19 other tests now failing - likely a new compilation error or critical regression.",
+      "narrativeContext" : "Student fixed the return value logic for testRemove but introduced a critical regression affecting the entire test suite. This suggests the fix broke something fundamental in the BST structure or caused a compilation error.",
       "intent" : "debugging"
     }, {
       "run" : 51,
-      "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Recovered all 20 previously failing tests; remove method now mostly working but testRemoveAdvanced fails with size assertion error",
-      "narrativeContext" : "Breakthrough: 20 tests now pass (recovery from run 50's regression). The remove method is largely functional, but testRemoveAdvanced reveals an edge case: after removing nodes, the tree size is 2 instead of expected 3, suggesting the remove logic doesn't handle all node removal scenarios correctly (likely issues with removing nodes with two children or handling tree restructuring).",
+      "diffCategories" : [ "remove_logic_refinement" ],
+      "semanticDescription" : "Recovered from regression. 20 tests now passing including testRemove and testRemoveReturnValue. Only testRemoveAdvanced failing with assertion error: expected 3 but was 2 (size mismatch after removal).",
+      "narrativeContext" : "Breakthrough: Student fixed the critical regression and now has 20 tests passing. The remove method is mostly working but has a subtle bug in the advanced removal case. The size discrepancy (expected 3, got 2) suggests one node is being incorrectly removed or the tree structure is wrong after a complex removal sequence.",
       "intent" : "debugging"
     }, {
       "run" : 52,
       "diffCategories" : [ ],
-      "semanticDescription" : "No test result changes; testRemoveAdvanced still fails with same size assertion error",
-      "narrativeContext" : "Student paused or made changes that didn't affect test results. The testRemoveAdvanced failure persists, indicating the edge case in remove logic remains unresolved.",
-      "intent" : "experimenting"
+      "semanticDescription" : "No visible test results (only testRemoveAdvanced shown). 21 tests now failing - likely another compilation error or test execution issue.",
+      "narrativeContext" : "Regression: Student attempted to fix testRemoveAdvanced but introduced a critical error. The test suite is again partially broken.",
+      "intent" : "debugging"
     }, {
       "run" : 53,
-      "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Modified remove method logic; testRemoveAdvanced error changed from size mismatch (expected 3, got 2) to value mismatch (expected 3, got 15)",
-      "narrativeContext" : "Student made a targeted fix to the remove method, but it changed the nature of the failure. Instead of removing too many nodes, it's now returning the wrong node value. This suggests the student modified the node selection logic (likely which node replaces a removed node in the tree), but the selection is incorrect.",
+      "diffCategories" : [ "remove_advanced_debugging" ],
+      "semanticDescription" : "testRemoveAdvanced still failing but with different error: expected 3 but was 15 (different wrong value than run 52's expected 3 but was 2). Indicates student is trying different approaches to fix the advanced removal case.",
+      "narrativeContext" : "Student is iterating on the remove logic for complex cases. The changing error values (2 → 15) suggest trial-and-error debugging of the node removal algorithm, possibly related to handling nodes with two children or maintaining BST properties.",
       "intent" : "debugging"
     }, {
       "run" : 54,
-      "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Major regression in remove method: 19 tests pass but 3 remove tests fail with wrong return values and StackOverflowError",
-      "narrativeContext" : "Significant regression: The student's fix introduced a StackOverflowError in testRemoveAdvanced, indicating infinite recursion in the remove method. The return value errors suggest the method is returning incorrect nodes. This is a critical failure requiring fundamental rethinking of the remove algorithm.",
+      "diffCategories" : [ "remove_algorithm_rewrite" ],
+      "semanticDescription" : "Recovered from broken state. 19 tests passing but 3 remove tests now failing with different errors: testRemove expects 14 but was 4, testRemoveAdvanced has StackOverflowError, testRemoveReturnValue expects 14 but was 4. The StackOverflowError indicates infinite recursion in remove logic.",
+      "narrativeContext" : "Student rewrote the remove algorithm but introduced infinite recursion. The StackOverflowError in testRemoveAdvanced suggests the recursive remove method is not properly terminating, likely due to incorrect base case or recursive call logic. The value mismatches (14 vs 4) suggest the wrong node is being removed.",
       "intent" : "debugging"
     }, {
       "run" : 55,
-      "diffCategories" : [ "method_implementation" ],
-      "semanticDescription" : "Breakthrough: Fixed remove method implementation; all 22 tests now pass including testRemove, testRemoveAdvanced, and testRemoveReturnValue",
-      "narrativeContext" : "Breakthrough: 3 tests newly pass (testRemove, testRemoveAdvanced, testRemoveReturnValue), completing the remove method implementation. The student resolved the StackOverflowError and incorrect return values by fixing the recursive logic and node replacement strategy. This is a major milestone—the entire BST assignment is now complete with all core functionality working.",
+      "diffCategories" : [ "remove_recursion_fix" ],
+      "semanticDescription" : "Breakthrough: Fixed the infinite recursion issue. All 22 tests now passing, including testRemove, testRemoveAdvanced, and testRemoveReturnValue. Complete implementation of binary search tree remove functionality.",
+      "narrativeContext" : "Breakthrough moment: Student fixed the recursive base case or termination condition in the remove method. All remove-related tests now pass, indicating proper handling of: (1) simple node removal, (2) complex removal with two children, (3) correct return values, and (4) exception handling. This completes the BST implementation.",
       "intent" : "debugging"
     }, {
       "run" : 56,
       "diffCategories" : [ ],
-      "semanticDescription" : "No code changes; all 22 tests continue to pass",
-      "narrativeContext" : "Verification run: Student confirmed that all tests pass consistently. No changes were made, indicating confidence in the solution.",
+      "semanticDescription" : "No code changes. All 22 tests still passing. Verification run confirming stability.",
+      "narrativeContext" : "Stable state - student verified that the remove implementation is working correctly across all test cases. No regressions.",
       "intent" : "refactoring"
     }, {
       "run" : 57,
       "diffCategories" : [ ],
-      "semanticDescription" : "Final verification; all 22 tests pass",
-      "narrativeContext" : "Final confirmation that the Binary Search Tree assignment is complete and all functionality is working correctly. The student has successfully implemented all required methods including the complex remove operation.",
+      "semanticDescription" : "No code changes. All 22 tests still passing. Final verification run.",
+      "narrativeContext" : "Final stable state - all BST functionality fully implemented and tested. Student has successfully completed the assignment with all tests passing.",
       "intent" : "refactoring"
     } ],
-    "currentNarrative" : "Student completed the Binary Search Tree assignment through intensive debugging of the remove method. Batch 2 focused entirely on implementing and fixing the remove operation, which proved to be the most challenging component. The journey included: (1) Initial compilation error recovery (runs 43-44), (2) First remove implementation attempt with partial success (run 45), (3) Critical regression and recovery cycle (runs 47-49), (4) Multiple debugging iterations targeting edge cases in node removal logic (runs 50-54), and (5) Final breakthrough where all tests passed (run 55). Key patterns: The remove method required understanding of BST node replacement strategies (handling nodes with 0, 1, or 2 children), proper recursion termination to avoid StackOverflowError, and correct return value handling. The student demonstrated persistence through 12 runs of remove-specific debugging, with multiple regression cycles (runs 47-50, 54) before achieving the final solution. The assignment is now complete with all 22 tests passing.",
-    "detectedPatterns" : [ "incremental development", "regression cycles", "trial-and-error debugging", "breakthrough moments", "systematic debugging with persistence", "test-driven progression", "regression cycles with recovery", "incremental debugging of complex algorithm", "trial-and-error approach to edge case handling", "breakthrough moment at run 55 after extended struggle", "verification runs after achieving success", "long debugging sessions with breaks (timestamps show 6+ hour gaps)", "systematic testing of specific failing test cases", "compilation error recovery and management" ]
+    "currentNarrative" : "Student completed batch 2 with all 22 tests passing (100% success rate). Journey shows: (1) Fixed compilation error in contains method (run 43-44); (2) Implemented remove functionality with extensive debugging (runs 45-55); (3) Encountered multiple regression cycles during remove implementation (runs 47-48, 50, 52) but recovered each time; (4) Key breakthrough at run 55 when infinite recursion was fixed, unlocking all remove-related tests; (5) Verified stability in final runs (56-57). The remove method implementation required the most iteration, with student debugging: return value logic, tree structure corruption, null pointer exceptions, and infinite recursion. Final implementation correctly handles simple removal, complex removal with two children, proper return values, and exception handling. Assignment now complete with all 22 tests passing.",
+    "detectedPatterns" : [ "trial-and-error debugging", "regression cycles", "breakthrough moments", "incremental development", "systematic recovery from errors", "persistence through multiple failed attempts", "test-driven progression", "regression cycles with recovery", "breakthrough moment at run 55", "systematic debugging of remove algorithm", "compilation error recovery", "recursive algorithm debugging" ]
   },
   "timeline" : [ {
     "time" : "11:40 PM",

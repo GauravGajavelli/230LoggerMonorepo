@@ -62,8 +62,8 @@ export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
               </span>
             )}
             {ep.hasFeedback && (ep.feedbackOpened
-              ? <span className="feedback-seen" title="Feedback reviewed">✓</span>
-              : <span className="feedback-unseen-chip" title="Has feedback" />
+              ? <span className="feedback-seen" style={{ marginLeft: 4 }} title="Feedback reviewed">✓</span>
+              : <span className="feedback-unseen-chip" style={{ marginLeft: 4 }} title="Has feedback" />
             )}
           </button>
         );

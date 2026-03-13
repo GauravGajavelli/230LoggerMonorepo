@@ -169,11 +169,12 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
         name: h.testName,
         status,
         changedAt,
-        explanation: fb?.explanation || '',
-        pattern:     fb?.pattern     || '',
-        nextSteps:   fb?.nextSteps   || [],
-        suggestion:  fb?.suggestion  || '',
-        diffs:       fb?.diffs       || [],
+        explanation:  fb?.explanation  || '',
+        pattern:      fb?.pattern      || '',
+        nextSteps:    fb?.nextSteps    || [],
+        suggestion:   fb?.suggestion   || '',
+        diffs:        fb?.diffs        || [],
+        statusByRun:  h.statusByRun    || {},
       };
     });
 

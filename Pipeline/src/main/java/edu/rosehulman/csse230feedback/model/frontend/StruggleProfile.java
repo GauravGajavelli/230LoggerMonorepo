@@ -12,10 +12,11 @@ public record StruggleProfile(
     int attemptsToFix,                         // Total runs spent trying to fix
     int distinctStrategies,                    // Number of different approaches tried (from diff categories)
     List<DiffCategoryCount> strategiesTried,   // What code change patterns were attempted
-    DiffCategoryCount winningFix,              // What finally worked (null if still failing)
+    DiffCategoryCount winningFix,              // What finally worked (null if still failing OR no diff-category data)
     List<TestCorrelation> relatedTests,        // Tests that fail together
     double struggleScore,                      // Enhanced score combining all signals
-    ErrorEvolution errorEvolution              // How errors evolved during struggle
+    ErrorEvolution errorEvolution,             // How errors evolved during struggle
+    boolean wasFixed                           // True if test eventually passed (independent of diff-category availability)
 ) {
     /**
      * Count of how many times a diff category was used while fixing this test.
@@ -39,12 +40,5 @@ public record StruggleProfile(
      */
     public boolean isSignificantStruggle() {
         return attemptsToFix >= 5 || distinctStrategies >= 3 || struggleScore >= 50;
-    }
-
-    /**
-     * Returns true if the student eventually fixed the test.
-     */
-    public boolean wasFixed() {
-        return winningFix != null;
     }
 }

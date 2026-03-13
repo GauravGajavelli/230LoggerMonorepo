@@ -324,8 +324,8 @@ public class FeedbackGenerationService {
             testNode.put("testId", testId);
             testNode.put("testName", th.testName());
             testNode.put("highlightCategory", th.highlightCategory() != null ? th.highlightCategory() : "unknown");
+            testNode.put("isLingeringFailure", th.isLingeringFailure());
             testNode.put("totalFailedRuns", th.totalFailedRuns());
-            testNode.put("meaningfulnessScore", th.meaningfulnessScore());
 
             // Categories
             if (th.categories() != null && !th.categories().isEmpty()) {
@@ -362,7 +362,6 @@ public class FeedbackGenerationService {
                 ObjectNode struggleNode = testNode.putObject("struggleProfile");
                 struggleNode.put("attemptsToFix", th.struggleProfile().attemptsToFix());
                 struggleNode.put("distinctStrategies", th.struggleProfile().distinctStrategies());
-                struggleNode.put("struggleScore", th.struggleProfile().struggleScore());
                 struggleNode.put("wasFixed", th.struggleProfile().wasFixed());
             }
 
@@ -405,6 +404,38 @@ public class FeedbackGenerationService {
                     diffNode.put("removedLines", beforeCount);
                     diffNode.put("addedLines", afterCount);
                     diffsNode.add(diffNode);
+                }
+            }
+
+            // Pre-LLM consistency check: if the pipeline's own fields contradict each other,
+            // that indicates a pipeline bug (wrong data fed to the LLM), not an LLM issue.
+            // Log clearly so it's distinguishable from a post-generation fact-check violation.
+            if (th.struggleProfile() != null) {
+                boolean profileSaysFixed = th.struggleProfile().wasFixed();
+                boolean historySaysFixed = !th.isLingeringFailure();
+                if (profileSaysFixed != historySaysFixed) {
+                    System.err.println("PIPELINE DATA INCONSISTENCY [" + testId + "]: "
+                        + "struggleProfile.wasFixed=" + profileSaysFixed
+                        + " contradicts isLingeringFailure=" + th.isLingeringFailure()
+                        + " — groundTruth block will override");
+                }
+            }
+
+            // Ground-truth facts block — explicitly computed from structured data.
+            // The LLM must not contradict these; they override any inference from
+            // other fields (e.g., highlightCategory, totalFailedRuns).
+            ObjectNode gt = testNode.putObject("groundTruth");
+            gt.put("currentlyPassing", !th.isLingeringFailure());
+            if (th.statusByRun() != null && !th.statusByRun().isEmpty()) {
+                List<Integer> sortedRuns = new ArrayList<>(th.statusByRun().keySet());
+                Collections.sort(sortedRuns);
+                gt.put("lastRunWithResult", sortedRuns.get(sortedRuns.size() - 1));
+                for (int r : sortedRuns) {
+                    String s = th.statusByRun().get(r);
+                    if ("fail".equals(s) || "error".equals(s)) { gt.put("firstFailRun", r); break; }
+                }
+                for (int r : sortedRuns) {
+                    if ("pass".equals(th.statusByRun().get(r))) { gt.put("firstPassRun", r); break; }
                 }
             }
 
