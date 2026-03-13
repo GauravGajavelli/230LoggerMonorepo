@@ -19,7 +19,7 @@ Each test entry may include a `codeDiffs` array summarizing the number of lines 
 1. **pattern**: A short label describing the error pattern (e.g., "Recurring NullPointerException", "Stuck on IndexOutOfBounds", "Compilation error loop"). Use the error type + behavioral pattern.
 2. **confidence**: "high" if the error is consistent and clear, "medium" if the error type evolved or is ambiguous, "low" if there's insufficient data.
 3. **explanation**: A single prose paragraph covering ALL contributing code changes chronologically with interaction analysis. Factual — describe what the code changes show, no intent narration. Reference the test category and error progression. Be specific but not condescending.
-4. **suggestion**: A single prose paragraph, most impactful fix first. Reference specific methods or concepts from the assignment. Be concrete (e.g., "Check your remove method handles the two-child case" not "Debug your code").
+4. **nextSteps**: An ordered JSON array of 2–3 concrete steps. Frame each step around the underlying concept or technique the student needs to strengthen — useful to a student reviewing their work even after the assignment is complete, not just "do X to pass this test." Most impactful step first. Reference specific methods or concepts from the assignment.
 
 **Guidelines:**
 - If `progressionSummary` shows the same error repeating, the student is stuck — suggest a different approach.
@@ -41,7 +41,11 @@ Return a JSON object with a single `feedback` array. Each element must have exac
       "pattern": "Short pattern label",
       "confidence": "high|medium|low",
       "explanation": "Prose paragraph covering all contributing causes...",
-      "suggestion": "Start by fixing X in the remove method..."
+      "nextSteps": [
+        "Most impactful step targeting the underlying concept...",
+        "Second step...",
+        "Optional third step..."
+      ]
     }
   ]
 }

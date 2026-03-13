@@ -125,4 +125,4 @@ Notes:
 
 ---
 
-*Based on the design philosophy in `design_philosophy.md`. Low scores on Q1–Q2 suggest the landing view needs a stronger summary. Low scores on Q3–Q4 suggest scan-ability issues. Low scores on Q5–Q6 suggest the expansion layer is weak. Low scores on Q7 suggest suggestions are buried.*
+*Based on the design philosophy in `/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Planning/demo_prep/design_philosophy.md`. Low scores on Q1–Q2 suggest the landing view needs a stronger summary. Low scores on Q3–Q4 suggest scan-ability issues. Low scores on Q5–Q6 suggest the expansion layer is weak. Low scores on Q7 suggest suggestions are buried.*

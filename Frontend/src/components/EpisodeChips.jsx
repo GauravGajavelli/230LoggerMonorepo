@@ -10,7 +10,7 @@ import { epColor } from '../utils/episodeColors';
  *   onJump: (episode: object) => void
  * }} props
  */
-export function EpisodeChips({ episodes, onJump }) {
+export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
   if (!episodes || episodes.length === 0) return null;
 
   return (
@@ -56,6 +56,11 @@ export function EpisodeChips({ episodes, onJump }) {
             <span style={{ color: dotColor, fontWeight: 600 }}>{index + 1}</span>
             <span style={{ color: isRegression ? '#DC2626' : isFix ? '#2563EB' : '#94A3B8', fontWeight: 500 }}>·</span>
             <span style={{ fontWeight: 500 }}>{areaLabel}</span>
+            {ep.linkedTestId && testNameById[ep.linkedTestId] && (
+              <span style={{ color: '#94A3B8', fontSize: 10 }}>
+                → {testNameById[ep.linkedTestId]}
+              </span>
+            )}
             {ep.hasFeedback && (ep.feedbackOpened
               ? <span className="feedback-seen" title="Feedback reviewed">✓</span>
               : <span className="feedback-unseen-chip" title="Has feedback" />

@@ -76,7 +76,7 @@ public class FeedbackRefinementService {
                 String newExplanation = rewritten.get(fb.testId());
                 if (newExplanation != null && !newExplanation.equals(fb.explanation())) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
-                        newExplanation, fb.suggestion(), fb.diffs(), fb.relatedTestIds());
+                        newExplanation, fb.nextSteps(), fb.diffs(), fb.relatedTestIds());
                 }
                 return fb;
             })

@@ -46,6 +46,12 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
     return ids;
   }, [episodes, feedbackMap]);
 
+  /* ── testId → name lookup for chip labels ── */
+  const testNameById = useMemo(
+    () => Object.fromEntries(detailTests.map(t => [t.id, t.name])),
+    [detailTests]
+  );
+
   /* ── Episodes annotated with feedback presence + opened state ── */
   const episodesWithFeedback = useMemo(() =>
     episodes.map(ep => ({
@@ -191,14 +197,24 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
             </div>
             {/* Mini-bar of all tests */}
             <div className="dv-summary-bars">
-              {detailTests.map((t) => (
-                <span key={t.id} title={t.name} style={{
-                  width: 10, height: 28, borderRadius: 3,
-                  background: t.status === 'failing' ? '#FCA5A5'
-                    : t.status === 'improved' ? '#93C5FD'
-                    : '#6EE7B7',
-                }} />
-              ))}
+              {[...detailTests]
+                .sort((a, b) => {
+                  const order = { failing: 0, improved: 1, passing: 2 };
+                  return order[a.status] - order[b.status];
+                })
+                .map((t) => (
+                  <span key={t.id} title={t.name} style={{
+                    width: 10, height: 28, borderRadius: 3,
+                    background: t.status === 'failing' ? '#FCA5A5'
+                      : t.status === 'improved' ? '#93C5FD'
+                      : '#6EE7B7',
+                  }} />
+                ))}
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4, display: 'flex', gap: 10 }}>
+              {detailSummary.failing  > 0 && <span style={{ color: '#DC2626' }}>{detailSummary.failing} failing</span>}
+              {detailSummary.improved > 0 && <span style={{ color: '#2563EB' }}>{detailSummary.improved} improved</span>}
+              {detailSummary.passing  > 0 && <span style={{ color: '#059669' }}>{detailSummary.passing} passing</span>}
             </div>
           </div>
 
@@ -217,7 +233,7 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
             <p style={{ fontSize: 11, color: '#94A3B8', margin: '10px 0 0', lineHeight: 1.5 }}>
               Based on test runs recorded during your work session. Yellow dots mark moments when a test's status changed.
             </p>
-            <EpisodeChips episodes={episodesWithFeedback} onJump={handleEpisodeJump} />
+            <EpisodeChips episodes={episodesWithFeedback} onJump={handleEpisodeJump} testNameById={testNameById} />
           </div>
 
           {/* Desktop only: episode chips below the full-width chart */}
@@ -231,7 +247,18 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
             }}>
               Episodes
             </div>
-            <EpisodeChips episodes={episodesWithFeedback} onJump={handleEpisodeJump} />
+            <EpisodeChips episodes={episodesWithFeedback} onJump={handleEpisodeJump} testNameById={testNameById} />
+            {episodesWithFeedback.some(ep => ep.outcomeType) && (
+              <div style={{ display: 'flex', gap: 12, marginTop: 8,
+                fontSize: 10, color: '#94A3B8', alignItems: 'center' }}>
+                {[['#FCA5A5','regression'],['#93C5FD','fix'],['#CBD5E1','neutral']].map(([bg, label]) => (
+                  <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: bg, display: 'inline-block' }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>{/* /dv-sidebar */}

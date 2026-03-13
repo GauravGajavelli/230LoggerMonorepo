@@ -431,9 +431,8 @@ public class PrepareService {
                 String exp = fb.explanation();
                 System.out.println("    explanation: " + exp.substring(0, Math.min(120, exp.length())) + "...");
             }
-            if (fb.suggestion() != null) {
-                String sug = fb.suggestion();
-                System.out.println("    suggestion: " + sug.substring(0, Math.min(120, sug.length())) + "...");
+            if (fb.nextSteps() != null && !fb.nextSteps().isEmpty()) {
+                System.out.println("    nextSteps[0]: " + fb.nextSteps().get(0).substring(0, Math.min(120, fb.nextSteps().get(0).length())) + "...");
             }
         });
         System.out.println("==========================\n");

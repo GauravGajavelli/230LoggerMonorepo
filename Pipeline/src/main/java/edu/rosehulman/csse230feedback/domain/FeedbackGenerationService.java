@@ -124,7 +124,7 @@ public class FeedbackGenerationService {
                 List<DiffEntry> diffs = diffsPerTest.get(fb.testId());
                 if (diffs != null && !diffs.isEmpty()) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
-                                       fb.explanation(), fb.suggestion(), diffs, null);
+                                       fb.explanation(), fb.nextSteps(), diffs, null);
                 }
                 return fb;
             })
@@ -460,9 +460,9 @@ public class FeedbackGenerationService {
             String pattern = getTextOrNull(item, "pattern");
             String confidence = getTextOrNull(item, "confidence");
             String explanation = getTextOrNull(item, "explanation");
-            String suggestion = getTextOrNull(item, "suggestion");
+            List<String> nextSteps = getStringListOrEmpty(item, "nextSteps");
 
-            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null, null));
+            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null));
         }
     }
 
@@ -515,9 +515,9 @@ public class FeedbackGenerationService {
                     String pattern = getTextOrNull(item, "pattern");
                     String confidence = getTextOrNull(item, "confidence");
                     String explanation = getTextOrNull(item, "explanation");
-                    String suggestion = getTextOrNull(item, "suggestion");
+                    List<String> nextSteps = getStringListOrEmpty(item, "nextSteps");
 
-                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, suggestion, null, null));
+                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null));
                 }
             } catch (Exception ignored) {
                 // Skip malformed object
@@ -537,6 +537,17 @@ public class FeedbackGenerationService {
 
     private static String getTextOrNull(JsonNode node, String field) {
         return node.has(field) && !node.get(field).isNull() ? node.get(field).asText() : null;
+    }
+
+    private static List<String> getStringListOrEmpty(JsonNode node, String field) {
+        if (!node.has(field) || node.get(field).isNull() || !node.get(field).isArray()) {
+            return Collections.emptyList();
+        }
+        List<String> result = new ArrayList<>();
+        for (JsonNode element : node.get(field)) {
+            if (!element.isNull()) result.add(element.asText());
+        }
+        return result;
     }
 
     /**
@@ -606,7 +617,7 @@ public class FeedbackGenerationService {
                 List<String> related = relatedMap.get(fb.testId());
                 if (related != null) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
-                        fb.explanation(), fb.suggestion(), fb.diffs(), related);
+                        fb.explanation(), fb.nextSteps(), fb.diffs(), related);
                 }
                 return fb;
             })

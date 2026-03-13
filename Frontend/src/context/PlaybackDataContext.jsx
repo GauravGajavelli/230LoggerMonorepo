@@ -170,8 +170,10 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
         status,
         changedAt,
         explanation: fb?.explanation || '',
-        suggestion: fb?.suggestion || '',
-        diffs: fb?.diffs || [],
+        pattern:     fb?.pattern     || '',
+        nextSteps:   fb?.nextSteps   || [],
+        suggestion:  fb?.suggestion  || '',
+        diffs:       fb?.diffs       || [],
       };
     });
 

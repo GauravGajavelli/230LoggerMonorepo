@@ -81,7 +81,7 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
   const [manualOpen, setManualOpen] = useState(false);
   const cardRef = useRef(null);
 
-  const hasFeedback = !!(test.explanation || test.suggestion || test.diffs?.length);
+  const hasFeedback = !!(test.explanation || test.suggestion || test.nextSteps?.length || test.diffs?.length);
   const canExpand = hasFeedback;
   const open = canExpand && (manualOpen || forceOpen);
   const highlighted = !!forceOpen;
@@ -149,16 +149,35 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
           padding: '0 16px 16px',
           borderTop: `1px solid ${isFailing ? '#FEE2E2' : isImproved ? '#DBEAFE' : '#D1FAE5'}`,
         }}>
+          {/* Diagnostic label */}
+          {test.pattern && (
+            <div style={{
+              display: 'inline-block', marginTop: 10, padding: '2px 8px',
+              background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 4,
+              fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '.04em',
+              textTransform: 'uppercase',
+            }}>
+              {test.pattern}
+            </div>
+          )}
+
           {/* What happened */}
           {test.explanation && (
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: test.pattern ? 8 : 12 }}>
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                             letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
                 What happened
               </div>
-              <p style={{ fontSize: 13, lineHeight: '1.6', color: '#334155', margin: 0 }}>
-                <CitationText text={test.explanation} onCiteClick={onCiteClick} />
-              </p>
+              <ul style={{ margin: 0, paddingLeft: 20, listStyleType: 'disc' }}>
+                {test.explanation
+                  .split(/(?<=\.)\s+/)
+                  .filter(Boolean)
+                  .map((sentence, i) => (
+                    <li key={i} style={{ fontSize: 13, lineHeight: '1.6', color: '#334155', marginBottom: 4 }}>
+                      <CitationText text={sentence} onCiteClick={onCiteClick} />
+                    </li>
+                  ))}
+              </ul>
             </div>
           )}
 
@@ -175,19 +194,29 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
             </div>
           )}
 
-          {/* Suggestion — amber box */}
-          {test.suggestion && (
+          {/* What to work on — amber box */}
+          {(test.nextSteps?.length > 0 || test.suggestion) && (
             <div style={{
               marginTop: 14, padding: '10px 14px',
               background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8,
             }}>
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                            letterSpacing: '.08em', color: '#B45309', marginBottom: 4 }}>
-                Suggested next step
+                            letterSpacing: '.08em', color: '#B45309', marginBottom: 6 }}>
+                What to work on
               </div>
-              <p style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', margin: 0 }}>
-                <CitationText text={test.suggestion} onCiteClick={onCiteClick} />
-              </p>
+              {test.nextSteps?.length > 0 ? (
+                <ul style={{ margin: 0, paddingLeft: 20, listStyleType: 'disc' }}>
+                  {test.nextSteps.map((step, i) => (
+                    <li key={i} style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', marginBottom: 6 }}>
+                      <CitationText text={step} onCiteClick={onCiteClick} />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', margin: 0 }}>
+                  <CitationText text={test.suggestion} onCiteClick={onCiteClick} />
+                </p>
+              )}
             </div>
           )}
         </div>

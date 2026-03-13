@@ -9,7 +9,7 @@ public record Feedback(
     String pattern,
     String confidence,
     String explanation,       // synthesized prose paragraph (all contributing causes)
-    String suggestion,        // synthesized prose paragraph (primary fix first)
+    List<String> nextSteps,   // ordered list of 2-3 concrete skill-building steps
     List<DiffEntry> diffs,    // chronologically ordered list of relevant code changes
     List<String> relatedTestIds // testIds of tests in same group, null if singleton
 ) {}
