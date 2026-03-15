@@ -114,51 +114,81 @@ function TestSourceModal({ testSource, onClose }) {
   );
 }
 
-/* ── Diff block (dark code style) ── */
+/* ── Diff block — side-by-side before / after ── */
 function DiffBlock({ diff, onLabelClick }) {
-  const lines = [...(diff.before || []), '───', ...(diff.after || [])];
+  const before = diff.before || [];
+  const after  = diff.after  || [];
+  const hasBefore = before.length > 0;
+  const hasAfter  = after.length  > 0;
+
+  const colStyle = (side) => ({
+    flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
+    borderRight: side === 'before' && hasAfter ? '1px solid #1E293B' : 'none',
+  });
+  const headerStyle = (side) => ({
+    padding: '3px 12px', fontSize: 10, fontWeight: 700,
+    textTransform: 'uppercase', letterSpacing: '.06em', flexShrink: 0,
+    color:      side === 'before' ? '#FCA5A5' : '#86EFAC',
+    background: side === 'before' ? 'rgba(220,38,38,.10)' : 'rgba(5,150,105,.10)',
+    borderBottom: '1px solid #1E293B',
+  });
+  const codeStyle = (side) => ({
+    fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, lineHeight: '1.7',
+    color:      side === 'before' ? '#FCA5A5' : '#86EFAC',
+    background: side === 'before' ? 'rgba(220,38,38,.05)' : 'rgba(5,150,105,.05)',
+    margin: 0, padding: '8px 12px', overflowX: 'auto', flex: 1,
+    whiteSpace: 'pre', minWidth: 0,
+  });
+
   return (
-    <pre style={{
-      fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, lineHeight: '1.7',
-      background: '#0F172A', color: '#CBD5E1', borderRadius: 8,
-      padding: '12px 16px', margin: '8px 0 0', overflowX: 'auto',
-      border: '1px solid #1E293B',
-    }}>
-      {diff.label && (
-        <div
-          onClick={onLabelClick || undefined}
-          style={{
-            color: '#64748B', marginBottom: diff.note ? 4 : 6, fontSize: 11,
-            cursor: onLabelClick ? 'pointer' : 'default',
-            textDecoration: onLabelClick ? 'underline' : 'none',
-            textDecorationColor: '#475569',
-          }}
-        >
-          {diff.label}{onLabelClick ? ' ↗' : ''}
+    <div style={{ margin: '8px 0 0', borderRadius: 8, overflow: 'hidden', border: '1px solid #1E293B' }}>
+
+      {/* Label + note header */}
+      {(diff.label || diff.note) && (
+        <div style={{ background: '#0F172A', padding: '6px 12px', borderBottom: '1px solid #1E293B' }}>
+          {diff.label && (
+            <div
+              onClick={onLabelClick || undefined}
+              style={{
+                color: '#64748B', fontSize: 11,
+                cursor: onLabelClick ? 'pointer' : 'default',
+                textDecoration: onLabelClick ? 'underline' : 'none',
+                textDecorationColor: '#475569',
+              }}
+            >
+              {diff.label}{onLabelClick ? ' ↗' : ''}
+            </div>
+          )}
+          {diff.note && (
+            <div style={{ color: '#94A3B8', fontSize: 11, marginTop: diff.label ? 3 : 0, fontStyle: 'italic', whiteSpace: 'pre-wrap' }}>
+              {diff.note}
+            </div>
+          )}
         </div>
       )}
-      {diff.note && (
-        <div style={{
-          color: '#94A3B8', fontSize: 11, marginBottom: 8,
-          fontStyle: 'italic', whiteSpace: 'pre-wrap',
-        }}>
-          {diff.note}
+
+      {/* Side-by-side columns */}
+      {(hasBefore || hasAfter) && (
+        <div style={{ display: 'flex', background: '#0F172A' }}>
+          {hasBefore && (
+            <div style={colStyle('before')}>
+              <div style={headerStyle('before')}>Before</div>
+              <pre style={codeStyle('before')}>
+                {before.map((line, i) => <div key={i}>{line || '\u200b'}</div>)}
+              </pre>
+            </div>
+          )}
+          {hasAfter && (
+            <div style={colStyle('after')}>
+              <div style={headerStyle('after')}>After</div>
+              <pre style={codeStyle('after')}>
+                {after.map((line, i) => <div key={i}>{line || '\u200b'}</div>)}
+              </pre>
+            </div>
+          )}
         </div>
       )}
-      {lines.map((l, i) => {
-        if (l === '───') return <div key={i} style={{ borderTop: '1px dashed #334155', margin: '6px 0' }} />;
-        let color = '#CBD5E1', bg = 'transparent';
-        if (l.trimStart().startsWith('-') || l.trimStart().startsWith('−')) {
-          color = '#FCA5A5'; bg = 'rgba(220,38,38,.12)';
-        }
-        if (l.trimStart().startsWith('+')) {
-          color = '#86EFAC'; bg = 'rgba(5,150,105,.12)';
-        }
-        return (
-          <div key={i} style={{ color, background: bg, padding: '0 4px', borderRadius: 3 }}>{l}</div>
-        );
-      })}
-    </pre>
+    </div>
   );
 }
 
