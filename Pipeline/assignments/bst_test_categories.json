@@ -1,0 +1,134 @@
+{
+  "categories": {
+    "insert": {
+      "description": "Core insert functionality - adding elements to the tree",
+      "tests": [
+        "BSTTesting#testInsertInts()",
+        "BSTTesting#testInsertStrings()",
+        "BSTTesting#testInsertReturnValueInt()",
+        "BSTTesting#testInsertReturnValueString()"
+      ]
+    },
+    "contains": {
+      "description": "Finding elements in the tree using contains()",
+      "tests": [
+        "BSTTesting#testContainsInts()",
+        "BSTTesting#testContainsStrings()",
+        "BSTManualTesting#testContainsNonBST()"
+      ]
+    },
+    "remove": {
+      "description": "Removing elements while maintaining BST property",
+      "tests": [
+        "BSTTesting#testRemove()",
+        "BSTTesting#testRemoveReturnValue()",
+        "BSTTesting#testRemoveAdvanced()"
+      ]
+    },
+    "height": {
+      "description": "Tree height queries",
+      "tests": [
+        "BSTTesting#testHeight()",
+        "BSTManualTesting#testHeight()"
+      ]
+    },
+    "size": {
+      "description": "Tree size queries",
+      "tests": [
+        "BSTTesting#testSize()",
+        "BSTManualTesting#testSize()"
+      ]
+    },
+    "isEmpty": {
+      "description": "Empty-tree detection",
+      "tests": [
+        "BSTTesting#testIsEmpty()",
+        "BSTManualTesting#testIsEmpty()"
+      ]
+    },
+    "toArrayList": {
+      "description": "Converting tree to ArrayList representation",
+      "tests": [
+        "BSTTesting#testToArrayList()"
+      ]
+    },
+    "toArray": {
+      "description": "Converting tree to array representation",
+      "tests": [
+        "BSTTesting#testToArrayInts()",
+        "BSTTesting#testToArrayStrings()"
+      ]
+    },
+    "toString": {
+      "description": "Converting tree to string representation",
+      "tests": [
+        "BSTTesting#testToString()",
+        "BSTManualTesting#testBasicToString()"
+      ]
+    },
+    "iterator": {
+      "description": "In-order iterator traversal",
+      "tests": [
+        "BSTTesting#testIterator()",
+        "BSTManualTesting#testIterator()"
+      ]
+    },
+    "inefficientIterator": {
+      "description": "Inefficient (toArrayList-backed) iterator",
+      "tests": [
+        "BSTTesting#testInefficientIterator()"
+      ]
+    },
+    "preOrderIterator": {
+      "description": "Pre-order iterator traversal",
+      "tests": [
+        "BSTTesting#testPreOrderIterator()",
+        "BSTManualTesting#testPreOrderIterator()"
+      ]
+    },
+    "edge_cases": {
+      "description": "Exception handling and null checks",
+      "tests": [
+        "BSTTesting#testInsertExceptions()",
+        "BSTTesting#testRemoveIllegalArgumentException()"
+      ]
+    },
+    "efficiency": {
+      "description": "Performance and algorithmic efficiency",
+      "tests": [
+        "BSTTesting#testEfficiency()"
+      ]
+    }
+  },
+  "testToCategories": {
+    "BSTTesting#testInsertInts()": ["insert"],
+    "BSTTesting#testInsertStrings()": ["insert"],
+    "BSTTesting#testInsertReturnValueInt()": ["insert"],
+    "BSTTesting#testInsertReturnValueString()": ["insert"],
+    "BSTTesting#testInsertExceptions()": ["edge_cases"],
+    "BSTTesting#testHeight()": ["height"],
+    "BSTTesting#testSize()": ["size"],
+    "BSTTesting#testIsEmpty()": ["isEmpty"],
+    "BSTManualTesting#testIsEmpty()": ["isEmpty"],
+    "BSTTesting#testContainsInts()": ["contains"],
+    "BSTTesting#testContainsStrings()": ["contains"],
+    "BSTManualTesting#testContainsNonBST()": ["contains"],
+    "BSTTesting#testToArrayList()": ["toArrayList"],
+    "BSTTesting#testToArrayInts()": ["toArray"],
+    "BSTTesting#testToArrayStrings()": ["toArray"],
+    "BSTTesting#testToString()": ["toString"],
+    "BSTManualTesting#testBasicToString()": ["toString"],
+    "BSTTesting#testInefficientIterator()": ["inefficientIterator"],
+    "BSTTesting#testPreOrderIterator()": ["preOrderIterator"],
+    "BSTManualTesting#testPreOrderIterator()": ["preOrderIterator"],
+    "BSTTesting#testIterator()": ["iterator"],
+    "BSTManualTesting#testIterator()": ["iterator"],
+    "BSTTesting#testRemove()": ["remove"],
+    "BSTTesting#testRemoveReturnValue()": ["remove"],
+    "BSTTesting#testRemoveIllegalArgumentException()": ["edge_cases"],
+    "BSTTesting#testRemoveAdvanced()": ["remove"],
+    "BSTTesting#testEfficiency()": ["efficiency"],
+    "BSTManualTesting#testSize()": ["size"],
+    "BSTManualTesting#testHeight()": ["height"]
+  }
+}

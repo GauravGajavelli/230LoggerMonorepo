@@ -1,4 +1,140 @@
 {
   "assignmentName": "Binary Search Tree",
-  "excludeTestClasses": ["BSTConcurrencyTesting"]
+  "excludeTestClasses": ["BSTConcurrencyTesting"],
+  "courseContext": {
+    "concepts": [
+      {
+        "concept": "BST remove with in-order successor restructuring",
+        "testCategories": ["remove"],
+        "futureAppearances": [
+          {
+            "label": "EditorTrees Milestone 3",
+            "description": "delete(int pos) applies the same three-case BST removal logic (leaf, one child, two children via in-order successor) but also triggers AVL rebalancing as the recursion unwinds."
+          },
+          {
+            "label": "Exam 2",
+            "description": "pruneFullSubtreesSize3 uses the same pointer-replacement pattern as BST remove—returning NULL_NODE to detach a subtree—to prune every full size-3 subtree from the tree."
+          }
+        ]
+      },
+      {
+        "concept": "Tree traversal order and iterators",
+        "testCategories": ["iterator", "inefficientIterator", "preOrderIterator"],
+        "futureAppearances": [
+          {
+            "label": "EditorTrees toString()",
+            "description": "EditorTrees toString() must run in O(N) via in-order traversal of the rank-ordered tree, directly paralleling the BST in-order iterator."
+          },
+          {
+            "label": "Exam 3 mirror",
+            "description": "The mirror constructor is verified by asserting that pre/in/post-order traversal outputs of the mirrored tree exactly reverse those of the original, requiring you to predict each traversal's output."
+          },
+          {
+            "label": "HW6",
+            "description": "preOrderInOrderBuild (Problem 3) reconstructs a binary tree from its pre-order traversal string and a children-type string, requiring precise understanding of what information each traversal order encodes."
+          },
+          {
+            "label": "Exam 3 & Final",
+            "description": "Both exams list traversals and iterators as explicit programming topics, with one tree question per exam requiring an O(n) single-pass recursive implementation."
+          }
+        ]
+      },
+      {
+        "concept": "Height calculation and subtree height comparison",
+        "testCategories": ["height"],
+        "futureAppearances": [
+          {
+            "label": "HW5",
+            "description": "The table requires exact minimum, maximum, and maximum-AVL heights for given n, depending on the same recursive height definition (h = -1 for empty, 1 + max(left, right) otherwise) used in the BST."
+          },
+          {
+            "label": "HW5 balance",
+            "description": "isHeightBalanced must combine height computation with balance checking in one O(n) recursive pass, avoiding the redundant calls that a naive height()-per-node approach makes."
+          },
+          {
+            "label": "HW6",
+            "description": "Proving S(H) = Fib(H+3) - 1 by induction requires internalizing the recurrence S(H) = S(H-1) + S(H-2) + 1 that governs minimum-node height-H AVL trees."
+          },
+          {
+            "label": "Exam 3",
+            "description": "countHeightImbalancedNodes / weightedHeight: Both Exam 3 programming questions require computing left and right subtree heights at each node and combining them—the same bottom-up height aggregation as the BST height() method, extended to carry additional state."
+          },
+          {
+            "label": "Final Exam",
+            "description": "countExactlyBalancedNodes / countOddOnlyIf: Both final-exam tree questions require comparing left and right subtree heights at each node as the core condition inside a recursive count, graded for O(n) single-pass efficiency."
+          }
+        ]
+      },
+      {
+        "concept": "BST search path navigation (contains)",
+        "testCategories": ["contains"],
+        "futureAppearances": [
+          {
+            "label": "Exam 2",
+            "description": "shortestWordAlongPath navigates the BST exactly as contains does—left if target < current, right otherwise—but accumulates the shortest word seen along the search path to the target."
+          },
+          {
+            "label": "EditorTrees get(int pos)",
+            "description": "get(int pos) uses rank instead of key comparison to decide left or right at each node, showing how the contains navigation pattern generalizes to rank-ordered balanced trees."
+          }
+        ]
+      },
+      {
+        "concept": "Insert and recursive tree construction",
+        "testCategories": ["insert"],
+        "futureAppearances": [
+          {
+            "label": "EditorTrees M1/2",
+            "description": "add(char c, int pos) uses rank to navigate to the insertion point—applying the same recursive descent and node-linking logic as BST insert, but comparing rank instead of key."
+          },
+          {
+            "label": "HW5 Full Tree Constructor",
+            "description": "The fullTree constructor uses the same recursive helper pattern—a method that creates and returns one node per call—that underlies BST insert's recursive structure."
+          }
+        ]
+      },
+      {
+        "concept": "Size as a subtree property",
+        "testCategories": ["size", "isEmpty"],
+        "futureAppearances": [
+          {
+            "label": "EditorTrees rank",
+            "description": "Each EditorTrees node stores its rank, defined as the size of its left subtree, so BST size computation is the direct conceptual basis for the rank invariant maintained across every add and delete."
+          },
+          {
+            "label": "Exam 2",
+            "description": "The prune condition checks that a subtree has exactly size 3 via recursive counting, making BST's recursive size() a required sub-problem inside the removal logic."
+          }
+        ]
+      },
+      {
+        "concept": "In-order collection output (toArrayList / toString)",
+        "testCategories": ["toArray", "toArrayList", "toString"],
+        "futureAppearances": [
+          {
+            "label": "EditorTrees toString()",
+            "description": "EditorTrees toString() is graded for O(N) efficiency and produces text by in-order traversal of the rank tree, directly paralleling BST toArrayList() and toString() which collect elements in sorted order."
+          },
+          {
+            "label": "Exam 3 mirror",
+            "description": "The mirror test verifies correctness by asserting that the in-order traversal of the mirrored tree equals the reverse of the original's in-order traversal."
+          }
+        ]
+      },
+      {
+        "concept": "BST efficiency and height under random insertion",
+        "testCategories": ["efficiency"],
+        "futureAppearances": [
+          {
+            "label": "EditorTrees O(log N)",
+            "description": "All EditorTrees core operations (add, delete, get, fastHeight) must run in O(log N), making the link between tree height and operation cost—demonstrated in testEfficiency—essential motivation for AVL balancing in the project."
+          },
+          {
+            "label": "Exam 3 & Final",
+            "description": "Each exam programming question is explicitly graded for O(n) single-pass efficiency, penalizing solutions that call height() redundantly in the same way an unbalanced BST degrades per-operation cost."
+          }
+        ]
+      }
+    ]
+  }
 }

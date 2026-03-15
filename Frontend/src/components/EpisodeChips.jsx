@@ -22,14 +22,14 @@ export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
         const border = isRegression ? '#FECACA' : isFix ? '#BFDBFE' : '#E2E8F0';
         const color = isRegression ? '#991B1B' : isFix ? '#1E40AF' : '#64748B';
         const borderHover = isRegression ? '#FCA5A5' : isFix ? '#93C5FD' : '#CBD5E1';
-        const areaLabel =
-          ep.semantics?.conceptsAddressed?.[0]
-          || ep.area
-          || ep.label
-          || ep.id;
-        const dotColor = epColor(index);
-
         const linkedTestName = ep.linkedTestId ? testNameById[ep.linkedTestId] : null;
+
+        // For feedback chips, label is the test name (what the chip navigates to).
+        // For non-feedback chips, label is the episode concept (what was being worked on).
+        const areaLabel = (ep.hasFeedback && linkedTestName)
+          ? linkedTestName.replace(/\(\)$/, '').replace(/^test/, '')
+          : (ep.semantics?.conceptsAddressed?.[0] || ep.area || ep.label || ep.id);
+        const dotColor = epColor(index);
 
         return (
           <button
@@ -68,8 +68,8 @@ export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
                 : <span className="feedback-unseen-chip" style={{ marginLeft: 2, flexShrink: 0 }} title="Has feedback" />
               )}
             </div>
-            {/* Line 2: → linked test name (only when present) */}
-            {linkedTestName && (
+            {/* Line 2: → linked test name (only for non-feedback chips; feedback chips use it as the primary label) */}
+            {linkedTestName && !ep.hasFeedback && (
               <div style={{ paddingLeft: 13, marginTop: 2, overflow: 'hidden' }}>
                 <span style={{
                   color: '#94A3B8', fontSize: 10,

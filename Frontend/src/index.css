@@ -141,6 +141,12 @@
   to   { transform: scale(1);    opacity: 1; }
 }
 
+/* TestCard AI feedback reveal — first expand only */
+@keyframes feedbackReveal {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Font settings */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

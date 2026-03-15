@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { CitationText } from './CitationText';
 
 /* ── Icons ── */
@@ -34,6 +34,85 @@ const ChevronIcon = ({ open }) => (
     <path d="M6 4l4 4-4 4" stroke="#64748B" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
+/* ── Test source modal — same entrance animation as ReplayModal ── */
+function TestSourceModal({ testSource, onClose }) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        background: 'rgba(15,23,42,.55)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '24px',
+        animation: 'modal-backdrop-in .15s ease-out',
+      }}
+    >
+      <div style={{
+        width: '100%', maxWidth: 680,
+        maxHeight: '80vh',
+        background: '#fff', borderRadius: 12,
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(0,0,0,.25)',
+        overflow: 'hidden',
+        animation: 'modal-scale-in .2s ease-out',
+      }}>
+        {/* Header — matches ReplayModal */}
+        <div style={{
+          background: '#800000', color: '#fff',
+          padding: '10px 20px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexShrink: 0,
+        }}>
+          <span style={{ fontWeight: 600, fontSize: 14, fontFamily: "'IBM Plex Mono', monospace" }}>
+            {testSource.fileName}
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none', border: '1px solid rgba(255,255,255,.4)',
+              color: '#fff', padding: '3px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 13,
+            }}
+          >
+            ✕ Close
+          </button>
+        </div>
+
+        {/* Code body — line-numbered */}
+        <div style={{ flex: 1, overflow: 'auto', background: '#0F172A' }}>
+          <pre style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, lineHeight: '1.7',
+            color: '#CBD5E1', margin: 0, padding: '16px 0',
+          }}>
+            {testSource.content.split('\n').map((line, i) => (
+              <div key={i} style={{ display: 'flex', minHeight: '1.7em' }}>
+                <span style={{
+                  display: 'inline-block', minWidth: 48, textAlign: 'right',
+                  paddingRight: 16, color: '#4B5563',
+                  userSelect: 'none', flexShrink: 0,
+                }}>
+                  {testSource.startLine + i}
+                </span>
+                <span style={{ flex: 1, paddingRight: 24, whiteSpace: 'pre' }}>{line}</span>
+              </div>
+            ))}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Diff block (dark code style) ── */
 function DiffBlock({ diff, onLabelClick }) {
@@ -95,11 +174,16 @@ function DiffBlock({ diff, onLabelClick }) {
  *   onCiteClick: (runNumber:number) => void,
  * }} props
  */
-export function TestCard({ test, forceOpen, onCiteClick }) {
+export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened }) {
   const [manualOpen, setManualOpen] = useState(false);
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
+  const [hoveredPill, setHoveredPill] = useState(null);
+  const [hasOpenedFeedback, setHasOpenedFeedback] = useState(false);
+  const [showTestSource, setShowTestSource] = useState(false);
+  const closeTestSource = useCallback(() => setShowTestSource(false), []);
   const cardRef = useRef(null);
+  const hasRevealedRef = useRef(false);
 
   const hasFeedback = !!(test.explanation || test.suggestion || test.nextSteps?.length || test.diffs?.length);
   const canExpand = hasFeedback;
@@ -162,30 +246,56 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
             <ClockIcon />{test.changedAt}
           </span>
         )}
+        {hasFeedback && !hasOpenedFeedback && (
+          <span className="feedback-unseen-tab" style={{ width: 7, height: 7 }} title="Has unreviewed feedback" />
+        )}
         {canExpand && <ChevronIcon open={open} />}
       </button>
 
       {/* Expanded body */}
       {open && (
-        <div style={{
-          padding: '0 16px 16px',
-          borderTop: `1px solid ${isFailing ? '#FEE2E2' : isImproved ? '#DBEAFE' : '#D1FAE5'}`,
-        }}>
-          {/* Diagnostic label */}
-          {test.pattern && (
-            <div style={{
-              display: 'inline-block', marginTop: 10, padding: '2px 8px',
-              background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 4,
-              fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '.04em',
-              textTransform: 'uppercase',
-            }}>
-              {test.pattern}
-            </div>
-          )}
+        <div
+          style={{
+            padding: '0 16px 16px',
+            borderTop: `1px solid ${isFailing ? '#FEE2E2' : isImproved ? '#DBEAFE' : '#D1FAE5'}`,
+            animation: !hasRevealedRef.current ? 'feedbackReveal 0.3s ease-out' : undefined,
+          }}
+          onAnimationEnd={() => { hasRevealedRef.current = true; setHasOpenedFeedback(true); onFeedbackOpened?.(); }}
+        >
+          {/* Top row: diagnostic label (left) + view test button (right) */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10, gap: 8 }}>
+            {test.pattern ? (
+              <div style={{
+                display: 'inline-block', padding: '2px 8px',
+                background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 4,
+                fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '.04em',
+                textTransform: 'uppercase',
+              }}>
+                {test.pattern}
+              </div>
+            ) : <div />}
+            {test.testSource && (
+              <button
+                onClick={() => setShowTestSource(true)}
+                style={{
+                  all: 'unset', cursor: 'pointer', flexShrink: 0,
+                  fontSize: 10, fontWeight: 500, color: '#64748B',
+                  padding: '2px 8px', borderRadius: 4,
+                  border: '1px solid #CBD5E1', background: '#F8FAFC',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  lineHeight: '1.6',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#94A3B8'; e.currentTarget.style.color = '#1E293B'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#64748B'; }}
+              >
+                {'<'}/{'>'} view test
+              </button>
+            )}
+          </div>
 
           {/* What happened */}
           {test.explanation && (
-            <div style={{ marginTop: test.pattern ? 8 : 12 }}>
+            <div style={{ marginTop: 8 }}>
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                             letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
                 What happened
@@ -196,7 +306,7 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
                   .filter(Boolean)
                   .map((sentence, i) => (
                     <li key={i} style={{ fontSize: 13, lineHeight: '1.6', color: '#334155', marginBottom: 4 }}>
-                      <CitationText text={sentence} onCiteClick={onCiteClick} />
+                      <CitationText text={sentence} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
                     </li>
                   ))}
               </ul>
@@ -252,57 +362,106 @@ export function TestCard({ test, forceOpen, onCiteClick }) {
                 <ul style={{ margin: 0, paddingLeft: 20, listStyleType: 'disc' }}>
                   {test.nextSteps.map((step, i) => (
                     <li key={i} style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', marginBottom: 6 }}>
-                      <CitationText text={step} onCiteClick={onCiteClick} />
+                      <CitationText text={step} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
                     </li>
                   ))}
                 </ul>
               ) : (
                 <p style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', margin: 0 }}>
-                  <CitationText text={test.suggestion} onCiteClick={onCiteClick} />
+                  <CitationText text={test.suggestion} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
                 </p>
               )}
             </div>
           )}
 
-          {/* Run history */}
-          {test.statusByRun && Object.keys(test.statusByRun).length > 0 && (
-            <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                            letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
-                Run history ({Object.keys(test.statusByRun).length} runs)
-              </div>
-              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                {Object.entries(test.statusByRun)
-                  .sort(([a], [b]) => Number(a) - Number(b))
-                  .map(([run, status]) => {
-                    const isPassing = status === 'pass' || status === 'SUCCESSFUL';
-                    return (
-                      <div key={run} style={{ position: 'relative' }}
-                           onMouseEnter={() => setHoveredRun(run)}
-                           onMouseLeave={() => setHoveredRun(null)}>
-                        <span style={{
-                          display: 'block', width: 6, height: isPassing ? 14 : 20, borderRadius: 2,
-                          background: isPassing ? '#6EE7B7' : '#FCA5A5',
-                          flexShrink: 0, cursor: 'default',
-                          outline: hoveredRun === run ? '2px solid #475569' : '2px solid transparent',
-                          outlineOffset: 1,
-                        }} />
-                        {hoveredRun === run && (
-                          <div style={{
-                            position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
-                            transform: 'translateX(-50%)',
-                            background: '#1E293B', color: '#F8FAFC',
-                            fontSize: 11, padding: '3px 8px', borderRadius: 4,
-                            whiteSpace: 'nowrap', zIndex: 20, pointerEvents: 'none',
-                          }}>
-                            Run {run}: {isPassing ? 'pass' : 'fail'}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
+          {/* Relevant in — future course appearances */}
+          {test.courseAppearances?.length > 0 && (
+            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                letterSpacing: '.08em', color: '#94A3B8', flexShrink: 0,
+              }}>
+                Relevant in
+              </span>
+              <span style={{ color: '#CBD5E1', fontSize: 11, flexShrink: 0 }}>→</span>
+              {test.courseAppearances.map((ap, i) => (
+                <div key={i} style={{ position: 'relative', display: 'inline-block' }}
+                     onMouseEnter={() => setHoveredPill(i)}
+                     onMouseLeave={() => setHoveredPill(null)}>
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10, padding: '2px 7px', borderRadius: 4,
+                    background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
+                    cursor: 'default', display: 'inline-block',
+                  }}>
+                    {ap.label}
+                  </span>
+                  {hoveredPill === i && (
+                    <div style={{
+                      position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: '#1E293B', color: '#F8FAFC',
+                      fontSize: 11, padding: '4px 10px', borderRadius: 4,
+                      whiteSpace: 'normal', maxWidth: 260, textAlign: 'center',
+                      zIndex: 20, pointerEvents: 'none',
+                    }}>
+                      {ap.description}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+          )}
+
+          {/* Run history */}
+          {Object.keys(test.statusByRun || {}).length > 0 && (
+            <div style={{ marginTop: 14 }}>
+              {Object.keys(test.statusByRun || {}).length > 0 && (
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                                letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
+                    Run history ({Object.keys(test.statusByRun).length} runs)
+                  </div>
+                  <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    {Object.entries(test.statusByRun)
+                      .sort(([a], [b]) => Number(a) - Number(b))
+                      .map(([run, status]) => {
+                        const isPassing = status === 'pass' || status === 'SUCCESSFUL';
+                        return (
+                          <div key={run} style={{ position: 'relative' }}
+                               onMouseEnter={() => setHoveredRun(run)}
+                               onMouseLeave={() => setHoveredRun(null)}>
+                            <span style={{
+                              display: 'block', width: 6, height: isPassing ? 14 : 20, borderRadius: 2,
+                              background: isPassing ? '#6EE7B7' : '#FCA5A5',
+                              flexShrink: 0, cursor: 'default',
+                              outline: hoveredRun === run ? '2px solid #475569' : '2px solid transparent',
+                              outlineOffset: 1,
+                            }} />
+                            {hoveredRun === run && (
+                              <div style={{
+                                position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
+                                transform: 'translateX(-50%)',
+                                background: '#1E293B', color: '#F8FAFC',
+                                fontSize: 11, padding: '3px 8px', borderRadius: 4,
+                                whiteSpace: 'nowrap', zIndex: 20, pointerEvents: 'none',
+                              }}>
+                                Run {run}: {isPassing ? 'pass' : 'fail'}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* Test source modal */}
+          {showTestSource && test.testSource && (
+            <TestSourceModal testSource={test.testSource} onClose={closeTestSource} />
           )}
         </div>
       )}

@@ -111,6 +111,7 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
         context: null,
         detailTests: [],
         detailSummary: { failing: 0, improved: 0, passing: 0, total: 0 },
+        runToEpisode: {},
       };
     }
 
@@ -169,12 +170,14 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
         name: h.testName,
         status,
         changedAt,
-        explanation:  fb?.explanation  || '',
-        pattern:      fb?.pattern      || '',
-        nextSteps:    fb?.nextSteps    || [],
-        suggestion:   fb?.suggestion   || '',
-        diffs:        fb?.diffs        || [],
-        statusByRun:  h.statusByRun    || {},
+        explanation:       fb?.explanation       || '',
+        pattern:           fb?.pattern           || '',
+        nextSteps:         fb?.nextSteps         || [],
+        suggestion:        fb?.suggestion        || '',
+        diffs:             fb?.diffs             || [],
+        courseAppearances: fb?.courseAppearances || [],
+        statusByRun:       h.statusByRun         || {},
+        testSource:        frontendData.testSources?.[h.testId] || null,
       };
     });
 
@@ -185,8 +188,15 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
       total:    detailTests.length,
     };
 
+    // Build run-number → episode lookup for citation tooltips
+    const episodes = frontendData.episodes || [];
+    const runToEpisode = {};
+    episodes.forEach((ep, idx) => {
+      (ep.runNumbers || []).forEach(r => { runToEpisode[r] = { idx: idx + 1, ep }; });
+    });
+
     return {
-      episodes: frontendData.episodes || [],
+      episodes,
       episodeTestData: frontendData.episodeTestData || [],
       allRuns,
       progressDataPoints,
@@ -197,6 +207,7 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
       context: frontendData.context || null,
       detailTests,
       detailSummary,
+      runToEpisode,
     };
   }, [frontendData]);
 

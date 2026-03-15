@@ -5,6 +5,7 @@ import edu.rosehulman.csse230feedback.llm.LlmException;
 import edu.rosehulman.csse230feedback.llm.LlmService;
 import edu.rosehulman.csse230feedback.llm.PromptLoader;
 import edu.rosehulman.csse230feedback.model.AssignmentConfig;
+import edu.rosehulman.csse230feedback.model.CourseContext;
 import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
 import edu.rosehulman.csse230feedback.model.IngestionManifest;
@@ -12,7 +13,9 @@ import edu.rosehulman.csse230feedback.model.RunRecord;
 import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
 import edu.rosehulman.csse230feedback.model.TestStatus;
 import edu.rosehulman.csse230feedback.model.frontend.*;
+import edu.rosehulman.csse230feedback.model.frontend.CourseAppearance;
 import edu.rosehulman.csse230feedback.prepare.*;
+import edu.rosehulman.csse230feedback.model.frontend.TestSource;
 import edu.rosehulman.csse230feedback.util.Json;
 import edu.rosehulman.csse230feedback.model.frontend.ErrorEvolution;
 import edu.rosehulman.csse230feedback.model.frontend.StruggleProfile;
@@ -98,12 +101,21 @@ public class PrepareService {
             manifest = Json.mapper().readValue(manifestPath.toFile(), IngestionManifest.class);
         }
 
-        // 4. Load optional category mappings (from ingest output)
+        // 4. Load optional category mappings (from ingest output, or sibling of assignment config)
         Path testCategoriesPath = opts.resolvedIngestDir().resolve("test_categories.json");
         TestCategoryMapping testCategories = null;
         if (Files.exists(testCategoriesPath)) {
             testCategories = Json.mapper().readValue(testCategoriesPath.toFile(), TestCategoryMapping.class);
             System.out.println("Loaded test categories from test_categories.json");
+        } else if (opts.assignmentConfigPath() != null) {
+            // Fallback: look for <stem>_test_categories.json alongside the assignment config
+            Path cfgPath = opts.assignmentConfigPath();
+            String stem = cfgPath.getFileName().toString().replaceFirst("\\.json$", "");
+            Path siblingPath = cfgPath.getParent().resolve(stem + "_test_categories.json");
+            if (Files.exists(siblingPath)) {
+                testCategories = Json.mapper().readValue(siblingPath.toFile(), TestCategoryMapping.class);
+                System.out.println("Loaded test categories from " + siblingPath);
+            }
         }
 
         Path diffCategoriesPath = opts.resolvedIngestDir().resolve("diff_categories.json");
@@ -255,8 +267,12 @@ public class PrepareService {
                 outcome = shortName + " went from " + fromStatus + " to " + toStatus;
             }
 
+            List<Integer> runNumbers = episodeRuns.stream()
+                .map(EpisodeSplitter.RunWithTests::runNumber)
+                .toList();
+
             Episode episode = new Episode(episodeId, startTime, endTime, label, dominantCategory)
-                .withDetails(timeRange, edits, area, outcome, outcomeType, linkedTestId);
+                .withDetails(timeRange, edits, area, outcome, outcomeType, linkedTestId, runNumbers);
             episodes.add(episode);
 
             // Transform runs
@@ -331,6 +347,19 @@ public class PrepareService {
         List<TimelinePoint> timeline = timelineGen.generate(runsWithTests);
         System.out.println("Generated " + timeline.size() + " timeline points");
 
+        // 8d. Extract test source snippets from diff archives
+        Map<String, TestSource> testSources = Collections.emptyMap();
+        try {
+            TestSourceExtractor testSourceExtractor = new TestSourceExtractor();
+            List<String> allTestIds = testHistories.stream().map(TestHistory::testId).toList();
+            testSources = testSourceExtractor.extract(opts.resolvedIngestDir(), allTestIds, warnings);
+            if (!testSources.isEmpty()) {
+                System.out.println("Extracted test sources for " + testSources.size() + " tests");
+            }
+        } catch (IOException e) {
+            warnings.add("Failed to extract test sources: " + e.getMessage());
+        }
+
         // 9. Build submission context
         String studentId = opts.studentIdOverride();
         String assignmentName = opts.assignmentNameOverride();
@@ -369,6 +398,7 @@ public class PrepareService {
                         semanticLog,
                         testCategories,
                         assignmentName,
+                        assignmentConfig.resolvedCourseContext(),
                         patchesByRunByFile,
                         feedbackRequestNum,
                         totalRequestsEstimate
@@ -406,6 +436,28 @@ public class PrepareService {
                 warnings.add("Feedback generation failed: " + e.getMessage());
             }
 
+            // Resolve courseAppearances deterministically (independent of LLM output)
+            if (!feedback.isEmpty()) {
+                CourseContext courseCtx = assignmentConfig.resolvedCourseContext();
+                if (!courseCtx.concepts().isEmpty()) {
+                    Map<String, TestHistory> historyById = testHistories.stream()
+                        .collect(Collectors.toMap(TestHistory::testId, th -> th, (a, b) -> a));
+                    feedback = feedback.stream().map(fb -> {
+                        TestHistory th = historyById.get(fb.testId());
+                        if (th == null) return fb;
+                        List<CourseContext.FutureAppearance> fas =
+                            FeedbackGenerationService.resolveFutureAppearances(th, courseCtx);
+                        if (fas.isEmpty()) return fb;
+                        List<CourseAppearance> appearances = fas.stream()
+                            .map(fa -> new CourseAppearance(fa.label(), fa.description()))
+                            .toList();
+                        return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
+                            fb.explanation(), fb.nextSteps(), fb.diffs(), fb.relatedTestIds(),
+                            appearances);
+                    }).toList();
+                }
+            }
+
             // Post-process: filter highlights and clear dots for secondary (grouped) tests.
             // The LLM only generated feedback for primaries, so only primaries get highlight dots.
             if (!feedback.isEmpty()) {
@@ -431,7 +483,8 @@ public class PrepareService {
             failureHighlights,
             codeSnapshots.isEmpty() ? null : codeSnapshots,
             semanticLog,
-            timeline.isEmpty() ? null : timeline
+            timeline.isEmpty() ? null : timeline,
+            testSources.isEmpty() ? null : testSources
         );
 
         // 11. Write output

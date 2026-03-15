@@ -8,8 +8,9 @@ public record Feedback(
     String testId,
     String pattern,
     String confidence,
-    String explanation,       // synthesized prose paragraph (all contributing causes)
-    List<String> nextSteps,   // ordered list of 2-3 concrete skill-building steps
-    List<DiffEntry> diffs,    // chronologically ordered list of relevant code changes
-    List<String> relatedTestIds // testIds of tests in same group, null if singleton
+    String explanation,                    // synthesized prose paragraph (all contributing causes)
+    List<String> nextSteps,                // ordered list of 2-3 concrete skill-building steps
+    List<DiffEntry> diffs,                 // chronologically ordered list of relevant code changes
+    List<String> relatedTestIds,           // testIds of tests in same group, null if singleton
+    List<CourseAppearance> courseAppearances // future appearances of this concept; empty = omitted
 ) {}

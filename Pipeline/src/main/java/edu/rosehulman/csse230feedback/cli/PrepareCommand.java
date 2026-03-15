@@ -128,7 +128,8 @@ public class PrepareCommand implements Callable<Integer> {
             ingestDir,
             allowBasicFallback,
             includeErrorMessages,
-            assignmentConfig
+            assignmentConfig,
+            assignmentConfigPath
         );
 
         PrepareService service = new PrepareService();

@@ -5,6 +5,7 @@ import edu.rosehulman.csse230feedback.llm.LlmException;
 import edu.rosehulman.csse230feedback.llm.LlmResponse;
 import edu.rosehulman.csse230feedback.llm.LlmService;
 import edu.rosehulman.csse230feedback.llm.PromptLoader;
+import edu.rosehulman.csse230feedback.model.CourseContext;
 import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
 import edu.rosehulman.csse230feedback.model.frontend.*;
 import edu.rosehulman.csse230feedback.prepare.StatusChangeTracker;
@@ -45,6 +46,7 @@ public class FeedbackGenerationService {
      * @param semanticLog semantic enrichment data (nullable)
      * @param testCategories test category mapping (nullable)
      * @param assignmentName assignment name for prompt context
+     * @param courseContext course context for forward-looking nextSteps (nullable)
      * @param patchesByRunByFile runNumber → (fileKey → patchText) for code diff context
      * @param requestNumber current request number for LLM progress tracking
      * @param totalRequests total expected requests
@@ -56,6 +58,7 @@ public class FeedbackGenerationService {
             SemanticLog semanticLog,
             TestCategoryMapping testCategories,
             String assignmentName,
+            CourseContext courseContext,
             Map<Integer, Map<String, String>> patchesByRunByFile,
             int requestNumber,
             int totalRequests) throws LlmException, IOException {
@@ -104,7 +107,7 @@ public class FeedbackGenerationService {
 
         // Build input JSON with context per effective (primary) test
         String inputData = buildInputJson(effectiveIds, historyMap, semanticLog, testCategories,
-            diffsPerTest, primaryToRelated);
+            courseContext, diffsPerTest, primaryToRelated);
 
         // Build narrative context from semantic log
         String narrativeContext = "(no narrative context available)";
@@ -150,14 +153,15 @@ public class FeedbackGenerationService {
                 return new Feedback(
                     fb.testId(), fb.pattern(), fb.confidence(), fb.explanation(), fb.nextSteps(),
                     (annotated != null && !annotated.isEmpty()) ? annotated : fb.diffs(),
-                    (related != null && !related.isEmpty()) ? related : null
+                    (related != null && !related.isEmpty()) ? related : null,
+                    null
                 );
             })
             .toList();
     }
 
     /**
-     * Backwards-compatible overload without patchesByRunByFile.
+     * Backwards-compatible overload without patchesByRunByFile or courseContext.
      */
     public List<Feedback> generate(
             FailureHighlights failureHighlights,
@@ -168,7 +172,7 @@ public class FeedbackGenerationService {
             int requestNumber,
             int totalRequests) throws LlmException, IOException {
         return generate(failureHighlights, testHistories, semanticLog, testCategories,
-                        assignmentName, Collections.emptyMap(), requestNumber, totalRequests);
+                        assignmentName, null, Collections.emptyMap(), requestNumber, totalRequests);
     }
 
     /**
@@ -418,6 +422,7 @@ public class FeedbackGenerationService {
             Map<String, TestHistory> historyMap,
             SemanticLog semanticLog,
             TestCategoryMapping testCategories,
+            CourseContext courseContext,
             Map<String, List<DiffEntry>> diffsPerTest,
             Map<String, List<String>> primaryToRelated) throws IOException {
 
@@ -538,6 +543,21 @@ public class FeedbackGenerationService {
                 }
             }
 
+            // Course context: inject matched future appearances for the LLM to frame nextSteps
+            if (courseContext != null && !courseContext.concepts().isEmpty()) {
+                List<CourseContext.FutureAppearance> appearances =
+                    resolveFutureAppearances(th, courseContext);
+                if (!appearances.isEmpty()) {
+                    ArrayNode ccArray = testNode.putArray("courseContext");
+                    for (CourseContext.FutureAppearance fa : appearances) {
+                        ObjectNode faNode = Json.mapper().createObjectNode();
+                        faNode.put("label", fa.label());
+                        faNode.put("description", fa.description());
+                        ccArray.add(faNode);
+                    }
+                }
+            }
+
             // Pre-LLM consistency check: if the pipeline's own fields contradict each other,
             // that indicates a pipeline bug (wrong data fed to the LLM), not an LLM issue.
             // Log clearly so it's distinguishable from a post-generation fact-check violation.
@@ -574,6 +594,44 @@ public class FeedbackGenerationService {
         }
 
         return Json.mapper().writeValueAsString(testsArray);
+    }
+
+    /**
+     * Resolves future appearances for a test by matching its categories (or test name fallback)
+     * against courseContext concept entries.
+     */
+    static List<CourseContext.FutureAppearance> resolveFutureAppearances(
+            TestHistory th, CourseContext courseContext) {
+        if (courseContext == null || courseContext.concepts().isEmpty()) return List.of();
+
+        // Primary: match against test categories
+        if (th.categories() != null && !th.categories().isEmpty()) {
+            List<CourseContext.FutureAppearance> matches = courseContext.forCategories(th.categories());
+            if (!matches.isEmpty()) return matches;
+        }
+
+        // Fallback: substring match on lowercased test method name (strip "test" prefix)
+        String methodName = extractMethodNameFromId(th.testId()).toLowerCase(java.util.Locale.ROOT);
+        String keyword = methodName.startsWith("test") ? methodName.substring(4) : methodName;
+        if (!keyword.isEmpty()) {
+            String kw = keyword;
+            return courseContext.concepts().stream()
+                .filter(e -> e.testCategories().stream()
+                    .anyMatch(cat -> cat.toLowerCase(java.util.Locale.ROOT).contains(kw)))
+                .flatMap(e -> e.futureAppearances().stream())
+                .distinct().toList();
+        }
+
+        return List.of();
+    }
+
+    private static String extractMethodNameFromId(String testId) {
+        if (testId == null) return "";
+        int hash = testId.indexOf('#');
+        if (hash < 0) return testId;
+        String method = testId.substring(hash + 1);
+        if (method.endsWith("()")) method = method.substring(0, method.length() - 2);
+        return method;
     }
 
     private String buildTestCategoriesSummary(TestCategoryMapping testCategories) {
@@ -628,7 +686,7 @@ public class FeedbackGenerationService {
             List<String> notes = getStringListOrEmpty(item, "diffNotes");
             if (!notes.isEmpty()) diffNotes.put(testId, notes);
 
-            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null));
+            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null, null));
         }
     }
 
@@ -686,7 +744,7 @@ public class FeedbackGenerationService {
                     List<String> notes = getStringListOrEmpty(item, "diffNotes");
                     if (!notes.isEmpty()) diffNotes.put(testId, notes);
 
-                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null));
+                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null, null));
                 }
             } catch (Exception ignored) {
                 // Skip malformed object
@@ -804,7 +862,7 @@ public class FeedbackGenerationService {
                 List<String> related = relatedMap.get(fb.testId());
                 if (related != null) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
-                        fb.explanation(), fb.nextSteps(), fb.diffs(), related);
+                        fb.explanation(), fb.nextSteps(), fb.diffs(), related, fb.courseAppearances());
                 }
                 return fb;
             })

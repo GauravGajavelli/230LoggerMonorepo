@@ -17,7 +17,7 @@ const BackIcon = () => (
  * On mobile: single column, stacked.
  */
 export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
-  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context } = usePlaybackDataContext();
+  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context, runToEpisode } = usePlaybackDataContext();
 
   const [tab, setTab] = useState('issues');
   const [highlightedTestId, setHighlightedTestId] = useState(null);
@@ -36,16 +36,10 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Test IDs reachable via a chip AND present in feedbackMap ── */
-  // Used for tab "all seen" check: feedback without a chip is readable inline
-  // in the test card, so we only track chip-navigable items.
-  const chipLinkedFeedbackIds = useMemo(() => {
-    const ids = new Set();
-    episodes.forEach(ep => {
-      if (ep.linkedTestId && feedbackMap.has(ep.linkedTestId)) ids.add(ep.linkedTestId);
-    });
-    return ids;
-  }, [episodes, feedbackMap]);
+  /* ── All test IDs that have feedback (used for tab dot + "all seen" check) ── */
+  // Covers every feedback item regardless of whether an episode chip links to it.
+  // Chip-navigation-only feedback (no chip) is still readable inline in the test card.
+  const chipLinkedFeedbackIds = useMemo(() => new Set(feedbackMap.keys()), [feedbackMap]);
 
   /* ── testId → name lookup for chip labels ── */
   const testNameById = useMemo(
@@ -311,13 +305,13 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
 
           {/* Test cards per tab */}
           {tab === 'issues'   && failingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
           ))}
           {tab === 'improved' && improvedTests.map(t => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
           ))}
           {tab === 'passing'  && passingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
           ))}
 
           {/* Closure / mark reviewed */}
