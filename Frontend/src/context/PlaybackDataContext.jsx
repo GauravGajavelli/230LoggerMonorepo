@@ -165,6 +165,10 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
       const changedAt = rawTs ? formatShortTime(rawTs) : null;
 
       const fb = feedbackByTestId.get(h.testId);
+
+      // Concept scores computed by pipeline (conceptScores field on TestHistory)
+      const conceptScores = h.conceptScores || [];
+
       return {
         id: h.testId,
         name: h.testName,
@@ -176,8 +180,10 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
         suggestion:        fb?.suggestion        || '',
         diffs:             fb?.diffs             || [],
         courseAppearances: fb?.courseAppearances || [],
+        drills:            fb?.drills            || null,
         statusByRun:       h.statusByRun         || {},
         testSource:        frontendData.testSources?.[h.testId] || null,
+        conceptScores,
       };
     });
 

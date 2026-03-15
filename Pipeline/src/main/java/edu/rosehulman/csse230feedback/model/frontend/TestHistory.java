@@ -19,7 +19,8 @@ public record TestHistory(
     String highlightCategory,
     List<String> categories,
     ErrorEvolution errorEvolution,
-    StruggleProfile struggleProfile
+    StruggleProfile struggleProfile,
+    List<ConceptScore> conceptScores
 ) {
     /**
      * Constructor for backwards compatibility - creates TestHistory without
@@ -40,7 +41,7 @@ public record TestHistory(
             List<String> categories) {
         this(testId, testName, statusByRun, failureIntervals, isLingeringFailure,
              isRegression, recursCount, flipsWithin, totalFailedRuns,
-             meaningfulnessScore, highlightCategory, categories, null, null);
+             meaningfulnessScore, highlightCategory, categories, null, null, null);
     }
 
     /**
@@ -50,7 +51,7 @@ public record TestHistory(
         return new TestHistory(
             testId, testName, statusByRun, failureIntervals, isLingeringFailure,
             isRegression, recursCount, flipsWithin, totalFailedRuns,
-            meaningfulnessScore, highlightCategory, categories, evolution, struggleProfile
+            meaningfulnessScore, highlightCategory, categories, evolution, struggleProfile, conceptScores
         );
     }
 
@@ -61,7 +62,7 @@ public record TestHistory(
         return new TestHistory(
             testId, testName, statusByRun, failureIntervals, isLingeringFailure,
             isRegression, recursCount, flipsWithin, totalFailedRuns,
-            meaningfulnessScore, highlightCategory, categories, errorEvolution, profile
+            meaningfulnessScore, highlightCategory, categories, errorEvolution, profile, conceptScores
         );
     }
 
@@ -72,7 +73,7 @@ public record TestHistory(
         return new TestHistory(
             testId, testName, statusByRun, failureIntervals, isLingeringFailure,
             isRegression, recursCount, flipsWithin, totalFailedRuns,
-            meaningfulnessScore, highlightCategory, categories, evolution, profile
+            meaningfulnessScore, highlightCategory, categories, evolution, profile, conceptScores
         );
     }
 
@@ -83,7 +84,19 @@ public record TestHistory(
         return new TestHistory(
             testId, testName, statusByRun, failureIntervals, isLingeringFailure,
             isRegression, recursCount, flipsWithin, totalFailedRuns,
-            meaningfulnessScore, newCategory, categories, errorEvolution, struggleProfile
+            meaningfulnessScore, newCategory, categories, errorEvolution, struggleProfile, conceptScores
+        );
+    }
+
+    /**
+     * Returns a copy of this TestHistory with conceptScores added.
+     */
+    public TestHistory withConceptScores(List<ConceptScore> scores) {
+        return new TestHistory(
+            testId, testName, statusByRun, failureIntervals, isLingeringFailure,
+            isRegression, recursCount, flipsWithin, totalFailedRuns,
+            meaningfulnessScore, highlightCategory, categories,
+            errorEvolution, struggleProfile, scores
         );
     }
 }

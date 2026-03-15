@@ -1,0 +1,119 @@
+[
+  {
+    "id": "exam2-pruneFullSubtreesSize3",
+    "source": "Exam 2",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~15 min",
+    "intro": "This appears on Exam 2 as part of pruneFullSubtreesSize3 — the same pointer-replacement pattern as remove(). Add pruneFullSubtreesSize3() to BinarySearchTree.java so that it removes every full size-3 subtree (a root with exactly two leaf children), then paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_pruneFullSubtreesSize3_basicCase() {\n    BST<String> bst = new BST<>();\n    bst.add(\"romeo\");\n    bst.add(\"echo\");\n    bst.add(\"tango\");\n    bst.pruneFullSubtreesSize3();\n    assertEquals(\"[]\", bst.toString());\n    points += 1;\n}",
+    "hints": [
+      "A full size-3 subtree has a root with exactly two non-null children and no grandchildren — both children are leaves.",
+      "Visit nodes bottom-up (post-order): recursively prune children before deciding whether the current node is the root of a full size-3 subtree.",
+      "In the recursive helper, return NULL_NODE when the current node qualifies (left != NULL_NODE, right != NULL_NODE, left.left == NULL_NODE, left.right == NULL_NODE, right.left == NULL_NODE, right.right == NULL_NODE); otherwise return this."
+    ]
+  },
+  {
+    "id": "exam2-shortestWordAlongPath",
+    "source": "Exam 2",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~10 min",
+    "intro": "This appears on Exam 2 as part of shortestWordAlongPath — walk the BST search path toward the target and return the shortest String encountered along the way. Add shortestWordAlongPath(String target) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_shortestWordAlongPath_singleAndTwoNodes() {\n    BST<String> bst = new BST<>();\n    bst.add(\"romeo\");\n    assertEquals(\"romeo\", bst.shortestWordAlongPath(\"romeo\"));\n    bst.add(\"echo\");\n    assertEquals(\"echo\", bst.shortestWordAlongPath(\"echo\"));\n    assertEquals(\"romeo\", bst.shortestWordAlongPath(\"romeo\"));\n    points += 1;\n}",
+    "hints": [
+      "Follow the standard BST search path from the root toward the target, comparing at each node exactly as contains() does.",
+      "Track the shortest String seen so far as you walk the path — update it whenever you find a String with fewer characters than the current best.",
+      "In the recursive helper, pass the current best down and return it; there is no need to backtrack, because you only visit nodes on the single root-to-target path."
+    ]
+  },
+  {
+    "id": "exam2-countLeftNodesAtDepth",
+    "source": "Exam 2",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~10 min",
+    "intro": "This appears on Exam 2 as part of countLeftNodesAtDepth — count how many nodes at a given depth are left children. Add countLeftNodesAtDepth(int depth) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_countLeftNodesAtDepth_threeNodeTree() {\n    BST<String> bst = new BST<>();\n    bst.add(\"november\");\n    bst.add(\"foxtrot\");\n    bst.add(\"tango\");\n    assertEquals(0, bst.countLeftNodesAtDepth(0));\n    assertEquals(1, bst.countLeftNodesAtDepth(1));\n    points += 1;\n}",
+    "hints": [
+      "Recurse with a depth counter: at each node, reduce the target depth by 1; when the counter hits 0, the current node is at the target depth.",
+      "A node is a left child when it was reached by following a parent's left pointer — pass an isLeftChild boolean down the recursion, and count when depth==0 and isLeftChild==true.",
+      "Base case: if the current node is NULL_NODE, return 0. The root call should pass isLeftChild=false so the root is never counted even when depth==0."
+    ]
+  },
+  {
+    "id": "hw5-isHeightBalanced",
+    "source": "HW5",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~10 min",
+    "intro": "HW5 asks you to test whether every node in the BST is height-balanced (|height(left) − height(right)| ≤ 1). Add isHeightBalanced() to BinarySearchTree.java using the height() method you already have, then paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_isHeightBalanced_leftHeavyChain() {\n    BST<Integer> bst = new BST<>();\n    assertTrue(bst.isHeightBalanced());\n    bst.add(30);\n    assertTrue(bst.isHeightBalanced());\n    bst.add(20);\n    assertTrue(bst.isHeightBalanced());\n    bst.add(10);\n    assertFalse(bst.isHeightBalanced());\n    points += 1;\n}",
+    "hints": [
+      "A tree is height-balanced if every node satisfies |height(left subtree) − height(right subtree)| ≤ 1.",
+      "Recurse through all nodes: for each BinaryNode, check both children recursively AND check the balance condition at the current node.",
+      "Use the existing height() helper to compute left and right heights at each node, then return false early if the difference exceeds 1 at any node."
+    ]
+  },
+  {
+    "id": "hw5-getSumOfHeights",
+    "source": "HW5",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~5 min",
+    "intro": "HW5 asks you to compute the sum of heights of all nodes in the BST. Add getSumOfHeights() to BinarySearchTree.java using the height() method you already have, then paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_getSumOfHeights_growthPattern() {\n    BST<Integer> bst = new BST<>();\n    assertEquals(0, bst.getSumOfHeights());\n    bst.add(20);\n    assertEquals(0, bst.getSumOfHeights());\n    bst.add(10);\n    assertEquals(1, bst.getSumOfHeights());\n    bst.add(30);\n    assertEquals(1, bst.getSumOfHeights());\n    points += 1;\n}",
+    "hints": [
+      "The height of a single leaf node is 0, and the height of NULL_NODE is -1 — so a root-only tree has sum 0.",
+      "Recurse through all nodes and accumulate height(node) for each non-null node; your existing height() method returns the correct value at each node.",
+      "When you add a symmetric sibling (e.g., both left and right children are leaves), their heights are both 0 and the root's height rises to 1 — the sum stays the same or grows depending on the shape."
+    ]
+  },
+  {
+    "id": "hw5-fullTreeConstructor",
+    "source": "HW5",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~15 min",
+    "intro": "HW5 asks you to add a BinarySearchTree(int maxDepth) constructor that builds a complete full binary tree whose node values are their own depths. Add this constructor to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_fullTreeConstructor_depthZeroAndOne() {\n    BST<Integer> b0 = new BST<>(0);\n    assertEquals(\"[0]\", b0.toStructuredString());\n    BST<Integer> b1 = new BST<>(1);\n    assertEquals(\"[[1]0[1]]\", b1.toStructuredString());\n    points += 1;\n}",
+    "hints": [
+      "A full binary tree of maxDepth 0 is just a root node with value 0; depth 1 adds a left child and right child both with value 1.",
+      "Use a recursive helper that takes the current depth and the maxDepth: if currentDepth > maxDepth, return NULL_NODE; otherwise create a node with value currentDepth and set its children by recursing with currentDepth+1.",
+      "toStructuredString() format wraps left subtree in brackets, then the node value, then right subtree in brackets — mirror this structure in your mental model to verify depth-1: [[1]0[1]]."
+    ]
+  },
+  {
+    "id": "practice-removeMin",
+    "source": "Practice",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~10 min",
+    "intro": "A natural extension of remove() — add removeMin() to BinarySearchTree.java that removes and returns the minimum element (the leftmost node). Uses the same one-child pointer-swap pattern as remove(), but you only ever need to follow left pointers. Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_removeMin_threeNodeTree() {\n    BST<Integer> bst = new BST<>();\n    bst.add(10);\n    bst.add(5);\n    bst.add(15);\n    assertEquals(5, (int) bst.removeMin());\n    assertEquals(\"[10, 15]\", bst.toString());\n    points += 1;\n}",
+    "hints": [
+      "The minimum is always the leftmost node — keep following left pointers until you find a node whose left child is NULL_NODE.",
+      "Once found, unlink the minimum by replacing it with its right child (which may be NULL_NODE) — exactly the same pointer-swap as removing a node with zero or one child in remove().",
+      "Return the data value from the removed node. In the recursive helper, when node.left == NULL_NODE, set the parent's left pointer to node.right and return node.data."
+    ]
+  },
+  {
+    "id": "practice-getPreOrderList",
+    "source": "Practice",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~10 min",
+    "intro": "Add getPreOrderList() to BinarySearchTree.java that collects all elements in pre-order (root first, then left subtree, then right subtree) into an ArrayList<T> — the same traversal order your preOrderIterator walks the tree. Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_getPreOrderList_rootFirst() {\n    BST<Integer> bst = new BST<>();\n    bst.add(10);\n    bst.add(5);\n    bst.add(15);\n    ArrayList<Integer> list = bst.getPreOrderList();\n    assertEquals(Integer.valueOf(10), list.get(0));\n    assertEquals(Integer.valueOf(5), list.get(1));\n    points += 1;\n}",
+    "hints": [
+      "Pre-order means: add the current node's data FIRST, then recurse left, then recurse right — root always comes before its descendants.",
+      "Pass an ArrayList into the recursive helper (or build one from recursive results): add current node data, then append the left subtree's pre-order list, then the right subtree's.",
+      "For a balanced 3-node tree with root 10, left 5, right 15: pre-order visits 10 → 5 → 15, so list.get(0)==10 and list.get(1)==5."
+    ]
+  },
+  {
+    "id": "final-countOddOnlyIf",
+    "source": "Final Exam",
+    "targetFile": "BSTTesting.java",
+    "timeEstimate": "~15 min",
+    "intro": "This appears on the Final Exam as part of countOddOnlyIf — count nodes whose Integer value is odd AND whose left subtree height is strictly less than their right subtree height. Add countOddOnlyIf() to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_countOddOnlyIf_oddRootRightHeavy() {\n    BST<Integer> bst = new BST<>();\n    bst.add(81);\n    assertEquals(0, (int) bst.countOddOnlyIf());\n    bst.add(101);\n    assertEquals(1, (int) bst.countOddOnlyIf());\n    points += 1;\n}",
+    "hints": [
+      "A node counts only if two conditions are both true: its value is odd (value % 2 != 0), and height(left child) < height(right child).",
+      "Recurse through all nodes and sum the count: at each node, check both conditions independently, then add the counts from left and right subtrees.",
+      "When you insert 101 as the right child of 81 (odd), height(left of 81) becomes -1 and height(right of 81) becomes 0 — so 81 satisfies both conditions and contributes 1 to the count."
+    ]
+  }
+]

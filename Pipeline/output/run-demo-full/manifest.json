@@ -1,0 +1,93 @@
+{
+  "schemaVersion" : 1,
+  "createdAtUtc" : "2026-03-15T22:09:34.397724Z",
+  "repoRoot" : "/tmp/demo-full-input",
+  "runTarPath" : "/tmp/demo-full-input/run.tar",
+  "runTarSha256" : "6fcef34cc180d1138bc9d1be0ac4682f566131cb1a294376bbc8c42d304d3bc7",
+  "extractedFiles" : [ {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_0_.tar.zip",
+    "sizeBytes" : 6337
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_28_.tar.zip",
+    "sizeBytes" : 9509
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_42_.tar.zip",
+    "sizeBytes" : 7848
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_44_.tar.zip",
+    "sizeBytes" : 8137
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_46_.tar.zip",
+    "sizeBytes" : 7557
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/testRunInfo.json",
+    "sizeBytes" : 23106
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_13_.tar.zip",
+    "sizeBytes" : 6700
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_19_.tar.zip",
+    "sizeBytes" : 7426
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/error-logs.txt",
+    "sizeBytes" : 219
+  } ],
+  "diffArchives" : [ {
+    "filename" : "diffs_0_.tar.zip",
+    "baselineRunNumber" : 0,
+    "sha256" : "44470ea3c452d6a18a7aef6f1c3a7fd330a3752f345e8d674e33a6441da642fe",
+    "baselineCount" : 4,
+    "patchCount" : 18,
+    "minPatchRunNumber" : 1,
+    "maxPatchRunNumber" : 12
+  }, {
+    "filename" : "diffs_13_.tar.zip",
+    "baselineRunNumber" : 13,
+    "sha256" : "5c08ca59e76e92d40f4951baa0c3d7adb3477ca480a876c88847c5e60caa2270",
+    "baselineCount" : 4,
+    "patchCount" : 12,
+    "minPatchRunNumber" : 13,
+    "maxPatchRunNumber" : 18
+  }, {
+    "filename" : "diffs_19_.tar.zip",
+    "baselineRunNumber" : 19,
+    "sha256" : "edd6fcce11609c3f222e31893c47aa082cc0d359f20f6f2a24a14d7dd2c2e85e",
+    "baselineCount" : 4,
+    "patchCount" : 14,
+    "minPatchRunNumber" : 19,
+    "maxPatchRunNumber" : 27
+  }, {
+    "filename" : "diffs_28_.tar.zip",
+    "baselineRunNumber" : 28,
+    "sha256" : "897b9171ea4df2a7625829af1068af409d3cdc98020d6d2b0aebc0233cc7e505",
+    "baselineCount" : 4,
+    "patchCount" : 18,
+    "minPatchRunNumber" : 28,
+    "maxPatchRunNumber" : 41
+  }, {
+    "filename" : "diffs_42_.tar.zip",
+    "baselineRunNumber" : 42,
+    "sha256" : "5c3a95bb07b33df39a0384ee2ff5532f2ae434d4ba23be6bceda104be750842b",
+    "baselineCount" : 4,
+    "patchCount" : 6,
+    "minPatchRunNumber" : 42,
+    "maxPatchRunNumber" : 43
+  }, {
+    "filename" : "diffs_44_.tar.zip",
+    "baselineRunNumber" : 44,
+    "sha256" : "33ee40e3a44c9ea5bde5b4f2a02d07a8e53afbf48ff1c78d7d9153fe0a90ec91",
+    "baselineCount" : 4,
+    "patchCount" : 6,
+    "minPatchRunNumber" : 44,
+    "maxPatchRunNumber" : 45
+  }, {
+    "filename" : "diffs_46_.tar.zip",
+    "baselineRunNumber" : 46,
+    "sha256" : "3037bd580dda45a397be00eb1705c12d7830b41e71b8faf2687769052503671b",
+    "baselineCount" : 4,
+    "patchCount" : 13,
+    "minPatchRunNumber" : 46,
+    "maxPatchRunNumber" : 57
+  } ],
+  "warnings" : [ ]
+}

@@ -114,6 +114,183 @@ function TestSourceModal({ testSource, onClose }) {
   );
 }
 
+/* ── Practice drill modal ── */
+function PracticeDrillModal({ drill, onClose }) {
+  const [hintsOpen, setHintsOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(drill.testCode || '').then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const isRepair = drill.mode === 'repair';
+
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        background: 'rgba(15,23,42,.55)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '24px',
+        animation: 'modal-backdrop-in .15s ease-out',
+      }}
+    >
+      <div style={{
+        width: '100%', maxWidth: 680,
+        maxHeight: '85vh',
+        background: '#fff', borderRadius: 12,
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(0,0,0,.25)',
+        overflow: 'hidden',
+        animation: 'modal-scale-in .2s ease-out',
+      }}>
+        {/* Header */}
+        <div style={{
+          background: '#800000', color: '#fff',
+          padding: '10px 20px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexShrink: 0, gap: 10,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+            <span style={{
+              fontWeight: 600, fontSize: 14,
+              fontFamily: "'IBM Plex Mono', monospace",
+            }}>
+              ✦ practice drill
+            </span>
+            {drill.mode && (
+              <span style={{
+                fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em',
+                padding: '2px 7px', borderRadius: 4, flexShrink: 0,
+                background: isRepair ? '#FEF2F2' : '#EFF6FF',
+                color: isRepair ? '#EF4444' : '#3B82F6',
+              }}>
+                {drill.mode}
+              </span>
+            )}
+            {drill.timeEstimate && (
+              <span style={{
+                fontSize: 11, fontWeight: 500,
+                padding: '2px 7px', borderRadius: 4, flexShrink: 0,
+                background: 'rgba(255,255,255,.15)', color: '#fff',
+              }}>
+                {drill.timeEstimate}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none', border: '1px solid rgba(255,255,255,.4)',
+              color: '#fff', padding: '3px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 13,
+              flexShrink: 0,
+            }}
+          >
+            ✕ Close
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {drill.intro && (
+            <p style={{ margin: 0, fontSize: 13, lineHeight: '1.6', color: '#64748B', fontStyle: 'italic' }}>
+              {drill.intro}
+            </p>
+          )}
+
+          {(drill.targetFile || drill.drillPoints) && (
+            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}>
+              {drill.targetFile && (
+                <>Paste into <code style={{ background: '#F3F4F6', padding: '0 3px', borderRadius: 3 }}>{drill.targetFile}</code></>
+              )}
+              {drill.drillPoints && (
+                <> · ~{drill.drillPoints} pt{drill.drillPoints !== 1 ? 's' : ''}{drill.pointsAvailable ? ' on regrade' : ' (standalone)'}</>
+              )}
+            </div>
+          )}
+
+          {drill.testCode && (
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={handleCopy}
+                style={{
+                  position: 'absolute', top: 8, right: 8, zIndex: 1,
+                  background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)',
+                  color: copied ? '#86EFAC' : '#94A3B8',
+                  padding: '3px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 11,
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  transition: 'color .15s',
+                }}
+              >
+                {copied ? '✓ copied' : 'copy'}
+              </button>
+              <pre style={{
+                background: '#0F172A', borderRadius: 8, margin: 0,
+                padding: '14px 16px', paddingRight: 60,
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, lineHeight: '1.7',
+                color: '#CBD5E1', overflowX: 'auto', whiteSpace: 'pre',
+              }}>
+                {drill.testCode}
+              </pre>
+            </div>
+          )}
+
+          {drill.hints && drill.hints.length > 0 && (
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: 8, overflow: 'hidden' }}>
+              <button
+                onClick={() => setHintsOpen(h => !h)}
+                style={{
+                  all: 'unset', display: 'flex', alignItems: 'center', gap: 6,
+                  width: '100%', padding: '8px 14px', cursor: 'pointer',
+                  boxSizing: 'border-box', background: '#F8FAFC',
+                  borderBottom: hintsOpen ? '1px solid #E2E8F0' : 'none',
+                }}
+              >
+                <span style={{
+                  fontSize: 10, color: '#94A3B8',
+                  display: 'inline-block',
+                  transition: 'transform .15s',
+                  transform: hintsOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}>▶</span>
+                <span style={{
+                  fontSize: 11, fontWeight: 600, color: '#64748B',
+                  letterSpacing: '.04em', textTransform: 'uppercase',
+                }}>
+                  {hintsOpen ? 'Hide hints' : 'Show hints'} ({drill.hints.length})
+                </span>
+              </button>
+              {hintsOpen && (
+                <ol style={{ margin: 0, paddingLeft: 32, paddingRight: 16, paddingTop: 10, paddingBottom: 10, listStyleType: 'decimal' }}>
+                  {drill.hints.map((hint, i) => (
+                    <li key={i} style={{ fontSize: 13, lineHeight: '1.6', color: '#334155', marginBottom: 8 }}>
+                      {hint}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Diff block — side-by-side before / after ── */
 function DiffBlock({ diff, onLabelClick }) {
   const before = diff.before || [];
@@ -192,6 +369,22 @@ function DiffBlock({ diff, onLabelClick }) {
   );
 }
 
+/* ── Feedback shimmer skeleton — shows briefly on first expand ── */
+function FeedbackShimmer() {
+  return (
+    <div style={{ padding: '14px 0 6px' }}>
+      <div className="skeleton-shimmer" style={{ height: 10, width: 88, marginBottom: 14 }} />
+      <div className="skeleton-shimmer" style={{ height: 13, width: '91%', marginBottom: 7 }} />
+      <div className="skeleton-shimmer" style={{ height: 13, width: '76%', marginBottom: 7 }} />
+      <div className="skeleton-shimmer" style={{ height: 13, width: '58%', marginBottom: 20 }} />
+      <div className="skeleton-shimmer" style={{ height: 10, width: 108, marginBottom: 10 }} />
+      <div className="skeleton-shimmer" style={{ height: 54, width: '100%', borderRadius: 6, marginBottom: 16 }} />
+      <div className="skeleton-shimmer" style={{ height: 10, width: 80, marginBottom: 10 }} />
+      <div className="skeleton-shimmer" style={{ height: 40, width: '100%', borderRadius: 6 }} />
+    </div>
+  );
+}
+
 /**
  * TestCard matching the wireframe style.
  * Failing AND improved tests with feedback can expand.
@@ -209,11 +402,16 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
   const [hoveredPill, setHoveredPill] = useState(null);
+  const [hoveredConcept, setHoveredConcept] = useState(null);
   const [hasOpenedFeedback, setHasOpenedFeedback] = useState(false);
   const [showTestSource, setShowTestSource] = useState(false);
   const closeTestSource = useCallback(() => setShowTestSource(false), []);
+  const [showDrill, setShowDrill] = useState(false);
+  const closeDrill = useCallback(() => setShowDrill(false), []);
+  const [shimmerDone, setShimmerDone] = useState(true);
   const cardRef = useRef(null);
   const hasRevealedRef = useRef(false);
+  const hasShimmeredRef = useRef(false);
 
   const hasFeedback = !!(test.explanation || test.suggestion || test.nextSteps?.length || test.diffs?.length);
   const canExpand = hasFeedback;
@@ -228,6 +426,16 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
   }, [forceOpen]);
 
   useEffect(() => { setDiffIndex(0); }, [test.id]);
+
+  // Shimmer on first expand: show skeleton for 380ms, then reveal real content
+  useEffect(() => {
+    if (open && !hasShimmeredRef.current) {
+      hasShimmeredRef.current = true;
+      setShimmerDone(false);
+      const t = setTimeout(() => setShimmerDone(true), 380);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
 
   const isFailing = test.status === 'failing';
   const isImproved = test.status === 'improved';
@@ -288,40 +496,50 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
           style={{
             padding: '0 16px 16px',
             borderTop: `1px solid ${isFailing ? '#FEE2E2' : isImproved ? '#DBEAFE' : '#D1FAE5'}`,
-            animation: !hasRevealedRef.current ? 'feedbackReveal 0.3s ease-out' : undefined,
           }}
-          onAnimationEnd={() => { hasRevealedRef.current = true; setHasOpenedFeedback(true); onFeedbackOpened?.(); }}
         >
+          {!shimmerDone ? (
+            <FeedbackShimmer />
+          ) : (
+          <div
+            style={{ animation: !hasRevealedRef.current ? 'feedbackReveal 0.3s ease-out' : undefined }}
+            onAnimationEnd={() => { hasRevealedRef.current = true; setHasOpenedFeedback(true); onFeedbackOpened?.(); }}
+          >
           {/* Top row: diagnostic label (left) + view test button (right) */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10, gap: 8 }}>
-            {test.pattern ? (
-              <div style={{
-                display: 'inline-block', padding: '2px 8px',
-                background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 4,
-                fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '.04em',
-                textTransform: 'uppercase',
-              }}>
-                {test.pattern}
-              </div>
-            ) : <div />}
-            {test.testSource && (
-              <button
-                onClick={() => setShowTestSource(true)}
-                style={{
-                  all: 'unset', cursor: 'pointer', flexShrink: 0,
-                  fontSize: 10, fontWeight: 500, color: '#64748B',
-                  padding: '2px 8px', borderRadius: 4,
-                  border: '1px solid #CBD5E1', background: '#F8FAFC',
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  lineHeight: '1.6',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#94A3B8'; e.currentTarget.style.color = '#1E293B'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#64748B'; }}
-              >
-                {'<'}/{'>'} view test
-              </button>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              {test.pattern && (
+                <div style={{
+                  display: 'inline-block', padding: '2px 8px',
+                  background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 4,
+                  fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '.04em',
+                  textTransform: 'uppercase',
+                }}>
+                  {test.pattern}
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              {test.testSource && (
+                <button
+                  onClick={() => setShowTestSource(true)}
+                  style={{
+                    all: 'unset', cursor: 'pointer', flexShrink: 0,
+                    fontSize: 10, fontWeight: 500, color: '#64748B',
+                    padding: '2px 8px', borderRadius: 4,
+                    border: '1px solid #CBD5E1', background: '#F8FAFC',
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    lineHeight: '1.6',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#94A3B8'; e.currentTarget.style.color = '#1E293B'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#64748B'; }}
+                >
+                  {'<'}/{'>'} view test
+                </button>
+              )}
+            </div>
           </div>
+
 
           {/* What happened */}
           {test.explanation && (
@@ -404,55 +622,109 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
             </div>
           )}
 
-          {/* Relevant in — future course appearances */}
-          {test.courseAppearances?.length > 0 && (
-            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <span style={{
-                fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                letterSpacing: '.08em', color: '#94A3B8', flexShrink: 0,
-              }}>
-                Relevant in
-              </span>
-              <span style={{ color: '#CBD5E1', fontSize: 11, flexShrink: 0 }}>→</span>
-              {test.courseAppearances.map((ap, i) => (
-                <div key={i} style={{ position: 'relative', display: 'inline-block' }}
-                     onMouseEnter={() => setHoveredPill(i)}
-                     onMouseLeave={() => setHoveredPill(null)}>
-                  <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 10, padding: '2px 7px', borderRadius: 4,
-                    background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
-                    cursor: 'default', display: 'inline-block',
-                  }}>
-                    {ap.label}
-                  </span>
-                  {hoveredPill === i && (
-                    <div style={{
-                      position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
-                      transform: 'translateX(-50%)',
-                      background: '#1E293B', color: '#F8FAFC',
-                      fontSize: 11, padding: '4px 10px', borderRadius: 4,
-                      whiteSpace: 'normal', maxWidth: 260, textAlign: 'center',
-                      zIndex: 20, pointerEvents: 'none',
-                    }}>
-                      {ap.description}
+          {/* Why this matters — concept chain → future assignments */}
+          {(test.conceptScores?.length > 0 || test.courseAppearances?.length > 0) && (
+            <div style={{
+              marginTop: 10,
+              background: '#F0FDF4', border: '1px solid #D1FAE5', borderRadius: 8,
+              padding: '10px 12px',
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                            letterSpacing: '.08em', color: '#15803D', marginBottom: 6 }}>
+                Why this matters
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                {/* Concept badges: current → potential */}
+                {test.conceptScores?.map(({ category, score, potential }) => {
+                  const currentColor = score >= 80 ? '#059669' : score >= 50 ? '#D97706' : '#DC2626';
+                  const showArrow = potential > score;
+                  return (
+                    <div key={category} style={{ position: 'relative', display: 'inline-block' }}
+                         onMouseEnter={() => setHoveredConcept(category)}
+                         onMouseLeave={() => setHoveredConcept(null)}>
+                      <span style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 10, padding: '2px 8px', borderRadius: 4,
+                        background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#475569',
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        cursor: 'help',
+                      }}>
+                        {category}
+                        <span style={{ color: currentColor, fontWeight: 600 }}>{score}%</span>
+                        {showArrow && (
+                          <>
+                            <span style={{ color: '#CBD5E1' }}>→</span>
+                            <span style={{ color: '#059669', fontWeight: 600 }}>{potential}%</span>
+                          </>
+                        )}
+                      </span>
+                      {hoveredConcept === category && (
+                        <div style={{
+                          position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#1E293B', color: '#F8FAFC',
+                          fontSize: 11, padding: '6px 10px', borderRadius: 4,
+                          whiteSpace: 'normal', maxWidth: 220, textAlign: 'center',
+                          zIndex: 20, pointerEvents: 'none', lineHeight: 1.5,
+                        }}>
+                          <strong style={{ color: '#F8FAFC' }}>{category}</strong>
+                          {' '}readiness: how smoothly you learned it this session ({score}%).
+                          {showArrow && ` Mastering this test could push it to ${potential}%.`}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                  );
+                })}
+
+                {/* Connecting arrow (only when both sides exist) */}
+                {test.conceptScores?.length > 0 && test.courseAppearances?.length > 0 && (
+                  <span style={{ color: '#CBD5E1', fontSize: 13, flexShrink: 0 }}>→</span>
+                )}
+
+                {/* Future assignment pills */}
+                {test.courseAppearances?.map((ap, i) => (
+                  <div key={i} style={{ position: 'relative', display: 'inline-block' }}
+                       onMouseEnter={() => setHoveredPill(i)}
+                       onMouseLeave={() => setHoveredPill(null)}>
+                    <span style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10, padding: '2px 7px', borderRadius: 4,
+                      background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
+                      cursor: 'default', display: 'inline-block',
+                    }}>
+                      {ap.label}
+                    </span>
+                    {hoveredPill === i && (
+                      <div style={{
+                        position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: '#1E293B', color: '#F8FAFC',
+                        fontSize: 11, padding: '4px 10px', borderRadius: 4,
+                        whiteSpace: 'normal', maxWidth: 260, textAlign: 'center',
+                        zIndex: 20, pointerEvents: 'none',
+                      }}>
+                        {ap.description}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Run history */}
-          {Object.keys(test.statusByRun || {}).length > 0 && (
-            <div style={{ marginTop: 14 }}>
+          {/* Bottom: run history (scrollable) + practice CTA (fixed right) */}
+          {(Object.keys(test.statusByRun || {}).length > 0 || test.drills?.length > 0) && (
+            <div style={{ marginTop: 14, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+
+              {/* Left: run history — overflowX:auto so bars don't push button off */}
               {Object.keys(test.statusByRun || {}).length > 0 && (
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                                 letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
                     Run history ({Object.keys(test.statusByRun).length} runs)
                   </div>
-                  <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: 2, overflowX: 'auto',
+                                alignItems: 'flex-end', paddingBottom: 2 }}>
                     {Object.entries(test.statusByRun)
                       .sort(([a], [b]) => Number(a) - Number(b))
                       .map(([run, status]) => {
@@ -486,12 +758,50 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
                 </div>
               )}
 
+              {/* Right: practice CTA — fixed, stacked column */}
+              {test.drills?.length > 0 && (() => {
+                const drill = test.drills[0];
+                return (
+                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column',
+                                alignItems: 'flex-end', gap: 4 }}>
+                    {/* Metadata chips above button */}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {drill.timeEstimate && (
+                        <span style={{ fontSize: 10, color: '#64748B',
+                                       fontFamily: "'IBM Plex Mono', monospace" }}>
+                          {drill.timeEstimate}
+                        </span>
+                      )}
+                      {drill.drillPoints && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 600, color: '#15803D',
+                          background: '#F0FDF4', border: '1px solid #BBF7D0',
+                          padding: '1px 6px', borderRadius: 4,
+                          fontFamily: "'IBM Plex Mono', monospace",
+                        }}>
+                          ~{drill.drillPoints} pt{drill.drillPoints !== 1 ? 's' : ''}{drill.pointsAvailable ? ' back' : ''}
+                        </span>
+                      )}
+                    </div>
+                    <button className="practice-drill-btn" onClick={() => setShowDrill(true)}>
+                      ✦ practice
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
+          </div>
+          )}
           {/* Test source modal */}
           {showTestSource && test.testSource && (
             <TestSourceModal testSource={test.testSource} onClose={closeTestSource} />
+          )}
+
+          {/* Practice drill modal */}
+          {showDrill && test.drills?.[0] && (
+            <PracticeDrillModal drill={test.drills[0]} onClose={closeDrill} />
           )}
         </div>
       )}

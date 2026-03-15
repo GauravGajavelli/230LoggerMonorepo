@@ -1,0 +1,9 @@
+1;
+CHANGE
+406,406
+2,
+		if (this.root == NULL_NODE) {
+			root = new Node(i);
+2,
+		if (this.root.data.equals(i)) {
+			root = NULL_NODE;

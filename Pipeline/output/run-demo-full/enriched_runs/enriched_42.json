@@ -1,0 +1,134 @@
+[ {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testBasicToString()",
+  "testId" : "BSTManualTesting#testBasicToString()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testBasicToString()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testContainsNonBST()",
+  "testId" : "BSTManualTesting#testContainsNonBST()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testContainsNonBST()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTManualTesting#testHeight()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testHeight()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testInefficientIterator()",
+  "testId" : "BSTManualTesting#testInefficientIterator()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testInefficientIterator()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTManualTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testIsEmpty()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testIterator()",
+  "testId" : "BSTManualTesting#testIterator()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testIterator()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testPreOrderIterator()",
+  "testId" : "BSTManualTesting#testPreOrderIterator()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testPreOrderIterator()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTManualTesting#testSize()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testSize()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArray()",
+  "testId" : "BSTManualTesting#testToArray()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testToArray()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToArrayList()",
+  "testId" : "BSTManualTesting#testToArrayList()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testToArrayList()]"
+}, {
+  "testClassSimple" : "BSTManualTesting",
+  "testDisplayName" : "testToString()",
+  "testId" : "BSTManualTesting#testToString()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTManualTesting]/[method:testToString()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testHeight()",
+  "testId" : "BSTTesting#testHeight()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testHeight()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertExceptions()",
+  "testId" : "BSTTesting#testInsertExceptions()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testInsertExceptions()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertInts()",
+  "testId" : "BSTTesting#testInsertInts()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testInsertInts()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueInt()",
+  "testId" : "BSTTesting#testInsertReturnValueInt()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testInsertReturnValueInt()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertReturnValueString()",
+  "testId" : "BSTTesting#testInsertReturnValueString()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testInsertReturnValueString()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testInsertStrings()",
+  "testId" : "BSTTesting#testInsertStrings()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testInsertStrings()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testIsEmpty()",
+  "testId" : "BSTTesting#testIsEmpty()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testIsEmpty()]"
+}, {
+  "testClassSimple" : "BSTTesting",
+  "testDisplayName" : "testSize()",
+  "testId" : "BSTTesting#testSize()",
+  "status" : "SUCCESSFUL",
+  "durationMs" : 0,
+  "uniqueId" : "[engine:junit-jupiter]/[class:BSTTesting]/[method:testSize()]"
+} ]

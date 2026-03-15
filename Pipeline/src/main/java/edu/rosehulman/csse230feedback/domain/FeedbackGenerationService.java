@@ -154,7 +154,7 @@ public class FeedbackGenerationService {
                     fb.testId(), fb.pattern(), fb.confidence(), fb.explanation(), fb.nextSteps(),
                     (annotated != null && !annotated.isEmpty()) ? annotated : fb.diffs(),
                     (related != null && !related.isEmpty()) ? related : null,
-                    null
+                    null, null
                 );
             })
             .toList();
@@ -686,7 +686,7 @@ public class FeedbackGenerationService {
             List<String> notes = getStringListOrEmpty(item, "diffNotes");
             if (!notes.isEmpty()) diffNotes.put(testId, notes);
 
-            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null, null));
+            feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null, null, null));
         }
     }
 
@@ -744,7 +744,7 @@ public class FeedbackGenerationService {
                     List<String> notes = getStringListOrEmpty(item, "diffNotes");
                     if (!notes.isEmpty()) diffNotes.put(testId, notes);
 
-                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null, null));
+                    feedbackList.add(new Feedback(testId, pattern, confidence, explanation, nextSteps, null, null, null, null));
                 }
             } catch (Exception ignored) {
                 // Skip malformed object
@@ -862,7 +862,7 @@ public class FeedbackGenerationService {
                 List<String> related = relatedMap.get(fb.testId());
                 if (related != null) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
-                        fb.explanation(), fb.nextSteps(), fb.diffs(), related, fb.courseAppearances());
+                        fb.explanation(), fb.nextSteps(), fb.diffs(), related, fb.courseAppearances(), null);
                 }
                 return fb;
             })

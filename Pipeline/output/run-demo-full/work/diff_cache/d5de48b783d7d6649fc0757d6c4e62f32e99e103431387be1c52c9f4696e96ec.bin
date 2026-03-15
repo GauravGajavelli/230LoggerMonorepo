@@ -1,0 +1,13 @@
+1;
+INSERT
+323,323
+0,
+8,
+			 	Node cur1 = stack.pop();
+				int flag1 = flags.pop();
+				if (flag1 == 1 && cur1.right != null) { // only revisit if there's something to
+					stack.push(cur1);
+					flags.push(2);
+				} else { // already 2 aka we were somehow already at the end; should be impossible
+					return null;
+				}

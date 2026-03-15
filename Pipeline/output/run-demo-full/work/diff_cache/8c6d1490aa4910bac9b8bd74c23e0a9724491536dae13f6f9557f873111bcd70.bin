@@ -1,0 +1,63 @@
+6;
+DELETE
+406,406
+4,
+		if (this.root == NULL_NODE) {
+			root = new Node(i);
+			return true;
+		}
+0,
+CHANGE
+412,408
+1,
+		removeHelper(root, i, b);
+1,
+		root = removeHelper(root, i, b);
+CHANGE
+425,421
+8,
+				//      1
+				//    2   5
+				//  3  4    6
+				// if you remove 1
+				//     2
+				//   3   4
+				//         5
+				//		     6
+1,
+				Node prev = cur;
+CHANGE
+434,423
+1,
+				while (bottom.right != NULL_NODE) {
+3,
+				int comp2 = bottom.data.compareTo(cur.right.data);
+				while (bottom.right != NULL_NODE && comp2 < 0) { // keep going right while exploring a viable candidate
+					prev = bottom;
+INSERT
+436,427
+0,
+1,
+					comp2 = bottom.data.compareTo(cur.right.data);
+CHANGE
+437,429
+5,
+				bottom.right = cur.right;
+				Node toRet = cur.left;
+				cur.left = NULL_NODE;
+				cur.right = NULL_NODE;
+				return toRet;
+13,
+				if (bottom != cur.left) { // we're down there
+					// Bottom is guaranteed greater than the left and less than the right
+					
+					//extricate
+					prev.right = removeHelper(bottom,bottom.data,b);
+					// using it as root
+					bottom.right = cur.right;
+					bottom.left = cur.left;
+					return bottom; // new root
+				} else { // the left's right is null; since it's all lefts, just shift up
+					bottom.right = cur.right;
+					return bottom;
+				}

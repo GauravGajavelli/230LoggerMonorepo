@@ -1,0 +1,6 @@
+{
+  "runNumber" : 43,
+  "status" : "exception",
+  "errors" : [ "Pipeline/output/run-demo-full/enriched_runs/run_43.tar" ],
+  "warnings" : [ "Run 43: excluded from compilation (errors): src/BSTConcurrencyTesting.java", "Run 43: excluded from compilation (errors): src/BinarySearchTree.java", "Run 43: excluded from compilation (errors): src/BSTTesting.java", "Run 43: excluded from compilation (errors): src/BSTManualTesting.java", "Run 43: partial compile succeeded (6/10 files); 4 file(s) excluded" ]
+}

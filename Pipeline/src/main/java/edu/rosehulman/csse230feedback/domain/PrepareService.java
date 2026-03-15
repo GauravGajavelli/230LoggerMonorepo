@@ -10,6 +10,7 @@ import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
 import edu.rosehulman.csse230feedback.model.EnrichedTestResult;
 import edu.rosehulman.csse230feedback.model.IngestionManifest;
 import edu.rosehulman.csse230feedback.model.RunRecord;
+import edu.rosehulman.csse230feedback.model.DrillQuestion;
 import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
 import edu.rosehulman.csse230feedback.model.TestStatus;
 import edu.rosehulman.csse230feedback.model.frontend.*;
@@ -118,6 +119,22 @@ public class PrepareService {
             }
         }
 
+        // 4b-pre. Load optional question bank (convention: bst.json → bst_drill_questions.json)
+        List<DrillQuestion> drillQuestions = List.of();
+        if (opts.assignmentConfigPath() != null) {
+            String stem = opts.assignmentConfigPath().getFileName().toString()
+                .replaceAll("\\.json$", "");
+            Path qPath = opts.assignmentConfigPath()
+                .resolveSibling(stem + "_drill_questions.json");
+            if (qPath.toFile().exists()) {
+                drillQuestions = Json.mapper().readValue(qPath.toFile(),
+                    Json.mapper().getTypeFactory()
+                        .constructCollectionType(List.class, DrillQuestion.class));
+                System.out.println("Loaded " + drillQuestions.size()
+                    + " drill questions from " + qPath.getFileName());
+            }
+        }
+
         Path diffCategoriesPath = opts.resolvedIngestDir().resolve("diff_categories.json");
         DiffCategoryMapping diffCategories = null;
         if (Files.exists(diffCategoriesPath)) {
@@ -146,15 +163,7 @@ public class PrepareService {
         // 4a. Initialize LLM service (if LLM options are present)
         LlmService llmService = null;
         try {
-            // Load .env from Pipeline root (sibling to cache/)
-            Path cacheParent = opts.resolvedCacheDir().getParent();
-            Path dotEnvPath;
-            if (cacheParent != null && cacheParent.getParent() != null) {
-                dotEnvPath = cacheParent.getParent();
-            } else {
-                dotEnvPath = Path.of(".");
-            }
-            Path dotEnv = dotEnvPath.resolve(".env");
+            Path dotEnv = resolveDotEnv(opts.resolvedCacheDir());
 
             LlmConfig llmConfig = LlmConfig.load(
                 dotEnv,
@@ -331,6 +340,9 @@ public class PrepareService {
             testHistories, tracker, testCategories, diffCategories
         );
 
+        // 8b-concept. Compute concept readiness scores per category
+        testHistories = computeConceptScores(testHistories);
+
         // 8b. Generate code snapshots (if enabled)
         List<CodeSnapshot> codeSnapshots = Collections.emptyList();
         if (opts.includeCodeSnapshots()) {
@@ -453,7 +465,7 @@ public class PrepareService {
                             .toList();
                         return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
                             fb.explanation(), fb.nextSteps(), fb.diffs(), fb.relatedTestIds(),
-                            appearances);
+                            appearances, null);
                     }).toList();
                 }
             }
@@ -470,6 +482,33 @@ public class PrepareService {
                     .map(th -> th.highlightCategory() != null && !primaryIds.contains(th.testId())
                         ? th.withHighlightCategory(null) : th)
                     .toList();
+            }
+
+            // 9b. Generate practice drills for highlighted tests
+            if (!feedback.isEmpty()) {
+                try {
+                    String resolvedDrillModel = opts.drillModel() != null
+                        ? opts.drillModel() : "claude-opus-4-6";
+                    LlmConfig drillLlmConfig = LlmConfig.load(
+                        resolveDotEnv(opts.resolvedCacheDir()),
+                        opts.llmProvider(), resolvedDrillModel, opts.llmApiKey()
+                    );
+                    LlmService drillLlmService = LlmService.create(
+                        drillLlmConfig, opts.resolvedCacheDir(),
+                        opts.noCache(), false, opts.dryRun()
+                    );
+                    PromptLoader drillPromptLoader = resolvePromptLoader(opts.inputDir());
+                    PracticeDrillService drillService = new PracticeDrillService(drillLlmService, drillPromptLoader, drillQuestions);
+                    feedback = drillService.generateDrills(
+                        feedback, testHistories, testSources, testCategories, assignmentName,
+                        assignmentConfig.resolvedCourseContext()
+                    );
+                    System.out.println("Practice drills generated for " + feedback.stream()
+                        .filter(fb -> fb.drills() != null).count() + " tests");
+                    drillLlmService.finish();
+                } catch (LlmException e) {
+                    warnings.add("Practice drill generation failed: " + e.getMessage());
+                }
             }
         }
 
@@ -612,6 +651,21 @@ public class PrepareService {
     }
 
     /**
+     * Resolves the .env file path from the cache directory location.
+     * The .env file lives at the Pipeline root (two levels above the llm/ cache subdirectory).
+     */
+    private Path resolveDotEnv(Path cacheDir) {
+        Path cacheParent = cacheDir.getParent();
+        Path dotEnvPath;
+        if (cacheParent != null && cacheParent.getParent() != null) {
+            dotEnvPath = cacheParent.getParent();
+        } else {
+            dotEnvPath = Path.of(".");
+        }
+        return dotEnvPath.resolve(".env");
+    }
+
+    /**
      * Resolves the prompt loader by trying multiple candidate directories in priority order.
      */
     private PromptLoader resolvePromptLoader(Path inputDir) {
@@ -660,6 +714,7 @@ public class PrepareService {
             // Check for any disagreement between rerun and original
             boolean discard = false;
             for (Map.Entry<String, Boolean> origEntry : originalPassFail.entrySet()) {
+                if (discard) break;
                 String testId = origEntry.getKey();
                 Boolean origPass = origEntry.getValue();
                 Boolean enrichedPass = enrichedPassFail.get(testId);
@@ -669,7 +724,12 @@ public class PrepareService {
                         + ", rerun=" + (enrichedPass ? "pass" : "fail")
                         + "), discarding enriched data for this run");
                     discard = true;
-                    break;
+                } else if (enrichedPass == null && !origPass) {
+                    // A test that was failing in the original is absent from the enriched run —
+                    // the rerun used a different code snapshot. Fall back to original data.
+                    warnings.add("Run " + runNumber + ": enriched data missing originally-failing test "
+                        + testId + ", discarding enriched data for this run");
+                    discard = true;
                 }
             }
 
@@ -785,6 +845,56 @@ public class PrepareService {
             .max(Map.Entry.comparingByValue())
             .map(Map.Entry::getKey)
             .orElse("Unknown");
+    }
+
+    /**
+     * Computes per-category readiness scores for each test and attaches them as conceptScores.
+     *
+     * journeyScore = isLingeringFailure ? 0 : max(20, 100 - totalFailedRuns * 5)
+     * categoryScore = round(avg journeyScore across all tests in category)
+     * potential     = min(100, round((catTotal - thisJourney + 100) / catCount))
+     */
+    private static List<TestHistory> computeConceptScores(List<TestHistory> histories) {
+        // 1. Compute per-test journey scores
+        Map<String, Integer> journeyByTestId = new HashMap<>();
+        for (TestHistory th : histories) {
+            int journey = th.isLingeringFailure()
+                ? 0
+                : Math.max(20, 100 - th.totalFailedRuns() * 5);
+            journeyByTestId.put(th.testId(), journey);
+        }
+
+        // 2. Accumulate per-category totals
+        Map<String, int[]> accum = new HashMap<>();   // int[]{total, count}
+        for (TestHistory th : histories) {
+            if (th.categories() == null) continue;
+            int journey = journeyByTestId.get(th.testId());
+            for (String cat : th.categories()) {
+                accum.computeIfAbsent(cat, k -> new int[]{0, 0});
+                accum.get(cat)[0] += journey;
+                accum.get(cat)[1] += 1;
+            }
+        }
+
+        // 3. Attach conceptScores to each TestHistory
+        List<TestHistory> result = new ArrayList<>(histories.size());
+        for (TestHistory th : histories) {
+            if (th.categories() == null || th.categories().isEmpty()) {
+                result.add(th);
+                continue;
+            }
+            int thisJourney = journeyByTestId.get(th.testId());
+            List<ConceptScore> scores = new ArrayList<>();
+            for (String cat : th.categories()) {
+                int[] a = accum.get(cat);
+                if (a == null) continue;
+                int categoryScore = (int) Math.round((double) a[0] / a[1]);
+                int potential = Math.min(100, (int) Math.round((a[0] - thisJourney + 100.0) / a[1]));
+                scores.add(new ConceptScore(cat, categoryScore, potential));
+            }
+            result.add(th.withConceptScores(scores));
+        }
+        return result;
     }
 
     /**

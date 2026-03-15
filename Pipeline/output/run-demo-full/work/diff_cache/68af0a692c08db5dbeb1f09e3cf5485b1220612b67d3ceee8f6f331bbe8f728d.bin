@@ -1,0 +1,166 @@
+11;
+INSERT
+2,2
+0,
+1,
+import java.util.NoSuchElementException;
+INSERT
+15,16
+0,
+1,
+	private int version;
+CHANGE
+197,199
+1,
+	public Iterator inefficientIterator() {
+1,
+	public Iterator<T> inefficientIterator() {
+CHANGE
+202,204
+2,
+	public Iterator preOrderIterator() {
+		// TODO Auto-generated method stub
+1,
+	public Iterator<T> preOrderIterator() {
+CHANGE
+207,208
+1,
+	private class preOrderIter implements Iterator {
+1,
+	private class preOrderIter implements Iterator<T> {
+INSERT
+209,210
+0,
+2,
+		private int version;
+		private BinarySearchTree<T> binarySearchTree;
+CHANGE
+212,215
+1,
+			stack.push(binarySearchTree.root);
+5,
+			if (binarySearchTree.root != NULL_NODE) {
+				stack.push(binarySearchTree.root);
+			}
+			version = binarySearchTree.version;
+			this.binarySearchTree = binarySearchTree;
+INSERT
+217,224
+0,
+3,
+			if (binarySearchTree.version != this.version) {
+				return false;
+			}
+INSERT
+222,232
+0,
+6,
+			if (binarySearchTree.version != this.version) {
+				return null;
+			}
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+CHANGE
+224,240
+3,
+			stack.push(cur.right);
+			stack.push(cur.left);
+			return null;
+7,
+			if (cur.right != NULL_NODE) {
+				stack.push(cur.right);
+			}
+			if (cur.left != NULL_NODE) {
+				stack.push(cur.left);
+			}
+			return toRet;
+INSERT
+230,250
+0,
+85,
+
+	public Iterator<T> iterator() {
+		return new inOrderIter(this);
+	}
+	
+	private class inOrderIter implements Iterator<T> {
+		private Stack<Node> stack;
+		private Stack<Integer> flags;
+		private int version;
+		private BinarySearchTree<T> binarySearchTree;
+		
+		public inOrderIter(BinarySearchTree<T> binarySearchTree) {
+			stack = new Stack<Node>();
+			flags = new Stack<Integer>();
+			if (binarySearchTree.root != NULL_NODE) {
+				stack.push(binarySearchTree.root);
+				flags.push(1);
+			}
+			version = binarySearchTree.version;
+			this.binarySearchTree = binarySearchTree;
+			
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (binarySearchTree.version != this.version) {
+				return false;
+			}
+			return !stack.isEmpty();
+		}
+		
+		/*
+		 inOrderRec(Node cur) {
+		 	if (cur == NULL_NODE) {
+		 		return;
+		 	}
+		 	Node left = cur.left;   // 1 means we've to do this part
+		 	if (left != NULL_NODE) {
+		 		inOrderRec(left);
+		 	}
+		 	l.add(cur);
+		 	Node right = cur.right; // 2 means this part
+		 	if (right != NULL_NODE) {
+		 		inOrderRec(right);
+	 		}
+		 }
+		 * */
+
+		@Override
+		public T next() {
+			if (binarySearchTree.version != this.version) {
+				return null;
+			}
+			
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+
+			Node cur = stack.pop();
+			int flag = flags.pop();
+			
+			if (flag == 1) {
+				stack.push(cur);
+				flags.push(2); // when we see it again we'll know to remove for good
+				
+				Node left = cur.left;   // 1 means we've to do this part
+				Node prev = cur;
+			 	while (left != NULL_NODE) {
+			 		stack.push(left);
+			 		flags.push(1);
+			 		prev = left;
+			 		left = left.left;
+			 	}
+				return prev.data;
+			}
+		 	Node right = cur.right; // 2 means this part
+		 	if (right != NULL_NODE) {
+		 		stack.push(right);
+		 		flags.push(1);
+		 		return cur.data;
+	 		}
+		 	return null;
+		}
+		
+	}

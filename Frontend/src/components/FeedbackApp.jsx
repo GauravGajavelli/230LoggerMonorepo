@@ -18,6 +18,47 @@ const InfoIcon = () => (
   </svg>
 );
 
+/* ── Skeleton assignment list — shown while frontend.json loads ── */
+function SkeletonAssignmentList() {
+  return (
+    <div style={{
+      maxWidth: 680, margin: '0 auto', padding: '32px 16px 100px',
+      fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+    }}>
+      {/* Title block */}
+      <div style={{ marginBottom: 28 }}>
+        <div className="skeleton-shimmer" style={{ height: 28, width: '52%', marginBottom: 10 }} />
+        <div className="skeleton-shimmer" style={{ height: 14, width: '78%', marginBottom: 6 }} />
+        <div className="skeleton-shimmer" style={{ height: 12, width: '48%' }} />
+      </div>
+      {/* Section label */}
+      <div className="skeleton-shimmer" style={{ height: 11, width: 92, marginBottom: 14 }} />
+      {/* Two skeleton assignment cards */}
+      {[1, 2].map((i) => (
+        <div key={i} style={{
+          background: '#FFFFFF', border: '1px solid #E2E8F0',
+          borderRadius: 12, padding: '18px 20px', marginBottom: 10,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div className="skeleton-shimmer" style={{ height: 16, width: 150 }} />
+                <div className="skeleton-shimmer" style={{ height: 20, width: 82, borderRadius: 10 }} />
+              </div>
+              <div className="skeleton-shimmer" style={{ height: 12, width: 200 }} />
+            </div>
+            <div style={{ display: 'flex', gap: 2, alignItems: 'center', paddingLeft: 16 }}>
+              {Array.from({ length: 8 }).map((_, j) => (
+                <div key={j} className="skeleton-shimmer" style={{ width: 6, height: 18, borderRadius: 2 }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /**
  * Root app — wireframe header, footer, navigation state.
  */
@@ -45,37 +86,31 @@ export function FeedbackApp() {
     setView('list');
   };
 
+  /* ── Derive main content ── */
+  let mainContent;
   if (loading) {
-    return (
+    mainContent = <SkeletonAssignmentList />;
+  } else if (error && allRuns.length === 0) {
+    mainContent = (
       <div style={{
-        minHeight: '100vh', background: '#F1F5F9',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: 32, height: 32, border: '3px solid #800000',
-            borderTopColor: 'transparent', borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite', margin: '0 auto 12px',
-          }} />
-          <p style={{ color: '#64748B', fontSize: 14 }}>Loading feedback…</p>
-        </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
-
-  if (error && allRuns.length === 0) {
-    return (
-      <div style={{
-        minHeight: '100vh', background: '#F1F5F9',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0',
       }}>
         <div style={{ textAlign: 'center', color: '#EF4444' }}>
           <p style={{ fontWeight: 600 }}>Error loading data</p>
           <p style={{ fontSize: 13, color: '#64748B' }}>{error.message}</p>
         </div>
       </div>
+    );
+  } else if (view === 'list') {
+    mainContent = <AssignmentList onSelectAssignment={() => setView('detail')} reviewed={reviewed} />;
+  } else {
+    mainContent = (
+      <DetailView
+        onBack={() => setView('list')}
+        onReplayRun={handleReplayRun}
+        onMarkReviewed={handleMarkReviewed}
+        reviewed={reviewed}
+      />
     );
   }
 
@@ -110,17 +145,7 @@ export function FeedbackApp() {
       </header>
 
       {/* Main content */}
-      {view === 'list' && (
-        <AssignmentList onSelectAssignment={() => setView('detail')} reviewed={reviewed} />
-      )}
-      {view === 'detail' && (
-        <DetailView
-          onBack={() => setView('list')}
-          onReplayRun={handleReplayRun}
-          onMarkReviewed={handleMarkReviewed}
-          reviewed={reviewed}
-        />
-      )}
+      {mainContent}
 
       {/* Fixed footer — matches wireframe */}
       <footer style={{

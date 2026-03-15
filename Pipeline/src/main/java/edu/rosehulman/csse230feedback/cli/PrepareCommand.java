@@ -78,6 +78,9 @@ public class PrepareCommand implements Callable<Integer> {
     @Option(names = {"--assignment-config"}, description = "Path to per-assignment JSON config (e.g. Pipeline/assignments/bst.json) to exclude test classes.")
     private Path assignmentConfigPath;
 
+    @Option(names = {"--drill-model"}, description = "Model for practice drill generation (default: claude-opus-4-6).")
+    private String drillModel = "claude-opus-4-6";
+
     @Override
     public Integer call() throws Exception {
         if (!Files.exists(input)) {
@@ -129,7 +132,8 @@ public class PrepareCommand implements Callable<Integer> {
             allowBasicFallback,
             includeErrorMessages,
             assignmentConfig,
-            assignmentConfigPath
+            assignmentConfigPath,
+            drillModel
         );
 
         PrepareService service = new PrepareService();

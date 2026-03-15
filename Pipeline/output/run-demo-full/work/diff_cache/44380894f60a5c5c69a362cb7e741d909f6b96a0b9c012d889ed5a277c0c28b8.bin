@@ -1,0 +1,35 @@
+4;
+INSERT
+0,0
+0,
+1,
+import java.util.ArrayList;
+CHANGE
+155,156
+1,
+		if (sb.length() == 1) {
+1,
+		if (sb.length() != 1) {
+INSERT
+157,158
+0,
+1,
+			sb.append(" ");
+INSERT
+162,164
+0,
+14,
+	public ArrayList<T> toArrayList() {
+		ArrayList<T> list = new ArrayList<>();
+		this.toArrayListHelper(root, list);
+		return list;
+	}
+	
+	private void toArrayListHelper(Node cur, ArrayList list) {
+		if (cur == NULL_NODE) {
+			return;
+		}
+		this.toArrayListHelper(cur.left, list);
+		list.add(cur.data);
+		this.toArrayListHelper(cur.right, list);
+	}

@@ -1,0 +1,17 @@
+2;
+CHANGE
+319,319
+1,
+			 		flags.push(1);
+1,
+			 		flags.push(2);
+INSERT
+323,323
+0,
+6,
+			 	Node cur1 = stack.pop();
+				int flag1 = flags.pop();
+				if (cur1.right != NULL_NODE) { // only revisit if there's something to
+					stack.push(cur1);
+					flags.push(2);
+				}

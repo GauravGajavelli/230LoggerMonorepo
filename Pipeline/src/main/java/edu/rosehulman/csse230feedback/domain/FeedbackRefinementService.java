@@ -77,7 +77,7 @@ public class FeedbackRefinementService {
                 if (newExplanation != null && !newExplanation.equals(fb.explanation())) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
                         newExplanation, fb.nextSteps(), fb.diffs(), fb.relatedTestIds(),
-                        fb.courseAppearances());
+                        fb.courseAppearances(), fb.drills());
                 }
                 return fb;
             })

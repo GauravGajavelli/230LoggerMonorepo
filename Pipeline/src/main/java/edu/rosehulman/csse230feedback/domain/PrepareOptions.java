@@ -28,7 +28,9 @@ public record PrepareOptions(
     /** Per-assignment configuration (excluded test classes, etc.). Null means no exclusions. */
     AssignmentConfig assignmentConfig,
     /** Path to the assignment config file (used to locate sibling test_categories file). Nullable. */
-    Path assignmentConfigPath
+    Path assignmentConfigPath,
+    /** Model to use for practice drill generation (default: claude-opus-4-6). Nullable. */
+    String drillModel
 ) {
     public long idleThresholdMs() {
         return idleThresholdMinutes * 60 * 1000;
@@ -49,7 +51,7 @@ public record PrepareOptions(
                           String assignmentNameOverride) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, true,
-             null, null, null, false, false, null, false, null, false, false, null, null);
+             null, null, null, false, false, null, false, null, false, false, null, null, null);
     }
 
     /**
@@ -60,7 +62,7 @@ public record PrepareOptions(
                           String assignmentNameOverride, boolean includeCodeSnapshots) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, includeCodeSnapshots,
-             null, null, null, false, false, null, false, null, false, false, null, null);
+             null, null, null, false, false, null, false, null, false, false, null, null, null);
     }
 
     /**

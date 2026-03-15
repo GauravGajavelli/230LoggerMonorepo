@@ -1,0 +1,6 @@
+{
+  "runNumber" : 25,
+  "status" : "exception",
+  "errors" : [ "Pipeline/output/run-demo-full/enriched_runs/run_25.tar" ],
+  "warnings" : [ "Run 25: excluded from compilation (errors): src/BSTTesting.java", "Run 25: excluded from compilation (errors): src/BSTConcurrencyTesting.java", "Run 25: partial compile succeeded (8/10 files); 2 file(s) excluded" ]
+}
