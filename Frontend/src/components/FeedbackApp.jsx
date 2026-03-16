@@ -7,8 +7,8 @@ import { ReplayModal } from './ReplayModal';
 /* ── Lock icon ── */
 const LockIcon = () => (
   <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-    <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#E2E8F0" strokeWidth="1.3" fill="none" />
-    <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="#E2E8F0" strokeWidth="1.3" strokeLinecap="round" />
+    <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3" fill="none" />
+    <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
   </svg>
 );
 const InfoIcon = () => (
@@ -119,23 +119,44 @@ export function FeedbackApp() {
       minHeight: '100vh', background: '#F1F5F9',
       fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
     }}>
-      {/* Top bar — matches wireframe exactly */}
+      {/* Top bar — Rose-Hulman branded header */}
       <header style={{
-        background: '#1E293B', color: '#F8FAFC', padding: '10px 24px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13,
+        background: '#800000', color: '#FFFFFF',
+        padding: '12px 28px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.22)',
+        borderBottom: '1px solid rgba(0,0,0,0.12)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-.02em', cursor: 'pointer' }}
-            onClick={() => setView('list')}
-          >
-            CSSE 230
-          </span>
-          <span style={{ color: '#64748B' }}>·</span>
-          <span style={{ color: '#94A3B8' }}>Debugging Feedback</span>
+        <div
+          style={{ cursor: 'pointer', lineHeight: 1.2 }}
+          onClick={() => setView('list')}
+        >
+          <div style={{
+            fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em',
+            textTransform: 'uppercase', color: 'rgba(255,255,255,0.58)',
+            marginBottom: 5, fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+          }}>
+            Rose-Hulman Institute of Technology
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+            <span style={{
+              fontSize: 19, fontWeight: 700, letterSpacing: '-.02em',
+              fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+            }}>
+              CSSE 230
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.38)', fontSize: 15, fontWeight: 300 }}>·</span>
+            <span style={{
+              fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.82)',
+              fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+              letterSpacing: '.01em',
+            }}>
+              Debugging Feedback
+            </span>
+          </div>
         </div>
         <span style={{
-          color: '#E2E8F0', fontSize: 13, fontWeight: 500,
+          fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.75)',
           fontFamily: "'IBM Plex Mono', monospace",
           display: 'flex', alignItems: 'center', gap: 6,
         }}>
@@ -158,7 +179,7 @@ export function FeedbackApp() {
         <span style={{ fontSize: 12, color: '#64748B' }}>
           Part of an IRB-approved research study.
         </span>
-        <span style={{ fontSize: 12, color: '#2563EB', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>
+        <span style={{ fontSize: 12, color: '#800000', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>
           Learn more
         </span>
       </footer>

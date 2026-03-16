@@ -98,13 +98,16 @@ java -jar Pipeline/target/csse230-feedback.jar prepare \
   --student-id "demo-student" \
   --assignment-config Pipeline/assignments/bst.json \
   --cache-dir Pipeline/cache/llm \
-  --no-code \
   --clear-cache
 ```
 
 **Note:** `--clear-cache` forces fresh LLM calls (~$0.07 for the BST demo). Omit it to reuse
 cached responses. Do NOT pass `--allow-basic-fallback` when `enriched_runs/` exists — that flag
 is only for the demo shortcut that skips `rerun`.
+
+**IMPORTANT — do NOT pass `--no-code`:** This flag strips all test source code from the output,
+which breaks the "view test" modals in the frontend. Always omit it when you want the code
+modals to be populated.
 
 ---
 
@@ -131,6 +134,7 @@ java -jar Pipeline/target/csse230-feedback.jar rerun \
   --test-support Pipeline/testOutputs/rerunOutputs/work/workspace_shared/src/testSupport
 
 # 3. Prepare (fresh LLM calls)
+# NOTE: do NOT add --no-code — it strips test source code and breaks the "view test" modals
 java -jar Pipeline/target/csse230-feedback.jar prepare \
   -i Pipeline/output/run-demo-full \
   -o Frontend/public/data/frontend.json \
@@ -138,7 +142,6 @@ java -jar Pipeline/target/csse230-feedback.jar prepare \
   --student-id "demo-student" \
   --assignment-config Pipeline/assignments/bst.json \
   --cache-dir Pipeline/cache/llm \
-  --no-code \
   --clear-cache
 ```
 
@@ -146,15 +149,16 @@ java -jar Pipeline/target/csse230-feedback.jar prepare \
 
 ## Makefile Shortcuts
 
-The `make demo` and `make demo-cached` targets use `Pipeline/output/run-demo` (ingest-only data)
-and pass `--allow-basic-fallback`. They are for quick iteration on the prepare step only —
-they do NOT run ingest or rerun.
+| Target | Input data | LLM cache | When to use |
+|--------|-----------|-----------|------------|
+| `make demo` | `run-demo` (ingest-only) | cleared | Quick prompt/UI iteration; no enriched data, no code modals |
+| `make demo-cached` | `run-demo` (ingest-only) | reused | Same but free (cached) |
+| `make demo-full-cached` | `run-demo-full` (enriched) | reused | Full quality + code modals; free (cached) |
+| Full sequence above | `run-demo-full` (enriched) | cleared | Full quality, fresh LLM calls (~$0.07) |
 
-| Target | When to use |
-|--------|------------|
-| `make demo` | Quick prepare test, no LLM cache |
-| `make demo-cached` | Quick prepare test, reuse LLM cache |
-| Full sequence above | When you need enriched stack traces and full feedback quality |
+**For code modals to work:** use `run-demo-full` (requires the ingest + rerun steps). The
+`make demo` / `make demo-cached` shortcuts use ingest-only data — test source code is still
+emitted but enriched stack traces are absent.
 
 ---
 
@@ -185,6 +189,7 @@ Log line to look for: `Loaded 7 drill questions from bst_drill_questions.json`
 |---------|-------|-----|
 | `prepare` fails with "enriched_runs not found" | rerun was skipped | Run rerun first, or add `--allow-basic-fallback` |
 | "Using minimal testSupport" in rerun logs | Wrong `--test-support` path | Use `Pipeline/testOutputs/rerunOutputs/work/workspace_shared/src/testSupport` |
+| Code modals are empty ("view test" shows nothing) | `--no-code` was passed to prepare | Remove `--no-code` — it strips all test source code |
 | Drill points show as null | Test file has no `points +=` (ungraded) | Fixed in pipeline: standalone point shown instead |
 | 0 drills generated | Bank questions have no overlapping categories | Check LLM category mapping log output |
 | LLM costs unexpected | `--clear-cache` was passed | Omit `--clear-cache` to reuse cache |

@@ -1,0 +1,42 @@
+6;
+INSERT
+15,15
+0,
+1,
+	private int version;
+INSERT
+209,210
+0,
+2,
+		private int version;
+		private BinarySearchTree<T> binarySearchTree;
+INSERT
+213,216
+0,
+2,
+			version = binarySearchTree.version;
+			this.binarySearchTree = binarySearchTree;
+CHANGE
+217,222
+1,
+			return !stack.isEmpty();
+4,
+			if (binarySearchTree.version != this.version) {
+				return false;
+			}
+			return !stack.isEmpty() && stack.peek() != NULL_NODE;
+INSERT
+223,231
+0,
+5,
+			
+			if (cur == NULL_NODE || binarySearchTree.version != this.version) {
+				return null;
+			}
+			
+CHANGE
+226,239
+1,
+			return null;
+1,
+			return toRet;

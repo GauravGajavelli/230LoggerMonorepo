@@ -128,7 +128,7 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
           all: 'unset', display: 'flex', alignItems: 'center', gap: 6,
           fontSize: 13, color: '#64748B', cursor: 'pointer', marginBottom: 20, padding: '4px 0',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = '#1E293B')}
+        onMouseEnter={(e) => (e.currentTarget.style.color = '#800000')}
         onMouseLeave={(e) => (e.currentTarget.style.color = '#64748B')}
       >
         <BackIcon />
@@ -289,7 +289,7 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
                   all: 'unset', padding: '8px 16px', fontSize: 13,
                   fontWeight: tab === t.key ? 600 : 400,
                   color: tab === t.key ? '#0F172A' : '#64748B',
-                  borderBottom: tab === t.key ? '2px solid #1E293B' : '2px solid transparent',
+                  borderBottom: tab === t.key ? '2px solid #800000' : '2px solid transparent',
                   marginBottom: -2, cursor: 'pointer', transition: 'color .15s',
                   display: 'flex', alignItems: 'center', gap: 5,
                 }}>
@@ -333,7 +333,7 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
                   onClick={onMarkReviewed}
                   style={{
                     all: 'unset', padding: '8px 20px', fontSize: 13, fontWeight: 600,
-                    color: '#FFF', background: '#1E293B', borderRadius: 8, cursor: 'pointer',
+                    color: '#FFF', background: '#800000', borderRadius: 8, cursor: 'pointer',
                   }}
                 >
                   Mark as reviewed ✓

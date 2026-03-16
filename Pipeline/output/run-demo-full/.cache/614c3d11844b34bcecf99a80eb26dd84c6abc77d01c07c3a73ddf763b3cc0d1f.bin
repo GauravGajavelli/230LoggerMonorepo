@@ -1,0 +1,58 @@
+7;
+INSERT
+2,2
+0,
+1,
+import java.util.NoSuchElementException;
+INSERT
+15,16
+0,
+1,
+	private int version;
+INSERT
+209,211
+0,
+2,
+		private int version;
+		private BinarySearchTree<T> binarySearchTree;
+CHANGE
+212,216
+1,
+			stack.push(binarySearchTree.root);
+5,
+			if (binarySearchTree.root != NULL_NODE) {
+				stack.push(binarySearchTree.root);
+			}
+			version = binarySearchTree.version;
+			this.binarySearchTree = binarySearchTree;
+INSERT
+217,225
+0,
+3,
+			if (binarySearchTree.version != this.version) {
+				return false;
+			}
+INSERT
+222,233
+0,
+6,
+			if (binarySearchTree.version != this.version) {
+				return null;
+			}
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+CHANGE
+224,241
+3,
+			stack.push(cur.right);
+			stack.push(cur.left);
+			return null;
+7,
+			if (cur.right != NULL_NODE) {
+				stack.push(cur.right);
+			}
+			if (cur.left != NULL_NODE) {
+				stack.push(cur.left);
+			}
+			return toRet;
