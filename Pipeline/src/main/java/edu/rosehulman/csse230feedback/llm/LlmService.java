@@ -80,8 +80,23 @@ public class LlmService {
     public LlmResponse complete(String promptFileName, String promptContent,
                                  String inputData, String requestLabel,
                                  int requestNumber, int totalRequests) throws LlmException {
+        return complete(promptFileName, promptContent, inputData, requestLabel,
+                        requestNumber, totalRequests, null);
+    }
+
+    /**
+     * Same as {@link #complete} but uses {@code modelOverride} (if non-null) instead of
+     * {@code config.model()} for both the cache key and the API call.
+     */
+    public LlmResponse complete(String promptFileName, String promptContent,
+                                 String inputData, String requestLabel,
+                                 int requestNumber, int totalRequests,
+                                 String modelOverride) throws LlmException {
+        String effectiveModel = (modelOverride != null && !modelOverride.isBlank())
+            ? modelOverride : config.model();
+
         LlmCache.CacheKey cacheKey = cache.computeKey(
-            promptFileName, promptContent, config.model(), inputData
+            promptFileName, promptContent, effectiveModel, inputData
         );
 
         // Estimate tokens (~4 chars per token)
@@ -90,12 +105,12 @@ public class LlmService {
         // Dry-run mode: log but don't call API
         if (dryRun) {
             logger.logDryRun(requestNumber, totalRequests, requestLabel,
-                config.model(), estimatedTokens);
+                effectiveModel, estimatedTokens);
             stats.recordCacheHit(); // Count as "handled" for progress
             return new LlmResponse(
                 "[DRY RUN - no API call made]",
                 new LlmResponse.Usage(estimatedTokens, 0),
-                0.0, config.model(), "dry_run"
+                0.0, effectiveModel, "dry_run"
             );
         }
 
@@ -106,7 +121,7 @@ public class LlmService {
                 LlmCache.CacheEntry entry = cached.get();
                 String cacheDate = entry.response() != null ? entry.response().timestamp() : null;
                 logger.logRequest(requestNumber, totalRequests, requestLabel,
-                    config.model(), estimatedTokens, true, cacheDate);
+                    effectiveModel, estimatedTokens, true, cacheDate);
                 stats.recordCacheHit();
 
                 // Reconstruct response from cache
@@ -115,15 +130,15 @@ public class LlmService {
                     ? new LlmResponse.Usage(resp.usage().promptTokens(), resp.usage().completionTokens())
                     : null;
                 return new LlmResponse(resp.content(), usage, resp.costEstimateUsd(),
-                    config.model(), "cached");
+                    effectiveModel, "cached");
             }
         }
 
         // Cache miss — make API call
         logger.logRequest(requestNumber, totalRequests, requestLabel,
-            config.model(), estimatedTokens, false, null);
+            effectiveModel, estimatedTokens, false, null);
 
-        LlmRequest request = LlmRequest.of(config.model(), promptContent, inputData);
+        LlmRequest request = LlmRequest.of(effectiveModel, promptContent, inputData);
 
         long startMs = System.currentTimeMillis();
         LlmResponse response = rateLimiter.executeWithRetry(

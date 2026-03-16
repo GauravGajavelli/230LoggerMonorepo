@@ -1,35 +1,35 @@
 {
   "schemaVersion" : 1,
-  "createdAtUtc" : "2026-03-16T00:11:39.090469Z",
-  "repoRoot" : "/tmp/demo-full-input",
-  "runTarPath" : "/tmp/demo-full-input/run.tar",
+  "createdAtUtc" : "2026-03-16T02:55:21.125992100Z",
+  "repoRoot" : "C:\\Users\\gajavegs\\AppData\\Local\\Temp\\demo-full-input",
+  "runTarPath" : "C:\\Users\\gajavegs\\AppData\\Local\\Temp\\demo-full-input\\run.tar",
   "runTarSha256" : "6fcef34cc180d1138bc9d1be0ac4682f566131cb1a294376bbc8c42d304d3bc7",
   "extractedFiles" : [ {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_0_.tar.zip",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\diffs_0_.tar.zip",
     "sizeBytes" : 6337
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_28_.tar.zip",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\diffs_28_.tar.zip",
     "sizeBytes" : 9509
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_42_.tar.zip",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\diffs_42_.tar.zip",
     "sizeBytes" : 7848
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_44_.tar.zip",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\diffs_44_.tar.zip",
     "sizeBytes" : 8137
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_46_.tar.zip",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\diffs_46_.tar.zip",
     "sizeBytes" : 7557
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/testRunInfo.json",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\testRunInfo.json",
     "sizeBytes" : 23106
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_13_.tar.zip",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\diffs_13_.tar.zip",
     "sizeBytes" : 6700
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/diffs_19_.tar.zip",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\diffs_19_.tar.zip",
     "sizeBytes" : 7426
   }, {
-    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/run-demo-full/work/run_tar_extracted/error-logs.txt",
+    "path" : "C:\\Users\\gajavegs\\230LoggerMonorepo\\Pipeline\\output\\run-demo-full\\work\\run_tar_extracted\\error-logs.txt",
     "sizeBytes" : 219
   } ],
   "diffArchives" : [ {

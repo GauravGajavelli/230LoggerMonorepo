@@ -719,9 +719,20 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
               {/* Left: run history — overflowX:auto so bars don't push button off */}
               {Object.keys(test.statusByRun || {}).length > 0 && (
                 <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Label lives outside the overflow container so the tooltip badge isn't clipped */}
                   <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                                letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
+                                letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6,
+                                display: 'flex', alignItems: 'center', gap: 6 }}>
                     Run history ({Object.keys(test.statusByRun).length} runs)
+                    {hoveredRun && (
+                      <span style={{
+                        fontWeight: 500, textTransform: 'none', letterSpacing: 0,
+                        fontSize: 10, background: '#1E293B', color: '#F8FAFC',
+                        padding: '1px 6px', borderRadius: 3,
+                      }}>
+                        Run {hoveredRun}: {test.statusByRun[hoveredRun] === 'pass' || test.statusByRun[hoveredRun] === 'SUCCESSFUL' ? 'pass' : 'fail'}
+                      </span>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: 2, overflowX: 'auto',
                                 alignItems: 'flex-end', paddingBottom: 2 }}>
@@ -730,7 +741,7 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
                       .map(([run, status]) => {
                         const isPassing = status === 'pass' || status === 'SUCCESSFUL';
                         return (
-                          <div key={run} style={{ position: 'relative' }}
+                          <div key={run}
                                onMouseEnter={() => setHoveredRun(run)}
                                onMouseLeave={() => setHoveredRun(null)}>
                             <span style={{
@@ -740,17 +751,6 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
                               outline: hoveredRun === run ? '2px solid #475569' : '2px solid transparent',
                               outlineOffset: 1,
                             }} />
-                            {hoveredRun === run && (
-                              <div style={{
-                                position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
-                                transform: 'translateX(-50%)',
-                                background: '#1E293B', color: '#F8FAFC',
-                                fontSize: 11, padding: '3px 8px', borderRadius: 4,
-                                whiteSpace: 'nowrap', zIndex: 20, pointerEvents: 'none',
-                              }}>
-                                Run {run}: {isPassing ? 'pass' : 'fail'}
-                              </div>
-                            )}
                           </div>
                         );
                       })}

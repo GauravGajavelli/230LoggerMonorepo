@@ -1,6 +1,6 @@
 {
   "runNumber" : 52,
   "status" : "exception",
-  "errors" : [ "Pipeline/output/run-demo-full/enriched_runs/run_52.tar" ],
+  "errors" : [ "Pipeline\\output\\run-demo-full\\enriched_runs\\run_52.tar" ],
   "warnings" : [ ]
 }

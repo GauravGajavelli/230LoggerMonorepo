@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 import { AssignmentList } from './AssignmentList';
 import { DetailView } from './DetailView';
@@ -63,7 +63,15 @@ function SkeletonAssignmentList() {
  * Root app — wireframe header, footer, navigation state.
  */
 export function FeedbackApp() {
-  const { loading, error, allRuns } = usePlaybackDataContext();
+  const { loading, error, allRuns, frontendData } = usePlaybackDataContext();
+
+  // Keep the page title in sync with the assignment name once data loads
+  useEffect(() => {
+    const name = frontendData?.context?.assignmentName;
+    if (name) {
+      document.title = `${name} · CSSE 230`;
+    }
+  }, [frontendData]);
 
   const [view, setView] = useState('list');
   const [replayRange, setReplayRange] = useState(null); // { start, end } | null

@@ -129,14 +129,15 @@ public class FeedbackGenerationService {
             )
         );
 
-        // Single LLM call for all highlighted tests
+        // Single LLM call for all highlighted tests — use Opus for richer explanations
         LlmResponse response = llmService.complete(
             "feedback_generation_prompt.md",
             promptContent,
             inputData,
             "feedback_generation (" + highlightedIds.size() + " tests)",
             requestNumber,
-            totalRequests
+            totalRequests,
+            "claude-opus-4-6"
         );
 
         // Parse response into Feedback records (includes per-diff notes)

@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Generates practice drills for highlighted feedback items.
@@ -96,7 +98,7 @@ public class PracticeDrillService {
                 // Question bank is the preferred source for all students/modes.
                 // A bank drill requires implementing a new method → always non-trivially passable.
                 // LLM is the fallback when no bank question matches the test's categories.
-                PracticeDrill drill = lookupQuestionBankDrill(th.categories(), pts, targetFile, usedDrillIds, drillCategoryMap);
+                PracticeDrill drill = lookupQuestionBankDrill(th.categories(), pts, targetFile, usedDrillIds, drillCategoryMap, testSources);
                 if (drill == null) {
                     drill = generateLlmDrill(fb, th, testSources, targetFile, pts, promptContent, i, total);
                 }
@@ -203,7 +205,8 @@ public class PracticeDrillService {
 
     private PracticeDrill lookupQuestionBankDrill(List<String> categories, int pts,
                                                    String targetFile, Set<String> usedIds,
-                                                   Map<String, List<String>> drillCategoryMap) {
+                                                   Map<String, List<String>> drillCategoryMap,
+                                                   Map<String, TestSource> testSources) {
         if (drillQuestions.isEmpty() || categories == null || categories.isEmpty()) return null;
 
         // Find first unused question whose effective categories overlap with this test's categories.
@@ -221,7 +224,7 @@ public class PracticeDrillService {
         if (match == null) return null;
         usedIds.add(match.id());
 
-        String testCode = match.testCode();
+        String testCode = adaptDrillToStudentApi(match.testCode(), testSources);
         Integer drillPoints;
         if (pts > 0) {
             int scaled = Math.max(1, Math.round(pts * 0.25f));
@@ -401,6 +404,61 @@ public class PracticeDrillService {
         } catch (Exception e) {
             return true; // conservative: don't reject the drill
         }
+    }
+
+    /**
+     * Adapts bank-question testCode to use the student's actual BST class name and insert
+     * method by scanning all available test sources for constructor and insert-call patterns.
+     *
+     * Bank questions are authored with {@code BST<>} and {@code .add()} as canonical placeholders.
+     * If the student's tests use a different class name (e.g. {@code BinarySearchTree}) or a
+     * different insert method (e.g. {@code .insert()}), this method rewrites the testCode so
+     * the drill compiles against the student's actual submission.
+     */
+    private String adaptDrillToStudentApi(String testCode, Map<String, TestSource> testSources) {
+        if (testSources == null || testSources.isEmpty() || testCode == null) return testCode;
+
+        String detectedClass = null;
+        String detectedInsert = null;
+
+        // Scan all test sources to infer the class name and insert method actually used.
+        for (TestSource ts : testSources.values()) {
+            String content = ts.content();
+            if (content == null) continue;
+
+            // Class name: match "new ClassName<" pattern
+            if (detectedClass == null) {
+                Matcher m = Pattern.compile("new\\s+([A-Z][A-Za-z0-9_]*)<").matcher(content);
+                if (m.find()) {
+                    detectedClass = m.group(1);
+                }
+            }
+
+            // Insert method: prefer .insert( but accept .add( if that's what's used
+            if (detectedInsert == null) {
+                if (content.contains(".insert(")) {
+                    detectedInsert = "insert";
+                } else if (content.contains(".add(")) {
+                    detectedInsert = "add";
+                }
+            }
+
+            if (detectedClass != null && detectedInsert != null) break;
+        }
+
+        // Apply substitutions only when the detected API differs from the bank defaults.
+        if (detectedClass != null && !detectedClass.equals("BST")) {
+            // Replace the type param usage: "BST<" → "ClassName<"
+            testCode = testCode.replace("BST<", detectedClass + "<");
+            // Replace constructor: "new BST<>()" → "new ClassName<>()"
+            testCode = testCode.replace("new BST<>()", "new " + detectedClass + "<>()");
+        }
+        if (detectedInsert != null && !detectedInsert.equals("add")) {
+            // Replace method calls: ".add(" → ".insert(" (word-boundary aware)
+            testCode = testCode.replaceAll("\\.add\\(", "." + detectedInsert + "(");
+        }
+
+        return testCode;
     }
 
     private int extractPoints(TestSource ts) {

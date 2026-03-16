@@ -26,6 +26,7 @@ public class AnthropicProvider implements LlmProvider {
 
     // Pricing per 1M tokens
     private static final Map<String, double[]> PRICING = Map.of(
+        "claude-opus-4-6", new double[]{15.00, 75.00},
         "claude-sonnet-4-5-20250929", new double[]{3.00, 15.00},
         "claude-haiku-4-5-20251001", new double[]{1.00, 5.00},
         "claude-3-5-sonnet-20241022", new double[]{3.00, 15.00},

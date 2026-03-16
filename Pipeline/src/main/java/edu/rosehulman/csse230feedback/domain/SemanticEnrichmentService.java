@@ -455,13 +455,15 @@ public class SemanticEnrichmentService {
             )
         );
 
+        // Episode summarization benefits from Opus's deeper synthesis
         LlmResponse response = llmService.complete(
             "episode_summary_prompt.md",
             promptContent,
             episodeBoundariesJson,
             "episode_summary",
             requestNumber,
-            requestNumber  // last request
+            requestNumber,  // last request
+            "claude-opus-4-6"
         );
 
         return parseEpisodeSummaryResponse(response.content());
