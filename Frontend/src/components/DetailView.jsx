@@ -25,9 +25,17 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
   const [hoveredBarId, setHoveredBarId] = useState(null);
 
   /* ── Bucketed test lists ── */
-  const failingTests  = useMemo(() => detailTests.filter(t => t.status === 'failing'), [detailTests]);
-  const improvedTests = useMemo(() => detailTests.filter(t => t.status === 'improved'), [detailTests]);
-  const passingTests  = useMemo(() => detailTests.filter(t => t.status === 'passing'), [detailTests]);
+  const hasFeedback = t => !!(t.explanation || t.diffs?.length || t.drills?.length);
+
+  const failingTests  = useMemo(() =>
+    detailTests.filter(t => t.status === 'failing')
+      .sort((a, b) => hasFeedback(b) - hasFeedback(a)), [detailTests]);
+  const improvedTests = useMemo(() =>
+    detailTests.filter(t => t.status === 'improved')
+      .sort((a, b) => hasFeedback(b) - hasFeedback(a)), [detailTests]);
+  const passingTests  = useMemo(() =>
+    detailTests.filter(t => t.status === 'passing')
+      .sort((a, b) => hasFeedback(b) - hasFeedback(a)), [detailTests]);
 
   /* ── Auto-select first non-empty tab on mount ── */
   useEffect(() => {
@@ -281,7 +289,7 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
           {/* Tabs */}
           <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderBottom: '2px solid #E2E8F0' }}>
             {[
-              { key: 'issues',   label: `Needs attention (${failingTests.length})`, tests: failingTests },
+              { key: 'issues',   label: `Failing (${failingTests.length})`, tests: failingTests },
               { key: 'improved', label: `Improved (${improvedTests.length})`,       tests: improvedTests },
               { key: 'passing',  label: `Passing (${passingTests.length})`,         tests: passingTests },
             ].map((t) => {

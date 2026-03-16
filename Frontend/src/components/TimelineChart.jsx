@@ -29,10 +29,22 @@ export function TimelineChart({ data }) {
   return (
     <div>
       <svg
-        viewBox={`0 0 ${w} ${h + 28}`}
+        viewBox={`0 0 ${w} ${h + 38}`}
         style={{ display: 'block', width: '100%' }}
         preserveAspectRatio="xMidYMid meet"
       >
+        {/* Y-axis title */}
+        <text
+          x={6} y={padY + (h - padY * 2) / 2}
+          textAnchor="middle"
+          transform={`rotate(-90, 6, ${padY + (h - padY * 2) / 2})`}
+          fill="#94A3B8" fontSize="8"
+          fontFamily="'IBM Plex Mono', monospace"
+          letterSpacing="0.08em"
+        >
+          TESTS
+        </text>
+
         {/* Grid lines */}
         {gridVals.map((v) => (
           <g key={v}>
@@ -86,13 +98,24 @@ export function TimelineChart({ data }) {
             </text>
           ) : null
         )}
+
+        {/* X-axis title */}
+        <text
+          x={w / 2} y={h + 36}
+          textAnchor="middle"
+          fill="#94A3B8" fontSize="8"
+          fontFamily="'IBM Plex Mono', monospace"
+          letterSpacing="0.06em"
+        >
+          SESSION TIME
+        </text>
       </svg>
 
       {/* Legend */}
       <div style={{ display: 'flex', gap: 16, marginTop: 4, paddingLeft: padX }}>
         <span style={{ fontSize: 11, color: '#059669', fontFamily: "'IBM Plex Mono', monospace" }}>● Passing</span>
         <span style={{ fontSize: 11, color: '#DC2626', fontFamily: "'IBM Plex Mono', monospace" }}>╌ Failing</span>
-        <span style={{ fontSize: 11, color: '#F59E0B', fontFamily: "'IBM Plex Mono', monospace" }}>● Event</span>
+        <span style={{ fontSize: 11, color: '#F59E0B', fontFamily: "'IBM Plex Mono', monospace" }}>● Status change</span>
       </div>
     </div>
   );

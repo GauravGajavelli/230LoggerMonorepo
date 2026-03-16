@@ -408,6 +408,8 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
   const closeTestSource = useCallback(() => setShowTestSource(false), []);
   const [showDrill, setShowDrill] = useState(false);
   const closeDrill = useCallback(() => setShowDrill(false), []);
+  const [diffsOpen, setDiffsOpen] = useState(false);
+  const [explanationExpanded, setExplanationExpanded] = useState(false);
   const [shimmerDone, setShimmerDone] = useState(true);
   const cardRef = useRef(null);
   const hasRevealedRef = useRef(false);
@@ -542,85 +544,43 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
 
 
           {/* What happened */}
-          {test.explanation && (
-            <div style={{ marginTop: 8 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                            letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
-                What happened
-              </div>
-              <ul style={{ margin: 0, paddingLeft: 20, listStyleType: 'disc' }}>
-                {test.explanation
-                  .split(/(?<=\.)\s+/)
-                  .filter(Boolean)
-                  .map((sentence, i) => (
-                    <li key={i} style={{ fontSize: 13, lineHeight: '1.6', color: '#334155', marginBottom: 4 }}>
-                      <CitationText text={sentence} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Code diffs — paginated */}
-          {test.diffs && test.diffs.length > 0 && (() => {
-            const diff = test.diffs[diffIndex];
-            const total = test.diffs.length;
-            const runNum = parseInt(diff?.label?.match(/Run (\d+)/)?.[1]);
+          {test.explanation && (() => {
+            const sentences = test.explanation.split(/(?<=\.)\s+/).filter(Boolean);
+            const extra = sentences.length - 1;
             return (
-              <div style={{ marginTop: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                                letterSpacing: '.08em', color: '#94A3B8' }}>
-                    Code change
-                  </div>
-                  {total > 1 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <button onClick={() => setDiffIndex(i => Math.max(0, i - 1))}
-                        disabled={diffIndex === 0}
-                        style={{ all: 'unset', cursor: diffIndex === 0 ? 'default' : 'pointer',
-                                 color: diffIndex === 0 ? '#CBD5E1' : '#64748B', fontSize: 14, lineHeight: 1 }}>
-                        ‹
-                      </button>
-                      <span style={{ fontSize: 11, color: '#94A3B8' }}>{diffIndex + 1} / {total}</span>
-                      <button onClick={() => setDiffIndex(i => Math.min(total - 1, i + 1))}
-                        disabled={diffIndex === total - 1}
-                        style={{ all: 'unset', cursor: diffIndex === total - 1 ? 'default' : 'pointer',
-                                 color: diffIndex === total - 1 ? '#CBD5E1' : '#64748B', fontSize: 14, lineHeight: 1 }}>
-                        ›
-                      </button>
-                    </div>
-                  )}
+              <div style={{ marginTop: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                              letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6 }}>
+                  What happened
                 </div>
-                <DiffBlock diff={diff} onLabelClick={runNum ? () => onCiteClick(runNum) : null} />
-              </div>
-            );
-          })()}
-
-          {/* What to work on — amber box */}
-          {(test.nextSteps?.length > 0 || test.suggestion) && (
-            <div style={{
-              marginTop: 14, padding: '10px 14px',
-              background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8,
-            }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                            letterSpacing: '.08em', color: '#B45309', marginBottom: 6 }}>
-                What to work on
-              </div>
-              {test.nextSteps?.length > 0 ? (
                 <ul style={{ margin: 0, paddingLeft: 20, listStyleType: 'disc' }}>
-                  {test.nextSteps.map((step, i) => (
-                    <li key={i} style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', marginBottom: 6 }}>
-                      <CitationText text={step} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
+                  <li style={{ fontSize: 13, lineHeight: '1.6', color: '#334155', marginBottom: 4 }}>
+                    <CitationText text={sentences[0]} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
+                  </li>
+                  {explanationExpanded && sentences.slice(1).map((s, i) => (
+                    <li key={i + 1} style={{ fontSize: 13, lineHeight: '1.6', color: '#334155', marginBottom: 4 }}>
+                      <CitationText text={s} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <p style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', margin: 0 }}>
-                  <CitationText text={test.suggestion} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
-                </p>
-              )}
-            </div>
-          )}
+                {extra > 0 && (
+                  <button
+                    onClick={() => setExplanationExpanded(e => !e)}
+                    style={{
+                      all: 'unset', cursor: 'pointer',
+                      fontSize: 11, color: '#64748B',
+                      marginTop: 4, marginLeft: 20, display: 'block',
+                      textDecoration: 'underline',
+                      textDecorationStyle: 'dotted',
+                      textDecorationColor: '#CBD5E1',
+                    }}
+                  >
+                    {explanationExpanded ? '↑ hide' : `↓ ${extra} more`}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Why this matters — concept chain → future assignments */}
           {(test.conceptScores?.length > 0 || test.courseAppearances?.length > 0) && (
@@ -712,83 +672,150 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
             </div>
           )}
 
-          {/* Bottom: run history (scrollable) + practice CTA (fixed right) */}
-          {(Object.keys(test.statusByRun || {}).length > 0 || test.drills?.length > 0) && (
-            <div style={{ marginTop: 14, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+          {/* What to work on — amber box */}
+          {(test.nextSteps?.length > 0 || test.suggestion) && (
+            <div style={{
+              marginTop: 14, padding: '10px 14px',
+              background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8,
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                            letterSpacing: '.08em', color: '#B45309', marginBottom: 6 }}>
+                What to work on
+              </div>
+              {test.nextSteps?.length > 0 ? (
+                <ul style={{ margin: 0, paddingLeft: 20, listStyleType: 'disc' }}>
+                  {test.nextSteps.map((step, i) => (
+                    <li key={i} style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', marginBottom: 6 }}>
+                      <CitationText text={step} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p style={{ fontSize: 13, lineHeight: '1.55', color: '#78350F', margin: 0 }}>
+                  <CitationText text={test.suggestion} onCiteClick={onCiteClick} runToEpisode={runToEpisode} />
+                </p>
+              )}
+            </div>
+          )}
 
-              {/* Left: run history — overflowX:auto so bars don't push button off */}
-              {Object.keys(test.statusByRun || {}).length > 0 && (
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {/* Label lives outside the overflow container so the tooltip badge isn't clipped */}
-                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                                letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6,
-                                display: 'flex', alignItems: 'center', gap: 6 }}>
-                    Run history ({Object.keys(test.statusByRun).length} runs)
-                    {hoveredRun && (
-                      <span style={{
-                        fontWeight: 500, textTransform: 'none', letterSpacing: 0,
-                        fontSize: 10, background: '#1E293B', color: '#F8FAFC',
-                        padding: '1px 6px', borderRadius: 3,
-                      }}>
-                        Run {hoveredRun}: {test.statusByRun[hoveredRun] === 'pass' || test.statusByRun[hoveredRun] === 'SUCCESSFUL' ? 'pass' : 'fail'}
+          {/* Practice drill CTA — standalone, card-closing CTA */}
+          {test.drills?.length > 0 && (() => {
+            const drill = test.drills[0];
+            return (
+              <div style={{ marginTop: 14 }}>
+                <button
+                  className="practice-drill-btn"
+                  onClick={() => setShowDrill(true)}
+                  style={{ width: '100%' }}
+                >
+                  ✦ practice drill
+                </button>
+                {(drill.timeEstimate || drill.drillPoints) && (
+                  <div style={{
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
+                    marginTop: 5,
+                  }}>
+                    {drill.timeEstimate && (
+                      <span style={{ fontSize: 10, color: '#64748B',
+                                     fontFamily: "'IBM Plex Mono', monospace" }}>
+                        {drill.timeEstimate}
+                      </span>
+                    )}
+                    {drill.timeEstimate && drill.drillPoints && (
+                      <span style={{ color: '#CBD5E1', fontSize: 10 }}>·</span>
+                    )}
+                    {drill.drillPoints && (
+                      <span style={{ fontSize: 10, color: '#15803D',
+                                     fontFamily: "'IBM Plex Mono', monospace" }}>
+                        ~{drill.drillPoints} pt{drill.drillPoints !== 1 ? 's' : ''}
+                        {drill.pointsAvailable ? ' back' : ''}
                       </span>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 2, overflowX: 'auto',
-                                alignItems: 'flex-end', paddingBottom: 2 }}>
-                    {Object.entries(test.statusByRun)
-                      .sort(([a], [b]) => Number(a) - Number(b))
-                      .map(([run, status]) => {
-                        const isPassing = status === 'pass' || status === 'SUCCESSFUL';
-                        return (
-                          <div key={run}
-                               onMouseEnter={() => setHoveredRun(run)}
-                               onMouseLeave={() => setHoveredRun(null)}>
-                            <span style={{
-                              display: 'block', width: 6, height: isPassing ? 14 : 20, borderRadius: 2,
-                              background: isPassing ? '#6EE7B7' : '#FCA5A5',
-                              flexShrink: 0, cursor: 'default',
-                              outline: hoveredRun === run ? '2px solid #475569' : '2px solid transparent',
-                              outlineOffset: 1,
-                            }} />
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
+            );
+          })()}
 
-              {/* Right: practice CTA — fixed, stacked column */}
-              {test.drills?.length > 0 && (() => {
-                const drill = test.drills[0];
-                return (
-                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column',
-                                alignItems: 'flex-end', gap: 4 }}>
-                    {/* Metadata chips above button */}
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      {drill.timeEstimate && (
-                        <span style={{ fontSize: 10, color: '#64748B',
-                                       fontFamily: "'IBM Plex Mono', monospace" }}>
-                          {drill.timeEstimate}
-                        </span>
-                      )}
-                      {drill.drillPoints && (
-                        <span style={{
-                          fontSize: 10, fontWeight: 600, color: '#15803D',
-                          background: '#F0FDF4', border: '1px solid #BBF7D0',
-                          padding: '1px 6px', borderRadius: 4,
-                          fontFamily: "'IBM Plex Mono', monospace",
-                        }}>
-                          ~{drill.drillPoints} pt{drill.drillPoints !== 1 ? 's' : ''}{drill.pointsAvailable ? ' back' : ''}
-                        </span>
-                      )}
+          {/* Code diffs — paginated, collapsed by default */}
+          {test.diffs && test.diffs.length > 0 && (() => {
+            const diff = test.diffs[diffIndex];
+            const total = test.diffs.length;
+            const runNum = parseInt(diff?.label?.match(/Run (\d+)/)?.[1]);
+            return (
+              <div style={{ marginTop: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <button onClick={() => setDiffsOpen(o => !o)} style={{
+                    all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
+                    fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                    letterSpacing: '.08em', color: '#94A3B8',
+                  }}>
+                    <span style={{ fontSize: 11, color: '#CBD5E1' }}>{diffsOpen ? '▾' : '▸'}</span>
+                    Code change{total > 1 ? ` (${total})` : ''}
+                  </button>
+                  {diffsOpen && total > 1 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => setDiffIndex(i => Math.max(0, i - 1))}
+                        disabled={diffIndex === 0}
+                        style={{ all: 'unset', cursor: diffIndex === 0 ? 'default' : 'pointer',
+                                 color: diffIndex === 0 ? '#CBD5E1' : '#64748B', fontSize: 14, lineHeight: 1 }}>
+                        ‹
+                      </button>
+                      <span style={{ fontSize: 11, color: '#94A3B8' }}>{diffIndex + 1} / {total}</span>
+                      <button onClick={() => setDiffIndex(i => Math.min(total - 1, i + 1))}
+                        disabled={diffIndex === total - 1}
+                        style={{ all: 'unset', cursor: diffIndex === total - 1 ? 'default' : 'pointer',
+                                 color: diffIndex === total - 1 ? '#CBD5E1' : '#64748B', fontSize: 14, lineHeight: 1 }}>
+                        ›
+                      </button>
                     </div>
-                    <button className="practice-drill-btn" onClick={() => setShowDrill(true)}>
-                      ✦ practice
-                    </button>
-                  </div>
-                );
-              })()}
+                  )}
+                </div>
+                {diffsOpen && (
+                  <DiffBlock diff={diff} onLabelClick={runNum ? () => onCiteClick(runNum) : null} />
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Run history */}
+          {Object.keys(test.statusByRun || {}).length > 0 && (
+            <div style={{ marginTop: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                            letterSpacing: '.08em', color: '#94A3B8', marginBottom: 6,
+                            display: 'flex', alignItems: 'center', gap: 6 }}>
+                Run history ({Object.keys(test.statusByRun).length} runs)
+                {hoveredRun && (
+                  <span style={{
+                    fontWeight: 500, textTransform: 'none', letterSpacing: 0,
+                    fontSize: 10, background: '#1E293B', color: '#F8FAFC',
+                    padding: '1px 6px', borderRadius: 3,
+                  }}>
+                    Run {hoveredRun}: {test.statusByRun[hoveredRun] === 'pass' || test.statusByRun[hoveredRun] === 'SUCCESSFUL' ? 'pass' : 'fail'}
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 2, overflowX: 'auto',
+                            alignItems: 'flex-end', paddingBottom: 2 }}>
+                {Object.entries(test.statusByRun)
+                  .sort(([a], [b]) => Number(a) - Number(b))
+                  .map(([run, status]) => {
+                    const isPassing = status === 'pass' || status === 'SUCCESSFUL';
+                    return (
+                      <div key={run}
+                           onMouseEnter={() => setHoveredRun(run)}
+                           onMouseLeave={() => setHoveredRun(null)}>
+                        <span style={{
+                          display: 'block', width: 6, height: isPassing ? 14 : 20, borderRadius: 2,
+                          background: isPassing ? '#6EE7B7' : '#FCA5A5',
+                          flexShrink: 0, cursor: 'default',
+                          outline: hoveredRun === run ? '2px solid #475569' : '2px solid transparent',
+                          outlineOffset: 1,
+                        }} />
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           )}
 

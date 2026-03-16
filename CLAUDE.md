@@ -37,8 +37,8 @@ to generate targeted, factual feedback that surfaces in a React frontend.
      -o Frontend/public/data/frontend.json \
      --assignment-name "Binary Search Tree" \
      --student-id "<student-id>" \
-     --no-code \
      --cache-dir Pipeline/cache/llm
+   # Note: do NOT pass --no-code — it strips test source data and breaks the "view test" modals.
 ```
 
 ### Demo pipeline (run-demo data; no enriched_runs/ available)
@@ -54,7 +54,6 @@ java -jar Pipeline/target/csse230-feedback.jar prepare \
   -o Frontend/public/data/frontend.json \
   --assignment-name "Binary Search Tree" \
   --student-id "demo-student" \
-  --no-code \
   --cache-dir Pipeline/cache/llm \
   --allow-basic-fallback \
   --clear-cache
