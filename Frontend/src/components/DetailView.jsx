@@ -182,12 +182,16 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
               <p style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', margin: '0 0 4px' }}>
                 {needsAttention > 0
                   ? `${needsAttention} of ${totalTests} tests need attention`
-                  : `All ${totalTests} tests passing`}
+                  : detailSummary.improved > 0
+                    ? `${detailSummary.improved} of ${totalTests} tests took multiple attempts, all resolved by submission`
+                    : `All ${totalTests} tests passing`}
               </p>
               <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>
-                {detailSummary.improved > 0
-                  ? `${detailSummary.improved} test${detailSummary.improved !== 1 ? 's' : ''} improved since your earlier runs — nice progress.`
-                  : 'Keep up the great work!'}
+                {needsAttention > 0 && detailSummary.improved > 0
+                  ? `${detailSummary.improved} test${detailSummary.improved !== 1 ? 's' : ''} improved since your earlier runs.`
+                  : needsAttention === 0 && detailSummary.improved > 0
+                    ? 'Review the Improved tab to see what the tool learned about your session.'
+                    : 'Keep up the great work!'}
               </p>
             </div>
             {/* Mini-bar of all tests */}
