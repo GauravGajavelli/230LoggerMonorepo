@@ -3,6 +3,20 @@
 
 ---
 
+## What this is
+
+**Who:** Gaurav Gajavelli, [your role — e.g. CS PhD student / TA / researcher]. Take 10–15 seconds at the start to say who you are and why you're here, since students may not know you.
+
+**What's happening:** A short demo of a debugging feedback tool built for CSSE 230, followed by an IRB consent form for a research study on the tool. The demo is the pitch; the form is the ask.
+
+**Total time:** About 10 minutes — 5–6 for the demo, a few minutes for the forms. Students sign (or don't) and pass them back at the end of class.
+
+**Research in one sentence:** The tool runs automatically during assignments and generates personalized feedback on your debugging session. The study measures whether that feedback actually helps students learn. The demo explains the tool; the consent form covers what data is collected and how it's used.
+
+**The forms:** IRB-approved informed consent. Signing means your de-identified data can be included in research analysis. Not signing means it won't be — but you still get the tool either way. Students can also take the form home and decide later.
+
+---
+
 ## Setup checklist
 
 - [ ] `make demo-full-cached` to regenerate `frontend.json` (free, uses cache)
