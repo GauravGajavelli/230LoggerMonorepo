@@ -117,11 +117,12 @@
 #### Open `testRemoveReturnValue`
 - **What happened** — what actually changed, not what you intended. All three contributing edits, in chronological order. Specific run numbers.
 - **Code change** — three labeled diffs: Run 50, Run 53, Run 55. Before and after, inline. The labels tell you not just what changed but when. You don't have to reconstruct this from git history.
-- **Why this matters** — concept score bars and future course appearances. Point to where this concept shows up on the next exam.
+- **Why this matters** — concept score bars and future course appearances. Point to where this concept shows up on the next exam and roughly how much of the exam covers it.
   - Switch to the Moodle Exam Resources page: "This is what's there now — past exams, practice problems. I'm basically organizing the relevant parts of this for you, tied to your specific session."
-  - Switch back to the app.
-- **Practice drill** — this is the actionable piece. One function to implement, worth a point back on regrade.
-  - Pedagogical argument: you're still in the code. Your memory of this session is fresh. The research on spaced retrieval and timely feedback (Karpicke & Roediger 2008, Hattie & Timperley 2007) is consistent: re-engaging with material right after you've worked on it consolidates it better than coming back to it cold. The drill is designed to hit that window.
+  - Switch back to the app. Point to the exam weight: this concept is worth roughly [X] points on the midterm. The assignment is done — those points are locked in. But the exam isn't.
+- **Practice drill** — one function to implement, takes about 10 minutes. Not extra credit, not a regrade — targeted practice on the exact concept you just struggled with, while your memory of it is still fresh.
+  - The argument: the exam is coming and this concept is on it. The drill is 10 minutes now versus relearning it cold the night before. That's the trade.
+  - Pedagogical grounding if you want it: spaced retrieval research (Karpicke & Roediger 2008, Hattie & Timperley 2007) consistently shows that re-engaging with material right after working on it consolidates it better than passive re-study later. The drill is designed to hit that window.
   - Switch to Eclipse: paste in the drill test, show it compiling and running. This is a real, runnable test — not advice to read.
   - Switch back to the app.
 - Run history sparkline at the bottom of the card: the bar chart of your session for this specific test — shows when it was failing, when it passed, how long the struggle lasted
