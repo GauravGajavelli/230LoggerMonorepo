@@ -219,7 +219,7 @@ function PracticeDrillModal({ drill, onClose }) {
                 <>Paste into <code style={{ background: '#F3F4F6', padding: '0 3px', borderRadius: 3 }}>{drill.targetFile}</code></>
               )}
               {drill.drillPoints && (
-                <> · ~{drill.drillPoints} pt{drill.drillPoints !== 1 ? 's' : ''}{drill.pointsAvailable ? ' on regrade' : ' (standalone)'}</>
+                <> · ~{drill.drillPoints} pt{drill.drillPoints !== 1 ? 's' : ''}{drill.pointsAvailable ? '' : ' (standalone)'}</>
               )}
             </div>
           )}
@@ -728,7 +728,7 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
                       <span style={{ fontSize: 10, color: '#15803D',
                                      fontFamily: "'IBM Plex Mono', monospace" }}>
                         ~{drill.drillPoints} pt{drill.drillPoints !== 1 ? 's' : ''}
-                        {drill.pointsAvailable ? ' back' : ''}
+                        {''}
                       </span>
                     )}
                   </div>
