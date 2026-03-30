@@ -38,7 +38,7 @@ Think: what is the next logical test a beginner would write? Not the hardest edg
 
 ## Points-back integration
 
-The generated test must include `points += 1;` as the very last statement inside the `@Test` method body (before the closing brace), matching the `points += N;` grading pattern already present in the test file. This lets the student paste the method directly into `{targetFile}` and earn partial credit on a regrade.
+The generated test must include `points += 1;` as the very last statement inside the `@Test` method body (before the closing brace), matching the `points += N;` grading pattern already present in the test file. This lets the student paste the method directly into the file named by `targetFile` in the input and earn partial credit on a regrade.
 
 Example structure:
 ```java
@@ -64,7 +64,7 @@ Instead:
 - Generate a **simpler, isolated** `@Test` method that exercises the smallest sub-case of the broken concept, so the student can get *something* passing and build from there.
 - Use a 2-node tree at most.
 - Generate 2–3 progressive hints: hint 1 is purely conceptual, hint 2 is algorithmic, hint 3 is near-code but still requires the student to fill in the logic.
-- `intro` should frame this as "let's get the simplest case passing first — paste into {targetFile} and it's worth a point back." If targetFile is absent, omit the file reference.
+- `intro` should frame this as "let's get the simplest case passing first — paste into `<targetFile>` and it's worth a point back", where `<targetFile>` is the **exact filename from the input JSON's `targetFile` field**. Do NOT substitute a different filename. If `targetFile` is absent from the input, omit the file reference entirely.
 
 **Example:** if `testRemove` is failing because of a node with two children, write a drill that tests only deletion of a leaf node.
 
@@ -82,7 +82,7 @@ Instead, **add a NEW method to the BST class** that exercises the same underlyin
 
 The new method must not exist in the student's codebase — the test will fail to compile until they implement it, making it a genuine stretch exercise.
 
-`intro` should frame the drill as: "add this new method — paste the test into {targetFile} and it's worth a point back." If targetFile is absent, omit the file reference.
+`intro` should frame the drill as: "add this new method — paste the test into `<targetFile>` and it's worth a point back", where `<targetFile>` is the **exact filename from the input JSON's `targetFile` field**. Do NOT substitute a different filename. If `targetFile` is absent from the input, omit the file reference entirely.
 
 ---
 
@@ -106,6 +106,7 @@ exam questions rather than simple assertion tests.
 7. The generated test must use only the same data structures and methods visible from the existing test source or standard Java. Do not import libraries not present in the project.
 8. The last statement inside the `@Test` method body must be `points += 1;`.
 9. Maximum 4 nodes in the test tree. Maximum 2 assert statements.
+10. The filename in the `intro` must exactly match the `targetFile` value from the input JSON. Never mention a different Java file in the intro.
 
 ---
 

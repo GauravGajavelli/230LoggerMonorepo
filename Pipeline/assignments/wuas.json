@@ -1,0 +1,138 @@
+{
+  "assignmentName": "Weighted and Sorted",
+  "excludeTestClasses": [],
+  "courseContext": {
+    "concepts": [
+      {
+        "concept": "Comparable and Comparator for custom ordering",
+        "testCategories": ["comparable", "treeSet"],
+        "futureAppearances": [
+          {
+            "label": "BinaryHeaps",
+            "description": "BinaryHeap is generic over Comparable so that heapifyUp and heapifyDown can compare elements without knowing their type—the same contract established when implementing Comparable on Shape subclasses."
+          },
+          {
+            "label": "GraphSurfing — Dijkstra's algorithm",
+            "description": "Dijkstra's priority queue entries are ordered by tentative distance; understanding how to express a total ordering via Comparable (or a Comparator passed to PriorityQueue) is required to implement the min-priority queue that drives the algorithm."
+          },
+          {
+            "label": "EditorTrees",
+            "description": "Though EditorTrees nodes are ordered by rank rather than a Comparable key, the invariant that defines 'correct position' parallels the Comparable contract: a consistent, transitive total order must be maintained across every add and delete."
+          },
+          {
+            "label": "Exam 2 / Final",
+            "description": "Exam problems on sorting and tree operations often require writing or tracing a Comparator to verify that students can express custom orderings independently of the Comparable default."
+          }
+        ]
+      },
+      {
+        "concept": "Sorted data structures (sorted linked list)",
+        "testCategories": ["sortedLinkedList"],
+        "futureAppearances": [
+          {
+            "label": "BST assignment",
+            "description": "A sorted linked list maintains O(n) insert with sorted order; the BST assignment replaces that with O(log n) average insert while preserving sorted in-order traversal—making the sorted linked list the direct motivating predecessor."
+          },
+          {
+            "label": "EditorTrees",
+            "description": "AVL trees (EditorTrees) extend the BST's sorted structure with guaranteed O(log n) worst-case cost; the progression from sorted linked list → BST → AVL tree is the central narrative of the course's first half."
+          },
+          {
+            "label": "BinaryHeaps",
+            "description": "A min-heap also enforces a structural ordering, but only the partial order property (parent ≤ children) rather than full sorted order—understanding why full sorted order costs more motivates the heap's design."
+          },
+          {
+            "label": "GraphSurfing",
+            "description": "Java's TreeSet (a Red-Black BST) is used in graph algorithms to maintain vertex sets in sorted order with O(log n) operations; experience with sorted structure invariants from this assignment directly applies."
+          }
+        ]
+      },
+      {
+        "concept": "Min-priority queue operations (insert, findMin, removeMin)",
+        "testCategories": ["priorityQueue"],
+        "futureAppearances": [
+          {
+            "label": "BinaryHeaps assignment",
+            "description": "BinaryHeaps implements the same three core operations—insert, findMin, removeMin—but achieves O(log n) cost via the heap property and array-based storage instead of a linear scan."
+          },
+          {
+            "label": "GraphSurfing — Dijkstra's algorithm",
+            "description": "Dijkstra's algorithm is driven entirely by removeMin: at each step the unvisited vertex with smallest tentative distance is extracted from the priority queue. Understanding that removeMin is the bottleneck operation directly informs the O((V + E) log V) cost analysis."
+          },
+          {
+            "label": "HW on heaps",
+            "description": "Homework problems ask students to trace heapifyDown after removeMin on a given heap array, requiring exact understanding of the operation semantics implemented here."
+          }
+        ]
+      },
+      {
+        "concept": "Binary search correctness and efficiency",
+        "testCategories": ["binarySearch"],
+        "futureAppearances": [
+          {
+            "label": "BST assignment",
+            "description": "BST contains() is binary search on a pointer-linked structure: each comparison eliminates half the remaining search space exactly as array binary search does, making testBinarySearchEfficiency the motivating complexity argument for BSTs."
+          },
+          {
+            "label": "EditorTrees get(int pos)",
+            "description": "get(int pos) navigates by rank in O(log n)—a generalization of binary search where the 'midpoint' is the current node's left-subtree size rather than a computed array index."
+          },
+          {
+            "label": "Exam questions on complexity",
+            "description": "Exam and homework problems on O(log n) algorithms (BST search, heap operations, merge sort) trace back to binary search as the prototype; students who understand why binary search is O(log n) can extend that argument to tree height and heap depth."
+          },
+          {
+            "label": "GraphSurfing",
+            "description": "Binary search over edge weights or sorted adjacency data appears in some graph problem variants; more broadly, the O(log n) search paradigm underlies the efficient priority queue that powers Dijkstra's algorithm."
+          }
+        ]
+      },
+      {
+        "concept": "GCD via Euclid's algorithm and runtime analysis",
+        "testCategories": ["euclid"],
+        "futureAppearances": [
+          {
+            "label": "Algorithm analysis / HW",
+            "description": "The worst-case input for Euclid's algorithm (consecutive Fibonacci numbers) is a standard homework problem in CSSE 230 that requires the same recurrence reasoning used in the AVL tree minimum-node proof—both rely on Fibonacci growth to establish a logarithmic bound."
+          },
+          {
+            "label": "EditorTrees height proofs",
+            "description": "Proving that an AVL tree of height H has at least S(H) = S(H-1) + S(H-2) + 1 nodes uses Fibonacci recurrences, the same mathematical structure that governs Euclid worst-case analysis."
+          },
+          {
+            "label": "Exam 1",
+            "description": "Exam 1 typically includes a worst-case runtime question on a recursive algorithm; Euclid's algorithm is the template for reasoning about how remaindering shrinks problem size, a technique students apply to merge sort and BST height analysis."
+          }
+        ]
+      },
+      {
+        "concept": "N-gram frequency counting and string processing",
+        "testCategories": ["ngramCounting"],
+        "futureAppearances": [
+          {
+            "label": "GraphSurfing",
+            "description": "Graph problems often involve accumulating edge or vertex labels as strings; the pattern of iterating a sequence and updating a frequency map (HashMap or TreeMap) used in n-gram counting reappears when building adjacency lists or computing degree histograms."
+          },
+          {
+            "label": "BST / TreeMap use",
+            "description": "N-gram counting with a TreeMap is a direct application of BST-ordered map operations; the assignment motivates why BST-backed maps deliver O(log n) put/get while HashMap delivers O(1) average—a trade-off students revisit in every subsequent data-structure choice."
+          }
+        ]
+      },
+      {
+        "concept": "Anagram detection and character frequency analysis",
+        "testCategories": ["anagram"],
+        "futureAppearances": [
+          {
+            "label": "Hashing / HashMap (lecture and HW)",
+            "description": "The canonical O(n) anagram algorithm uses a frequency array or HashMap; once hashing is introduced, students are asked to re-examine why anagram detection is O(n) with a hash map but O(n log n) with a sorted structure, reinforcing the cost model."
+          },
+          {
+            "label": "Exam problems on maps and sets",
+            "description": "Exam problems that ask students to choose between HashMap, TreeMap, and sorted arrays for membership queries are direct descendants of the anagram problem, where the right data structure determines algorithmic efficiency."
+          }
+        ]
+      }
+    ]
+  }
+}

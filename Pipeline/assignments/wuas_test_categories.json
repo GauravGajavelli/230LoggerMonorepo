@@ -1,0 +1,126 @@
+{
+  "categories": {
+    "anagram": {
+      "description": "Detecting anagrams via character frequency analysis",
+      "tests": [
+        "AnagramTests#testAnagram1()",
+        "AnagramTests#testAnagram2()",
+        "AnagramTests#testAnagram3()",
+        "AnagramTests#testAnagram4()",
+        "AnagramTests#testAnagram5()",
+        "AnagramTests#testAnagram6()",
+        "AnagramTests#testAnagram7()"
+      ]
+    },
+    "priorityQueue": {
+      "description": "Min-priority queue correctness — insert, findMin, removeMin, size, isEmpty, and type genericity",
+      "tests": [
+        "ArrayListMinPQTest#testClear()",
+        "ArrayListMinPQTest#testFindMin()",
+        "ArrayListMinPQTest#testFindMinEmpty()",
+        "ArrayListMinPQTest#testFindMinStrings()",
+        "ArrayListMinPQTest#testInsertAndSize()",
+        "ArrayListMinPQTest#testIsEmpty()",
+        "ArrayListMinPQTest#testRemoveMin()",
+        "ArrayListMinPQTest#testRemoveMinEmpty()",
+        "ArrayListMinPQTest#testRemoveMinStrings()"
+      ]
+    },
+    "binarySearch": {
+      "description": "Binary search correctness (element found, not found, first/second midpoint) and O(log n) efficiency",
+      "tests": [
+        "EfficientSearchTest#testBinarySearchAllArrayElements()",
+        "EfficientSearchTest#testBinarySearchFirstMid()",
+        "EfficientSearchTest#testBinarySearchItemNotInArray()",
+        "EfficientSearchTest#testBinarySearchSecondMid()",
+        "EfficientSearchTest#testBinarySearchSecondMid2()",
+        "EfficientSearchTest#zzzTestBinarySearchEfficiency()"
+      ]
+    },
+    "euclid": {
+      "description": "Euclid's GCD algorithm correctness and worst-case runtime analysis",
+      "tests": [
+        "EuclidTest#testBasic()",
+        "EuclidTest#testLargeGcd()",
+        "EuclidTest#testLargePrimeGcd()",
+        "EuclidTest#testReversed()",
+        "EuclidTest#testWorstCaseRuntime()"
+      ]
+    },
+    "ngramCounting": {
+      "description": "N-gram (unigram, bigram, trigram) frequency counting and map-based analysis",
+      "tests": [
+        "NGramCountingTests#testBigramCounting()",
+        "NGramCountingTests#testNGramCountingFrequencyAnalysis()",
+        "NGramCountingTests#testTrigramCounting()",
+        "NGramCountingTests#testUnigramCounting()"
+      ]
+    },
+    "comparable": {
+      "description": "Implementing Comparable on shape types and sorting with Collections.sort",
+      "tests": [
+        "ShapeTest#testSortCircles()",
+        "ShapeTest#testSortTrianglesByArea()",
+        "ShapeTest#testSortTrianglesByPerimeter()"
+      ]
+    },
+    "treeSet": {
+      "description": "Using TreeSet with Comparator for duplicate-tolerant sorted ordering",
+      "tests": [
+        "ShapeTest#testSortTrianglesByAreaUsingTreeSet()"
+      ]
+    },
+    "sortedLinkedList": {
+      "description": "Sorted linked list construction, insertion maintaining sorted order, and list-constructor conversion",
+      "tests": [
+        "SortedLinkedListTests#testAdd1()",
+        "SortedLinkedListTests#testAdd2()",
+        "SortedLinkedListTests#testAdd3()",
+        "SortedLinkedListTests#testConstructor()",
+        "SortedLinkedListTests#testListConstructor()"
+      ]
+    }
+  },
+  "testToCategories": {
+    "AnagramTests#testAnagram1()": ["anagram"],
+    "AnagramTests#testAnagram2()": ["anagram"],
+    "AnagramTests#testAnagram3()": ["anagram"],
+    "AnagramTests#testAnagram4()": ["anagram"],
+    "AnagramTests#testAnagram5()": ["anagram"],
+    "AnagramTests#testAnagram6()": ["anagram"],
+    "AnagramTests#testAnagram7()": ["anagram"],
+    "ArrayListMinPQTest#testClear()": ["priorityQueue"],
+    "ArrayListMinPQTest#testFindMin()": ["priorityQueue"],
+    "ArrayListMinPQTest#testFindMinEmpty()": ["priorityQueue"],
+    "ArrayListMinPQTest#testFindMinStrings()": ["priorityQueue"],
+    "ArrayListMinPQTest#testInsertAndSize()": ["priorityQueue"],
+    "ArrayListMinPQTest#testIsEmpty()": ["priorityQueue"],
+    "ArrayListMinPQTest#testRemoveMin()": ["priorityQueue"],
+    "ArrayListMinPQTest#testRemoveMinEmpty()": ["priorityQueue"],
+    "ArrayListMinPQTest#testRemoveMinStrings()": ["priorityQueue"],
+    "EfficientSearchTest#testBinarySearchAllArrayElements()": ["binarySearch"],
+    "EfficientSearchTest#testBinarySearchFirstMid()": ["binarySearch"],
+    "EfficientSearchTest#testBinarySearchItemNotInArray()": ["binarySearch"],
+    "EfficientSearchTest#testBinarySearchSecondMid()": ["binarySearch"],
+    "EfficientSearchTest#testBinarySearchSecondMid2()": ["binarySearch"],
+    "EfficientSearchTest#zzzTestBinarySearchEfficiency()": ["binarySearch"],
+    "EuclidTest#testBasic()": ["euclid"],
+    "EuclidTest#testLargeGcd()": ["euclid"],
+    "EuclidTest#testLargePrimeGcd()": ["euclid"],
+    "EuclidTest#testReversed()": ["euclid"],
+    "EuclidTest#testWorstCaseRuntime()": ["euclid"],
+    "NGramCountingTests#testBigramCounting()": ["ngramCounting"],
+    "NGramCountingTests#testNGramCountingFrequencyAnalysis()": ["ngramCounting"],
+    "NGramCountingTests#testTrigramCounting()": ["ngramCounting"],
+    "NGramCountingTests#testUnigramCounting()": ["ngramCounting"],
+    "ShapeTest#testSortCircles()": ["comparable"],
+    "ShapeTest#testSortTrianglesByArea()": ["comparable"],
+    "ShapeTest#testSortTrianglesByPerimeter()": ["comparable"],
+    "ShapeTest#testSortTrianglesByAreaUsingTreeSet()": ["treeSet"],
+    "SortedLinkedListTests#testAdd1()": ["sortedLinkedList"],
+    "SortedLinkedListTests#testAdd2()": ["sortedLinkedList"],
+    "SortedLinkedListTests#testAdd3()": ["sortedLinkedList"],
+    "SortedLinkedListTests#testConstructor()": ["sortedLinkedList"],
+    "SortedLinkedListTests#testListConstructor()": ["sortedLinkedList"]
+  }
+}

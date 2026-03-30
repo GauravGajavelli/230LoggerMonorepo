@@ -29,6 +29,9 @@ import { formatShortTime } from '../utils/formatUtils';
 
 const PlaybackDataContext = createContext(/** @type {PlaybackDataContextValue | null} */ (null));
 
+// Sentinel: API returned an error response (no_data / processing / processing_error)
+// exposed as apiError = { error, message, allowUpload? } | null
+
 /**
  * Provider component for playback data
  * In development, uses mock data. In production, can fetch from API.
@@ -43,6 +46,7 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
   const [frontendData, setFrontendData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [apiError, setApiError] = useState(null);
   const [dataSource, setDataSource] = useState('mock');
 
   // Load data on mount or when submissionId changes
@@ -53,12 +57,20 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
 
       try {
         if (jsonUrl) {
-          // Load from local JSON file
+          // Load from URL (static JSON file in dev, or /api/data?token=... in prod)
           const response = await fetch(jsonUrl);
           if (!response.ok) {
             throw new Error(`Failed to load data: ${response.statusText}`);
           }
           const data = await response.json();
+          // API may return an error object instead of real feedback data
+          if (data.error) {
+            setApiError(data);
+            setFrontendData(null);
+            setDataSource('api');
+            return;
+          }
+          setApiError(null);
           setFrontendData(data);
           setDataSource('file');
         } else if (useMock || !submissionId) {
@@ -80,13 +92,15 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
         console.error('Error loading playback data:', err);
         setError(err);
 
-        // Fall back to mock data on error
-        try {
-          const mockData = convertMockToFrontendOutput();
-          setFrontendData(mockData);
-          setDataSource('mock');
-        } catch (mockErr) {
-          console.error('Error loading mock data:', mockErr);
+        // Only fall back to mock data when in dev/mock mode (no jsonUrl)
+        if (!jsonUrl) {
+          try {
+            const mockData = convertMockToFrontendOutput();
+            setFrontendData(mockData);
+            setDataSource('mock');
+          } catch (mockErr) {
+            console.error('Error loading mock data:', mockErr);
+          }
         }
       } finally {
         setLoading(false);
@@ -222,8 +236,9 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
     ...derivedData,
     loading,
     error,
+    apiError,
     dataSource
-  }), [frontendData, derivedData, loading, error, dataSource]);
+  }), [frontendData, derivedData, loading, error, apiError, dataSource]);
 
   return (
     <PlaybackDataContext.Provider value={value}>

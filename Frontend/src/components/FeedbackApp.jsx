@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 import { AssignmentList } from './AssignmentList';
 import { DetailView } from './DetailView';
@@ -60,10 +60,112 @@ function SkeletonAssignmentList() {
 }
 
 /**
+ * Shown when the server returns a null-feedback response (no_data / processing / processing_error).
+ */
+function NullFeedbackScreen({ error: apiError, token }) {
+  const [uploadState, setUploadState] = useState('idle'); // idle | uploading | success | error
+  const [uploadMsg, setUploadMsg] = useState('');
+
+  const handleUpload = useCallback(async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.endsWith('.tar')) {
+      setUploadMsg('Please select a .tar file.');
+      setUploadState('error');
+      return;
+    }
+
+    setUploadState('uploading');
+    setUploadMsg('Uploading…');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch(`/api/upload?token=${token}`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (res.ok) {
+        setUploadState('success');
+        setUploadMsg(data.message || 'Upload complete. Check back in a few minutes.');
+      } else {
+        setUploadState('error');
+        setUploadMsg(data.error || 'Upload failed. Please try again.');
+      }
+    } catch {
+      setUploadState('error');
+      setUploadMsg('Network error. Please check your connection and try again.');
+    }
+  }, [token]);
+
+  const containerStyle = {
+    maxWidth: 560, margin: '80px auto', padding: '0 20px',
+    fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+  };
+  const cardStyle = {
+    background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 14,
+    padding: '32px 36px', boxShadow: '0 1px 3px rgba(0,0,0,.06)',
+  };
+
+  return (
+    <div style={containerStyle}>
+      <div style={cardStyle}>
+        <p style={{ margin: '0 0 16px', fontSize: 15, color: '#475569', lineHeight: 1.6 }}>
+          {apiError.message}
+        </p>
+
+        {apiError.allowUpload && token && uploadState !== 'success' && (
+          <div style={{ marginTop: 24 }}>
+            <p style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 600, color: '#334155' }}>
+              Upload your run.tar file
+            </p>
+            <label style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '9px 18px', background: '#800000', color: '#fff',
+              borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600,
+              opacity: uploadState === 'uploading' ? 0.6 : 1,
+              pointerEvents: uploadState === 'uploading' ? 'none' : 'auto',
+            }}>
+              {uploadState === 'uploading' ? 'Uploading…' : 'Choose run.tar'}
+              <input
+                type="file"
+                accept=".tar"
+                style={{ display: 'none' }}
+                onChange={handleUpload}
+                disabled={uploadState === 'uploading'}
+              />
+            </label>
+            {uploadMsg && (
+              <p style={{
+                marginTop: 12, fontSize: 13,
+                color: uploadState === 'error' ? '#B91C1C' : '#475569',
+              }}>
+                {uploadMsg}
+              </p>
+            )}
+          </div>
+        )}
+
+        {uploadState === 'success' && (
+          <p style={{ marginTop: 16, fontSize: 14, color: '#166534', fontWeight: 500 }}>
+            {uploadMsg}
+          </p>
+        )}
+
+        {!apiError.allowUpload && (
+          <p style={{ marginTop: 16, fontSize: 13, color: '#64748B' }}>
+            Questions? Contact <a href="mailto:gajavegs@rose-hulman.edu" style={{ color: '#800000' }}>gajavegs@rose-hulman.edu</a>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
  * Root app — wireframe header, footer, navigation state.
  */
-export function FeedbackApp() {
-  const { loading, error, allRuns, frontendData } = usePlaybackDataContext();
+export function FeedbackApp({ token }) {
+  const { loading, error, apiError, allRuns, frontendData } = usePlaybackDataContext();
 
   // Keep the page title in sync with the assignment name once data loads
   useEffect(() => {
@@ -73,7 +175,7 @@ export function FeedbackApp() {
     }
   }, [frontendData]);
 
-  const [view, setView] = useState('list');
+  const [view, setView] = useState(token ? 'detail' : 'list');
   const [replayRange, setReplayRange] = useState(null); // { start, end } | null
   const [reviewed, setReviewed] = useState(false);
 
@@ -98,6 +200,8 @@ export function FeedbackApp() {
   let mainContent;
   if (loading) {
     mainContent = <SkeletonAssignmentList />;
+  } else if (apiError) {
+    mainContent = <NullFeedbackScreen error={apiError} token={token} />;
   } else if (error && allRuns.length === 0) {
     mainContent = (
       <div style={{

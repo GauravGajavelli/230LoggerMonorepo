@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSSE 230 Debugging Feedback — Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #800000;
+      color: #fff;
+      padding: 14px 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.22);
+    }
+    header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 64px 20px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 36px 40px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      text-align: center;
+    }
+    .card h2 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }
+    .card p.subtitle {
+      margin: 0 0 28px;
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .btn-rosefire {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background: #800000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-rosefire:hover { background: #6b0000; }
+    .btn-rosefire:disabled { background: #aaa; cursor: not-allowed; }
+    #message {
+      margin-top: 18px;
+      font-size: 14px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: none;
+      text-align: left;
+    }
+    #message.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; display: block; }
+    #message.info  { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: block; }
+    .divider { margin: 24px 0 0; font-size: 12px; color: #94a3b8; }
+    footer { text-align: center; padding: 20px; font-size: 12px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <header><h1>CSSE 230 · Debugging Feedback</h1></header>
+  <main>
+    <div class="card">
+      <h2>Sign in</h2>
+      <p class="subtitle">Use your Rose-Hulman account to access your personalized debugging feedback.</p>
+
+      <button class="btn-rosefire" id="loginBtn" onclick="loginWithRosefire()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Sign in with Rose-Hulman
+      </button>
+
+      <div id="message"></div>
+      <p class="divider">A popup will open to complete sign-in.</p>
+    </div>
+  </main>
+  <footer>CSSE 230 Data Structures &nbsp;·&nbsp; Rose-Hulman Institute of Technology</footer>
+
+  <script>
+    const REGISTRY_TOKEN = '__ROSEFIRE_REGISTRY_TOKEN__';
+    const ROSEFIRE_URL   = 'https://rosefire.csse.rose-hulman.edu';
+    const message        = document.getElementById('message');
+    const loginBtn       = document.getElementById('loginBtn');
+
+    // Show message if redirected here from an invalid/expired token link
+    if (new URLSearchParams(window.location.search).get('error') === 'invalid') {
+      showError('That link has expired or is invalid. Sign in to get a fresh link.');
+    }
+
+    function showError(text) {
+      message.className = 'error';
+      message.textContent = text;
+    }
+
+    function showInfo(text) {
+      message.className = 'info';
+      message.textContent = text;
+    }
+
+    function loginWithRosefire() {
+      if (!REGISTRY_TOKEN || REGISTRY_TOKEN === '__ROSEFIRE_REGISTRY_TOKEN__') {
+        showError('RoseFire is not configured on this server. Contact the research team.');
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Opening sign-in window…';
+      message.className = '';
+      message.style.display = 'none';
+
+      const origin = window.location.origin;
+      const popupUrl = `${ROSEFIRE_URL}/webview/login` +
+        `?registryToken=${encodeURIComponent(REGISTRY_TOKEN)}` +
+        `&platform=web` +
+        `&referrer=${encodeURIComponent(origin)}`;
+
+      const popup = window.open(popupUrl, 'rosefire-login',
+        'width=500,height=600,menubar=no,toolbar=no,scrollbars=yes');
+
+      if (!popup) {
+        showError('Popup was blocked. Please allow popups for this site and try again.');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Sign in with Rose-Hulman';
+        return;
+      }
+
+      function onMessage(event) {
+        // RoseFire sends postMessage from its own origin
+        if (event.origin !== ROSEFIRE_URL) return;
+        window.removeEventListener('message', onMessage);
+        popup.close();
+        handleRosefireToken(event.data);
+      }
+
+      window.addEventListener('message', onMessage);
+
+      // If popup is closed without completing login, re-enable the button
+      const pollClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(pollClosed);
+          window.removeEventListener('message', onMessage);
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Sign in with Rose-Hulman';
+        }
+      }, 500);
+    }
+
+    async function handleRosefireToken(rfToken) {
+      showInfo('Verifying…');
+      try {
+        const res = await fetch('/api/auth/rosefire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: rfToken }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.redirectUrl) {
+          showInfo('Signed in! Redirecting…');
+          window.location.href = data.redirectUrl;
+        } else {
+          showError(data.error || 'Sign-in failed. Please try again.');
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Sign in with Rose-Hulman';
+        }
+      } catch {
+        showError('Network error. Please check your connection and try again.');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Sign in with Rose-Hulman';
+      }
+    }
+  </script>
+</body>
+</html>

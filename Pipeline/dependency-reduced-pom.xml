@@ -57,14 +57,14 @@
     </plugins>
   </build>
   <properties>
-    <slf4j.version>2.0.13</slf4j.version>
-    <junit.version>5.10.3</junit.version>
     <maven.compiler.target>17</maven.compiler.target>
-    <diffutils.version>4.0</diffutils.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jackson.version>2.17.2</jackson.version>
-    <commons.compress.version>1.26.2</commons.compress.version>
     <picocli.version>4.7.6</picocli.version>
+    <slf4j.version>2.0.13</slf4j.version>
+    <commons.compress.version>1.26.2</commons.compress.version>
     <maven.compiler.source>17</maven.compiler.source>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <diffutils.version>4.0</diffutils.version>
+    <junit.version>5.10.3</junit.version>
+    <jackson.version>2.17.2</jackson.version>
   </properties>
 </project>

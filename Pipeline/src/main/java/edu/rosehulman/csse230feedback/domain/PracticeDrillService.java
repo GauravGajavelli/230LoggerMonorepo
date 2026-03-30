@@ -92,7 +92,17 @@ public class PracticeDrillService {
 
             try {
                 TestSource testSource = testSources != null ? testSources.get(fb.testId()) : null;
-                String targetFile = testSource != null ? testSource.fileName() : null;
+                // Derive targetFile from the test source when available; fall back to the
+                // class name in the testId (always correct in Java: ClassName → ClassName.java).
+                // This covers named-package projects (WuaS, GraphSurfing) where the patch key
+                // format differs from what TestSourceExtractor historically expected.
+                String targetFile;
+                if (testSource != null) {
+                    targetFile = testSource.fileName();
+                } else {
+                    int hash = fb.testId().indexOf('#');
+                    targetFile = hash > 0 ? fb.testId().substring(0, hash) + ".java" : null;
+                }
                 int pts = extractPoints(testSource);
 
                 // Question bank is the preferred source for all students/modes.
@@ -237,8 +247,9 @@ public class PracticeDrillService {
 
         // Bank-sourced drills extend the concept rather than repair a specific bug —
         // probe framing is always correct for them.
+        String intro = fixIntroTargetFile(match.intro(), targetFile);
         return new PracticeDrill(
-            "probe", match.timeEstimate(), match.intro(), testCode,
+            "probe", match.timeEstimate(), intro, testCode,
             match.hints(), targetFile,
             pts > 0 ? pts : null,
             drillPoints
@@ -328,6 +339,23 @@ public class PracticeDrillService {
         return Json.mapper().writeValueAsString(node);
     }
 
+    /**
+     * Ensures the "paste into X.java" reference in the intro matches the actual targetFile.
+     * The LLM (and even bank drill intros adapted to a new student) sometimes names a different
+     * file as the paste destination. This post-processing step replaces the paste-destination
+     * filename with targetFile while leaving any implementation-file references untouched.
+     *
+     * Pattern matched: "paste [this/the] test into X.java" (case-insensitive).
+     */
+    private String fixIntroTargetFile(String intro, String targetFile) {
+        if (intro == null || targetFile == null) return intro;
+        // Match "paste [this/the/a] test into SomeFile.java" and replace the filename only
+        return intro.replaceAll(
+            "(?i)(paste\\s+(?:this|the|a)?\\s*test\\s+into\\s+)`?([\\w]+\\.java)`?",
+            "$1" + targetFile
+        );
+    }
+
     private PracticeDrill parseDrillResponse(String content, String targetFile, int pointsAvailable) {
         try {
             String json = Json.extractLlmJson(content);
@@ -359,6 +387,8 @@ public class PracticeDrillService {
                 // No points scaffolding — keep the drill's own points += 1 as-is.
                 drillPoints = 1;
             }
+
+            intro = fixIntroTargetFile(intro, targetFile);
 
             return new PracticeDrill(mode, timeEstimate, intro, testCode,
                 hints.isEmpty() ? null : hints,
@@ -463,8 +493,13 @@ public class PracticeDrillService {
 
     private int extractPoints(TestSource ts) {
         if (ts == null || ts.content() == null) return 0;
+        // Matches assignment-specific point field names:
+        //   points   (BST, WuaS)
+        //   sPoints  (StringHashSet)
+        //   m1points / m2points  (GraphSurfing milestones)
+        // Only counts literal integer increments; expressions like "3*m1weight" are skipped.
         java.util.regex.Matcher m =
-            java.util.regex.Pattern.compile("points\\s*\\+=\\s*(\\d+)").matcher(ts.content());
+            java.util.regex.Pattern.compile("\\w*[Pp]oints\\s*\\+=\\s*(\\d+)").matcher(ts.content());
         int total = 0;
         while (m.find()) total += Integer.parseInt(m.group(1));
         return total;

@@ -51,12 +51,20 @@ public class TestSourceExtractor {
             String className = entry.getKey();
             List<String> methods = entry.getValue();
 
-            // Test class file key follows the same convention as student files
-            String fileKey = className + ".java." + className;
+            // Test class file key has two observed formats depending on how LoggingExtension
+            // was configured when the student's run.tar was captured:
+            //   1. Default-package projects (BST, BinaryHeaps, StringHashSet):
+            //        "ClassName.java.ClassName"
+            //   2. Named-package projects (WuaS, GraphSurfing):
+            //        "package.ClassName"  (dots replace path separators, no ".java." infix)
+            // We try the exact default-package key first; if absent, fall back to any patch
+            // whose fileKey ends with ".<ClassName>" (the package-qualified suffix).
+            String defaultKey = className + ".java." + className;
+            String suffix     = "." + className;
             // Use the latest available patch so we see the most complete version of the file
             // (e.g. tests that were commented-out in the baseline but uncommented by run 1)
             Optional<PatchPointer> patch = allPatches.stream()
-                .filter(p -> p.fileKey().equals(fileKey))
+                .filter(p -> p.fileKey().equals(defaultKey) || p.fileKey().endsWith(suffix))
                 .max(Comparator.comparingInt(PatchPointer::runNumber));
 
             if (patch.isEmpty()) {
@@ -68,7 +76,7 @@ public class TestSourceExtractor {
             try {
                 lines = reconstructor.reconstruct(archivesDir, patch.get(), cacheDir, warnings);
             } catch (Exception e) {
-                warnings.add("TestSourceExtractor: failed to reconstruct " + fileKey + ": " + e.getMessage());
+                warnings.add("TestSourceExtractor: failed to reconstruct " + patch.get().fileKey() + ": " + e.getMessage());
                 continue;
             }
 
