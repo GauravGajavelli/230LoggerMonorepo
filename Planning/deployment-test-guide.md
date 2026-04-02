@@ -1,7 +1,7 @@
 # Deployment & Test Guide — Email, Reports, and Relay
 
 End-to-end setup for sending feedback emails with PDF report links to CSSE 230 students.
-Covers the Ubuntu server (pipeline + Express), the Windows Zenbook (Outlook COM relay),
+Covers the Ubuntu server (nginx + Express), the Windows Zenbook (Outlook COM relay),
 and a step-by-step test sequence to verify everything before a real send.
 
 ---
@@ -9,8 +9,11 @@ and a step-by-step test sequence to verify everything before a real send.
 ## Architecture recap
 
 ```
-Ubuntu server (campus network)
-  ├── Express app  (port 3000)
+Internet / campus browser
+        ↓  HTTPS :443
+nginx  (terminates SSL, proxies to Node)
+        ↓  HTTP  :3000  (localhost only)
+Express app
   ├── SQLite       db/feedback.db
   ├── Java JAR     Pipeline/target/csse230-feedback.jar
   └── Puppeteer    renders report.pdf per student
@@ -25,7 +28,45 @@ Student inbox
 
 ## Ubuntu Server
 
-### 1. Environment setup
+### 1. nginx setup
+
+nginx handles SSL termination and proxies all traffic to the Node server on port 3000.
+
+```nginx
+# /etc/nginx/sites-available/feedback
+server {
+    listen 443 ssl;
+    server_name feedback.csse.rose-hulman.edu;
+
+    ssl_certificate     /etc/ssl/certs/feedback_csse.cer;
+    ssl_certificate_key /etc/ssl/private/feedback_csse.key;
+
+    location / {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+
+        # For large file uploads (run.tar)
+        client_max_body_size 500M;
+        proxy_read_timeout   300s;
+    }
+}
+
+server {
+    listen 80;
+    server_name feedback.csse.rose-hulman.edu;
+    return 301 https://$host$request_uri;
+}
+```
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+### 2. Environment setup
 
 ```bash
 cd /path/to/230LoggerMonorepo/Frontend
@@ -40,7 +81,7 @@ SECRET_KEY=<64-char hex>
 RELAY_SECRET=<64-char hex — different from SECRET_KEY; paste same value on Zenbook>
 
 PORT=3000
-BASE_URL=http://<ubuntu-server-ip>:3000
+BASE_URL=https://feedback.csse.rose-hulman.edu
 DATA_DIR=./data
 DB_PATH=./db/feedback.db
 
@@ -59,7 +100,7 @@ ROSEFIRE_REGISTRY_TOKEN=<UUID from rosefire>
 EMAIL_DEV_REDIRECT=gajavegs@rose-hulman.edu
 ```
 
-### 2. Build and install
+### 3. Build and install
 
 ```bash
 # Build the pipeline JAR
@@ -73,7 +114,7 @@ npm install
 mkdir -p db
 ```
 
-### 3. Start the server
+### 4. Start the server
 
 ```bash
 node server.js
@@ -81,7 +122,7 @@ node server.js
 ```
 
 The server auto-creates all database tables (`tokens`, `email_queue`, `pipeline_runs`,
-`events`, `relay_status`) on first start.
+`events`, `relay_status`) on first start. nginx forwards all public HTTPS traffic to it.
 
 ---
 
@@ -102,7 +143,7 @@ The server auto-creates all database tables (`tokens`, `email_queue`, `pipeline_
 
 | Variable | Value |
 |---|---|
-| `FEEDBACK_SERVER_URL` | `http://<ubuntu-server-ip>:3000` |
+| `FEEDBACK_SERVER_URL` | `https://feedback.csse.rose-hulman.edu` |
 | `RELAY_SECRET` | same 64-char hex as `RELAY_SECRET` in `.env` |
 
 Sign out and back in (or reboot) for the variables to take effect.
@@ -133,7 +174,7 @@ To test manually before setting up the scheduler:
 
 ```powershell
 cd C:\path\to\230LoggerMonorepo\Frontend\scripts
-.\relay-server.ps1 -Port 3001 -ServerUrl http://<ubuntu-ip>:3000
+.\relay-server.ps1 -Port 3001 -ServerUrl https://feedback.csse.rose-hulman.edu
 ```
 
 Expected output:
@@ -193,7 +234,7 @@ Get the token and open the report URL in a browser:
 ```bash
 sqlite3 db/feedback.db \
   "SELECT token FROM tokens WHERE student_id='teststu' AND assignment='bst';"
-# Open: http://<ubuntu-ip>:3000/report?token=<token>
+# Open: https://feedback.csse.rose-hulman.edu/report?token=<token>
 ```
 
 The browser should download `report.pdf`. Open it and verify:
@@ -223,8 +264,8 @@ Verify the email body contains:
 - Breadcrumb: `2526S CSSE230 -> Debugging Feedback -> Binary Search Tree`
 - Dashed separator
 - Pattern count + assessment name
-- PDF report link (`/report?token=…`)
-- Interactive feedback site link (`/feedback?token=…`)
+- PDF report link (`https://feedback.csse.rose-hulman.edu/report?token=…`)
+- Interactive feedback site link (`https://feedback.csse.rose-hulman.edu/feedback?token=…`)
 
 ### Step 7 — Full batch run (real student data)
 
@@ -262,7 +303,7 @@ Before removing `EMAIL_DEV_REDIRECT` and sending to real students:
 
 - [ ] Test email arrives at `gajavegs@rose-hulman.edu` with `[DEV →` prefix
 - [ ] PDF report downloads and renders correctly (assessment cards, days-left badge, drill columns)
-- [ ] Report link and feedback site link both work from the email body
+- [ ] Report link and feedback site link both resolve to `https://feedback.csse.rose-hulman.edu/…`
 - [ ] `relay_status` shows a recent `last_heartbeat` (Zenbook is alive)
 - [ ] Zenbook sleep is disabled; power adapter is plugged in
 - [ ] Windows auto-updates paused for the April 6–10 exam window
@@ -317,7 +358,7 @@ Use the manual send endpoints from any Windows machine with Outlook signed in:
 
 ```bash
 # On Ubuntu: list pending emails as JSON
-curl http://localhost:3000/api/emails/pending
+curl https://feedback.csse.rose-hulman.edu/api/emails/pending
 ```
 
 Or run the manual PowerShell script on any signed-in Windows machine (see `system-plan-email-delivery.md`).

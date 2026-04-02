@@ -32,6 +32,7 @@ const ROSEFIRE_SECRET           = process.env.ROSEFIRE_SECRET;
 const ROSEFIRE_REGISTRY_TOKEN   = process.env.ROSEFIRE_REGISTRY_TOKEN || '';
 
 const app = express();
+app.set('trust proxy', 1); // nginx sits in front; use X-Forwarded-For for req.ip
 app.use(express.json());
 
 // ─── Rate limiting ────────────────────────────────────────────────────────────
