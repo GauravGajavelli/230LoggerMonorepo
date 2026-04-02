@@ -1,5 +1,6 @@
 package edu.rosehulman.csse230feedback.domain;
 
+import edu.rosehulman.csse230feedback.model.AssessmentCalendar;
 import edu.rosehulman.csse230feedback.model.AssignmentConfig;
 
 import java.nio.file.Path;
@@ -30,7 +31,9 @@ public record PrepareOptions(
     /** Path to the assignment config file (used to locate sibling test_categories file). Nullable. */
     Path assignmentConfigPath,
     /** Model to use for practice drill generation (default: claude-opus-4-6). Nullable. */
-    String drillModel
+    String drillModel,
+    /** Parsed Frontend assessment-config.json for relevance-based drill prioritization. Nullable. */
+    AssessmentCalendar assessmentCalendar
 ) {
     public long idleThresholdMs() {
         return idleThresholdMinutes * 60 * 1000;
@@ -51,7 +54,7 @@ public record PrepareOptions(
                           String assignmentNameOverride) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, true,
-             null, null, null, false, false, null, false, null, false, false, null, null, null);
+             null, null, null, false, false, null, false, null, false, false, null, null, null, null);
     }
 
     /**
@@ -62,7 +65,7 @@ public record PrepareOptions(
                           String assignmentNameOverride, boolean includeCodeSnapshots) {
         this(inputDir, outputFile, idleThresholdMinutes, categoryShiftWindow,
              studentIdOverride, assignmentNameOverride, includeCodeSnapshots,
-             null, null, null, false, false, null, false, null, false, false, null, null, null);
+             null, null, null, false, false, null, false, null, false, false, null, null, null, null);
     }
 
     /**

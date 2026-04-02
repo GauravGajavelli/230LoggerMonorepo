@@ -72,4 +72,7 @@ db.exec(`
   INSERT OR IGNORE INTO relay_status (id) VALUES (1);
 `);
 
+// relay_port added after initial schema — ALTER TABLE is idempotent (fails silently if exists)
+try { db.exec('ALTER TABLE relay_status ADD COLUMN relay_port INTEGER'); } catch { /* already exists */ }
+
 export default db;

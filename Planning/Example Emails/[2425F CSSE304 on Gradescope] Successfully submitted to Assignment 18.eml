@@ -1,0 +1,165 @@
+Received: from PH7PR18MB5727.namprd18.prod.outlook.com (2603:10b6:510:303::10)
+ by MW5PR18MB5127.namprd18.prod.outlook.com with HTTPS; Mon, 4 Nov 2024
+ 03:15:16 +0000
+Received: from BL1PR13CA0225.namprd13.prod.outlook.com (2603:10b6:208:2bf::20)
+ by PH7PR18MB5727.namprd18.prod.outlook.com (2603:10b6:510:303::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8114.29; Mon, 4 Nov
+ 2024 03:15:13 +0000
+Received: from BL6PEPF00020E66.namprd04.prod.outlook.com
+ (2603:10b6:208:2bf:cafe::b) by BL1PR13CA0225.outlook.office365.com
+ (2603:10b6:208:2bf::20) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8137.14 via Frontend
+ Transport; Mon, 4 Nov 2024 03:15:12 +0000
+Authentication-Results: spf=pass (sender IP is 54.240.27.217)
+ smtp.mailfrom=notifications.gradescope.com; dkim=pass (signature was
+ verified) header.d=gradescope.com;dmarc=pass action=none
+ header.from=gradescope.com;compauth=pass reason=100
+Received-SPF: Pass (protection.outlook.com: domain of
+ notifications.gradescope.com designates 54.240.27.217 as permitted sender)
+ receiver=protection.outlook.com; client-ip=54.240.27.217;
+ helo=a27-217.smtp-out.us-west-2.amazonses.com; pr=C
+Received: from a27-217.smtp-out.us-west-2.amazonses.com (54.240.27.217) by
+ BL6PEPF00020E66.mail.protection.outlook.com (10.167.249.27) with Microsoft
+ SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.8137.17
+ via Frontend Transport; Mon, 4 Nov 2024 03:15:11 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=wu3x72jd2nmh6tadnz5q45mxajp7pxzw; d=gradescope.com; t=1730690111;
+	h=Date:From:To:Message-ID:Subject:Mime-Version:Content-Type:Content-Transfer-Encoding;
+	bh=DVEyqaownJ9SIZ1DG9j0czjd7qzP5RSCdtqAeef6nH4=;
+	b=I/sr9UMCAip2cypFYhGVSYeM72U3+29hWUN4OgZR58x8Sw0i36whbjukewzFdZ9s
+	bVnL4d98mX4M3ufRKrueDpyVDGMRKdAWfB9YtpaKfaVUuF9Oj9W7Fdqo04f0CdPzmpY
+	wYKa+YoZw+mmo26A5C+6CfZCxra3Q8xy/p53CSQE=
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=7v7vs6w47njt4pimodk5mmttbegzsi6n; d=amazonses.com; t=1730690111;
+	h=Date:From:To:Message-ID:Subject:Mime-Version:Content-Type:Content-Transfer-Encoding:Feedback-ID;
+	bh=DVEyqaownJ9SIZ1DG9j0czjd7qzP5RSCdtqAeef6nH4=;
+	b=AfsHCvksMLlB3Jed9xU0AHK6PDDXoHnglxZPNOCLX90mmuIewO3Btm5FB4pEzNFo
+	lQ1eqq1+mKc/diLzQsjuTKRh1QqVdkrqBDtdJK4v/sF4fG3SihbWwcliQaGhoQ6CRtj
+	mBH7iuaDXqMGE0bU2KcbsWzFhGOPIGpUHVi03XKs=
+Date: Mon, 4 Nov 2024 03:15:10 +0000
+From: Gradescope <no-reply@gradescope.com>
+To: Gaurav Gajavelli <gajavegs@rose-hulman.edu>
+Message-ID: <01010192f52b55d1-37b855cb-c2d2-4607-853e-42ee6e82fdaf-000000@us-west-2.amazonses.com>
+Subject: [2425F CSSE304 on Gradescope] Successfully submitted to Assignment 18
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Feedback-ID: ::1.us-west-2.m5VwKT24tBKYiTgxmNYpdgGEShKWi+9T6cWGaUfPILY=:AmazonSES
+X-SES-Outgoing: 2024.11.04-54.240.27.217
+Return-Path: 01010192f52b55d1-37b855cb-c2d2-4607-853e-42ee6e82fdaf-000000@notifications.gradescope.com
+X-MS-Exchange-Organization-ExpirationStartTime: 04 Nov 2024 03:15:12.3903
+ (UTC)
+X-MS-Exchange-Organization-ExpirationStartTimeReason: OriginalSubmit
+X-MS-Exchange-Organization-ExpirationInterval: 1:00:00:00.0000000
+X-MS-Exchange-Organization-ExpirationIntervalReason: OriginalSubmit
+X-MS-Exchange-Organization-Network-Message-Id: 91967b42-60cc-48be-ae31-08dcfc7ee55c
+X-EOPAttributedMessage: 0
+X-EOPTenantAttributedMessage: 6c373827-e5b7-45a7-ae27-b17e388fcad4:0
+X-MS-Exchange-Organization-MessageDirectionality: Incoming
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BL6PEPF00020E66:EE_|PH7PR18MB5727:EE_|MW5PR18MB5127:EE_
+X-MS-Exchange-Organization-AuthSource: BL6PEPF00020E66.namprd04.prod.outlook.com
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-Office365-Filtering-Correlation-Id: 91967b42-60cc-48be-ae31-08dcfc7ee55c
+X-MS-Exchange-AtpMessageProperties: SA|SL
+X-MS-Exchange-Organization-SCL: 1
+X-Microsoft-Antispam: BCL:2;ARA:13230040|3072899012|3092899012|5062899012|2092899012|12012899012|13102899012|32142699015|8096899003;
+X-Forefront-Antispam-Report: CIP:54.240.27.217;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:a27-217.smtp-out.us-west-2.amazonses.com;PTR:a27-217.smtp-out.us-west-2.amazonses.com;CAT:NONE;SFS:(13230040)(3072899012)(3092899012)(5062899012)(2092899012)(12012899012)(13102899012)(32142699015)(8096899003);DIR:INB;
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Nov 2024 03:15:11.9528
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 91967b42-60cc-48be-ae31-08dcfc7ee55c
+X-MS-Exchange-CrossTenant-Id: 6c373827-e5b7-45a7-ae27-b17e388fcad4
+X-MS-Exchange-CrossTenant-AuthSource: BL6PEPF00020E66.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: Internet
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR18MB5727
+X-MS-Exchange-Transport-EndToEndLatency: 00:00:04.0753426
+X-MS-Exchange-Processed-By-BccFoldering: 15.20.8114.023
+X-Microsoft-Antispam-Mailbox-Delivery:
+	ucf:0;jmr:0;auth:0;dest:I;ENG:(910001)(944506478)(944626604)(920097)(930097)(140003)(1420198);
+X-Microsoft-Antispam-Message-Info:
+	=?Windows-1252?Q?GMQOLe75EFv1LKZ3Wekwc1V7NYs+mhDCPFQ7RshNlhLSAzKXiQ9B1Abk?=
+ =?Windows-1252?Q?IxFP7aa4K2Rb6a4D7dUtBvceENH/1/iYvlvtghnwNyjWvsEBmf4uNqbG?=
+ =?Windows-1252?Q?HmKBhqdQIWSq6SkplaeiImlGw57YxcCcrB6cZnQid2pd3q1rP27XHPHN?=
+ =?Windows-1252?Q?AZJE91fwWnzMF/ZaZRuzLkGRfLs1hvx3QzfQhWBI2Unw3yyQ7kDLAQeL?=
+ =?Windows-1252?Q?KTFIzh2ix07wnffpWKC7H1S3JeIhNEH6TUjfRaI5N98LnlGJFijih314?=
+ =?Windows-1252?Q?A6NIEJC3C5PdsubLUP06onRD+xUzmLcSvWezY84pCF0Z27nshthUXGFL?=
+ =?Windows-1252?Q?V5h4P3lgSnN5xz5tu8WW/QirmV2yrZt6ZC3fInA4WobLBfxON1z3W1UJ?=
+ =?Windows-1252?Q?50ENG0chnNu/oIkNtlV/X1Z2P46r3K+iAhPs84mbBRldLoR2ZeaSPZZl?=
+ =?Windows-1252?Q?QT6P339o2P7L0x2UKn8PQT1QGMldiLjagB/5gHzME2Jj7bLTU8AuMXDJ?=
+ =?Windows-1252?Q?kPq25QKzVhKvNDoOo4pzT/i6rFJAn1J7ypswcZTCKy9gHfIXzKZxGif2?=
+ =?Windows-1252?Q?9OOSjtCRekf6xaz7Ay1jw+z5QCMmk6Ac/d+IQ4Vhkz9CpIcjafMZ/Q4O?=
+ =?Windows-1252?Q?eYlRq1G6f4FpV2OwEd24+T4lHsQVZi59qs0/hvsiNhB+BVh4ynLlkd0w?=
+ =?Windows-1252?Q?u4PLAghl0nJamw45yTnjKSURdyDnKPLxY+LwNzLaKJoPFrI1dCYgAKPL?=
+ =?Windows-1252?Q?qyan99aYauO0SLdBA+G+EuRlMediE/u+8RcSFaUr8gkMwlR+mwLK6f1J?=
+ =?Windows-1252?Q?x8hhxn7sAxzSo9vnc8sA8OTVjTzjGYvqKrTzUKKt6rzTMQd2OBe6V5xh?=
+ =?Windows-1252?Q?1LXD/YetxmJbrWTtg7xFW8eVLdGNDQxgcMhc/tR+m5uN5/E71xiTRvbl?=
+ =?Windows-1252?Q?DsjP9AQ0x1S+b4wbgYhis5pUT4IAHumUJtip1hXRqTkmekFD6WgyE61i?=
+ =?Windows-1252?Q?YPLPXIG08ZoZQaN85UBFlWcBMyQgImr7evqeiJtyrpDmztYa675/NpYT?=
+ =?Windows-1252?Q?seXxsDr13dEdGBCg1NXp/Z01XZdRz2x7o3DlqZhpTuFLlR9OCEh1KuXA?=
+ =?Windows-1252?Q?h7hkYqO4HGdeyip7Q2bfMbCbE0Y39tCBZTseBhLJx0xvomy4H2pwIoqp?=
+ =?Windows-1252?Q?boLGSAhns1k56B5iPPTesxy+wZrtYWCHIy3OKPKmRiBmryFpAHdhyhlE?=
+ =?Windows-1252?Q?CcfdpzrqMDcIFqN4wYNiWMIm7/TSHTFsfCAyubJc19ztsl/1ry6sFCPz?=
+ =?Windows-1252?Q?7o9We9hv/CyUpMBYA2VKTGr3SWKgGiv2us/hWHmukVCbdpJ23rfkEdnG?=
+ =?Windows-1252?Q?gM2ICkLzNbC/ikbMLi6ndWk3A9KoFkADwnAY0t0UfZG1/FDWbTpfwVxB?=
+ =?Windows-1252?Q?B974YozgQpXSn3/E/mXuidpTJL8dXh7SYSGTxWQ186sS4H2u8OBz5oLL?=
+ =?Windows-1252?Q?ATwTu+p1rJUYSqgkpIL/obGWUgis62WtIEv+tYrQEVX1Vm7WvtNsKW5q?=
+ =?Windows-1252?Q?LVaHSoEqJxgd/vY5oJ5ySK9qFXlEqh3u3A4Rg/6lOwjcj0LAXdasJeXu?=
+ =?Windows-1252?Q?HdhuCAeOWNLdDzlHnKzAh6cNxrGJfs17J5vt9K3mdFKqQt+oBZFkWuJj?=
+ =?Windows-1252?Q?n6YiyCvW0nj46eMRbArmWsGNT4HZp6hDAQYyMDv/vbMiQG4bQTirdROm?=
+ =?Windows-1252?Q?nGbWRZ4iErlf/HGzqxNim/n7Jnz7Yqx3dj97qQmyeiYcL+KQDFW6kNjn?=
+ =?Windows-1252?Q?N/MSpbfJ6Nuu4CMBY92S/bX6aJ3Zeef3uSl224CL/img4mj1BAduAOgL?=
+ =?Windows-1252?Q?baqJ5lbR18rVborJfZfCg72aoPwkVzn2onpFeMOo1+uCHCcn9YQHBJ62?=
+ =?Windows-1252?Q?hV3Cn6f060juWHQJJ4b3c3iu46AgyyuBm1UGuEdMwqkXUcyr34qfP9mi?=
+ =?Windows-1252?Q?XpA9arTPGssiX03Nc7qQO+ZX949Xlu404jRA/5ol89fxUTJIEQR8BcEP?=
+ =?Windows-1252?Q?Wyrjv2yAA/lBTFzJMRjEPS/N/lTEcw7Q7QDgug=3D=3D?=
+MIME-Version: 1.0
+
+<html><head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8"></=
+head>
+<body>
+<p style=3D"border:1px; border-style:solid; border-color: #FFFF99; backgrou=
+nd-color: #FFFF99;">
+<span style=3D"font-size:11.0pt;color:black;"><b>[External Sender]</span></=
+b></p>
+<div>
+<p>Hello Gaurav Gajavelli,</p>
+<p>You=E2=80=99ve successfully submitted Assignment 18, CSSE304-01 ALL SECT=
+IONS - 2024-25. You may be able to resubmit until the due date (<time datet=
+ime=3D"2024-11-04 20:59:00 -0800">Nov 04, 2024 at 11:59:00 PM EST</time>).
+<strong>You will be notified if your grades are made available.</strong></p=
+>
+<p><strong>Submitted At:</strong><br>
+<time datetime=3D"2024-11-03 19:15:10 -0800">Nov 03, 2024 at 10:15:10 PM ES=
+T</time></p>
+<p><strong>Due Date:</strong><br>
+<time datetime=3D"2024-11-04 20:59:00 -0800">Nov 04, 2024 at 11:59:00 PM ES=
+T</time></p>
+<p><strong>Late Due Date:</strong><br>
+<time datetime=3D"2024-11-04 22:00:00 -0800">Nov 05, 2024 at 1:00:00 AM EST=
+</time></p>
+<p><strong>Link to submission:</strong><br>
+<a href=3D"https://nam12.safelinks.protection.outlook.com/?url=3Dhttps%3A%2=
+F%2Fwww.gradescope.com%2Fcourses%2F855349%2Fassignments%2F4887320%2Fsubmiss=
+ions%2F285132043&amp;data=3D05%7C02%7Cgajavegs%40rose-hulman.edu%7C91967b42=
+60cc48beae3108dcfc7ee55c%7C6c373827e5b745a7ae27b17e388fcad4%7C1%7C0%7C63866=
+2869161668345%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiL=
+CJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&amp;sdata=3DRrXWl8E8qPpLxMkL3zLw=
+KjUoinMDYpXn%2FWMRh6jAElA%3D&amp;reserved=3D0" originalsrc=3D"https://www.g=
+radescope.com/courses/855349/assignments/4887320/submissions/285132043" sha=
+sh=3D"gXNI+QGBur6RdAN9LMlviq6mvaXcYyu/YGyMdBsKJTZVRpyGdzx4h4kQV5dg4bzT4yZD7=
+K4n1qPAwE/izXK4HZqst7mZwtlzveLn6sAykA3+ff8ULiDbl9+lyvF0vJsf/O/C+ToLAuerILrz=
+HjKCLHK6Ng0fDh3MeemCGCG3HFY=3D" rel=3D"noopener noreferrer" target=3D"_blan=
+k">https://www.gradescope.com/courses/855349/assignments/4887320/submission=
+s/285132043</a></p>
+<p>- The Gradescope Team</p>
+</div>
+<p style=3D"border:1px; border-style:solid; border-color: #FFFF99; backgrou=
+nd-color: #FFFF99; padding: 0em;">
+<span style=3D"font-size:10.0pt;color:black">This email originated from out=
+side of Rose-Hulman. Do not click links or open attachments unless you reco=
+gnize the sender and know the content is safe.</span></p>
+</body>
+</html>

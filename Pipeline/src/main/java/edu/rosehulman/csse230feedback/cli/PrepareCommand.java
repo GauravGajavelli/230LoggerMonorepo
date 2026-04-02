@@ -3,6 +3,7 @@ package edu.rosehulman.csse230feedback.cli;
 import edu.rosehulman.csse230feedback.domain.PrepareOptions;
 import edu.rosehulman.csse230feedback.domain.PrepareResult;
 import edu.rosehulman.csse230feedback.domain.PrepareService;
+import edu.rosehulman.csse230feedback.model.AssessmentCalendar;
 import edu.rosehulman.csse230feedback.model.AssignmentConfig;
 import edu.rosehulman.csse230feedback.util.Json;
 import picocli.CommandLine.Command;
@@ -81,6 +82,9 @@ public class PrepareCommand implements Callable<Integer> {
     @Option(names = {"--drill-model"}, description = "Model for practice drill generation (default: claude-opus-4-6).")
     private String drillModel = "claude-opus-4-6";
 
+    @Option(names = {"--assessment-calendar"}, description = "Path to Frontend assessment-config.json for relevance-based sustained-struggle prioritization.")
+    private Path assessmentCalendarPath;
+
     @Override
     public Integer call() throws Exception {
         if (!Files.exists(input)) {
@@ -113,6 +117,11 @@ public class PrepareCommand implements Callable<Integer> {
             assignmentConfig = Json.mapper().readValue(assignmentConfigPath.toFile(), AssignmentConfig.class);
         }
 
+        AssessmentCalendar assessmentCalendar = null;
+        if (assessmentCalendarPath != null && Files.exists(assessmentCalendarPath)) {
+            assessmentCalendar = Json.mapper().readValue(assessmentCalendarPath.toFile(), AssessmentCalendar.class);
+        }
+
         PrepareOptions opts = new PrepareOptions(
             input,
             output,
@@ -133,7 +142,8 @@ public class PrepareCommand implements Callable<Integer> {
             includeErrorMessages,
             assignmentConfig,
             assignmentConfigPath,
-            drillModel
+            drillModel,
+            assessmentCalendar
         );
 
         PrepareService service = new PrepareService();

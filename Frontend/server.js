@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import db from './lib/db.js';
 import { verifyToken } from './lib/tokens.js';
 import { logEvents } from './lib/events.js';
+import { generateReportForToken } from './lib/report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT       = path.resolve(__dirname, '..');
@@ -23,6 +24,7 @@ const DIST_DIR    = path.resolve(process.env.DIST_DIR   || path.join(__dirname, 
 const PIPELINE_JAR = path.resolve(process.env.PIPELINE_JAR || path.join(__dirname, '..', 'Pipeline', 'target', 'csse230-feedback.jar'));
 const LLM_CACHE_DIR = path.resolve(process.env.LLM_CACHE_DIR || path.join(__dirname, '..', 'Pipeline', 'cache', 'llm'));
 const DEMO_TOKEN  = process.env.DEMO_TOKEN || null;
+const EMAIL_DEV_REDIRECT  = process.env.EMAIL_DEV_REDIRECT || null;
 const DEMO_JSON   = path.join(__dirname, 'public', 'data', 'frontend.json');
 // RoseFire — ROSEFIRE_SECRET is the secretOrPrivateKey you provided when registering your app.
 // ROSEFIRE_REGISTRY_TOKEN is the UUID returned by registration (safe to embed in client HTML).
@@ -249,7 +251,13 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   });
 
   runPipeline(tarDir, outputDir, assignment, student_id, runId)
-    .then(() => {
+    .then(async () => {
+      // Regenerate PDF report with the real token URL so the link in the PDF is correct
+      try {
+        await generateReportForToken(student_id, assignment, token, DATA_DIR, BASE_URL);
+      } catch (err) {
+        console.error(`[report] PDF generation failed for ${student_id}: ${err.message}`);
+      }
       queueEmail(token, record.email, assignment,
         process.env.ASSIGNMENT_DISPLAY_NAME || assignment, 'regeneration_ready');
     })
@@ -265,8 +273,64 @@ app.get('/api/health', (_req, res) => {
     demo: DEMO_TOKEN ? true : false });
 });
 
+// ─── Report PDF endpoint ──────────────────────────────────────────────────────
+
+app.get('/report', async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.redirect('/login');
+  if (DEMO_TOKEN && token === DEMO_TOKEN) return res.status(404).send('No report for demo.');
+
+  const record = verifyToken(token);
+  if (!record) return res.redirect('/login?error=invalid');
+
+  const { student_id, assignment } = record;
+  const reportPdfPath = path.join(DATA_DIR, assignment, 'output', student_id, 'report.pdf');
+
+  // Generate/regenerate if missing (e.g. first visit after pipeline ran)
+  if (!fs.existsSync(reportPdfPath)) {
+    const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', student_id, 'frontend.json');
+    if (!fs.existsSync(frontendJsonPath)) {
+      return res.status(404).send('Feedback not yet generated for this student.');
+    }
+    try {
+      await generateReportForToken(student_id, assignment, token, DATA_DIR, BASE_URL);
+    } catch (err) {
+      console.error(`[report] PDF generation failed for ${student_id}: ${err.message}`);
+      return res.status(500).send('Report generation failed. Try again in a moment.');
+    }
+  }
+
+  res.setHeader('Content-Disposition', `inline; filename="${assignment}-feedback-report.pdf"`);
+  res.setHeader('Content-Type', 'application/pdf');
+  fs.createReadStream(reportPdfPath).pipe(res);
+});
+
 // ─── Email relay endpoints ────────────────────────────────────────────────────
 
+// Register: Zenbook calls this on startup so the server knows where to push.
+// Immediately attempts to drain any pending emails.
+app.post('/api/relay/register', requireRelayAuth, async (req, res) => {
+  const { port } = req.body || {};
+  if (!port) return res.status(400).json({ error: 'port required' });
+  const ip = req.ip.replace(/^::ffff:/, ''); // normalise IPv6-mapped IPv4
+  db.prepare("UPDATE relay_status SET relay_ip=?,relay_port=?,last_heartbeat=datetime('now') WHERE id=1")
+    .run(ip, port);
+  console.log(`[relay] registered at ${ip}:${port}`);
+  res.json({ ok: true });
+  // Drain any emails that queued while relay was offline — fire and forget
+  setImmediate(pushAllPending);
+});
+
+app.get('/api/emails/stats', requireRelayAuth, (_req, res) => {
+  const stats = { pending: 0, sending: 0, sent: 0, failed: 0, dead: 0 };
+  for (const row of db.prepare("SELECT status, COUNT(*) as count FROM email_queue GROUP BY status").all()) {
+    if (row.status in stats) stats[row.status] = row.count;
+  }
+  res.json(stats);
+});
+
+// Manual-fallback endpoints — used by manual-send.ps1 when the Zenbook is unavailable.
+// Normal delivery path goes through pushEmail(); these are not called by the relay server.
 app.get('/api/emails/pending', requireRelayAuth, (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 5, 50);
   res.json(db.prepare("SELECT * FROM email_queue WHERE status='pending' ORDER BY created_at LIMIT ?").all(limit));
@@ -294,29 +358,80 @@ app.post('/api/emails/:id/failed', requireRelayAuth, (req, res) => {
   res.json({ ok: true, status, attempts });
 });
 
-app.get('/api/emails/stats', requireRelayAuth, (_req, res) => {
-  const stats = { pending: 0, sending: 0, sent: 0, failed: 0, dead: 0 };
-  for (const row of db.prepare("SELECT status, COUNT(*) as count FROM email_queue GROUP BY status").all()) {
-    if (row.status in stats) stats[row.status] = row.count;
+// ─── Email push logic ─────────────────────────────────────────────────────────
+
+async function pushEmail(email) {
+  // Atomically claim the email — prevents double-send if pushAllPending is called concurrently
+  const claimed = db.prepare(
+    "UPDATE email_queue SET status='sending',last_attempt=datetime('now') WHERE id=? AND status='pending'"
+  ).run(email.id);
+  if (claimed.changes === 0) return; // already claimed by another call
+
+  const relay = db.prepare('SELECT relay_ip, relay_port FROM relay_status WHERE id=1').get();
+  if (!relay?.relay_ip || !relay?.relay_port) {
+    db.prepare("UPDATE email_queue SET status='pending' WHERE id=?").run(email.id);
+    return; // relay not registered yet — leave pending for next retry cycle
   }
-  res.json(stats);
-});
 
-app.get('/api/relay/heartbeat', requireRelayAuth, (req, res) => {
-  db.prepare("UPDATE relay_status SET last_heartbeat=datetime('now'),relay_ip=? WHERE id=1").run(req.ip);
-  res.json({ ok: true });
-});
+  const actualRecipient = EMAIL_DEV_REDIRECT ?? email.recipient;
+  const actualSubject   = EMAIL_DEV_REDIRECT
+    ? `[DEV → ${email.recipient}] ${email.subject}`
+    : email.subject;
 
-// ─── Background: stuck email recovery + heartbeat alert ──────────────────────
+  try {
+    const res = await fetch(`http://${relay.relay_ip}:${relay.relay_port}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RELAY_SECRET}` },
+      body: JSON.stringify({ recipient: actualRecipient, subject: actualSubject, body: email.body }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (res.ok) {
+      db.prepare("UPDATE email_queue SET status='sent',sent_at=datetime('now') WHERE id=?").run(email.id);
+      if (EMAIL_DEV_REDIRECT) {
+        console.log(`[email] DEV redirect → ${actualRecipient} (real: ${email.recipient}, ${email.email_type})`);
+      } else {
+        console.log(`[email] sent → ${email.recipient} (${email.email_type})`);
+      }
+    } else {
+      recordEmailFailure(email.id, `Relay returned HTTP ${res.status}`);
+    }
+  } catch (err) {
+    recordEmailFailure(email.id, err.message);
+  }
+}
 
-setInterval(() => {
+function recordEmailFailure(id, errorMsg) {
+  const row = db.prepare('SELECT attempts FROM email_queue WHERE id=?').get(id);
+  const attempts = (row?.attempts || 0) + 1;
+  const status = attempts >= 3 ? 'dead' : 'failed';
+  db.prepare('UPDATE email_queue SET status=?,attempts=?,error_msg=? WHERE id=?')
+    .run(status, attempts, errorMsg?.slice(0, 500) || null, id);
+  console.warn(`[email] ${status} (attempt ${attempts}): ${errorMsg}`);
+}
+
+async function pushAllPending() {
+  const pending = db.prepare(
+    "SELECT * FROM email_queue WHERE status='pending' ORDER BY created_at LIMIT 20"
+  ).all();
+  for (const email of pending) await pushEmail(email);
+}
+
+// ─── Background: retry loop ───────────────────────────────────────────────────
+
+setInterval(async () => {
+  // Safety valve: unstick emails left in 'sending' for >5 min (e.g. server crash mid-push)
   db.prepare("UPDATE email_queue SET status='pending' WHERE status='sending' AND last_attempt < datetime('now','-5 minutes')").run();
+  // Reset failed emails for retry after 5-min backoff
+  db.prepare("UPDATE email_queue SET status='pending' WHERE status='failed' AND attempts < 3 AND last_attempt < datetime('now','-5 minutes')").run();
+  // Push any pending (newly queued or retried)
+  await pushAllPending();
+  // Alert if relay hasn't registered recently
   const relay = db.prepare('SELECT last_heartbeat FROM relay_status WHERE id=1').get();
   if (relay?.last_heartbeat) {
     const staleMs = Date.now() - new Date(relay.last_heartbeat + 'Z').getTime();
-    if (staleMs > 5 * 60_000) console.warn(`[ALERT] Relay heartbeat missing for ${Math.round(staleMs / 60_000)} min`);
+    if (staleMs > 5 * 60_000) console.warn(`[ALERT] Relay offline for ${Math.round(staleMs / 60_000)} min`);
   }
-}, 5 * 60_000);
+}, 60_000);
 
 // ─── Pipeline helper ──────────────────────────────────────────────────────────
 
@@ -357,32 +472,38 @@ function runPipeline(tarDir, outputDir, assignment, studentId, runId) {
 
 // ─── Email queue helper ───────────────────────────────────────────────────────
 
-const EMAIL_TEMPLATES = {
-  feedback_ready: (dn, link) => ({
-    subject: `Your ${dn} debugging feedback is ready`,
-    body: `Hi,\n\nYour debugging feedback for the ${dn} assignment is ready to view:\n\n${link}\n\nThis link is private to you — please don't share it.\n\nIf you have questions, contact gajavegs@rose-hulman.edu.`,
-  }),
-  regeneration_ready: (dn, link) => ({
-    subject: `Your updated ${dn} feedback is ready`,
-    body: `Hi,\n\nYour regenerated debugging feedback for ${dn} is ready:\n\n${link}\n\nSame link as before — just refreshed with your latest data.`,
-  }),
-  missing_tar: (dn, link) => ({
-    subject: `Your ${dn} debugging feedback — action needed`,
-    body: `Hi,\n\nWe tried to generate your debugging feedback for ${dn}, but couldn't find a run.tar file in your submission.\n\nIf you have your run.tar file locally, you can upload it directly at:\n\n${link}\n\nIf you're not sure where to find it, it's in your assignment project directory under the testSupport folder.`,
-  }),
-  nudge: (dn, link) => ({
-    subject: `Reminder — your ${dn} debugging feedback is available`,
-    body: `Hi,\n\nJust a reminder that your ${dn} debugging feedback is available:\n\n${link}\n\nIt takes about 5 minutes to review and may help with upcoming assignments.`,
-  }),
-};
+const SEP = '---------------------------------------------------------------------';
+const BREADCRUMB = '2526S CSSE230 -> Debugging Feedback';
 
+// Reads data/{assignment}/assessment-config.json if present, returns { shortName, fullName } or null.
+function loadAssessmentConfig(assignment) {
+  const cfgPath = path.join(DATA_DIR, assignment, 'assessment-config.json');
+  if (!fs.existsSync(cfgPath)) return null;
+  try { return JSON.parse(fs.readFileSync(cfgPath, 'utf8')); } catch { return null; }
+}
+
+// Called only from the upload regeneration flow — regeneration_ready template.
+// feedback_ready, missing_tar, and nudge are queued by the batch scripts.
 export function queueEmail(token, recipient, assignment, displayName, emailType) {
-  const link = `${BASE_URL}/feedback?token=${token}`;
-  const tmpl = EMAIL_TEMPLATES[emailType];
-  if (!tmpl) { console.error(`[email] Unknown type: ${emailType}`); return; }
-  const { subject, body } = tmpl(displayName, link);
+  const feedbackLink = `${BASE_URL}/feedback?token=${token}`;
+  const reportLink   = `${BASE_URL}/report?token=${token}`;
+  const cfg = loadAssessmentConfig(assignment);
+  const fullName = cfg?.full_name || displayName;
+  const shortName = cfg?.short_name || displayName;
+
+  let subject, body;
+  if (emailType === 'regeneration_ready') {
+    subject = `CSSE 230 \u2014 Updated ${shortName} feedback available`;
+    body = `${BREADCRUMB} -> ${fullName}\n${SEP}\nYour debugging feedback for '${fullName}' has been\nregenerated with your latest data.\n\nView your updated feedback summary (PDF):\n\n${reportLink}\n\nOr open the interactive feedback site:\n\n${feedbackLink}\n\n${SEP}`;
+  } else {
+    console.error(`[email] queueEmail called for unexpected type: ${emailType} — use batch scripts for ${emailType}`);
+    return;
+  }
+
   db.prepare('INSERT INTO email_queue (token,recipient,subject,body,email_type,assignment) VALUES (?,?,?,?,?,?)')
     .run(token, recipient, subject, body, emailType, assignment);
+  // Attempt immediate push; background job retries on failure
+  setImmediate(pushAllPending);
 }
 
 // ─── Start ────────────────────────────────────────────────────────────────────

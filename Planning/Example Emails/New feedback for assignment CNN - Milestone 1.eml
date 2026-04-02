@@ -1,0 +1,129 @@
+Received: from SJ4PPFB5EAB54B6.namprd18.prod.outlook.com
+ (2603:10b6:a0f:fc02::f39) by PH3PPF0E97770F7.namprd18.prod.outlook.com with
+ HTTPS; Thu, 30 Oct 2025 16:33:20 +0000
+Received: from SN6PR04CA0081.namprd04.prod.outlook.com (2603:10b6:805:f2::22)
+ by SJ4PPFB5EAB54B6.namprd18.prod.outlook.com (2603:10b6:a0f:fc02::f39) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9275.14; Thu, 30 Oct
+ 2025 16:33:19 +0000
+Received: from SN1PEPF0002529D.namprd05.prod.outlook.com
+ (2603:10b6:805:f2:cafe::1b) by SN6PR04CA0081.outlook.office365.com
+ (2603:10b6:805:f2::22) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9275.14 via Frontend Transport; Thu,
+ 30 Oct 2025 16:33:18 +0000
+Authentication-Results: spf=softfail (sender IP is 137.112.1.55)
+ smtp.mailfrom=rose-hulman.edu; dkim=none (message not signed)
+ header.d=none;dmarc=fail action=none header.from=rose-hulman.edu;
+Received-SPF: SoftFail (protection.outlook.com: domain of transitioning
+ rose-hulman.edu discourages use of 137.112.1.55 as permitted sender)
+Received: from ExchHybrid-hv-1.rose-hulman.edu (137.112.1.86) by
+ SN1PEPF0002529D.mail.protection.outlook.com (10.167.242.4) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.9275.10 via Frontend Transport; Thu, 30 Oct 2025 16:33:19 +0000
+Received: from exch19-1-cv.rose-hulman.edu (137.112.1.55) by
+ ExchHybrid-hv-1.rose-hulman.edu (137.112.1.86) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.57; Thu, 30 Oct 2025 12:33:03 -0400
+Received: from ExchHybrid-hv-1.rose-hulman.edu (137.112.1.86) by
+ exch19-1-cv.rose-hulman.edu (137.112.1.55) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.2.1748.10; Thu, 30 Oct 2025 12:33:03 -0400
+Received: from internalrelay.rose-hulman.edu (137.112.8.61) by
+ ExchHybrid-hv-1.rose-hulman.edu (137.112.1.86) with Microsoft SMTP Server id
+ 15.1.2507.57 via Frontend Transport; Thu, 30 Oct 2025 12:33:03 -0400
+Received: from mooprod-t636.rose-hulman.edu ([137.112.255.67]) by internalrelay.rose-hulman.edu with Microsoft SMTPSVC(10.0.17763.1697);
+	 Thu, 30 Oct 2025 12:33:02 -0400
+Date: Thu, 30 Oct 2025 12:33:02 -0400
+To: Gaurav Gajavelli <gajavegs@rose-hulman.edu>
+From: "Do not reply to this email  (via RHIT)" <noreply@rose-hulman.edu>
+Reply-To: Do not reply to this email <noreply@rose-hulman.edu>
+Subject: New feedback for assignment CNN - Milestone 1
+Message-ID: <6903933ed4a038.08657865@moodle.rose-hulman.edu>
+X-Mailer: PHPMailer 6.9.3 (https://github.com/PHPMailer/PHPMailer)
+X-Moodle-Originating-Script: https://moodle.rose-hulman.edu => mooprod-t636.rose-hulman.edu:mod/assign/locallib.php:6624
+Content-Type: multipart/alternative;
+	boundary="b1=_IlidoNZqIDukUCP87SGdqo96JArm2Ppd4d8aIpkhg"
+Return-Path: mdl+AABcI0AAA==9c3379b0349f4d7e68dcf8af697b24ed@rose-hulman.edu
+X-OriginalArrivalTime: 30 Oct 2025 16:33:02.0880 (UTC) FILETIME=[DCA4BA00:01DC49BA]
+X-OrganizationHeadersPreserved: ExchHybrid-hv-1.rose-hulman.edu
+X-MS-Exchange-Organization-ExpirationStartTime: 30 Oct 2025 16:33:19.2101
+ (UTC)
+X-MS-Exchange-Organization-ExpirationStartTimeReason: OriginalSubmit
+X-MS-Exchange-Organization-ExpirationInterval: 1:00:00:00.0000000
+X-MS-Exchange-Organization-ExpirationIntervalReason: OriginalSubmit
+X-MS-Exchange-Organization-Network-Message-Id: d1aeb78c-9961-4989-82ed-08de17d208d7
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Organization-MessageDirectionality: Originating
+X-MS-Exchange-SkipListedInternetSender: ip=[137.112.1.55];domain=exch19-1-cv.rose-hulman.edu
+X-MS-Exchange-ExternalOriginalInternetSender: ip=[137.112.1.55];domain=exch19-1-cv.rose-hulman.edu
+X-MS-Exchange-Organization-AuthSource: ExchHybrid-hv-1.rose-hulman.edu
+X-MS-Exchange-Organization-AuthAs: Internal
+X-MS-Exchange-Organization-AuthMechanism: 10
+X-CrossPremisesHeadersPromoted: SN1PEPF0002529D.namprd05.prod.outlook.com
+X-CrossPremisesHeadersFiltered: SN1PEPF0002529D.namprd05.prod.outlook.com
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SN1PEPF0002529D:EE_|SJ4PPFB5EAB54B6:EE_|PH3PPF0E97770F7:EE_
+X-OriginatorOrg: rose-hulman.edu
+X-MS-Office365-Filtering-Correlation-Id: d1aeb78c-9961-4989-82ed-08de17d208d7
+X-MS-Exchange-AtpMessageProperties: SA
+X-MS-Exchange-Organization-SCL: 1
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|82310400026|8096899003|13003099007|41050700001;
+X-Forefront-Antispam-Report: CIP:137.112.1.86;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:exch19-1-cv.rose-hulman.edu;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(366016)(82310400026)(8096899003)(13003099007)(41050700001);DIR:INT;
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Oct 2025 16:33:19.1275
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: d1aeb78c-9961-4989-82ed-08de17d208d7
+X-MS-Exchange-CrossTenant-Id: 6c373827-e5b7-45a7-ae27-b17e388fcad4
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=6c373827-e5b7-45a7-ae27-b17e388fcad4;Ip=[137.112.1.86];Helo=[ExchHybrid-hv-1.rose-hulman.edu]
+X-MS-Exchange-CrossTenant-AuthSource: ExchHybrid-hv-1.rose-hulman.edu
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ4PPFB5EAB54B6
+X-MS-Exchange-Transport-EndToEndLatency: 00:00:01.6803634
+X-MS-Exchange-Processed-By-BccFoldering: 15.20.9275.012
+X-Microsoft-Antispam-Mailbox-Delivery:
+	ucf:0;jmr:0;auth:0;dest:I;ENG:(910005)(944506478)(944626604)(920097)(425001)(930097)(140003);
+X-Microsoft-Antispam-Message-Info:
+	V09zrPvb0okH2It4xYNfYkosSJWZiQZE9gRdp08ycqx4dK4XJ5Ri0XmZ+9X9xTcVLbSwKNj9jTIltZSqdRixWfnWQj8d1S2Tqsowa6DmE+1z1fXo0eXJbMP0I1VM/4Z9N56eS0xyI6xRD5bW6uWny0bKlvbznL7Jyj7uv0C2u3g6PCyzuEjJpAazIL2y0BM5j9pyOsAcarxYXyW1zXg1alukO/0JBiw4CAX/+1bgdO8cSMG2uxfs7Hlst2pHh3G/paOtDETXHq1o31t77z3arS1Q3MiYjH+RiSzGsmOXHaHi5czEDH2qqbRcL8fd7Sxq15hjJBE0Z5SjXyWd+05y4YVaBoK7l9Dr6/HxLyjFZ1NH7WJuSuOqb/j63lWzza1XAWn63NqG6Be6fWMHiiZVc0M5MRgm592foL3EN5sLf8Fh88X81x9DUzw0StTpto7dSU3dxsRXtAxLwI99eYElVov3cz1LgXEd0Dwzq78EHYGlCSC5/UiRV2E76ToS5maguKchpyhQPz1xbOi5UmJh4pGN0fnCZAF3BUcoODIWQlc4dGtlbQYJzH3VSNOjLkTIrAZToJtGPgQCG3f2Eqo4F6q+wJYDZT6ZqO4jidRdQqFIeO969BJoxa6ueNU7u+oilGc/5Tj6vstbzdGb2ZrBPnvHhE336150JuJDEcv96At2toT2Ep2gxmURaKbsKJCUQLpaErkQVEMDqCJM/mQgeR/DVnqrl2rwymOhLXGC+hXELGt35wUJH77GuIiPkKPbIzEMD/3T7nCCUQseqoD7H6bP6K/wjnHuRy7/zIkWkNKNvDijqOS8YxYXczSa0Tyh1Dv91VmkHVwXhDjhn+nXdkYVvV7orfiqwINzS7JolD0=
+MIME-Version: 1.0
+
+--b1=_IlidoNZqIDukUCP87SGdqo96JArm2Ppd4d8aIpkhg
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+
+2526F CSSE313-01 -> Assignment -> CNN - Milestone 1
+---------------------------------------------------------------------
+You have new feedback on your
+assignment submission for 'CNN - Milestone 1'
+
+You can see it appended to your assignment submission:
+
+https://moodle.rose-hulman.edu/mod/assign/view.php?id=3D5149022
+
+---------------------------------------------------------------------
+
+--b1=_IlidoNZqIDukUCP87SGdqo96JArm2Ppd4d8aIpkhg
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8"><p=
+><font face=3D"sans-serif">=0A=
+    <a href=3D"https://moodle.rose-hulman.edu/course/view.php?id=3D116364">=
+2526F CSSE313-01</a> -&gt;=0A=
+    <a href=3D"https://moodle.rose-hulman.edu/mod/assign/index.php?id=3D116=
+364">Assignment</a> -&gt;=0A=
+    <a href=3D"https://moodle.rose-hulman.edu/mod/assign/view.php?id=3D5149=
+022">CNN - Milestone 1</a>=0A=
+</font></p>=0A=
+<hr>=0A=
+<font face=3D"sans-serif"><p>You have new feedback on your assignment submi=
+ssion for 'CNN - Milestone 1'. You can see it appended to your <a href=3D"h=
+ttps://moodle.rose-hulman.edu/mod/assign/view.php?id=3D5149022">assignment =
+submission</a>.</p></font>=0A=
+<hr><p>Are you reading this in an email? <a href=3D"https://download.moodle=
+.org/mobile?version=3D2025041403.02&amp;lang=3Den_us&amp;iosappid=3D6333595=
+93&amp;androidappid=3Dcom.moodle.moodlemobile&amp;siteurl=3Dhttps%3A%2F%2Fm=
+oodle.rose-hulman.edu">Download the mobile app and receive notifications on=
+ your mobile device</a>.</p>
+
+--b1=_IlidoNZqIDukUCP87SGdqo96JArm2Ppd4d8aIpkhg--

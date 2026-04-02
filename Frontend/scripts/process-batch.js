@@ -14,6 +14,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import db from '../lib/db.js';
+import { generateReport } from '../lib/report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // The pipeline JAR resolves prompt templates relative to cwd, which must be the repo root
@@ -28,6 +29,7 @@ if (!assignment) {
 }
 
 const DATA_DIR        = path.resolve(process.env.DATA_DIR    || path.join(__dirname, '..', 'data'));
+const BASE_URL        = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const PIPELINE_JAR    = path.resolve(process.env.PIPELINE_JAR || path.join(__dirname, '..', '..', 'Pipeline', 'target', 'csse230-feedback.jar'));
 const LLM_CACHE_DIR   = path.resolve(process.env.LLM_CACHE_DIR || path.join(__dirname, '..', '..', 'Pipeline', 'cache', 'llm'));
 const ASSIGNMENTS_DIR = path.resolve(path.join(__dirname, '..', '..', 'Pipeline', 'assignments'));
@@ -62,13 +64,17 @@ function runPipelineForStudent(studentId) {
     execFile('java', ['-jar', PIPELINE_JAR, 'ingest', '-i', tarDir, '-o', outputDir],
       { timeout: 120_000, cwd: REPO_ROOT }, (err, _o, stderr) => {
         if (err) return reject(new Error(`ingest: ${(stderr || err.message).slice(0, 300)}`));
-        const assignmentConfigPath = path.join(ASSIGNMENTS_DIR, `${assignment}.json`);
+        const assignmentConfigPath  = path.join(ASSIGNMENTS_DIR, `${assignment}.json`);
+        const assessmentCalendarPath = path.join(DATA_DIR, assignment, 'assessment-config.json');
         const prepareArgs = ['-jar', PIPELINE_JAR, 'prepare',
           '-i', outputDir, '-o', path.join(outputDir, 'frontend.json'),
           '--assignment-name', displayName, '--student-id', studentId,
           '--cache-dir', LLM_CACHE_DIR, '--allow-basic-fallback'];
         if (fs.existsSync(assignmentConfigPath)) {
           prepareArgs.push('--assignment-config', assignmentConfigPath);
+        }
+        if (fs.existsSync(assessmentCalendarPath)) {
+          prepareArgs.push('--assessment-calendar', assessmentCalendarPath);
         }
         execFile('java', prepareArgs,
           { timeout: 0, cwd: REPO_ROOT }, (err2, _o2, stderr2) => {
@@ -91,6 +97,12 @@ for (const studentId of students) {
   try {
     await runPipelineForStudent(studentId); // top-level await — requires "type":"module"
     db.prepare("UPDATE pipeline_runs SET status='success',finished_at=datetime('now') WHERE id=?").run(runId);
+    // Generate PDF report (best-effort — don't fail the batch if report generation fails)
+    try {
+      await generateReport(studentId, assignment, DATA_DIR, BASE_URL);
+    } catch (reportErr) {
+      console.warn(`  ⚠  ${studentId} report generation failed: ${reportErr.message}`);
+    }
     console.log(`  ✓  ${studentId}  (${Math.round((Date.now()-t0)/1000)}s)`);
     succeeded++;
   } catch (err) {

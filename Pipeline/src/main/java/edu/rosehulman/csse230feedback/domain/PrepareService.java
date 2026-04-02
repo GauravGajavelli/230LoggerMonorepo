@@ -4,6 +4,7 @@ import edu.rosehulman.csse230feedback.llm.LlmConfig;
 import edu.rosehulman.csse230feedback.llm.LlmException;
 import edu.rosehulman.csse230feedback.llm.LlmService;
 import edu.rosehulman.csse230feedback.llm.PromptLoader;
+import edu.rosehulman.csse230feedback.model.AssessmentCalendar;
 import edu.rosehulman.csse230feedback.model.AssignmentConfig;
 import edu.rosehulman.csse230feedback.model.CourseContext;
 import edu.rosehulman.csse230feedback.model.DiffCategoryMapping;
@@ -25,8 +26,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
@@ -334,6 +337,37 @@ public class PrepareService {
         FailureHighlights allHighlights = tracker.buildAllHighlights(testHistories);
         // Budget-capped highlights — used as fallback when no LLM is available.
         FailureHighlights failureHighlights = tracker.buildFailureHighlights(testHistories);
+
+        // 8-rerank. If an assessment calendar is provided, re-sort sustained-struggle candidates
+        // by composite relevance score (concept_weight × grade_weight × urgency_factor) so that
+        // tests most important to upcoming high-stakes assessments are prioritised for feedback.
+        if (opts.assessmentCalendar() != null) {
+            Map<String, TestHistory> historyById = testHistories.stream()
+                .collect(Collectors.toMap(TestHistory::testId, th -> th, (a, b) -> a));
+            LocalDate today = LocalDate.now();
+
+            // Re-rank allHighlights (uncapped) — this is what feedbackService.generate() uses.
+            List<String> rerankedAll = rerankedByRelevance(
+                allHighlights.sustainedStruggles(), historyById, opts.assessmentCalendar(), today,
+                Integer.MAX_VALUE);
+            allHighlights = new FailureHighlights(
+                allHighlights.stillFailing(), allHighlights.regressions(),
+                allHighlights.costlyDetours(),
+                rerankedAll.isEmpty() ? null : rerankedAll);
+
+            // Re-rank failureHighlights (budget-capped) — used as LLM-unavailable fallback.
+            int budget = Math.max(0,
+                StatusChangeTracker.MAX_FEEDBACK_ITEMS
+                - size(failureHighlights.stillFailing())
+                - size(failureHighlights.regressions())
+                - size(failureHighlights.costlyDetours()));
+            List<String> rerankedCapped = rerankedByRelevance(
+                allHighlights.sustainedStruggles(), historyById, opts.assessmentCalendar(), today, budget);
+            failureHighlights = new FailureHighlights(
+                failureHighlights.stillFailing(), failureHighlights.regressions(),
+                failureHighlights.costlyDetours(),
+                rerankedCapped.isEmpty() ? null : rerankedCapped);
+        }
 
         // 8a. Enhance test histories with error evolution and struggle profiles
         testHistories = enhanceTestHistories(
@@ -754,6 +788,60 @@ public class PrepareService {
                 .collect(Collectors.toList());
             entry.setValue(filtered);
         }
+    }
+
+    /**
+     * Returns up to {@code limit} test IDs from {@code candidates}, sorted by composite relevance
+     * score (concept_weight × grade_weight × urgency_factor) descending, with totalFailedRuns as
+     * a secondary tiebreaker. Candidates absent from {@code historyById} are silently dropped.
+     */
+    private List<String> rerankedByRelevance(
+            List<String> candidates,
+            Map<String, TestHistory> historyById,
+            AssessmentCalendar calendar,
+            LocalDate today,
+            int limit) {
+        if (candidates == null || candidates.isEmpty()) return List.of();
+        return candidates.stream()
+            .filter(historyById::containsKey)
+            .sorted(Comparator
+                .<String>comparingDouble(id -> relevanceScore(historyById.get(id), calendar, today))
+                .reversed()
+                .thenComparingInt(id -> historyById.get(id).totalFailedRuns())
+                .reversed())
+            .limit(limit == Integer.MAX_VALUE ? Long.MAX_VALUE : (long) limit)
+            .toList();
+    }
+
+    /** Composite relevance score: sum of concept_weight × grade_weight × urgency_factor over all assessments. */
+    private double relevanceScore(TestHistory history, AssessmentCalendar calendar, LocalDate today) {
+        List<String> categories = history.categories() != null ? history.categories() : List.of();
+        double score = 0.0;
+        for (AssessmentCalendar.AssessmentEntry entry : calendar.assessments()) {
+            if (entry.conceptWeights() == null) continue;
+            double conceptWeight = categories.stream()
+                .mapToDouble(cat -> entry.conceptWeights().getOrDefault(cat, 0.0))
+                .sum();
+            if (conceptWeight == 0.0) continue;
+            double gradeWeight = entry.gradeWeight() != null
+                ? entry.gradeWeight()
+                : ("exam".equals(entry.type()) ? 0.10 : 0.035);
+            long daysUntil = ChronoUnit.DAYS.between(today, LocalDate.parse(entry.date()));
+            score += conceptWeight * gradeWeight * urgencyFactor(daysUntil);
+        }
+        return score;
+    }
+
+    private static double urgencyFactor(long days) {
+        if (days <= 3)  return 1.0;
+        if (days <= 7)  return 0.8;
+        if (days <= 14) return 0.6;
+        if (days <= 30) return 0.4;
+        return 0.2;
+    }
+
+    private static int size(List<?> list) {
+        return list == null ? 0 : list.size();
     }
 
     /**
