@@ -62,6 +62,12 @@ const assessmentDate    = nearest.date_display;
 
 const SEP        = '---------------------------------------------------------------------';
 const BREADCRUMB = `2526S CSSE230 -> Debugging Feedback -> ${fullName}`;
+const AUTOMATED_FOOTER = [
+  '',
+  SEP,
+  'This email was sent automatically \u2014 replies are not monitored.',
+  'For questions, contact gajavegs@rose-hulman.edu.',
+].join('\n');
 
 function renderNudge(highUrgencyCount, reportLink, feedbackLink) {
   const subject = `CSSE 230 \u2014 ${shortName} feedback reminder (${nearestAssessment}, ${assessmentDate})`;
@@ -81,6 +87,7 @@ function renderNudge(highUrgencyCount, reportLink, feedbackLink) {
     feedbackLink,
     '',
     SEP,
+    AUTOMATED_FOOTER,
   ].join('\n');
   return { subject, body };
 }

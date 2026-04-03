@@ -38,8 +38,6 @@ app.use(express.json());
 // ─── Rate limiting ────────────────────────────────────────────────────────────
 
 const lookupRateMap = new Map(); // ip → [timestamps]
-const uploadRateMap = new Map(); // token → last upload ms
-
 function isLookupAllowed(ip) {
   const now = Date.now();
   const prev = (lookupRateMap.get(ip) || []).filter(t => now - t < 60_000);
@@ -48,12 +46,12 @@ function isLookupAllowed(ip) {
   return prev.length <= 5;
 }
 
+// DB-backed: max 3 upload-sourced pipeline runs per token (survives server restarts)
 function isUploadAllowed(token) {
-  const now = Date.now();
-  const last = uploadRateMap.get(token);
-  if (last && now - last < 3_600_000) return false;
-  uploadRateMap.set(token, now);
-  return true;
+  const row = db.prepare(
+    "SELECT COUNT(*) as n FROM pipeline_runs WHERE student_id=(SELECT student_id FROM tokens WHERE token=?) AND assignment=(SELECT assignment FROM tokens WHERE token=?) AND source='upload'"
+  ).get(token, token);
+  return (row?.n ?? 0) < 3;
 }
 
 // ─── Relay auth ───────────────────────────────────────────────────────────────
@@ -226,7 +224,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   if (!record) return res.status(401).json({ error: 'invalid token' });
   if (!isUploadAllowed(token)) {
     if (req.file) fs.unlink(req.file.path, () => {});
-    return res.status(429).json({ error: 'Upload limit: one upload per hour.' });
+    return res.status(429).json({ error: 'Upload limit reached (max 3 resubmissions per assignment).' });
   }
   if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
   if (!req.file.originalname.endsWith('.tar')) {
@@ -285,6 +283,7 @@ app.get('/report', async (req, res) => {
   if (!record) return res.redirect('/login?error=invalid');
 
   const { student_id, assignment } = record;
+  logEvents(token, [{ type: 'report_viewed', data: { student_id, assignment } }]);
   const reportPdfPath = path.join(DATA_DIR, assignment, 'output', student_id, 'report.pdf');
 
   // Generate/regenerate if missing (e.g. first visit after pipeline ran)
@@ -475,6 +474,7 @@ function runPipeline(tarDir, outputDir, assignment, studentId, runId) {
 
 const SEP = '---------------------------------------------------------------------';
 const BREADCRUMB = '2526S CSSE230 -> Debugging Feedback';
+const AUTOMATED_FOOTER = `\n${SEP}\nThis email was sent automatically \u2014 replies are not monitored.\nFor questions, contact gajavegs@rose-hulman.edu.`;
 
 // Reads data/{assignment}/assessment-config.json if present, returns { shortName, fullName } or null.
 function loadAssessmentConfig(assignment) {
@@ -495,7 +495,7 @@ export function queueEmail(token, recipient, assignment, displayName, emailType)
   let subject, body;
   if (emailType === 'regeneration_ready') {
     subject = `CSSE 230 \u2014 Updated ${shortName} feedback available`;
-    body = `${BREADCRUMB} -> ${fullName}\n${SEP}\nYour debugging feedback for '${fullName}' has been\nregenerated with your latest data.\n\nView your updated feedback summary (PDF):\n\n${reportLink}\n\nOr open the interactive feedback site:\n\n${feedbackLink}\n\n${SEP}`;
+    body = `${BREADCRUMB} -> ${fullName}\n${SEP}\nYour debugging feedback for '${fullName}' has been\nregenerated with your latest data.\n\nView your updated feedback summary (PDF):\n\n${reportLink}\n\nOr open the interactive feedback site:\n\n${feedbackLink}\n\n${SEP}${AUTOMATED_FOOTER}`;
   } else {
     console.error(`[email] queueEmail called for unexpected type: ${emailType} — use batch scripts for ${emailType}`);
     return;

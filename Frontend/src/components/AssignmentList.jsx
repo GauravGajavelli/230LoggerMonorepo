@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 
 /* ── Icons ── */
@@ -147,6 +148,37 @@ function AssignmentCard({ assignment, onClick }) {
  */
 export function AssignmentList({ onSelectAssignment, reviewed }) {
   const { context, detailSummary } = usePlaybackDataContext();
+  const token = new URLSearchParams(window.location.search).get('token');
+  const [uploadState, setUploadState] = useState('idle'); // idle | uploading | success | error
+  const [uploadMsg, setUploadMsg] = useState('');
+
+  const handleResubmit = useCallback(async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.endsWith('.tar')) {
+      setUploadMsg('Please select a .tar file.');
+      setUploadState('error');
+      return;
+    }
+    setUploadState('uploading');
+    setUploadMsg('Uploading…');
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch(`/api/upload?token=${token}`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (res.ok) {
+        setUploadState('success');
+        setUploadMsg(data.message || "Upload complete. You'll receive an email when feedback is ready.");
+      } else {
+        setUploadState('error');
+        setUploadMsg(data.error || 'Upload failed. Please try again.');
+      }
+    } catch {
+      setUploadState('error');
+      setUploadMsg('Network error. Please check your connection and try again.');
+    }
+  }, [token]);
 
   const submittedAt = context?.submittedAt
     ? new Date(context.submittedAt).toLocaleString('en-US', {
@@ -219,6 +251,53 @@ export function AssignmentList({ onSelectAssignment, reviewed }) {
             />
           ))}
         </div>
+      )}
+
+      {/* Resubmit section — for students with existing feedback who want to upload a newer tar */}
+      {token && (
+        <details style={{ marginTop: 32 }}>
+          <summary style={{
+            fontSize: 12, color: '#94A3B8', cursor: 'pointer', userSelect: 'none',
+            listStyle: 'none', display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <span style={{ fontSize: 10 }}>▸</span> Submit a newer run.tar for updated feedback
+          </summary>
+          <div style={{
+            marginTop: 10, padding: '12px 14px',
+            background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8,
+          }}>
+            <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 10px', lineHeight: 1.5 }}>
+              Upload a new run.tar if you've made changes since your initial submission.
+              You'll receive an email when updated feedback is ready (up to 3 resubmissions).
+            </p>
+            {uploadState !== 'success' && (
+              <label style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px', background: '#800000', color: '#fff',
+                borderRadius: 6, cursor: uploadState === 'uploading' ? 'not-allowed' : 'pointer',
+                fontSize: 12, fontWeight: 600,
+                opacity: uploadState === 'uploading' ? 0.6 : 1,
+              }}>
+                {uploadState === 'uploading' ? 'Uploading…' : 'Choose run.tar'}
+                <input
+                  type="file"
+                  accept=".tar"
+                  style={{ display: 'none' }}
+                  onChange={handleResubmit}
+                  disabled={uploadState === 'uploading'}
+                />
+              </label>
+            )}
+            {uploadMsg && (
+              <p style={{
+                marginTop: 8, fontSize: 12,
+                color: uploadState === 'error' ? '#B91C1C' : uploadState === 'success' ? '#166534' : '#475569',
+              }}>
+                {uploadMsg}
+              </p>
+            )}
+          </div>
+        </details>
       )}
     </div>
   );

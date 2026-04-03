@@ -3,6 +3,7 @@ import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 import { TimelineChart } from './TimelineChart';
 import { EpisodeChips } from './EpisodeChips';
 import { TestCard } from './TestCard';
+import { eventTracker } from '../utils/eventTracker';
 
 /* ── Back icon ── */
 const BackIcon = () => (
@@ -43,6 +44,12 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
       setTab(improvedTests.length > 0 ? 'improved' : 'passing');
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── ID of the first test with feedback in the active tab — auto-opens it ── */
+  const firstFeedbackId = useMemo(() => {
+    const activeTests = tab === 'issues' ? failingTests : tab === 'improved' ? improvedTests : passingTests;
+    return activeTests.find(hasFeedback)?.id ?? null;
+  }, [tab, failingTests, improvedTests, passingTests]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── All test IDs that have feedback (used for tab dot + "all seen" check) ── */
   // Covers every feedback item regardless of whether an episode chip links to it.
@@ -297,7 +304,7 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
               const hasFeedback = fbTests.length > 0;
               const allSeen = hasFeedback && fbTests.every(x => openedFeedbackIds.has(x.id));
               return (
-                <button key={t.key} onClick={() => setTab(t.key)} style={{
+                <button key={t.key} onClick={() => { setTab(t.key); eventTracker.track('tab_switch', { tab: t.key }); }} style={{
                   all: 'unset', padding: '8px 16px', fontSize: 13,
                   fontWeight: tab === t.key ? 600 : 400,
                   color: tab === t.key ? '#0F172A' : '#64748B',
@@ -317,13 +324,13 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
 
           {/* Test cards per tab */}
           {tab === 'issues'   && failingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
           ))}
           {tab === 'improved' && improvedTests.map(t => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
           ))}
           {tab === 'passing'  && passingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
           ))}
 
           {/* Closure / mark reviewed */}

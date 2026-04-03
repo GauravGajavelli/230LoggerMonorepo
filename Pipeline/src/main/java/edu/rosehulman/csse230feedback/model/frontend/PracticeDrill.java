@@ -12,5 +12,6 @@ public record PracticeDrill(
     List<String> hints,      // 2–3 progressive hints
     String targetFile,       // e.g. "BSTTesting.java"
     Integer pointsAvailable, // sum of points += N in original test, or null
-    Integer drillPoints      // scaled value (≈25% of pointsAvailable); shown on card + modal
+    Integer drillPoints,     // scaled value (≈25% of pointsAvailable); shown on card + modal
+    String source            // e.g. "Exam 2", "HW5" — from DrillQuestion.source; null for LLM-generated
 ) {}

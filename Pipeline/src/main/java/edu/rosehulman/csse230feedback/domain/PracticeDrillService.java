@@ -5,6 +5,7 @@ import edu.rosehulman.csse230feedback.llm.LlmException;
 import edu.rosehulman.csse230feedback.llm.LlmResponse;
 import edu.rosehulman.csse230feedback.llm.LlmService;
 import edu.rosehulman.csse230feedback.llm.PromptLoader;
+import edu.rosehulman.csse230feedback.model.AssessmentCalendar;
 import edu.rosehulman.csse230feedback.model.CourseContext;
 import edu.rosehulman.csse230feedback.model.DrillQuestion;
 import edu.rosehulman.csse230feedback.model.TestCategoryMapping;
@@ -19,6 +20,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +55,8 @@ public class PracticeDrillService {
             Map<String, TestSource> testSources,
             TestCategoryMapping testCategories,
             String assignmentName,
-            CourseContext courseContext) throws LlmException, IOException {
+            CourseContext courseContext,
+            AssessmentCalendar assessmentCalendar) throws LlmException, IOException {
 
         if (feedback.isEmpty()) return feedback;
 
@@ -108,7 +112,7 @@ public class PracticeDrillService {
                 // Question bank is the preferred source for all students/modes.
                 // A bank drill requires implementing a new method → always non-trivially passable.
                 // LLM is the fallback when no bank question matches the test's categories.
-                PracticeDrill drill = lookupQuestionBankDrill(th.categories(), pts, targetFile, usedDrillIds, drillCategoryMap, testSources);
+                PracticeDrill drill = lookupQuestionBankDrill(th.categories(), pts, targetFile, usedDrillIds, drillCategoryMap, testSources, assessmentCalendar);
                 if (drill == null) {
                     drill = generateLlmDrill(fb, th, testSources, targetFile, pts, promptContent, i, total);
                 }
@@ -216,11 +220,17 @@ public class PracticeDrillService {
     private PracticeDrill lookupQuestionBankDrill(List<String> categories, int pts,
                                                    String targetFile, Set<String> usedIds,
                                                    Map<String, List<String>> drillCategoryMap,
-                                                   Map<String, TestSource> testSources) {
+                                                   Map<String, TestSource> testSources,
+                                                   AssessmentCalendar assessmentCalendar) {
         if (drillQuestions.isEmpty() || categories == null || categories.isEmpty()) return null;
 
-        // Find first unused question whose effective categories overlap with this test's categories.
-        // Effective categories = LLM-computed mapping first, JSON field as fallback.
+        // Find the unused question whose effective categories best address the most urgent
+        // upcoming assessments. Score = sum over assessments of
+        //   concept_weight × grade_weight × urgency_factor(days_until).
+        // Falls back to list order when two drills score identically (preserving bank ordering).
+        // When no assessment calendar is available, any category-matching drill scores 1.0
+        // so the first match wins (original behaviour).
+        LocalDate today = LocalDate.now();
         DrillQuestion match = drillQuestions.stream()
             .filter(q -> !usedIds.contains(q.id()))
             .filter(q -> {
@@ -228,7 +238,8 @@ public class PracticeDrillService {
                     q.id(), q.categories() != null ? q.categories() : List.of());
                 return effective.stream().anyMatch(categories::contains);
             })
-            .findFirst()
+            .max(Comparator.comparingDouble(q ->
+                scoreDrill(q, drillCategoryMap, assessmentCalendar, today)))
             .orElse(null);
 
         if (match == null) return null;
@@ -252,7 +263,8 @@ public class PracticeDrillService {
             "probe", match.timeEstimate(), intro, testCode,
             match.hints(), targetFile,
             pts > 0 ? pts : null,
-            drillPoints
+            drillPoints,
+            match.source()
         );
     }
 
@@ -394,7 +406,8 @@ public class PracticeDrillService {
                 hints.isEmpty() ? null : hints,
                 targetFile,
                 pointsAvailable > 0 ? pointsAvailable : null,
-                drillPoints);
+                drillPoints,
+                null); // LLM-generated: no bank source
         } catch (Exception e) {
             System.err.println("Warning: failed to parse drill response: " + e.getMessage());
             return null;
@@ -503,6 +516,47 @@ public class PracticeDrillService {
         int total = 0;
         while (m.find()) total += Integer.parseInt(m.group(1));
         return total;
+    }
+
+    /**
+     * Composite relevance score for a drill question against the assessment calendar.
+     * For each assessment: sum concept_weight × grade_weight × urgency_factor(days_until).
+     * Returns 1.0 when no calendar is available so all category-matching drills are equal
+     * and the first match in bank order wins.
+     */
+    private double scoreDrill(DrillQuestion q,
+                              Map<String, List<String>> drillCategoryMap,
+                              AssessmentCalendar calendar,
+                              LocalDate today) {
+        if (calendar == null || calendar.assessments() == null || calendar.assessments().isEmpty()) {
+            return 1.0;
+        }
+        List<String> drillCats = drillCategoryMap.getOrDefault(
+            q.id(), q.categories() != null ? q.categories() : List.of());
+        if (drillCats.isEmpty()) return 0.0;
+
+        double score = 0.0;
+        for (AssessmentCalendar.AssessmentEntry entry : calendar.assessments()) {
+            if (entry.conceptWeights() == null) continue;
+            double conceptWeight = drillCats.stream()
+                .mapToDouble(cat -> entry.conceptWeights().getOrDefault(cat, 0.0))
+                .sum();
+            if (conceptWeight == 0.0) continue;
+            double gradeWeight = entry.gradeWeight() != null
+                ? entry.gradeWeight()
+                : ("exam".equals(entry.type()) ? 0.10 : 0.035);
+            long daysUntil = ChronoUnit.DAYS.between(today, LocalDate.parse(entry.date()));
+            score += conceptWeight * gradeWeight * urgencyFactor(daysUntil);
+        }
+        return score;
+    }
+
+    private static double urgencyFactor(long days) {
+        if (days <= 3)  return 1.0;
+        if (days <= 7)  return 0.8;
+        if (days <= 14) return 0.6;
+        if (days <= 30) return 0.4;
+        return 0.2;
     }
 
     private String buildTestCategoriesSummary(TestCategoryMapping testCategories) {

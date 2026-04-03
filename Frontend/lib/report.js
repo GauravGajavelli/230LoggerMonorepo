@@ -246,9 +246,10 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.pdf({
       path: reportPdfPath,
-      format: 'A4',
+      format: 'Letter',
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
       printBackground: true,
+      preferCSSPageSize: true,
     });
   } finally {
     await browser.close();
@@ -276,9 +277,10 @@ export async function generateReportForToken(studentId, assignment, token, dataD
       await page.setContent(html, { waitUntil: 'networkidle0' });
       await page.pdf({
         path: reportPdfPath,
-        format: 'A4',
+        format: 'Letter',
         margin: { top: '0', right: '0', bottom: '0', left: '0' },
         printBackground: true,
+        preferCSSPageSize: true,
       });
     } finally {
       await browser.close();

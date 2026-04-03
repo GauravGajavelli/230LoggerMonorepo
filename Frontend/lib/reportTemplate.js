@@ -44,8 +44,14 @@ function escHtml(str) {
 function renderCard(a) {
   const fill = barPct(a.overlap_pct);
   const accentColor = a.type === 'exam' ? '#4a6d8c' : '#6b7c6b';
+  const isExam = a.type === 'exam';
+  const cardBg = isExam ? '#f0f4f8' : 'var(--bg-card)';
+  const topRule = isExam ? 'border-top: 3px solid var(--accent-exam);' : '';
+  const drillSummary = a.drill_count === 0
+    ? '<span class="muted">No drill matches</span>'
+    : `${a.drill_count} drill${a.drill_count !== 1 ? 's' : ''} · ${a.total_time} min`;
   return `
-    <div class="card">
+    <div class="card" style="background:${cardBg};${topRule}">
       <div class="card-header">
         <span class="card-name" style="color:${accentColor}">${escHtml(a.name.toUpperCase())}</span>
         <span class="card-date">
@@ -56,8 +62,8 @@ function renderCard(a) {
       <div class="bar-track">
         <div class="bar-fill" style="width:${fill}%"></div>
       </div>
-      <div class="overlap-label">~${a.overlap_pct}% ${escHtml(weightLabel(a.type))}<br>overlaps with your practice drills</div>
-      <div class="card-summary">${a.drill_count} drill${a.drill_count !== 1 ? 's' : ''} · ${a.total_time} min</div>
+      <div class="overlap-label" style="font-feature-settings:'tnum'">~${a.overlap_pct}% ${escHtml(weightLabel(a.type))}<br>overlaps with your practice drills</div>
+      <div class="card-summary">${drillSummary}</div>
     </div>`;
 }
 
@@ -79,19 +85,25 @@ function renderDrillCard(drill, assessmentType, feedbackUrl) {
 
 function renderColumn(a, feedbackUrl) {
   const accentColor = a.type === 'exam' ? '#4a6d8c' : '#6b7c6b';
-  const drillCards = a.drills.map(d => renderDrillCard(d, a.type, feedbackUrl)).join('');
+  const visibleDrills = a.drills.slice(0, 4);
+  const hiddenCount = a.drills.length - visibleDrills.length;
+  const drillCards = visibleDrills.map(d => renderDrillCard(d, a.type, feedbackUrl)).join('');
+  const moreNote = hiddenCount > 0
+    ? `<div class="muted" style="font-size:11px;margin-top:4px">and ${hiddenCount} more — see feedback site</div>`
+    : '';
   return `
     <div class="column">
       <div class="col-header" style="color:${accentColor}">
         ${escHtml(a.name)} · ${escHtml(dayLabel(a.date))}, ${escHtml(a.date_display)}
       </div>
       <div class="col-rule"></div>
-      ${drillCards}
+      ${drillCards}${moreNote}
     </div>`;
 }
 
 export function renderReportHtml(reportData, feedbackUrl) {
-  const { assignment, assessments, total_unique_drills, total_time } = reportData;
+  const { assignment, assessments, total_unique_drills, total_time, generated_at } = reportData;
+  const generatedDate = generated_at ? generated_at.slice(0, 10) : '';
 
   const hasAssessments = assessments && assessments.length > 0;
 
@@ -133,14 +145,17 @@ export function renderReportHtml(reportData, feedbackUrl) {
     --bar-track:       #e8e7e3;
   }
 
+  @page { size: Letter; margin: 0; }
   body {
     font-family: 'Source Sans 3', sans-serif;
     font-size: 14px;
     color: var(--text-primary);
     background: #fff;
-    padding: 32px 40px;
+    padding: 20px 28px;
     max-width: 860px;
     margin: 0 auto;
+    height: 10.5in;
+    overflow: hidden;
   }
 
   /* Header */
@@ -166,7 +181,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   .header-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 24px; }
 
   /* Assessment cards */
-  .cards { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+  .cards { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
   .card {
     flex: 1; min-width: 200px;
     border: 1px solid var(--border);
@@ -184,7 +199,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   .card-summary  { font-size: 12px; color: var(--text-tertiary); }
 
   /* Drill columns */
-  .columns { display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
+  .columns { display: flex; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
   .column { flex: 1; min-width: 220px; }
   .col-header { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 6px; }
   .col-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 14px; }
@@ -193,8 +208,8 @@ export function renderReportHtml(reportData, feedbackUrl) {
     border: 1px solid var(--border);
     border-radius: 5px;
     background: var(--bg-card);
-    padding: 12px 14px;
-    margin-bottom: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
   }
   .drill-name {
     font-family: 'Source Serif 4', serif;
@@ -250,7 +265,10 @@ ${hiddenNote}
 ${hasAssessments ? `<div class="columns">${columnsHtml}</div>` : ''}
 
 <div class="footer">
-  <div class="footer-summary">${total_unique_drills} drill${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total · All drills are optional</div>
+  <div class="footer-summary" style="display:flex;justify-content:space-between;align-items:baseline">
+    <span>${total_unique_drills} drill${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total · All drills are optional</span>
+    ${generatedDate ? `<span style="font-size:10px;color:var(--text-tertiary)">Generated ${escHtml(generatedDate)}</span>` : ''}
+  </div>
   <a class="footer-link" href="${escHtml(feedbackUrl)}">Open full feedback site →</a>
   <div class="footer-privacy">
     This report was generated from your test run data.<br>

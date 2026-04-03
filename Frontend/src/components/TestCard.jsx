@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { CitationText } from './CitationText';
+import { eventTracker } from '../utils/eventTracker';
 
 /* ── Icons ── */
 const FailIcon = () => (
@@ -397,8 +398,8 @@ function FeedbackShimmer() {
  *   onCiteClick: (runNumber:number) => void,
  * }} props
  */
-export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened }) {
-  const [manualOpen, setManualOpen] = useState(false);
+export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened }) {
+  const [manualOpen, setManualOpen] = useState(initiallyOpen ?? false);
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
   const [hoveredPill, setHoveredPill] = useState(null);
@@ -412,8 +413,17 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
   const [explanationExpanded, setExplanationExpanded] = useState(false);
   const [shimmerDone, setShimmerDone] = useState(true);
   const cardRef = useRef(null);
-  const hasRevealedRef = useRef(false);
-  const hasShimmeredRef = useRef(false);
+  const hasRevealedRef = useRef(!!initiallyOpen);
+  const hasShimmeredRef = useRef(!!initiallyOpen); // skip shimmer for initially-open cards
+
+  // Fire telemetry + callbacks for initially-open cards (shimmer is skipped for these)
+  useEffect(() => {
+    if (initiallyOpen) {
+      setHasOpenedFeedback(true);
+      onFeedbackOpened?.();
+      eventTracker.track('feedback_opened', { test_id: test.id });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasFeedback = !!(test.explanation || test.suggestion || test.nextSteps?.length || test.diffs?.length);
   const canExpand = hasFeedback;
@@ -492,6 +502,27 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
         {canExpand && <ChevronIcon open={open} />}
       </button>
 
+      {/* Course relevance tags — preview when collapsed; full detail in "Why This Matters" when open */}
+      {!open && test.courseAppearances?.length > 0 && (
+        <div style={{ padding: '0 16px 10px' }}>
+          <div style={{
+            background: '#F0FDF4', border: '1px solid #D1FAE5', borderRadius: 6,
+            padding: '5px 8px',
+            display: 'inline-flex', alignItems: 'center', gap: 5, flexWrap: 'wrap',
+          }}>
+            {test.courseAppearances.map((ap, i) => (
+              <span key={i} style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10, padding: '1px 6px', borderRadius: 4,
+                background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
+              }}>
+                {ap.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Expanded body */}
       {open && (
         <div
@@ -505,7 +536,12 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
           ) : (
           <div
             style={{ animation: !hasRevealedRef.current ? 'feedbackReveal 0.3s ease-out' : undefined }}
-            onAnimationEnd={() => { hasRevealedRef.current = true; setHasOpenedFeedback(true); onFeedbackOpened?.(); }}
+            onAnimationEnd={() => {
+              hasRevealedRef.current = true;
+              setHasOpenedFeedback(true);
+              onFeedbackOpened?.();
+              eventTracker.track('feedback_opened', { test_id: test.id });
+            }}
           >
           {/* Top row: diagnostic label (left) + view test button (right) */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, gap: 8 }}>
@@ -524,7 +560,7 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               {test.testSource && (
                 <button
-                  onClick={() => setShowTestSource(true)}
+                  onClick={() => { setShowTestSource(true); eventTracker.track('test_source_opened', { test_id: test.id }); }}
                   style={{
                     all: 'unset', cursor: 'pointer', flexShrink: 0,
                     fontSize: 10, fontWeight: 500, color: '#64748B',
@@ -705,16 +741,27 @@ export function TestCard({ test, forceOpen, onCiteClick, runToEpisode = {}, onFe
               <div style={{ marginTop: 14 }}>
                 <button
                   className="practice-drill-btn"
-                  onClick={() => setShowDrill(true)}
+                  onClick={() => { setShowDrill(true); eventTracker.track('drill_opened', { test_id: test.id }); }}
                   style={{ width: '100%' }}
                 >
                   ✦ practice drill
                 </button>
-                {(drill.timeEstimate || drill.drillPoints) && (
+                {(drill.timeEstimate || drill.drillPoints || drill.source) && (
                   <div style={{
                     display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
                     marginTop: 5,
                   }}>
+                    {drill.source && (
+                      <span style={{ fontSize: 10, color: '#7C3AED',
+                                     fontFamily: "'IBM Plex Mono', monospace",
+                                     background: '#F5F3FF', border: '1px solid #DDD6FE',
+                                     padding: '1px 6px', borderRadius: 4 }}>
+                        {drill.source}
+                      </span>
+                    )}
+                    {drill.source && (drill.timeEstimate || drill.drillPoints) && (
+                      <span style={{ color: '#CBD5E1', fontSize: 10 }}>·</span>
+                    )}
                     {drill.timeEstimate && (
                       <span style={{ fontSize: 10, color: '#64748B',
                                      fontFamily: "'IBM Plex Mono', monospace" }}>

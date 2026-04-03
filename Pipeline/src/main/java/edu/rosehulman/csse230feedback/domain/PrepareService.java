@@ -535,7 +535,8 @@ public class PrepareService {
                     PracticeDrillService drillService = new PracticeDrillService(drillLlmService, drillPromptLoader, drillQuestions);
                     feedback = drillService.generateDrills(
                         feedback, testHistories, testSources, testCategories, assignmentName,
-                        assignmentConfig.resolvedCourseContext()
+                        assignmentConfig.resolvedCourseContext(),
+                        opts.assessmentCalendar()
                     );
                     System.out.println("Practice drills generated for " + feedback.stream()
                         .filter(fb -> fb.drills() != null).count() + " tests");

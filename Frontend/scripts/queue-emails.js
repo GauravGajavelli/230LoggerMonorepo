@@ -65,6 +65,12 @@ const assessmentDate    = nearest.date_display;
 
 const SEP        = '---------------------------------------------------------------------';
 const BREADCRUMB = `2526S CSSE230 -> Debugging Feedback -> ${fullName}`;
+const AUTOMATED_FOOTER = [
+  '',
+  SEP,
+  'This email was sent automatically \u2014 replies are not monitored.',
+  'For questions, contact gajavegs@rose-hulman.edu.',
+].join('\n');
 
 function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
   const fullSubject  = `CSSE 230 \u2014 ${shortName} feedback available (${patternCount} patterns, ${nearestAssessment})`;
@@ -87,6 +93,7 @@ function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
     '',
     'This feedback is private to you and is not shared with course staff.',
     SEP,
+    AUTOMATED_FOOTER,
   ].join('\n');
   return { subject, body };
 }
@@ -106,6 +113,7 @@ function renderMissingTar(link) {
     link,
     '',
     SEP,
+    AUTOMATED_FOOTER,
   ].join('\n');
   return { subject, body };
 }

@@ -13,6 +13,7 @@
 let _token = null;
 let _buffer = [];
 let _timer = null;
+let _initTime = null;
 
 const FLUSH_INTERVAL_MS = 30_000;
 const ENDPOINT = '/api/events';
@@ -20,6 +21,7 @@ const ENDPOINT = '/api/events';
 function init(token) {
   if (!token) return;
   _token = token;
+  _initTime = Date.now();
 
   if (_timer) clearInterval(_timer);
   _timer = setInterval(flush, FLUSH_INTERVAL_MS);
@@ -49,8 +51,12 @@ async function flush() {
 }
 
 function flushBeacon() {
-  if (!_token || _buffer.length === 0) return;
+  if (!_token) return;
   const events = _buffer.splice(0, _buffer.length);
+  if (_initTime) {
+    events.push({ type: 'time_on_page', data: { seconds: Math.round((Date.now() - _initTime) / 1000) } });
+  }
+  if (events.length === 0) return;
   const payload = JSON.stringify({ token: _token, events });
   navigator.sendBeacon(ENDPOINT, new Blob([payload], { type: 'application/json' }));
 }

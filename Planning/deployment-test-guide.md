@@ -110,6 +110,9 @@ mvn -f ../Pipeline/pom.xml package -q -DskipTests
 # (first run downloads ~300 MB Chromium for Puppeteer — takes a few minutes)
 npm install
 
+# Build the React frontend (creates dist/ — served by Express for /feedback)
+npm run build
+
 # Create database directory
 mkdir -p db
 ```
