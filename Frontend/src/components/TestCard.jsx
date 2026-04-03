@@ -398,7 +398,7 @@ function FeedbackShimmer() {
  *   onCiteClick: (runNumber:number) => void,
  * }} props
  */
-export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened }) {
+export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened, assessmentConfig }) {
   const [manualOpen, setManualOpen] = useState(initiallyOpen ?? false);
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
@@ -751,14 +751,35 @@ export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpi
                     display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
                     marginTop: 5,
                   }}>
-                    {drill.source && (
-                      <span style={{ fontSize: 10, color: '#7C3AED',
-                                     fontFamily: "'IBM Plex Mono', monospace",
-                                     background: '#F5F3FF', border: '1px solid #DDD6FE',
-                                     padding: '1px 6px', borderRadius: 4 }}>
-                        {drill.source}
-                      </span>
-                    )}
+                    {drill.source && (() => {
+                      const entry = assessmentConfig?.assessments?.find(a => a.name === drill.source);
+                      const daysLeft = entry ? Math.ceil(
+                        (new Date(entry.date + 'T12:00:00Z') - new Date()) / 86400000
+                      ) : null;
+                      const urgencyColor = daysLeft == null ? '#7C3AED'
+                        : daysLeft <= 3  ? '#c0392b'
+                        : daysLeft <= 7  ? '#d35400'
+                        : daysLeft <= 14 ? '#b7860b'
+                        : '#7C3AED';
+                      const urgencyBg = daysLeft == null ? '#F5F3FF'
+                        : daysLeft <= 3  ? '#FEF2F2'
+                        : daysLeft <= 7  ? '#FFF7ED'
+                        : daysLeft <= 14 ? '#FFFBEB'
+                        : '#F5F3FF';
+                      const urgencyBorder = daysLeft == null ? '#DDD6FE'
+                        : daysLeft <= 3  ? '#FECACA'
+                        : daysLeft <= 7  ? '#FED7AA'
+                        : daysLeft <= 14 ? '#FDE68A'
+                        : '#DDD6FE';
+                      return (
+                        <span style={{ fontSize: 10, color: urgencyColor,
+                                       fontFamily: "'IBM Plex Mono', monospace",
+                                       background: urgencyBg, border: `1px solid ${urgencyBorder}`,
+                                       padding: '1px 6px', borderRadius: 4, whiteSpace: 'nowrap' }}>
+                          {drill.source}{daysLeft != null && daysLeft > 0 ? ` · ${daysLeft}d` : ''}
+                        </span>
+                      );
+                    })()}
                     {drill.source && (drill.timeEstimate || drill.drillPoints) && (
                       <span style={{ color: '#CBD5E1', fontSize: 10 }}>·</span>
                     )}

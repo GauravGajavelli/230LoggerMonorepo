@@ -38,7 +38,11 @@ function TokenApp({ token }) {
   }, [token]);
 
   return (
-    <PlaybackDataProvider useMock={false} jsonUrl={`/api/data?token=${token}`}>
+    <PlaybackDataProvider
+      useMock={false}
+      jsonUrl={`/api/data?token=${token}`}
+      assessmentConfigUrl={`/api/assessment-config?token=${token}`}
+    >
       <FeedbackApp token={token} />
     </PlaybackDataProvider>
   );

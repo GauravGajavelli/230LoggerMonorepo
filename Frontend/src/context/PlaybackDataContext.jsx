@@ -41,9 +41,11 @@ const PlaybackDataContext = createContext(/** @type {PlaybackDataContextValue | 
  * @param {string} [props.submissionId] - Optional submission ID for API mode
  * @param {boolean} [props.useMock=true] - Force mock mode even if submissionId provided
  * @param {string} [props.jsonUrl] - Optional URL to load JSON data from (e.g., "/data/frontend.json")
+ * @param {string} [props.assessmentConfigUrl] - Optional URL to load assessment-config.json from
  */
-export function PlaybackDataProvider({ children, submissionId, useMock = true, jsonUrl }) {
+export function PlaybackDataProvider({ children, submissionId, useMock = true, jsonUrl, assessmentConfigUrl }) {
   const [frontendData, setFrontendData] = useState(null);
+  const [assessmentConfig, setAssessmentConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [apiError, setApiError] = useState(null);
@@ -109,6 +111,15 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
 
     loadData();
   }, [submissionId, useMock, jsonUrl]);
+
+  // Fetch assessment config independently — non-blocking, best-effort
+  useEffect(() => {
+    if (!assessmentConfigUrl) return;
+    fetch(assessmentConfigUrl)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data && data.assessments) setAssessmentConfig(data); })
+      .catch(() => {});
+  }, [assessmentConfigUrl]);
 
   // Derive data from frontendData
   const derivedData = useMemo(() => {
@@ -234,11 +245,12 @@ export function PlaybackDataProvider({ children, submissionId, useMock = true, j
   const value = useMemo(() => ({
     frontendData,
     ...derivedData,
+    assessmentConfig,
     loading,
     error,
     apiError,
     dataSource
-  }), [frontendData, derivedData, loading, error, apiError, dataSource]);
+  }), [frontendData, derivedData, assessmentConfig, loading, error, apiError, dataSource]);
 
   return (
     <PlaybackDataContext.Provider value={value}>

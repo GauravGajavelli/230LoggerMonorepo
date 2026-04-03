@@ -18,7 +18,7 @@ const BackIcon = () => (
  * On mobile: single column, stacked.
  */
 export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
-  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context, runToEpisode } = usePlaybackDataContext();
+  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context, runToEpisode, assessmentConfig } = usePlaybackDataContext();
 
   const [tab, setTab] = useState('issues');
   const [highlightedTestId, setHighlightedTestId] = useState(null);
@@ -324,13 +324,13 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
 
           {/* Test cards per tab */}
           {tab === 'issues'   && failingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'improved' && improvedTests.map(t => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'passing'  && passingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
           ))}
 
           {/* Closure / mark reviewed */}

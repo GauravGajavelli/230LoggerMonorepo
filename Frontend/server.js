@@ -189,6 +189,22 @@ app.get('/api/data', (req, res) => {
   }
 });
 
+// ─── API: assessment config (for urgency display in feedback app) ─────────────
+
+app.get('/api/assessment-config', (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: 'token required' });
+  const record = verifyToken(token);
+  if (!record) return res.status(403).json({ error: 'invalid token' });
+  const cfgPath = path.join(DATA_DIR, record.assignment, 'assessment-config.json');
+  if (!fs.existsSync(cfgPath)) return res.json({});
+  try {
+    res.json(JSON.parse(fs.readFileSync(cfgPath, 'utf8')));
+  } catch {
+    res.json({});
+  }
+});
+
 function logNullFeedback(token, eventType) {
   try { db.prepare('INSERT INTO events (token, event_type) VALUES (?, ?)').run(token, eventType); } catch { /* non-critical */ }
 }
