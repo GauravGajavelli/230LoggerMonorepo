@@ -151,7 +151,7 @@ Sign out and back in (or reboot) for the variables to take effect.
 ### 3. URL reservation — run once as Administrator
 
 ```powershell
-netsh http add urlacl url=http://+:3001/ user=RHIT\gajavegs
+netsh http add urlacl url=http://+:3001/ user=ROSE-HULMAN\gajavegs
 # Expected: URL reservation successfully added
 ```
 
