@@ -36,7 +36,24 @@ node scripts/generate-tokens.js bst roster.dev.csv
 # → teststu → <token>  (gajavegs@rose-hulman.edu)
 ```
 
-### A3. Run the pipeline
+### A3. Build the JAR and clear caches
+
+Do this any time the Pipeline Java code has changed since the last run:
+
+```bash
+# From repo root
+mvn -f Pipeline/pom.xml package -q -DskipTests
+
+# Clear LLM cache (forces fresh API calls — costs ~$0.07)
+rm -rf Pipeline/cache/llm/*
+
+# Clear previous pipeline output for this student
+rm -rf Frontend/data/bst/output/teststu/
+```
+
+Skip `rm -rf Pipeline/cache/llm/*` to reuse cached LLM responses (near-instant, free).
+
+### A4. Run the pipeline
 
 ```bash
 node scripts/process-batch.js bst "Binary Search Tree"
@@ -53,7 +70,7 @@ ls data/bst/output/teststu/
 # frontend.json  report.json  report.pdf  (plus ingest artifacts)
 ```
 
-### A4. Copy outputs to local Mac for report iteration
+### A5. Copy outputs to local Mac for report iteration
 
 ```bash
 # Run on your Mac — pull the pipeline outputs down
@@ -65,7 +82,7 @@ rsync -av ubuntu-server:/path/to/Frontend/data/bst/ \
 
 ## Part B — Iterate on the report (local Mac)
 
-No relay, no Zenbook, no JAR needed. Just Node running locally against the files copied in A4.
+No relay, no Zenbook, no JAR needed. Just Node running locally against the files copied in A5.
 
 All commands run from `Frontend/` on your Mac.
 

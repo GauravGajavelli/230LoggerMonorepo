@@ -76,12 +76,34 @@ function drillAnchor(fb) {
   return 'drill-' + fb.testId.substring(hash + 1).replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
 }
 
+// Resolve category keys for a feedback item's testId using the test_categories file.
+// Falls back to an empty array if the file is absent or the testId isn't mapped.
+function resolveCategories(testId, testToCategories) {
+  if (!testToCategories || !testId) return [];
+  // Try exact match first
+  if (testToCategories[testId]) return testToCategories[testId];
+  // Strip argument list: "ClassName#methodName(args)" → "ClassName#methodName()"
+  const bare = testId.replace(/\(.*\)$/, '()');
+  return testToCategories[bare] || [];
+}
+
 export async function generateReport(studentId, assignment, dataDir, baseUrl) {
   const outputDir        = path.join(dataDir, assignment, 'output', studentId);
   const frontendJsonPath = path.join(outputDir, 'frontend.json');
   const assessmentCfgPath = path.join(dataDir, assignment, 'assessment-config.json');
   const reportJsonPath   = path.join(outputDir, 'report.json');
   const reportPdfPath    = path.join(outputDir, 'report.pdf');
+
+  // Resolve repo root (Frontend/lib/ → repo root is two levels up)
+  const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+  const testCategoriesPath = path.join(repoRoot, 'Pipeline', 'assignments', `${assignment}_test_categories.json`);
+  let testToCategories = null;
+  if (fs.existsSync(testCategoriesPath)) {
+    try {
+      const tc = JSON.parse(fs.readFileSync(testCategoriesPath, 'utf8'));
+      testToCategories = tc.testToCategories || null;
+    } catch { /* degrade gracefully */ }
+  }
 
   if (!fs.existsSync(frontendJsonPath)) return null;
 
@@ -102,7 +124,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
   const assessmentMap = new Map(); // assessmentId → { config, drills[], rawOverlap }
 
   for (const fb of feedbackItems) {
-    const categories = fb.categories || [];
+    const categories = resolveCategories(fb.testId, testToCategories);
     const drill = fb.drills?.[0] || null; // use primary drill for time/points
     const time = estimateTime(drill);
 
