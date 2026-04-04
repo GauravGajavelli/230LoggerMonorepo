@@ -1,12 +1,34 @@
-target
-bin
-node_modules
+# ── Build output ──────────────────────────────────────────────────────────────
+target/
+bin/
+*.class
+Frontend/dist/
 
-.DS_Store
-.class
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
 
-# Environment and secrets
+# ── Environment & secrets ──────────────────────────────────────────────────────
+# Never commit — contains API keys, SECRET_KEY, RELAY_SECRET, etc.
 .env
+**/.env
 
-# LLM cache
-cache/
+# ── Student data ───────────────────────────────────────────────────────────────
+# Rosters (student IDs + email addresses)
+Frontend/data/roster.csv
+Frontend/data/roster.dev.csv
+#
+# Student submission tars
+Frontend/data/*/tars/
+#
+# Pipeline output per student (feedback JSON, diffs, code snapshots)
+Frontend/data/*/output/
+#
+# Database (tokens, events, email queue)
+Frontend/db/
+
+# ── Runtime / generated ────────────────────────────────────────────────────────
+Frontend/tmp/
+Pipeline/cache/
+
+# ── OS / editor ───────────────────────────────────────────────────────────────
+.DS_Store

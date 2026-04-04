@@ -88,14 +88,14 @@ function resolveCategories(testId, testToCategories) {
 }
 
 export async function generateReport(studentId, assignment, dataDir, baseUrl) {
+  // Resolve repo root (Frontend/lib/ → repo root is two levels up)
+  const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
   const outputDir        = path.join(dataDir, assignment, 'output', studentId);
   const frontendJsonPath = path.join(outputDir, 'frontend.json');
-  const assessmentCfgPath = path.join(dataDir, assignment, 'assessment-config.json');
+  const assessmentCfgPath = path.join(repoRoot, 'Pipeline', 'assignments', `${assignment}_assessment_config.json`);
   const reportJsonPath   = path.join(outputDir, 'report.json');
   const reportPdfPath    = path.join(outputDir, 'report.pdf');
 
-  // Resolve repo root (Frontend/lib/ → repo root is two levels up)
-  const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
   const testCategoriesPath = path.join(repoRoot, 'Pipeline', 'assignments', `${assignment}_test_categories.json`);
   let testToCategories = null;
   if (fs.existsSync(testCategoriesPath)) {

@@ -33,10 +33,12 @@ const BASE_URL = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/
 
 // ── Assessment config ─────────────────────────────────────────────────────────
 
-const cfgPath = path.join(DATA_DIR, assignment, 'assessment-config.json');
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const ASSIGNMENTS_DIR = path.join(REPO_ROOT, 'Pipeline', 'assignments');
+const cfgPath = path.join(ASSIGNMENTS_DIR, `${assignment}_assessment_config.json`);
 if (!fs.existsSync(cfgPath)) {
   console.error(`Missing assessment config: ${cfgPath}`);
-  console.error('Create data/{assignment}/assessment-config.json before queueing emails.');
+  console.error(`Create Pipeline/assignments/${assignment}_assessment_config.json before queueing emails.`);
   process.exit(1);
 }
 

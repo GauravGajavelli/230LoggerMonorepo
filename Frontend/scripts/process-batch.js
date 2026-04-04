@@ -65,7 +65,7 @@ function runPipelineForStudent(studentId) {
       { timeout: 120_000, cwd: REPO_ROOT }, (err, _o, stderr) => {
         if (err) return reject(new Error(`ingest: ${(stderr || err.message).slice(0, 300)}`));
         const assignmentConfigPath  = path.join(ASSIGNMENTS_DIR, `${assignment}.json`);
-        const assessmentCalendarPath = path.join(DATA_DIR, assignment, 'assessment-config.json');
+        const assessmentCalendarPath = path.join(ASSIGNMENTS_DIR, `${assignment}_assessment_config.json`);
         const prepareArgs = ['-jar', PIPELINE_JAR, 'prepare',
           '-i', outputDir, '-o', path.join(outputDir, 'frontend.json'),
           '--assignment-name', displayName, '--student-id', studentId,

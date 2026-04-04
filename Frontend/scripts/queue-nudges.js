@@ -29,12 +29,15 @@ if (!assignment) {
 
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, '..', 'data'));
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const ASSIGNMENTS_DIR = path.join(REPO_ROOT, 'Pipeline', 'assignments');
 
 // ── Assessment config ─────────────────────────────────────────────────────────
 
-const cfgPath = path.join(DATA_DIR, assignment, 'assessment-config.json');
+const cfgPath = path.join(ASSIGNMENTS_DIR, `${assignment}_assessment_config.json`);
 if (!fs.existsSync(cfgPath)) {
   console.error(`Missing assessment config: ${cfgPath}`);
+  console.error(`Create Pipeline/assignments/${assignment}_assessment_config.json first.`);
   process.exit(1);
 }
 

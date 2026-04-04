@@ -200,7 +200,7 @@ app.get('/api/assessment-config', (req, res) => {
   if (!token) return res.status(400).json({ error: 'token required' });
   const record = verifyToken(token);
   if (!record) return res.status(403).json({ error: 'invalid token' });
-  const cfgPath = path.join(DATA_DIR, record.assignment, 'assessment-config.json');
+  const cfgPath = path.join(ASSIGNMENTS_DIR, `${record.assignment}_assessment_config.json`);
   if (!fs.existsSync(cfgPath)) return res.json({});
   try {
     res.json(JSON.parse(fs.readFileSync(cfgPath, 'utf8')));
@@ -496,9 +496,9 @@ const SEP = '-------------------------------------------------------------------
 const BREADCRUMB = '2526S CSSE230 -> Debugging Feedback';
 const AUTOMATED_FOOTER = `\n${SEP}\nThis email was sent automatically \u2014 replies are not monitored.\nFor questions, contact gajavegs@rose-hulman.edu.`;
 
-// Reads data/{assignment}/assessment-config.json if present, returns { shortName, fullName } or null.
+// Reads Pipeline/assignments/{assignment}_assessment_config.json if present, returns parsed JSON or null.
 function loadAssessmentConfig(assignment) {
-  const cfgPath = path.join(DATA_DIR, assignment, 'assessment-config.json');
+  const cfgPath = path.join(ASSIGNMENTS_DIR, `${assignment}_assessment_config.json`);
   if (!fs.existsSync(cfgPath)) return null;
   try { return JSON.parse(fs.readFileSync(cfgPath, 'utf8')); } catch { return null; }
 }

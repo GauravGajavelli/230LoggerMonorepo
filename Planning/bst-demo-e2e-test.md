@@ -73,10 +73,14 @@ ls data/bst/output/teststu/
 ### A5. Copy outputs to local Mac for report iteration
 
 ```bash
-# Run on your Mac — pull the pipeline outputs down
-rsync -av ubuntu-server:/path/to/Frontend/data/bst/ \
+# Run on your Mac — pull pipeline outputs AND assessment config down
+rsync -av csse@feedback:~/230LoggerMonorepo/Frontend/data/bst/ \
   /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/data/bst/
 ```
+
+This syncs the whole `data/bst/` tree, which includes both `output/teststu/frontend.json`
+and `assessment-config.json`. Without `assessment-config.json` the local report generates
+with empty assessment cards.
 
 ---
 

@@ -1,0 +1,66 @@
+{
+  "assignment": "Binary Search Tree",
+  "short_name": "BST",
+  "full_name": "Binary Search Tree",
+  "assessments": [
+    {
+      "id": "exam_2",
+      "name": "Exam 2",
+      "date": "2026-04-10",
+      "date_display": "April 10",
+      "type": "exam",
+      "grade_weight": 0.07,
+      "concept_weights": {
+        "remove":   0.10,
+        "contains": 0.08,
+        "size":     0.08,
+        "iterator": 0.05,
+        "isEmpty":  0.03
+      }
+    },
+    {
+      "id": "hw5",
+      "name": "HW5",
+      "date": "2026-04-10",
+      "date_display": "April 10",
+      "type": "homework",
+      "grade_weight": 0.035,
+      "concept_weights": {
+        "height": 0.10
+      }
+    },
+    {
+      "id": "exam_3",
+      "name": "Exam 3",
+      "date": "2026-05-06",
+      "date_display": "May 6",
+      "type": "exam",
+      "grade_weight": 0.07,
+      "concept_weights": {
+        "height":           0.08,
+        "iterator":         0.06,
+        "efficiency":       0.06,
+        "preOrderIterator": 0.04,
+        "size":             0.04,
+        "toString":         0.02
+      }
+    },
+    {
+      "id": "final_exam",
+      "name": "Final Exam",
+      "date": "2026-05-27",
+      "date_display": "May 27",
+      "type": "exam",
+      "grade_weight": 0.12,
+      "concept_weights": {
+        "height":           0.08,
+        "iterator":         0.06,
+        "efficiency":       0.06,
+        "preOrderIterator": 0.04,
+        "size":             0.04,
+        "remove":           0.03,
+        "contains":         0.02
+      }
+    }
+  ]
+}
