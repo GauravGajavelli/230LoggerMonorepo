@@ -16,7 +16,7 @@ public record CourseContext(List<ConceptEntry> concepts) {
         List<FutureAppearance> futureAppearances
     ) {}
 
-    public record FutureAppearance(String label, String description) {}
+    public record FutureAppearance(String label, String description, String url) {}
 
     public static CourseContext empty() { return new CourseContext(List.of()); }
 

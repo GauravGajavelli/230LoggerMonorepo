@@ -13,5 +13,6 @@ public record PracticeDrill(
     String targetFile,       // e.g. "BSTTesting.java"
     Integer pointsAvailable, // sum of points += N in original test, or null
     Integer drillPoints,     // scaled value (≈25% of pointsAvailable); shown on card + modal
-    String source            // e.g. "Exam 2", "HW5" — from DrillQuestion.source; null for LLM-generated
+    String source,           // e.g. "Exam 2", "HW5" — from DrillQuestion.source; null for LLM-generated
+    String sourceUrl         // relative path under /study-materials/; null for LLM-generated or no URL
 ) {}

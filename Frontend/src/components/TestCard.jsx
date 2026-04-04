@@ -502,23 +502,44 @@ export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpi
         {canExpand && <ChevronIcon open={open} />}
       </button>
 
-      {/* Course relevance tags — preview when collapsed; full detail in "Why This Matters" when open */}
-      {!open && test.courseAppearances?.length > 0 && (
-        <div style={{ padding: '0 16px 10px' }}>
-          <div style={{
-            background: '#F0FDF4', border: '1px solid #D1FAE5', borderRadius: 6,
-            padding: '5px 8px',
-            display: 'inline-flex', alignItems: 'center', gap: 5, flexWrap: 'wrap',
-          }}>
-            {test.courseAppearances.map((ap, i) => (
-              <span key={i} style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10, padding: '1px 6px', borderRadius: 4,
-                background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
-              }}>
-                {ap.label}
-              </span>
-            ))}
+      {/* Course relevance tags — preview when collapsed; fades out on open */}
+      {test.courseAppearances?.length > 0 && (
+        <div style={{
+          overflow: 'hidden',
+          maxHeight: open ? '0px' : '120px',
+          opacity: open ? 0 : 1,
+          transition: 'max-height 0.2s ease-out, opacity 0.15s ease-out',
+        }}>
+          <div style={{ padding: '0 16px 10px' }}>
+            <div style={{
+              background: '#F0FDF4', border: '1px solid #D1FAE5', borderRadius: 6,
+              padding: '5px 8px',
+              display: 'inline-flex', alignItems: 'center', gap: 5, flexWrap: 'wrap',
+            }}>
+              {test.courseAppearances.map((ap, i) => (
+                ap.url ? (
+                  <a key={i}
+                     href={`/study-materials/${ap.url.split('/').map(encodeURIComponent).join('/')}`}
+                     target="_blank" rel="noopener noreferrer"
+                     style={{
+                       fontFamily: "'IBM Plex Mono', monospace",
+                       fontSize: 10, padding: '1px 6px', borderRadius: 4,
+                       background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
+                       textDecoration: 'none',
+                     }}>
+                    {ap.label} ↗
+                  </a>
+                ) : (
+                  <span key={i} style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10, padding: '1px 6px', borderRadius: 4,
+                    background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
+                  }}>
+                    {ap.label}
+                  </span>
+                )
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -678,32 +699,45 @@ export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpi
                 )}
 
                 {/* Future assignment pills */}
-                {test.courseAppearances?.map((ap, i) => (
-                  <div key={i} style={{ position: 'relative', display: 'inline-block' }}
-                       onMouseEnter={() => setHoveredPill(i)}
-                       onMouseLeave={() => setHoveredPill(null)}>
-                    <span style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10, padding: '2px 7px', borderRadius: 4,
-                      background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
-                      cursor: 'default', display: 'inline-block',
-                    }}>
-                      {ap.label}
-                    </span>
-                    {hoveredPill === i && (
-                      <div style={{
-                        position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: '#1E293B', color: '#F8FAFC',
-                        fontSize: 11, padding: '4px 10px', borderRadius: 4,
-                        whiteSpace: 'normal', maxWidth: 260, textAlign: 'center',
-                        zIndex: 20, pointerEvents: 'none',
-                      }}>
-                        {ap.description}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {test.courseAppearances?.map((ap, i) => {
+                  const pillStyle = {
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10, padding: '2px 7px', borderRadius: 4,
+                    background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1',
+                    display: 'inline-block',
+                  };
+                  const href = ap.url
+                    ? `/study-materials/${ap.url.split('/').map(encodeURIComponent).join('/')}`
+                    : null;
+                  return (
+                    <div key={i} style={{ position: 'relative', display: 'inline-block' }}
+                         onMouseEnter={() => setHoveredPill(i)}
+                         onMouseLeave={() => setHoveredPill(null)}>
+                      {href ? (
+                        <a href={href} target="_blank" rel="noopener noreferrer"
+                           style={{ ...pillStyle, cursor: 'pointer', textDecoration: 'none' }}>
+                          {ap.label} ↗
+                        </a>
+                      ) : (
+                        <span style={{ ...pillStyle, cursor: 'default' }}>
+                          {ap.label}
+                        </span>
+                      )}
+                      {hoveredPill === i && (
+                        <div style={{
+                          position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#1E293B', color: '#F8FAFC',
+                          fontSize: 11, padding: '4px 10px', borderRadius: 4,
+                          whiteSpace: 'normal', maxWidth: 260, textAlign: 'center',
+                          zIndex: 20, pointerEvents: 'none',
+                        }}>
+                          {ap.description}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -771,13 +805,23 @@ export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpi
                         : daysLeft <= 7  ? '#FED7AA'
                         : daysLeft <= 14 ? '#FDE68A'
                         : '#DDD6FE';
-                      return (
-                        <span style={{ fontSize: 10, color: urgencyColor,
-                                       fontFamily: "'IBM Plex Mono', monospace",
-                                       background: urgencyBg, border: `1px solid ${urgencyBorder}`,
-                                       padding: '1px 6px', borderRadius: 4, whiteSpace: 'nowrap' }}>
-                          {drill.source}{daysLeft != null && daysLeft > 0 ? ` · ${daysLeft}d` : ''}
-                        </span>
+                      const badgeContent = `${drill.source}${daysLeft != null && daysLeft > 0 ? ` · ${daysLeft}d` : ''}`;
+                      const badgeStyle = {
+                        fontSize: 10, color: urgencyColor,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        background: urgencyBg, border: `1px solid ${urgencyBorder}`,
+                        padding: '1px 6px', borderRadius: 4, whiteSpace: 'nowrap',
+                      };
+                      const sourceHref = drill.sourceUrl
+                        ? `/study-materials/${drill.sourceUrl.split('/').map(encodeURIComponent).join('/')}`
+                        : null;
+                      return sourceHref ? (
+                        <a href={sourceHref} target="_blank" rel="noopener noreferrer"
+                           style={{ ...badgeStyle, textDecoration: 'none', cursor: 'pointer' }}>
+                          {badgeContent} ↗
+                        </a>
+                      ) : (
+                        <span style={badgeStyle}>{badgeContent}</span>
                       );
                     })()}
                     {drill.source && (drill.timeEstimate || drill.drillPoints) && (

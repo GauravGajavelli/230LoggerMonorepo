@@ -7,6 +7,7 @@ import java.util.List;
 public record DrillQuestion(
     String id,
     String source,           // "Exam 2", "HW5", "Final Exam"
+    String url,              // optional relative path under /study-materials/ (e.g. "Exams/Exam 2/Exam2-202320-solution.md")
     List<String> categories, // BST category keys this maps to
     String targetFile,       // "BSTTesting.java"
     String timeEstimate,     // "~5 min" | "~10 min" | "~15 min"

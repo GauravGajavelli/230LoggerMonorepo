@@ -2,6 +2,7 @@
   {
     "id": "exam2-pruneFullSubtreesSize3",
     "source": "Exam 2",
+    "url": "Exams/Exam 2/Exam2-202320-solution.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~15 min",
     "intro": "This appears on Exam 2 as part of pruneFullSubtreesSize3 — the same pointer-replacement pattern as remove(). Add pruneFullSubtreesSize3() to BinarySearchTree.java so that it removes every full size-3 subtree (a root with exactly two leaf children), then paste this test into BSTTesting.java for a point back.",
@@ -15,6 +16,7 @@
   {
     "id": "exam2-shortestWordAlongPath",
     "source": "Exam 2",
+    "url": "Exams/Exam 2/Exam2-202320-solution.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~10 min",
     "intro": "This appears on Exam 2 as part of shortestWordAlongPath — walk the BST search path toward the target and return the shortest String encountered along the way. Add shortestWordAlongPath(String target) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
@@ -28,6 +30,7 @@
   {
     "id": "exam2-countLeftNodesAtDepth",
     "source": "Exam 2",
+    "url": "Exams/Exam 2/Exam2-202320-solution.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~10 min",
     "intro": "This appears on Exam 2 as part of countLeftNodesAtDepth — count how many nodes at a given depth are left children. Add countLeftNodesAtDepth(int depth) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
@@ -41,6 +44,7 @@
   {
     "id": "hw5-isHeightBalanced",
     "source": "HW5",
+    "url": "Homework 5/Homework_5_CSSE230.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~10 min",
     "intro": "HW5 asks you to test whether every node in the BST is height-balanced (|height(left) − height(right)| ≤ 1). Add isHeightBalanced() to BinarySearchTree.java using the height() method you already have, then paste this test into BSTTesting.java for a point back.",
@@ -54,6 +58,7 @@
   {
     "id": "hw5-getSumOfHeights",
     "source": "HW5",
+    "url": "Homework 5/Homework_5_CSSE230.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~5 min",
     "intro": "HW5 asks you to compute the sum of heights of all nodes in the BST. Add getSumOfHeights() to BinarySearchTree.java using the height() method you already have, then paste this test into BSTTesting.java for a point back.",
@@ -67,6 +72,7 @@
   {
     "id": "hw5-fullTreeConstructor",
     "source": "HW5",
+    "url": "Homework 5/Homework_5_CSSE230.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~15 min",
     "intro": "HW5 asks you to add a BinarySearchTree(int maxDepth) constructor that builds a complete full binary tree whose node values are their own depths. Add this constructor to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
@@ -106,6 +112,7 @@
   {
     "id": "final-countOddOnlyIf",
     "source": "Final Exam",
+    "url": "Exams/Final Exam/PracticeFinalExam.pdf",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~15 min",
     "intro": "This appears on the Final Exam as part of countOddOnlyIf — count nodes whose Integer value is odd AND whose left subtree height is strictly less than their right subtree height. Add countOddOnlyIf() to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",

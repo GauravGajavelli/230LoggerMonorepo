@@ -43,7 +43,12 @@ const fullName  = assessmentConfig.full_name  || assignment;
 const shortName = assessmentConfig.short_name || assignment;
 
 const TYPE_PRIORITY = { exam: 3, assignment: 2, homework: 1 };
+const force = process.argv.includes('--force');
+const todayMs = Date.now();
+
+// Only consider upcoming assessments (date >= today) so past exams don't drive nudges.
 const nearest = (assessmentConfig.assessments || [])
+  .filter(a => new Date(a.date + 'T12:00:00Z') >= new Date(new Date().toDateString()))
   .sort((a, b) => {
     const dateDiff = new Date(a.date) - new Date(b.date);
     if (dateDiff !== 0) return dateDiff;
@@ -51,12 +56,22 @@ const nearest = (assessmentConfig.assessments || [])
   })[0] || null;
 
 if (!nearest) {
-  console.error('No assessments found in assessment-config.json.');
-  process.exit(1);
+  console.log('No upcoming assessments in assessment-config.json — no nudge sent.');
+  process.exit(0);
 }
 
 const nearestAssessment = nearest.name;
 const assessmentDate    = nearest.date_display;
+
+// Calendar guard: when the nearest assessment is an exam, only send nudges ≤ 2 days before it.
+// Run this script daily via cron — it exits quietly on non-exam days that are too early.
+// When the nearest assessment is homework or an assignment, skip the guard and send whenever called.
+const daysUntil = Math.ceil((new Date(nearest.date + 'T12:00:00Z') - todayMs) / 86_400_000);
+if (nearest.type === 'exam' && daysUntil > 2 && !force) {
+  console.log(`Next assessment: ${nearestAssessment} (${assessmentDate}), ${daysUntil} day(s) away — no nudge sent (exam guard).`);
+  console.log('Run with --force to send nudges regardless of date.');
+  process.exit(0);
+}
 
 // ── Template ──────────────────────────────────────────────────────────────────
 

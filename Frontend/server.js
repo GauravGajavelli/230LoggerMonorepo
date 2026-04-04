@@ -75,6 +75,10 @@ const upload = multer({
 // Serve built assets without auto-serving index.html at /
 app.use(express.static(DIST_DIR, { index: false }));
 
+// Serve course study materials (exam solutions, homework specs) from Pipeline/testInputs/csse230/
+const STUDY_MATERIALS_DIR = path.join(REPO_ROOT, 'Pipeline', 'testInputs', 'csse230');
+app.use('/study-materials', express.static(STUDY_MATERIALS_DIR));
+
 // Root → login
 app.get('/', (_req, res) => res.redirect('/login'));
 

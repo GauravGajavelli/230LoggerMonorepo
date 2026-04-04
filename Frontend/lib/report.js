@@ -128,6 +128,8 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           time_min: time,
           test_names: testNames(fb),
           drill_anchor: drillAnchor(fb),
+          source: drill?.source || null,
+          source_url: drill?.sourceUrl || null,
         });
       }
     } else {
@@ -141,6 +143,8 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         time_min: time,
         test_names: testNames(fb),
         drill_anchor: drillAnchor(fb),
+        source: drill?.source || null,
+        source_url: drill?.sourceUrl || null,
       });
     }
   }

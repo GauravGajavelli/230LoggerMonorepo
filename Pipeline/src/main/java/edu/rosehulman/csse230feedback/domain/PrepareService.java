@@ -495,7 +495,7 @@ public class PrepareService {
                             FeedbackGenerationService.resolveFutureAppearances(th, courseCtx);
                         if (fas.isEmpty()) return fb;
                         List<CourseAppearance> appearances = fas.stream()
-                            .map(fa -> new CourseAppearance(fa.label(), fa.description()))
+                            .map(fa -> new CourseAppearance(fa.label(), fa.description(), fa.url()))
                             .toList();
                         return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
                             fb.explanation(), fb.nextSteps(), fb.diffs(), fb.relatedTestIds(),

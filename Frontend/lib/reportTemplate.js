@@ -67,19 +67,30 @@ function renderCard(a) {
     </div>`;
 }
 
+function encodeStudyPath(rawPath) {
+  return rawPath.split('/').map(s => encodeURIComponent(s)).join('/');
+}
+
 function renderDrillCard(drill, assessmentType, feedbackUrl) {
   const tests = drill.test_names.slice(0, 4);
   const extraCount = drill.test_names.length - tests.length;
   const testLine = tests.map(t => `<code>${escHtml(t)}</code>`).join(', ')
     + (extraCount > 0 ? ` <span class="muted">and ${extraCount} more</span>` : '');
   const drillUrl = `${feedbackUrl}${drill.drill_anchor ? '#' + drill.drill_anchor : ''}`;
+  let sourceHtml = '';
+  if (drill.source_url) {
+    let smBase = '/study-materials';
+    try { smBase = new URL(feedbackUrl).origin + '/study-materials'; } catch {}
+    const href = smBase + '/' + encodeStudyPath(drill.source_url);
+    sourceHtml = `<a class="drill-source-link" href="${escHtml(href)}" target="_blank">View ${escHtml(drill.source || 'source')} →</a>`;
+  }
   return `
     <div class="drill-card">
       <div class="drill-name">${escHtml(drill.pattern_name)}</div>
       <div class="drill-tests">${testLine}</div>
       <div class="drill-meta">~${drill.weight_pct}% ${escHtml(weightLabel(assessmentType))} · ${drill.time_min} min</div>
       ${drill.also_relevant_to ? `<div class="drill-also">Also relevant to ${escHtml(drill.also_relevant_to)}</div>` : ''}
-      <a class="drill-link" href="${escHtml(drillUrl)}">Open drill →</a>
+      <div class="drill-links">${sourceHtml}<a class="drill-link" href="${escHtml(drillUrl)}">Open drill →</a></div>
     </div>`;
 }
 
@@ -223,13 +234,14 @@ export function renderReportHtml(reportData, feedbackUrl) {
   .drill-tests code { background: #f0efeb; padding: 1px 4px; border-radius: 3px; font-size: 10px; }
   .drill-meta  { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
   .drill-also  { font-size: 11px; color: var(--text-tertiary); margin-bottom: 6px; }
-  .drill-link  {
+  .drill-links { display: flex; gap: 12px; align-items: baseline; margin-top: 6px; flex-wrap: wrap; }
+  .drill-link, .drill-source-link {
     display: inline-block;
     font-size: 12px;
     color: var(--accent-exam);
     text-decoration: none;
-    margin-top: 6px;
   }
+  .drill-source-link { color: var(--text-tertiary); }
   .muted { color: var(--text-tertiary); }
 
   /* Fallback */
