@@ -265,7 +265,8 @@ public class PracticeDrillService {
             pts > 0 ? pts : null,
             drillPoints,
             match.source(),
-            match.url()
+            match.url(),
+            match.sourceLabel()
         );
     }
 
@@ -409,7 +410,8 @@ public class PracticeDrillService {
                 pointsAvailable > 0 ? pointsAvailable : null,
                 drillPoints,
                 null,  // LLM-generated: no bank source
-                null); // no source URL
+                null,  // no source URL
+                null); // no source label
         } catch (Exception e) {
             System.err.println("Warning: failed to parse drill response: " + e.getMessage());
             return null;

@@ -2,10 +2,11 @@
   {
     "id": "exam2-pruneFullSubtreesSize3",
     "source": "Exam 2",
-    "url": "Exams/Exam 2/Exam2-202320-solution.md",
+    "source_label": "Exam 2 — 2023 questions",
+    "url": "Exams/Exam 2/Exam2-202320.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~15 min",
-    "intro": "This appears on Exam 2 as part of pruneFullSubtreesSize3 — the same pointer-replacement pattern as remove(). Add pruneFullSubtreesSize3() to BinarySearchTree.java so that it removes every full size-3 subtree (a root with exactly two leaf children), then paste this test into BSTTesting.java for a point back.",
+    "intro": "This appears on Exam 2 as part of pruneFullSubtreesSize3 — the same pointer-replacement pattern as remove(). Add pruneFullSubtreesSize3() to BinarySearchTree.java so that it removes every full size-3 subtree (a root with exactly two leaf children), then paste this test into BSTTesting.java for a point back. Practices the Full Traversal (tree mutation) pattern from the Exam 2 review.",
     "testCode": "@Test\npublic void practice_pruneFullSubtreesSize3_basicCase() {\n    BST<String> bst = new BST<>();\n    bst.add(\"romeo\");\n    bst.add(\"echo\");\n    bst.add(\"tango\");\n    bst.pruneFullSubtreesSize3();\n    assertEquals(\"[]\", bst.toString());\n    points += 1;\n}",
     "hints": [
       "A full size-3 subtree has a root with exactly two non-null children and no grandchildren — both children are leaves.",
@@ -16,10 +17,11 @@
   {
     "id": "exam2-shortestWordAlongPath",
     "source": "Exam 2",
-    "url": "Exams/Exam 2/Exam2-202320-solution.md",
+    "source_label": "Exam 2 — 2023 questions",
+    "url": "Exams/Exam 2/Exam2-202320.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~10 min",
-    "intro": "This appears on Exam 2 as part of shortestWordAlongPath — walk the BST search path toward the target and return the shortest String encountered along the way. Add shortestWordAlongPath(String target) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
+    "intro": "This appears on Exam 2 as part of shortestWordAlongPath — walk the BST search path toward the target and return the shortest String encountered along the way. Add shortestWordAlongPath(String target) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back. Practices the Tree Navigation pattern from the Exam 2 review.",
     "testCode": "@Test\npublic void practice_shortestWordAlongPath_singleAndTwoNodes() {\n    BST<String> bst = new BST<>();\n    bst.add(\"romeo\");\n    assertEquals(\"romeo\", bst.shortestWordAlongPath(\"romeo\"));\n    bst.add(\"echo\");\n    assertEquals(\"echo\", bst.shortestWordAlongPath(\"echo\"));\n    assertEquals(\"romeo\", bst.shortestWordAlongPath(\"romeo\"));\n    points += 1;\n}",
     "hints": [
       "Follow the standard BST search path from the root toward the target, comparing at each node exactly as contains() does.",
@@ -30,10 +32,11 @@
   {
     "id": "exam2-countLeftNodesAtDepth",
     "source": "Exam 2",
-    "url": "Exams/Exam 2/Exam2-202320-solution.md",
+    "source_label": "Exam 2 — 2023 questions",
+    "url": "Exams/Exam 2/Exam2-202320.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~10 min",
-    "intro": "This appears on Exam 2 as part of countLeftNodesAtDepth — count how many nodes at a given depth are left children. Add countLeftNodesAtDepth(int depth) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back.",
+    "intro": "This appears on Exam 2 as part of countLeftNodesAtDepth — count how many nodes at a given depth are left children. Add countLeftNodesAtDepth(int depth) to BinarySearchTree.java, then paste this test into BSTTesting.java for a point back. Practices the Full Traversal (with depth) pattern from the Exam 2 review.",
     "testCode": "@Test\npublic void practice_countLeftNodesAtDepth_threeNodeTree() {\n    BST<String> bst = new BST<>();\n    bst.add(\"november\");\n    bst.add(\"foxtrot\");\n    bst.add(\"tango\");\n    assertEquals(0, bst.countLeftNodesAtDepth(0));\n    assertEquals(1, bst.countLeftNodesAtDepth(1));\n    points += 1;\n}",
     "hints": [
       "Recurse with a depth counter: at each node, reduce the target depth by 1; when the counter hits 0, the current node is at the target depth.",
@@ -44,6 +47,7 @@
   {
     "id": "hw5-isHeightBalanced",
     "source": "HW5",
+    "source_label": "HW 5 problem set",
     "url": "Homework 5/Homework_5_CSSE230.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~10 min",
@@ -58,6 +62,7 @@
   {
     "id": "hw5-getSumOfHeights",
     "source": "HW5",
+    "source_label": "HW 5 problem set",
     "url": "Homework 5/Homework_5_CSSE230.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~5 min",
@@ -72,6 +77,7 @@
   {
     "id": "hw5-fullTreeConstructor",
     "source": "HW5",
+    "source_label": "HW 5 problem set",
     "url": "Homework 5/Homework_5_CSSE230.md",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~15 min",
@@ -112,6 +118,7 @@
   {
     "id": "final-countOddOnlyIf",
     "source": "Final Exam",
+    "source_label": "Final Exam — practice",
     "url": "Exams/Final Exam/PracticeFinalExam.pdf",
     "targetFile": "BSTTesting.java",
     "timeEstimate": "~15 min",

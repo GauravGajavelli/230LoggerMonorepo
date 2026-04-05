@@ -2,6 +2,7 @@
   "assignment": "Binary Search Tree",
   "short_name": "BST",
   "full_name": "Binary Search Tree",
+  "review_video_url": "",
   "assessments": [
     {
       "id": "exam_2",
@@ -11,11 +12,9 @@
       "type": "exam",
       "grade_weight": 0.07,
       "concept_weights": {
-        "remove":   0.10,
-        "contains": 0.08,
-        "size":     0.08,
-        "iterator": 0.05,
-        "isEmpty":  0.03
+        "remove":   0.33,
+        "contains": 0.33,
+        "size":     0.27
       }
     },
     {
