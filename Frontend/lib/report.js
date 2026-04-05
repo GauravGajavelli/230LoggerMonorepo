@@ -174,18 +174,33 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           assessmentMap.set(aCfg.id, { config: aCfg, drills: [], rawOverlap: 0 });
         }
         const entry = assessmentMap.get(aCfg.id);
+
+        // courseAppearances for this assessment (match by label prefix)
+        const caForAssmt = (fb.courseAppearances || []).filter(ca =>
+          ca.label === aCfg.name || ca.label.startsWith(aCfg.name + ' ')
+        );
+
+        // Fall back to courseAppearances for source link — but NOT for drill_intro,
+        // because the courseAppearance description describes the connection to another
+        // pattern (e.g. "shortestWordAlongPath uses the same navigation as contains"),
+        // not the drill practice task itself.
+        const sourceUrl   = drill?.sourceUrl   || caForAssmt[0]?.url   || null;
+        const sourceLabel = drill?.sourceLabel  || caForAssmt[0]?.label || null;
+        const drillIntro  = drill?.intro        || null;
+
         // Store internal tracking fields for dedup; stripped below
         entry.drills.push({
           _categories: categories,
           _matchWeight: matchWeight,
+          _extraLinks: caForAssmt.map(ca => ({ url: ca.url, label: ca.label })),
           pattern_name: patternName(fb),
           time_min: time,
           test_names: testNames(fb),
           drill_anchor: drillAnchor(fb),
           source: drill?.source || null,
-          source_url: drill?.sourceUrl || null,
-          source_label: drill?.sourceLabel || null,
-          drill_intro: drill?.intro || null,
+          source_url: sourceUrl,
+          source_label: sourceLabel,
+          drill_intro: drillIntro,
         });
       }
     } else {
@@ -236,11 +251,23 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
       }))
       .sort((a, b) => b.weight_pct - a.weight_pct);
     entry.rawOverlap = entry.drills.reduce((sum, d) => sum + (d._matchWeight || 0), 0);
+    // Collect all unique source links across surviving drills + courseAppearances + config resources
+    const allLinksMap = new Map(); // url → label
+    for (const d of entry.drills) {
+      if (d.source_url) allLinksMap.set(d.source_url, d.source_label || d.source || 'source');
+      for (const el of (d._extraLinks || [])) allLinksMap.set(el.url, el.label);
+    }
+    // Always-shown assessment resources (not drill-dependent, e.g. practice exam zips)
+    for (const r of (entry.config?.resources || [])) {
+      if (r.url) allLinksMap.set(r.url, r.label || 'resource');
+    }
+    entry.allLinks = [...allLinksMap.entries()].map(([url, label]) => ({ url, label }));
     // Compute weight_pct from matchWeight, then strip internal tracking fields
     for (const d of entry.drills) {
       d.weight_pct = Math.round((d._matchWeight || 0) * 100);
       delete d._categories;
       delete d._matchWeight;
+      delete d._extraLinks;
     }
   }
 
@@ -275,6 +302,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         total_time: totalTime,
         drills,
         uncovered_concepts: entry.uncoveredConcepts || [],
+        all_links: entry.allLinks || [],
       };
     })
     .sort((a, b) => {
@@ -359,6 +387,17 @@ export async function generateReportForToken(studentId, assignment, token, dataD
     try {
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'networkidle0' });
+      // Auto-scale if content overflows the 11in page height.
+      // Applies CSS zoom to the root element so everything scales proportionally.
+      await page.evaluate(() => {
+        const body = document.body;
+        const contentH = body.scrollHeight;
+        const pageH    = body.clientHeight; // set to 11in in CSS
+        if (contentH > pageH) {
+          const scale = Math.max(0.80, pageH / contentH);
+          document.documentElement.style.zoom = String(scale);
+        }
+      });
       await page.pdf({
         path: reportPdfPath,
         format: 'Letter',

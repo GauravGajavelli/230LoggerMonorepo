@@ -15,7 +15,10 @@
         "remove":   0.33,
         "contains": 0.33,
         "size":     0.27
-      }
+      },
+      "resources": [
+        { "url": "Exams/Exam 2/Exam2-practice.zip", "label": "Exam 2 practice (zip)" }
+      ]
     },
     {
       "id": "hw5",
@@ -99,7 +102,10 @@
         "preOrderIterator": 0.04,
         "size":             0.04,
         "toString":         0.02
-      }
+      },
+      "resources": [
+        { "url": "Exams/Exam 3/Exam3-practice.zip", "label": "Exam 3 practice (zip)" }
+      ]
     },
     {
       "id": "final_exam",
@@ -116,7 +122,11 @@
         "size":             0.04,
         "remove":           0.03,
         "contains":         0.02
-      }
+      },
+      "resources": [
+        { "url": "Exams/Final Exam/PracticeFinalExam.pdf",         "label": "Practice final (PDF)" },
+        { "url": "Exams/Final Exam/FinalPracticeComputerPart.zip", "label": "Practice final computer part (zip)" }
+      ]
     }
   ]
 }

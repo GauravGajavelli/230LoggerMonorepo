@@ -124,6 +124,38 @@
     ]
   },
   {
+    "id": "exam2practice-buildSearchPathList",
+    "source": "Exam 2 practice",
+    "sourceLabel": "Practice Exam 2 (2020-21)",
+    "url": "Exams/Exam 2/Exam2-practice.zip",
+    "targetFile": "BSTTesting.java",
+    "categories": ["contains"],
+    "timeEstimate": "~10 min",
+    "intro": "Add buildSearchPathList(T item) to BinarySearchTree.java returning an ArrayList of all values on the BST search path from root to item, or an empty list if the item is not found. This is a 2020-21 practice Exam 2 question using the same O(height) navigation pattern as shortestWordAlongPath. Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_buildSearchPathList_searchPath() {\n    BST<Integer> bst = new BST<>();\n    bst.add(77); bst.add(37); bst.add(93); bst.add(35); bst.add(52);\n    assertEquals(\"[77, 37, 52]\", bst.buildSearchPathList(52).toString());\n    assertEquals(\"[77, 37, 35]\", bst.buildSearchPathList(35).toString());\n    assertEquals(\"[77]\",         bst.buildSearchPathList(77).toString());\n    assertEquals(\"[]\",           bst.buildSearchPathList(99).toString());\n    points += 1;\n}",
+    "hints": [
+      "Walk the BST search path exactly as contains() does: left if item < current, right if item > current. Add the current node's value to the result list before recursing.",
+      "Propagate failure upward: if the recursive call returns an empty list, the item was not found in that subtree — return empty without prepending the current node.",
+      "Base case: if current node is NULL_NODE, return an empty list (item not found). If current.data.equals(item), return a list containing only current.data."
+    ]
+  },
+  {
+    "id": "exam2practice-countSiblingDiffGreaterThan",
+    "source": "Exam 2 practice",
+    "sourceLabel": "Practice Exam 2 (2020-21)",
+    "url": "Exams/Exam 2/Exam2-practice.zip",
+    "targetFile": "BSTTesting.java",
+    "categories": ["size"],
+    "timeEstimate": "~10 min",
+    "intro": "Add countSiblingDiffGreaterThan(int threshold) to BinarySearchTree.java that counts nodes whose two children have a value difference strictly greater than the threshold (right.data - left.data > threshold, both children must exist). This is a 2020-21 practice Exam 2 question using the same full-tree recursive accumulator pattern as getSumOfHeights. Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_countSiblingDiffGreaterThan_basicCases() {\n    BST<Integer> bst = new BST<>();\n    assertEquals(0, bst.countSiblingDiffGreaterThan(8));\n    bst.add(20); bst.add(15); bst.add(25);\n    assertEquals(1, bst.countSiblingDiffGreaterThan(8));  // 25-15=10 > 8\n    assertEquals(0, bst.countSiblingDiffGreaterThan(12)); // 25-15=10 not > 12\n    bst.add(10); bst.add(30);\n    assertEquals(2, bst.countSiblingDiffGreaterThan(8));  // also 30-10=20 > 8\n    points += 1;\n}",
+    "hints": [
+      "Traverse every node (full-tree traversal, not BST search) and accumulate a count — same structure as getSumOfHeights() or size().",
+      "At each BinaryNode, count 1 if both children are not NULL_NODE AND (right.data - left.data) > threshold; otherwise count 0. Then add the counts from left and right subtrees.",
+      "The difference is always right.data - left.data (positive, since BSTs keep right > left), so no absolute value needed. Both children must be non-null — a node with only one child does not qualify."
+    ]
+  },
+  {
     "id": "final-countOddOnlyIf",
     "source": "Final Exam",
     "sourceLabel": "Final Exam - practice",
