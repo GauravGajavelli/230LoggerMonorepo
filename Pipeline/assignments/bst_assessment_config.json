@@ -25,7 +25,64 @@
       "type": "homework",
       "grade_weight": 0.035,
       "concept_weights": {
-        "height": 0.10
+        "height":           0.10,
+        "size":             0.06,
+        "iterator":         0.05,
+        "preOrderIterator": 0.04
+      }
+    },
+    {
+      "id": "editor_trees_m1",
+      "name": "EditorTrees M1",
+      "date": "2026-04-20",
+      "date_display": "April 20",
+      "type": "homework",
+      "grade_weight": 0.04,
+      "concept_weights": {
+        "insert":   0.08,
+        "size":     0.06,
+        "iterator": 0.04
+      }
+    },
+    {
+      "id": "hw6",
+      "name": "HW6",
+      "date": "2026-04-24",
+      "date_display": "April 24",
+      "type": "homework",
+      "grade_weight": 0.035,
+      "concept_weights": {
+        "preOrderIterator": 0.10,
+        "height":           0.06,
+        "insert":           0.04
+      }
+    },
+    {
+      "id": "editor_trees_m2",
+      "name": "EditorTrees M2",
+      "date": "2026-04-27",
+      "date_display": "April 27",
+      "type": "homework",
+      "grade_weight": 0.04,
+      "concept_weights": {
+        "height":   0.15,
+        "insert":   0.08,
+        "size":     0.04
+      }
+    },
+    {
+      "id": "editor_trees_m3",
+      "name": "EditorTrees M3",
+      "date": "2026-05-04",
+      "date_display": "May 4",
+      "type": "homework",
+      "grade_weight": 0.04,
+      "concept_weights": {
+        "height":   0.12,
+        "remove":   0.10,
+        "insert":   0.06,
+        "iterator": 0.05,
+        "size":     0.04
       }
     },
     {

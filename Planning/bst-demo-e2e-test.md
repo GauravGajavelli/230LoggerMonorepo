@@ -43,15 +43,25 @@ Do this any time the Pipeline Java code has changed since the last run:
 ```bash
 # From repo root
 mvn -f Pipeline/pom.xml package -q -DskipTests
+```
 
-# Clear LLM cache (forces fresh API calls — costs ~$0.07)
+To test with fresh LLM calls (e.g. to verify updated drill intros or new `categories` fields
+in `bst_drill_questions.json` take effect):
+
+```bash
+# Clear LLM cache — forces fresh API calls (~$0.07)
 rm -rf Pipeline/cache/llm/*
 
 # Clear previous pipeline output for this student
 rm -rf Frontend/data/bst/output/teststu/
 ```
 
-Skip `rm -rf Pipeline/cache/llm/*` to reuse cached LLM responses (near-instant, free).
+To reuse cached LLM responses (near-instant, free — drill intros will be from the cached run,
+not the updated bank):
+
+```bash
+rm -rf Frontend/data/bst/output/teststu/
+```
 
 ### A4. Run the pipeline
 
@@ -138,12 +148,32 @@ The browser downloads `report.pdf`. Verify:
 
 ### B5. Iterate on the report design
 
-Edit `lib/reportTemplate.js` (HTML/CSS) or `lib/report.js` (data logic) in your IDE, then:
+**Report layout/data only** (no LLM calls needed) — edit `lib/reportTemplate.js` or `lib/report.js`,
+then:
 
 ```bash
 rm data/bst/output/teststu/report.json data/bst/output/teststu/report.pdf
 open "http://localhost:3000/report?token=$TOKEN"
 # Regenerates in ~4s (Puppeteer launch)
+```
+
+**Verify new drill intros or assessment config changes** — these are baked into `frontend.json`
+at pipeline time, so deleting `report.json`/`report.pdf` alone is not enough. You need to
+re-run the pipeline with a cleared LLM cache:
+
+```bash
+# On Ubuntu — clear cache, delete all outputs, re-run pipeline
+rm -rf Pipeline/cache/llm/*
+rm -rf data/bst/output/teststu/
+node scripts/process-batch.js bst "Binary Search Tree"
+
+# Then pull results back to Mac
+rsync -av csse@feedback:~/230LoggerMonorepo/Frontend/data/bst/ \
+  /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/data/bst/
+
+# Then regenerate the report
+rm data/bst/output/teststu/report.json data/bst/output/teststu/report.pdf
+open "http://localhost:3000/report?token=$TOKEN"
 ```
 
 Repeat until satisfied.
@@ -235,10 +265,24 @@ Check `gajavegs@rose-hulman.edu`. Subject prefixed `[DEV → gajavegs@rose-hulma
 
 ## Reset between iterations
 
-**Report only** (local Mac):
+**Report layout only** (local Mac — no pipeline re-run):
 ```bash
 rm data/bst/output/teststu/report.json data/bst/output/teststu/report.pdf
 open "http://localhost:3000/report?token=$TOKEN"
+```
+
+**Drill intros / assessment config changes** (Ubuntu — re-runs pipeline with fresh LLM calls):
+```bash
+rm -rf Pipeline/cache/llm/*
+rm -rf data/bst/output/teststu/
+node scripts/process-batch.js bst "Binary Search Tree"
+# Then rsync to Mac and delete report.json/report.pdf as in B5
+```
+
+**Cached pipeline re-run** (Ubuntu — re-runs pipeline, reuses LLM cache):
+```bash
+rm -rf data/bst/output/teststu/
+node scripts/process-batch.js bst "Binary Search Tree"
 ```
 
 **Email copy only** (Ubuntu):
@@ -256,6 +300,7 @@ sqlite3 db/feedback.db \
    DELETE FROM pipeline_runs WHERE assignment='bst';
    DELETE FROM tokens WHERE assignment='bst';"
 rm -rf data/bst/output/teststu
+rm -rf Pipeline/cache/llm/*
 # Then repeat from A1
 ```
 

@@ -241,9 +241,10 @@ export function renderReportHtml(reportData, feedbackUrl) {
 
   // If no exam has drills, promote highest-relevance HW to focal position
   let focalAssessment = focalExam;
-  let secondaryAssessments; // all non-focal assessments with drills
+  let secondaryAssessments; // non-focal assessments shown in compact zone
   if (focalExam) {
-    // Secondary = remaining exams + all HW with drills
+    // All non-focal exams and HW with drills — far-away ones are already excluded at the
+    // data layer (report.js DRILL_HORIZON_DAYS), so no display-time filter needed.
     secondaryAssessments = [...examZoneWithDrills.slice(1), ...hwWithDrills];
   } else if (hwWithDrills.length > 0) {
     focalAssessment = hwWithDrills[0];
@@ -256,13 +257,15 @@ export function renderReportHtml(reportData, feedbackUrl) {
   const allAssessments = [...(exam_assessments ?? []), ...(hw_assessments ?? [])];
   const tableAssessments = allAssessments.length > 0 ? allAssessments : (assessments ?? []);
 
-  // Framing sentence
-  const nearestExam = examZone.length > 0 ? examZone[0] : null;
+  // Framing sentence — anchored to the focal assessment (what actually has drill cards),
+  // not just the nearest exam, so it stays accurate when the focal is a HW or when
+  // the nearest exam has zero overlap for this student.
+  const focalIsExam = focalAssessment?.type === 'exam';
   let framingSentence;
-  if (nearestExam && review_video_url) {
-    framingSentence = `Based on the <a href="${escHtml(review_video_url)}" style="color:var(--text-secondary);text-decoration:none">${escHtml(nearestExam.name)} review</a> (which covers the expected exam contents, with minor differences possible), these patterns from your submission are your highest-priority practice targets (${timeDisplay(nearestExam.days_left)} until ${escHtml(nearestExam.name)}).`;
-  } else if (nearestExam) {
-    framingSentence = `These patterns from your submission are your highest-priority practice targets (${timeDisplay(nearestExam.days_left)} until ${escHtml(nearestExam.name)}).`;
+  if (focalIsExam && review_video_url) {
+    framingSentence = `Based on the <a href="${escHtml(review_video_url)}" style="color:var(--text-secondary);text-decoration:none">${escHtml(focalAssessment.name)} review</a> (which covers the expected exam contents, with minor differences possible), these patterns from your submission are your highest-priority practice targets (${timeDisplay(focalAssessment.days_left)} until ${escHtml(focalAssessment.name)}).`;
+  } else if (focalAssessment) {
+    framingSentence = `These patterns from your submission are your highest-priority practice targets (${timeDisplay(focalAssessment.days_left)} until ${escHtml(focalAssessment.name)}).`;
   } else {
     framingSentence = `These patterns from your submission are your highest-priority practice targets.`;
   }
@@ -315,10 +318,10 @@ export function renderReportHtml(reportData, feedbackUrl) {
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-primary);
     background: #fff;
-    padding: 14px 22px;
+    padding: 20px 28px;
     max-width: 860px;
     margin: 0 auto;
     height: 10.5in;
@@ -327,141 +330,141 @@ export function renderReportHtml(reportData, feedbackUrl) {
 
   /* Header */
   .sys-label {
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-tertiary);
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
   .assignment-name {
     font-family: Georgia, 'Palatino Linotype', Palatino, serif;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
   .framing {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 14px;
     line-height: 1.5;
   }
-  .header-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 8px; }
+  .header-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 12px; }
 
   /* Assessment table strip */
   .assessment-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
     table-layout: fixed;
   }
   .assessment-table td {
-    font-size: 11px;
-    padding: 4px 6px;
+    font-size: 12px;
+    padding: 5px 7px;
     border-bottom: 1px solid var(--border);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .arow-type   { width: 36px; font-size: 10px; letter-spacing: 0.06em; color: var(--text-tertiary); }
+  .arow-type   { width: 44px; font-size: 10px; letter-spacing: 0.06em; color: var(--text-tertiary); }
   .arow-name   { width: 130px; }
-  .arow-date   { width: 68px; color: var(--text-secondary); }
-  .arow-time   { width: 60px; font-size: 10px; }
-  .arow-bar    { width: 88px; }
-  .arow-pct    { width: 40px; font-size: 10px; font-variant-numeric: tabular-nums; }
-  .arow-drills { font-size: 10px; }
+  .arow-date   { width: 72px; color: var(--text-secondary); }
+  .arow-time   { width: 62px; font-size: 11px; }
+  .arow-bar    { width: 90px; }
+  .arow-pct    { width: 42px; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .arow-drills { font-size: 11px; }
 
   .bar-track { height: 5px; background: var(--bar-track); border-radius: 3px; }
   .bar-fill  { height: 5px; border-radius: 3px; }
 
   /* Drill columns (exam zone) */
-  .columns { display: flex; gap: 0; margin-bottom: 8px; }
+  .columns { display: flex; gap: 0; margin-bottom: 12px; }
   .column  { flex: 1; min-width: 0; }
   .col-header {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--accent-exam);
     letter-spacing: 0.04em;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
   }
-  .col-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 6px; }
+  .col-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 8px; }
 
   .drill-card {
     border: 1px solid var(--border);
     border-radius: 3px;
     background: var(--bg-card);
-    padding: 7px 9px;
-    margin-bottom: 5px;
+    padding: 9px 11px;
+    margin-bottom: 7px;
   }
   .drill-name {
     font-family: Georgia, 'Palatino Linotype', Palatino, serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: bold;
     color: var(--text-primary);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     line-height: 1.3;
   }
   .drill-num { font-variant-numeric: tabular-nums; margin-right: 4px; }
   .drill-intro {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-tertiary);
     font-style: italic;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     line-height: 1.4;
   }
-  .drill-tests { font-size: 10px; color: var(--text-secondary); margin-bottom: 3px; }
+  .drill-tests { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
   .drill-tests code { background: #f0efeb; padding: 1px 3px; border-radius: 2px; font-size: 10px; }
-  .drill-meta  { font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; }
-  .drill-also  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 3px; }
-  .drill-links { display: flex; gap: 10px; align-items: baseline; margin-top: 3px; flex-wrap: wrap; }
-  .drill-link  { font-size: 10px; color: var(--text-secondary); text-decoration: none; }
+  .drill-meta  { font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+  .drill-also  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; }
+  .drill-links { display: flex; gap: 10px; align-items: baseline; margin-top: 4px; flex-wrap: wrap; }
+  .drill-link  { font-size: 11px; color: var(--text-secondary); text-decoration: none; }
 
   /* "Also on this exam" section */
   .exam-also {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-tertiary);
-    margin-top: 6px;
+    margin-top: 8px;
     border-top: 1px solid var(--border);
-    padding-top: 5px;
+    padding-top: 6px;
     line-height: 1.5;
   }
   .exam-also-label {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    font-size: 9px;
+    font-size: 10px;
     color: var(--text-tertiary);
   }
   .exam-also-link { color: var(--text-secondary); text-decoration: none; }
 
-  /* HW zone */
-  .hw-zone { margin-bottom: 8px; }
+  /* Secondary zone */
+  .hw-zone { margin-bottom: 12px; }
   .hw-zone-label {
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-tertiary);
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
   .hw-row {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: baseline;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-tertiary);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
   }
   .hw-name   { font-weight: 600; color: var(--text-secondary); }
-  .hw-link   { font-size: 10px; color: var(--text-secondary); text-decoration: none; }
+  .hw-link   { font-size: 11px; color: var(--text-secondary); text-decoration: none; }
 
   /* Fallback */
-  .fallback-header { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
+  .fallback-header { font-size: 15px; color: var(--text-secondary); margin-bottom: 18px; }
 
   /* Footer */
-  .footer { border-top: 1px solid var(--border); padding-top: 8px; }
-  .footer-summary { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: baseline; }
-  .footer-link    { display: block; font-size: 11px; color: var(--text-secondary); text-decoration: none; margin-bottom: 4px; }
-  .footer-privacy { font-size: 10px; color: var(--text-tertiary); line-height: 1.5; }
+  .footer { border-top: 1px solid var(--border); padding-top: 10px; }
+  .footer-summary { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: baseline; }
+  .footer-link    { display: block; font-size: 12px; color: var(--text-secondary); text-decoration: none; margin-bottom: 6px; }
+  .footer-privacy { font-size: 11px; color: var(--text-tertiary); line-height: 1.5; }
 
   .muted { color: var(--text-tertiary); }
 

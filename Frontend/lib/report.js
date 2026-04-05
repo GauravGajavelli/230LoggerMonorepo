@@ -29,6 +29,9 @@ const TYPE_PRIORITY = { exam: 3, assignment: 2, homework: 1 };
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+// Assessments further out than this get no drill assignments (still appear in the table strip).
+const DRILL_HORIZON_DAYS = 21;
+
 function urgencyFactor(days) {
   if (days <= 3)  return 1.0;
   if (days <= 7)  return 0.8;
@@ -152,6 +155,13 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
 
     if (assessmentConfig?.assessments) {
       for (const aCfg of assessmentConfig.assessments) {
+        // Skip assessments beyond the drill horizon — they appear in the table strip
+        // but are too far out to prioritize drills for now.
+        const aCfgDaysLeft = Math.ceil(
+          (new Date(aCfg.date + 'T12:00:00Z') - generatedAt) / MS_PER_DAY
+        );
+        if (aCfgDaysLeft > DRILL_HORIZON_DAYS) continue;
+
         let matchWeight = 0;
         for (const cat of categories) {
           if (aCfg.concept_weights?.[cat]) {
@@ -326,30 +336,11 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     review_video_url: reviewVideoUrl && reviewVideoUrl.length > 0 ? reviewVideoUrl : null,
   };
 
-  // Cache report.json alongside the PDF
+  // Write report.json — PDF is always generated via generateReportForToken so the
+  // real token URL is embedded (never the __token__ placeholder).
   fs.writeFileSync(reportJsonPath, JSON.stringify(reportData, null, 2));
 
-  // Render HTML and generate PDF via Puppeteer
-  const feedbackUrl = `${baseUrl}/feedback?token=__token__`;
-  const html = renderReportHtml(reportData, feedbackUrl);
-
-  const { default: puppeteer } = await import('puppeteer');
-  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    await page.pdf({
-      path: reportPdfPath,
-      format: 'Letter',
-      margin: { top: '0', right: '0', bottom: '0', left: '0' },
-      printBackground: true,
-      preferCSSPageSize: true,
-    });
-  } finally {
-    await browser.close();
-  }
-
-  return reportPdfPath;
+  return reportJsonPath;
 }
 
 // Convenience: generate report with the actual token URL substituted in.
