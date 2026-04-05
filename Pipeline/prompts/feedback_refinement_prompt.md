@@ -15,6 +15,9 @@ You are editing feedback explanations for a student programming assignment. Your
 - Error type facts: "the test threw AssertionError on runs 43–50", "the error message indicates a null value"
 - Outcome facts: "the test passed after run 51 and remained passing"
 
+**Additionally:**
+- Replace any em dash (—) with a comma, semicolon, or hyphen. Do not introduce new em dashes.
+
 **Keep all of the following unchanged:**
 - Specific run numbers
 - Line counts from diffs

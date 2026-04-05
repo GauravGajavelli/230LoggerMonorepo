@@ -115,10 +115,14 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
 
   const testCategoriesPath = path.join(repoRoot, 'Pipeline', 'assignments', `${assignment}_test_categories.json`);
   let testToCategories = null;
+  let categoryDescriptions = {};
   if (fs.existsSync(testCategoriesPath)) {
     try {
       const tc = JSON.parse(fs.readFileSync(testCategoriesPath, 'utf8'));
       testToCategories = tc.testToCategories || null;
+      for (const [k, v] of Object.entries(tc.categories || {})) {
+        categoryDescriptions[k] = v.description || k;
+      }
     } catch { /* degrade gracefully */ }
   }
 
@@ -207,6 +211,20 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
   for (const [id, entry] of assessmentMap.entries()) {
     if (id === '__none__' || !entry.config?.concept_weights) continue;
     entry.drills = dedupByPrimaryConcept(entry.drills, entry.config.concept_weights);
+    // Collect covered categories before stripping internal fields
+    const coveredCats = new Set();
+    for (const d of entry.drills) {
+      for (const cat of (d._categories || [])) coveredCats.add(cat);
+    }
+    // Uncovered concepts = concept_weights keys with no surviving drill
+    entry.uncoveredConcepts = Object.entries(entry.config.concept_weights || {})
+      .filter(([cat]) => !coveredCats.has(cat))
+      .map(([cat, w]) => ({
+        name: cat,
+        description: categoryDescriptions[cat] || cat,
+        weight_pct: Math.round(w * 100),
+      }))
+      .sort((a, b) => b.weight_pct - a.weight_pct);
     entry.rawOverlap = entry.drills.reduce((sum, d) => sum + (d._matchWeight || 0), 0);
     // Compute weight_pct from matchWeight, then strip internal tracking fields
     for (const d of entry.drills) {
@@ -246,6 +264,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         drill_count: drills.length,
         total_time: totalTime,
         drills,
+        uncovered_concepts: entry.uncoveredConcepts || [],
       };
     })
     .sort((a, b) => {

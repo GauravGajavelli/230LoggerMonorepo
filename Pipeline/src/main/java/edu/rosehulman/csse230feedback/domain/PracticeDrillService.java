@@ -403,6 +403,7 @@ public class PracticeDrillService {
             }
 
             intro = fixIntroTargetFile(intro, targetFile);
+            if (intro != null) intro = intro.replace("\u2014", "-");
 
             return new PracticeDrill(mode, timeEstimate, intro, testCode,
                 hints.isEmpty() ? null : hints,

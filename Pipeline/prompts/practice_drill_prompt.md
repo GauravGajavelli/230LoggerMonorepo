@@ -107,6 +107,7 @@ exam questions rather than simple assertion tests.
 8. The last statement inside the `@Test` method body must be `points += 1;`.
 9. Maximum 4 nodes in the test tree. Maximum 2 assert statements.
 10. The filename in the `intro` must exactly match the `targetFile` value from the input JSON. Never mention a different Java file in the intro.
+11. Do NOT use em dashes (—) in `intro` or `hints`. Use a comma, semicolon, colon, or hyphen instead.
 
 ---
 

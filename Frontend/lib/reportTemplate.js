@@ -79,7 +79,7 @@ function renderAssessmentTable(allAssessments) {
     const isExam = a.type === 'exam';
     const accentColor = isExam ? 'var(--accent-exam)' : 'transparent';
     const nameStyle = isExam
-      ? 'font-weight:600;font-family:\'Source Serif 4\',serif;color:var(--text-primary)'
+      ? 'font-weight:600;color:var(--text-primary)'
       : 'color:var(--text-tertiary)';
     const timeColor = isExam ? daysUrgencyColor(a.days_left) : 'var(--text-tertiary)';
     const hasBar = a.drill_count > 0;
@@ -89,7 +89,7 @@ function renderAssessmentTable(allAssessments) {
     const pctCell = hasBar && isExam ? `~${a.overlap_pct}%` : '';
     const drillCell = a.drill_count > 0
       ? `${a.drill_count} drill${a.drill_count !== 1 ? 's' : ''} · ${a.total_time} min`
-      : '—';
+      : '-';
     const daysCell = a.days_left > 0
       ? `<span style="color:${timeColor}">${timeDisplay(a.days_left)}</span>`
       : '';
@@ -115,7 +115,7 @@ function renderExamDrillCard(drill, assessment, num, urgencyColor, feedbackUrl) 
     + (extraCount > 0 ? ` <span class="muted">+${extraCount}</span>` : '');
 
   const introText = drill.drill_intro
-    ? drill.drill_intro.slice(0, 120) + (drill.drill_intro.length > 120 ? '…' : '')
+    ? drill.drill_intro.slice(0, 120) + (drill.drill_intro.length > 120 ? '...' : '')
     : null;
 
   const metaLine = `~${drill.time_min} min · do before ${escHtml(assessment.name)} · ~${drill.weight_pct}% ${weightLabel(assessment.type)}`;
@@ -126,10 +126,10 @@ function renderExamDrillCard(drill, assessment, num, urgencyColor, feedbackUrl) 
     try { smBase = new URL(feedbackUrl).origin + '/study-materials'; } catch {}
     const href = smBase + '/' + encodeStudyPath(drill.source_url);
     const label = drill.source_label || drill.source || 'source';
-    linksHtml += `<a class="drill-link" href="${escHtml(href)}" target="_blank">${escHtml(label)} →</a>`;
+    linksHtml += `<a class="drill-link" href="${escHtml(href)}" target="_blank">${escHtml(label)} -&gt;</a>`;
   }
   if (drill.drill_anchor) {
-    linksHtml += `<a class="drill-link" href="${escHtml(feedbackUrl)}#${escHtml(drill.drill_anchor)}">Open drill →</a>`;
+    linksHtml += `<a class="drill-link" href="${escHtml(feedbackUrl)}#${escHtml(drill.drill_anchor)}">Open drill -&gt;</a>`;
   }
 
   const alsoNote = drill.also_relevant_to
@@ -149,11 +149,33 @@ function renderExamDrillCard(drill, assessment, num, urgencyColor, feedbackUrl) 
     </div>`;
 }
 
-// Full exam drill column
-function renderExamColumn(a, feedbackUrl, isPrimary) {
+// "Also on this exam" section — concepts not covered by the student's drills
+function renderAlsoOnExam(assessment, feedbackUrl) {
+  const uncovered = (assessment.uncovered_concepts || []).filter(c => c.weight_pct > 0);
+  if (uncovered.length === 0) return '';
+
+  // Find a study material link from any drill in this assessment
+  const refDrill = assessment.drills.find(d => d.source_url);
+  let linkHtml = '';
+  if (refDrill?.source_url) {
+    let smBase = '/study-materials';
+    try { smBase = new URL(feedbackUrl).origin + '/study-materials'; } catch {}
+    const href = smBase + '/' + encodeStudyPath(refDrill.source_url);
+    const label = refDrill.source_label || refDrill.source || 'questions';
+    linkHtml = ` - <a class="exam-also-link" href="${escHtml(href)}" target="_blank">${escHtml(label)} -&gt;</a>`;
+  }
+
+  const topics = uncovered.map(c => `${escHtml(c.description)} (~${c.weight_pct}%)`).join(', ');
+  return `
+    <div class="exam-also">
+      <span class="exam-also-label">Also on ${escHtml(assessment.name)}:</span> ${topics}${linkHtml}
+    </div>`;
+}
+
+// Full exam drill column — single focal exam only
+function renderExamColumn(a, feedbackUrl) {
   const urgencyColor = barColor(a.overlap_pct);
-  const headerBorder = isPrimary ? `border-left:3px solid var(--accent-exam);padding-left:8px` : '';
-  const visibleDrills = a.drills.slice(0, 4);
+  const visibleDrills = a.drills.slice(0, 3);
   const hiddenCount = a.drills.length - visibleDrills.length;
 
   const drillCards = visibleDrills.map((d, i) =>
@@ -161,32 +183,34 @@ function renderExamColumn(a, feedbackUrl, isPrimary) {
   ).join('');
 
   const moreNote = hiddenCount > 0
-    ? `<div class="muted" style="font-size:11px;margin-top:4px">and ${hiddenCount} more — see feedback site</div>`
+    ? `<div class="muted" style="font-size:11px;margin-top:4px">and ${hiddenCount} more - see feedback site</div>`
     : '';
+
+  const alsoOnExam = renderAlsoOnExam(a, feedbackUrl);
 
   return `
     <div class="column">
-      <div class="col-header" style="${headerBorder}">
+      <div class="col-header" style="border-left:3px solid var(--accent-exam);padding-left:8px">
         ${escHtml(a.name)} · ${escHtml(dayLabel(a.date))}, ${escHtml(a.date_display)}
       </div>
       <div class="col-rule"></div>
-      ${drillCards}${moreNote}
+      ${drillCards}${moreNote}${alsoOnExam}
     </div>`;
 }
 
-// Compact homework zone row
+// Compact secondary zone row (non-focal exams + HW)
 function renderHwRow(a, feedbackUrl) {
-  const drillText = a.drill_count > 0
-    ? `${a.drill_count} drill${a.drill_count !== 1 ? 's' : ''} · ${a.total_time} min`
-    : 'no matched drills';
-  const linkHtml = a.drill_count > 0
-    ? `<a class="hw-link" href="${escHtml(feedbackUrl)}">see all drills →</a>`
+  const typeTag = a.type === 'exam'
+    ? `<span style="font-size:9px;letter-spacing:0.05em;color:var(--accent-exam);margin-right:4px">EXAM</span>`
     : '';
+  const drillText = `${a.drill_count} drill${a.drill_count !== 1 ? 's' : ''} · ${a.total_time} min`;
+  const overlapText = a.type === 'exam' && a.overlap_pct > 0 ? ` · ~${a.overlap_pct}% of exam` : '';
+  const linkHtml = `<a class="hw-link" href="${escHtml(feedbackUrl)}">see all -&gt;</a>`;
   return `
     <div class="hw-row">
-      <span class="hw-name">${escHtml(a.name)}</span>
+      ${typeTag}<span class="hw-name">${escHtml(a.name)}</span>
       <span class="hw-date">${escHtml(a.date_display)}</span>
-      <span class="hw-drills">${drillText}</span>
+      <span class="hw-drills">${drillText}${overlapText}</span>
       ${linkHtml}
     </div>`;
 }
@@ -210,14 +234,22 @@ export function renderReportHtml(reportData, feedbackUrl) {
   const examZone = exam_assessments ?? assessments?.filter(a => a.type === 'exam') ?? [];
   const hwZone   = hw_assessments   ?? assessments?.filter(a => a.type !== 'exam') ?? [];
 
-  // If no exam zone drills, promote highest-relevance HW assessment to exam zone
+  // Limit to ONE focal exam column — highest relevance exam with drills
   const examZoneWithDrills = examZone.filter(a => a.drill_count > 0);
-  let primaryExamAssessments = examZoneWithDrills.slice(0, 2);
-  let hwZoneToShow = hwZone.filter(a => a.drill_count > 0);
+  const focalExam = examZoneWithDrills[0] ?? null;
+  const hwWithDrills = hwZone.filter(a => a.drill_count > 0);
 
-  if (primaryExamAssessments.length === 0 && hwZoneToShow.length > 0) {
-    primaryExamAssessments = [hwZoneToShow[0]];
-    hwZoneToShow = hwZoneToShow.slice(1);
+  // If no exam has drills, promote highest-relevance HW to focal position
+  let focalAssessment = focalExam;
+  let secondaryAssessments; // all non-focal assessments with drills
+  if (focalExam) {
+    // Secondary = remaining exams + all HW with drills
+    secondaryAssessments = [...examZoneWithDrills.slice(1), ...hwWithDrills];
+  } else if (hwWithDrills.length > 0) {
+    focalAssessment = hwWithDrills[0];
+    secondaryAssessments = hwWithDrills.slice(1);
+  } else {
+    secondaryAssessments = [];
   }
 
   // All assessments for the table strip (exams first, then HW)
@@ -225,7 +257,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   const tableAssessments = allAssessments.length > 0 ? allAssessments : (assessments ?? []);
 
   // Framing sentence
-  const nearestExam = primaryExamAssessments[0];
+  const nearestExam = examZone.length > 0 ? examZone[0] : null;
   let framingSentence;
   if (nearestExam && review_video_url) {
     framingSentence = `Based on the <a href="${escHtml(review_video_url)}" style="color:var(--text-secondary);text-decoration:none">${escHtml(nearestExam.name)} review</a> (which covers the expected exam contents, with minor differences possible), these patterns from your submission are your highest-priority practice targets (${timeDisplay(nearestExam.days_left)} until ${escHtml(nearestExam.name)}).`;
@@ -238,16 +270,16 @@ export function renderReportHtml(reportData, feedbackUrl) {
   // Assessment table
   const tableHtml = renderAssessmentTable(tableAssessments);
 
-  // Exam drill columns
-  const examColumnsHtml = primaryExamAssessments.length > 0
-    ? `<div class="columns">${primaryExamAssessments.map((a, i) => renderExamColumn(a, feedbackUrl, i === 0)).join('')}</div>`
+  // Focal exam drill column
+  const examColumnHtml = focalAssessment
+    ? `<div class="columns">${renderExamColumn(focalAssessment, feedbackUrl)}</div>`
     : '';
 
-  // HW zone
-  const hwRowsHtml = hwZoneToShow.length > 0
+  // Secondary zone — all non-focal assessments with drills
+  const hwRowsHtml = secondaryAssessments.length > 0
     ? `<div class="hw-zone">
-        <div class="hw-zone-label">ALSO PREPARES YOU FOR UPCOMING HOMEWORK</div>
-        ${hwZoneToShow.map(a => renderHwRow(a, feedbackUrl)).join('')}
+        <div class="hw-zone-label">ALSO PREPARES YOU FOR</div>
+        ${secondaryAssessments.map(a => renderHwRow(a, feedbackUrl)).join('')}
       </div>`
     : '';
 
@@ -261,9 +293,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escHtml(assignment.full_name)} — Debugging Feedback</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<title>${escHtml(assignment.full_name)} - Debugging Feedback</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -274,18 +304,21 @@ export function renderReportHtml(reportData, feedbackUrl) {
     --border:          #d3d1c7;
     --bg-card:         #fafaf8;
     --accent-exam:     #4a6d8c;
-    --accent-hw:       #6b7c6b;
     --bar-fill:        #5576a6;
     --bar-track:       #e8e7e3;
   }
 
   @page { size: Letter; margin: 0; }
+  html {
+    height: 10.5in;
+    overflow: hidden;
+  }
   body {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 13px;
     color: var(--text-primary);
     background: #fff;
-    padding: 20px 28px;
+    padding: 14px 22px;
     max-width: 860px;
     margin: 0 auto;
     height: 10.5in;
@@ -294,37 +327,37 @@ export function renderReportHtml(reportData, feedbackUrl) {
 
   /* Header */
   .sys-label {
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-tertiary);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .assignment-name {
-    font-family: 'Source Serif 4', serif;
-    font-size: 22px;
-    font-weight: 600;
+    font-family: Georgia, 'Palatino Linotype', Palatino, serif;
+    font-size: 20px;
+    font-weight: bold;
     color: var(--text-primary);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .framing {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     line-height: 1.5;
   }
-  .header-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 14px; }
+  .header-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 8px; }
 
   /* Assessment table strip */
   .assessment-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     table-layout: fixed;
   }
   .assessment-table td {
-    font-size: 12px;
-    padding: 5px 8px;
+    font-size: 11px;
+    padding: 4px 6px;
     border-bottom: 1px solid var(--border);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -332,116 +365,131 @@ export function renderReportHtml(reportData, feedbackUrl) {
   }
   .arow-type   { width: 36px; font-size: 10px; letter-spacing: 0.06em; color: var(--text-tertiary); }
   .arow-name   { width: 130px; }
-  .arow-date   { width: 72px; color: var(--text-secondary); }
-  .arow-time   { width: 64px; font-size: 11px; }
-  .arow-bar    { width: 90px; }
-  .arow-pct    { width: 42px; font-size: 11px; font-variant-numeric: tabular-nums; }
-  .arow-drills { font-size: 11px; }
+  .arow-date   { width: 68px; color: var(--text-secondary); }
+  .arow-time   { width: 60px; font-size: 10px; }
+  .arow-bar    { width: 88px; }
+  .arow-pct    { width: 40px; font-size: 10px; font-variant-numeric: tabular-nums; }
+  .arow-drills { font-size: 10px; }
 
   .bar-track { height: 5px; background: var(--bar-track); border-radius: 3px; }
   .bar-fill  { height: 5px; border-radius: 3px; }
 
   /* Drill columns (exam zone) */
-  .columns { display: flex; gap: 24px; margin-bottom: 14px; flex-wrap: nowrap; }
+  .columns { display: flex; gap: 0; margin-bottom: 8px; }
   .column  { flex: 1; min-width: 0; }
   .col-header {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--accent-exam);
     letter-spacing: 0.04em;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
-  .col-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 10px; }
+  .col-rule { border: none; border-top: 1px solid var(--border); margin-bottom: 6px; }
 
   .drill-card {
     border: 1px solid var(--border);
     border-radius: 3px;
     background: var(--bg-card);
-    padding: 9px 11px;
-    margin-bottom: 7px;
+    padding: 7px 9px;
+    margin-bottom: 5px;
   }
   .drill-name {
-    font-family: 'Source Serif 4', serif;
-    font-size: 13px;
-    font-weight: 600;
+    font-family: Georgia, 'Palatino Linotype', Palatino, serif;
+    font-size: 12px;
+    font-weight: bold;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     line-height: 1.3;
   }
   .drill-num { font-variant-numeric: tabular-nums; margin-right: 4px; }
   .drill-intro {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-tertiary);
     font-style: italic;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     line-height: 1.4;
   }
-  .drill-tests { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+  .drill-tests { font-size: 10px; color: var(--text-secondary); margin-bottom: 3px; }
   .drill-tests code { background: #f0efeb; padding: 1px 3px; border-radius: 2px; font-size: 10px; }
-  .drill-meta  { font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
-  .drill-also  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; }
-  .drill-links { display: flex; gap: 10px; align-items: baseline; margin-top: 5px; flex-wrap: wrap; }
-  .drill-link  { font-size: 11px; color: var(--text-secondary); text-decoration: none; }
+  .drill-meta  { font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; }
+  .drill-also  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 3px; }
+  .drill-links { display: flex; gap: 10px; align-items: baseline; margin-top: 3px; flex-wrap: wrap; }
+  .drill-link  { font-size: 10px; color: var(--text-secondary); text-decoration: none; }
+
+  /* "Also on this exam" section */
+  .exam-also {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+    border-top: 1px solid var(--border);
+    padding-top: 5px;
+    line-height: 1.5;
+  }
+  .exam-also-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 9px;
+    color: var(--text-tertiary);
+  }
+  .exam-also-link { color: var(--text-secondary); text-decoration: none; }
 
   /* HW zone */
-  .hw-zone { margin-bottom: 14px; }
+  .hw-zone { margin-bottom: 8px; }
   .hw-zone-label {
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-tertiary);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .hw-row {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     align-items: baseline;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-tertiary);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
   .hw-name   { font-weight: 600; color: var(--text-secondary); }
-  .hw-date   { }
-  .hw-drills { }
-  .hw-link   { font-size: 11px; color: var(--text-secondary); text-decoration: none; }
+  .hw-link   { font-size: 10px; color: var(--text-secondary); text-decoration: none; }
 
   /* Fallback */
-  .fallback-header { font-size: 15px; color: var(--text-secondary); margin-bottom: 20px; }
+  .fallback-header { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
 
   /* Footer */
-  .footer { border-top: 1px solid var(--border); padding-top: 12px; }
-  .footer-summary { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: baseline; }
-  .footer-link    { display: block; font-size: 12px; color: var(--text-secondary); text-decoration: none; margin-bottom: 8px; }
-  .footer-privacy { font-size: 11px; color: var(--text-tertiary); line-height: 1.5; }
+  .footer { border-top: 1px solid var(--border); padding-top: 8px; }
+  .footer-summary { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: baseline; }
+  .footer-link    { display: block; font-size: 11px; color: var(--text-secondary); text-decoration: none; margin-bottom: 4px; }
+  .footer-privacy { font-size: 10px; color: var(--text-tertiary); line-height: 1.5; }
 
   .muted { color: var(--text-tertiary); }
 
   @media print {
-    body { padding: 20px 28px; }
-    .columns { flex-wrap: nowrap; }
+    html, body { overflow: hidden; }
   }
 </style>
 </head>
 <body>
 
-<div class="sys-label">CSSE 230 · Debugging Feedback</div>
+<div class="sys-label">CSSE 230 - Debugging Feedback</div>
 <div class="assignment-name">${escHtml(assignment.full_name)}</div>
 <div class="framing">${framingSentence}</div>
 <hr class="header-rule">
 
 ${noAssessmentHeader}
 ${tableHtml}
-${examColumnsHtml}
+${examColumnHtml}
 ${hwRowsHtml}
 
 <div class="footer">
   <div class="footer-summary">
     <span>${total_unique_drills} drill${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total</span>
-    ${generatedDate ? `<span style="font-size:10px;color:var(--text-tertiary)">Generated ${escHtml(generatedDate)}</span>` : ''}
+    ${generatedDate ? `<span style="font-size:9px;color:var(--text-tertiary)">Generated ${escHtml(generatedDate)}</span>` : ''}
   </div>
   <a class="footer-link" href="${escHtml(feedbackUrl)}">Open full feedback site</a>
   <div class="footer-privacy">
-    Drills are optional and supplement — not replace — your own review.<br>
+    Drills are optional and supplement, not replace, your own review.<br>
     Only you can see this feedback. Questions? gajavegs@rose-hulman.edu
   </div>
 </div>

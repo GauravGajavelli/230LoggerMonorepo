@@ -73,7 +73,8 @@ public class FeedbackRefinementService {
         // Merge back into original Feedback objects
         return feedbacks.stream()
             .map(fb -> {
-                String newExplanation = rewritten.get(fb.testId());
+                String raw = rewritten.get(fb.testId());
+                String newExplanation = raw != null ? raw.replace("\u2014", "-") : null;
                 if (newExplanation != null && !newExplanation.equals(fb.explanation())) {
                     return new Feedback(fb.testId(), fb.pattern(), fb.confidence(),
                         newExplanation, fb.nextSteps(), fb.diffs(), fb.relatedTestIds(),

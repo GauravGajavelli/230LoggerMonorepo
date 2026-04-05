@@ -37,6 +37,7 @@ Each test entry may include a `relatedTests` array listing test IDs that belong 
 - Keep language encouraging but direct. This is for a CS student, not a beginner.
 - Do NOT use the words "prolonged", "meaningfulness", or "struggle score". Instead of "prolonged struggle", prefer phrasing like "took several runs to resolve" or "required multiple attempts".
 - Do NOT include generic advice like "read the docs" or "ask your professor".
+- Do NOT use em dashes (—) anywhere in your output. Use a comma, semicolon, colon, or hyphen instead.
 
 **Never reference compilation errors in feedback.** If tests show ABORTED or ERROR status at some runs, do not tell the student to "fix compilation issues" — assume they already know how to compile their code. Treat those runs as non-informative runs where the test could not execute, not as bugs to fix. Feedback covers algorithmic correctness and test behavior only.
 
