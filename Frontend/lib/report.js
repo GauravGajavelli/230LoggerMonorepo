@@ -383,20 +383,27 @@ export async function generateReportForToken(studentId, assignment, token, dataD
     const reportData = JSON.parse(fs.readFileSync(reportJsonPath, 'utf8'));
     const html = renderReportHtml(reportData, feedbackUrl);
     const { default: puppeteer } = await import('puppeteer');
-    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',  // required on Linux: /dev/shm often too small for Chromium
+        '--disable-gpu',            // safe on headless servers; avoids GPU init failures
+      ],
+    });
     try {
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-      // Auto-scale if content overflows the 11in page height.
-      // Applies CSS zoom to the root element so everything scales proportionally.
-      await page.evaluate(() => {
-        const body = document.body;
-        const contentH = body.scrollHeight;
-        const pageH    = body.clientHeight; // set to 11in in CSS
-        if (contentH > pageH) {
-          const scale = Math.max(0.80, pageH / contentH);
-          document.documentElement.style.zoom = String(scale);
-        }
+      // Set viewport to Letter size at 96dpi so body.clientHeight reflects the
+      // CSS page height (11in = 1056px) rather than Puppeteer's default 600px.
+      await page.setViewport({ width: 816, height: 1056 });
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
+      // Measure content vs page; return scale as a number — no DOM mutation.
+      // Uses Puppeteer's native scale option rather than CSS zoom, which
+      // behaves inconsistently across platforms with preferCSSPageSize.
+      const pdfScale = await page.evaluate(() => {
+        const contentH = document.body.scrollHeight;
+        const pageH    = document.body.clientHeight; // = 1056 after setViewport
+        return contentH > pageH ? Math.max(0.80, pageH / contentH) : 1.0;
       });
       await page.pdf({
         path: reportPdfPath,
@@ -404,7 +411,11 @@ export async function generateReportForToken(studentId, assignment, token, dataD
         margin: { top: '0', right: '0', bottom: '0', left: '0' },
         printBackground: true,
         preferCSSPageSize: true,
+        scale: pdfScale,
       });
+    } catch (err) {
+      console.error('[report] Puppeteer PDF generation failed:', err.message);
+      throw err;
     } finally {
       await browser.close();
     }
