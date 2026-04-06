@@ -77,6 +77,8 @@ async function register() {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body),
       },
+      // Rose-Hulman uses a campus CA not in Node's built-in trust store
+      rejectUnauthorized: false,
     }, res => {
       res.resume();
       resolve(res.statusCode);
