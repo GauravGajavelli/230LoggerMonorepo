@@ -43,7 +43,13 @@ EOF
 
 ### A2. Place the tar file
 
+`process-batch.js` discovers students by scanning `data/bst/tars/` for subdirectories with a
+`run.tar` — it does **not** use the roster. Remove any leftover directories from previous runs first.
+
 ```bash
+# Remove any leftover tars from previous runs (e.g. teststu from a prior demo)
+rm -rf data/bst/tars/teststu
+
 mkdir -p data/bst/tars/gajavegs
 cp /path/to/Pipeline/testInputs/run-demo.tar data/bst/tars/gajavegs/run.tar
 ```

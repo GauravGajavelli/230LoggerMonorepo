@@ -14,7 +14,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import db from '../lib/db.js';
-import { generateReport } from '../lib/report.js';
+import { generateReport, generateReportForToken } from '../lib/report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // The pipeline JAR resolves prompt templates relative to cwd, which must be the repo root
@@ -97,11 +97,27 @@ for (const studentId of students) {
   try {
     await runPipelineForStudent(studentId); // top-level await — requires "type":"module"
     db.prepare("UPDATE pipeline_runs SET status='success',finished_at=datetime('now') WHERE id=?").run(runId);
-    // Generate PDF report (best-effort — don't fail the batch if report generation fails)
+    // Generate report.json, then PDF if a token exists in the DB.
+    // PDF is generated via generateReportForToken so the real token URL is embedded.
     try {
       await generateReport(studentId, assignment, DATA_DIR, BASE_URL);
     } catch (reportErr) {
-      console.warn(`  ⚠  ${studentId} report generation failed: ${reportErr.message}`);
+      console.warn(`  ⚠  ${studentId} report.json generation failed: ${reportErr.message}`);
+      console.warn(reportErr.stack);
+    }
+    const tokenRow = db.prepare(
+      "SELECT token FROM tokens WHERE student_id=? AND assignment=?"
+    ).get(studentId, assignment);
+    if (tokenRow) {
+      try {
+        await generateReportForToken(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
+        console.log(`     PDF generated with token`);
+      } catch (pdfErr) {
+        console.warn(`  ⚠  ${studentId} PDF generation failed: ${pdfErr.message}`);
+        console.warn(pdfErr.stack);
+      }
+    } else {
+      console.log(`     No token found for ${studentId}/${assignment} — skipping PDF (run generate-tokens.js first)`);
     }
     console.log(`  ✓  ${studentId}  (${Math.round((Date.now()-t0)/1000)}s)`);
     succeeded++;
