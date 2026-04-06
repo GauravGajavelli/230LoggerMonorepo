@@ -7,9 +7,9 @@
 # Usage (from repo root):
 #   bash Pipeline/scripts/e2e-wuas-mac.sh [test-student-id]
 #
-# Default test student: agneswang42
+# Default test student: plant4040  (has still-failing tests — most interesting for QA)
 
-STUDENT=${1:-agneswang42}
+STUDENT=${1:-plant4040}
 ASSIGNMENT=wuas
 DISPLAY_NAME="Warmup and Stretching"
 UBUNTU_HOST=csse@feedback

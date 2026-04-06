@@ -1,15 +1,26 @@
 #!/usr/bin/env bash
 # e2e-wuas-ubuntu.sh — WaS end-to-end test (Ubuntu server side)
 #
-# Covers the rerun path: frontend.json already exists from process-batch.js.
-# Steps: regenerate reports → pre-flight → queue dev email → verify delivery.
+# Default (rerun path): regenerate reports from existing frontend.json — no LLM calls.
+# With --fresh:         clear LLM cache + student output, re-run pipeline for one student.
 #
 # Usage (from repo root):
-#   bash Pipeline/scripts/e2e-wuas-ubuntu.sh [test-student-id]
+#   bash Pipeline/scripts/e2e-wuas-ubuntu.sh [--fresh] [test-student-id]
 #
-# Default test student: agneswang42
+# Default test student: plant4040  (has still-failing tests — most interesting for QA)
 
-STUDENT=${1:-agneswang42}
+FRESH=0
+STUDENT=""
+
+for arg in "$@"; do
+    if [ "$arg" = "--fresh" ]; then
+        FRESH=1
+    else
+        STUDENT="$arg"
+    fi
+done
+
+STUDENT=${STUDENT:-plant4040}
 ASSIGNMENT=wuas
 DISPLAY_NAME="Warmup and Stretching"
 PROD_URL=https://feedback.csse.rose-hulman.edu
@@ -17,6 +28,7 @@ DEV_EMAIL=gajavegs@rose-hulman.edu
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 FRONTEND="$REPO_ROOT/Frontend"
+LLM_CACHE="$REPO_ROOT/Pipeline/cache/llm"
 
 pass() { echo "  ✓  $*"; }
 fail() { echo "  ✗  $*" >&2; FAILURES=$((FAILURES+1)); }
@@ -26,20 +38,37 @@ FAILURES=0
 
 cd "$FRONTEND"
 
-# ── A5. Regenerate reports ────────────────────────────────────────────────────
+# ── A5. Pipeline / regenerate ─────────────────────────────────────────────────
 
-header "A5. Regenerate reports (rerun path — skips LLM)"
+if [ "$FRESH" -eq 1 ]; then
+    header "A5. Fresh run — clearing cache + output, re-running pipeline"
 
-if [ ! -f "data/$ASSIGNMENT/output/$STUDENT/frontend.json" ]; then
-    fail "No frontend.json for $STUDENT — run process-batch.js first"
-    exit 1
-fi
+    echo "  Clearing LLM cache…"
+    rm -rf "$LLM_CACHE"/*
+    echo "  Clearing output for $STUDENT…"
+    rm -rf "data/$ASSIGNMENT/output/$STUDENT"
 
-node scripts/regenerate-reports.js "$ASSIGNMENT"
-if [ $? -eq 0 ]; then
-    pass "regenerate-reports.js completed"
+    node scripts/process-batch.js "$ASSIGNMENT" "$DISPLAY_NAME"
+    if [ $? -eq 0 ]; then
+        pass "process-batch.js completed"
+    else
+        fail "process-batch.js failed"
+        exit 1
+    fi
 else
-    fail "regenerate-reports.js failed"
+    header "A5. Regenerate reports (rerun path — skips LLM)"
+
+    if [ ! -f "data/$ASSIGNMENT/output/$STUDENT/frontend.json" ]; then
+        fail "No frontend.json for $STUDENT — run process-batch.js first, or use --fresh"
+        exit 1
+    fi
+
+    node scripts/regenerate-reports.js "$ASSIGNMENT"
+    if [ $? -eq 0 ]; then
+        pass "regenerate-reports.js completed"
+    else
+        fail "regenerate-reports.js failed"
+    fi
 fi
 
 if [ -f "data/$ASSIGNMENT/output/$STUDENT/report.pdf" ]; then
@@ -57,7 +86,6 @@ fi
 
 header "C1. Pre-flight checks"
 
-# nginx / Express
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/api/health" 2>/dev/null || echo "000")
 if [ "$HTTP_STATUS" = "200" ]; then
     pass "Server reachable ($PROD_URL/api/health → 200)"
@@ -65,7 +93,6 @@ else
     fail "Server not reachable ($PROD_URL/api/health → $HTTP_STATUS)"
 fi
 
-# Relay registered
 RELAY_ROW=$(node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -81,7 +108,6 @@ else
     fail "No relay registered — Zenbook not connected"
 fi
 
-# Dev redirect set
 DEV_REDIRECT=$(grep -s EMAIL_DEV_REDIRECT .env | cut -d= -f2)
 if [ -n "$DEV_REDIRECT" ]; then
     pass "EMAIL_DEV_REDIRECT=$DEV_REDIRECT"
@@ -111,7 +137,7 @@ else
     fail "No token for $STUDENT/$ASSIGNMENT — run generate-tokens.js first"
 fi
 
-# ── C3. Check report HTTP ─────────────────────────────────────────────────────
+# ── C3. HTTP checks ───────────────────────────────────────────────────────────
 
 header "C3. HTTP check — report and feedback endpoints"
 
@@ -137,7 +163,6 @@ fi
 
 header "C4. Queue email (dev redirect → $DEV_EMAIL)"
 
-# Clear any prior queued email for this student/assignment
 node --input-type=module << EOF
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -153,7 +178,6 @@ else
     fail "queue-emails.js failed"
 fi
 
-# Inspect queued email
 EMAIL_ROW=$(node --input-type=module << EOF
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -166,7 +190,6 @@ EOF
 
 if [ -n "$EMAIL_ROW" ]; then
     SUBJECT=$(echo "$EMAIL_ROW" | node --input-type=module -e "
-import { createRequire } from 'module';
 process.stdin.setEncoding('utf8');
 let d=''; process.stdin.on('data',c=>d+=c);
 process.stdin.on('end',()=>{ try { console.log(JSON.parse(d).subject); } catch(e) { console.log('parse error'); } });
@@ -175,7 +198,6 @@ process.stdin.on('end',()=>{ try { console.log(JSON.parse(d).subject); } catch(e
     echo ""
     echo "Email body preview:"
     echo "$EMAIL_ROW" | node --input-type=module -e "
-import { createRequire } from 'module';
 process.stdin.setEncoding('utf8');
 let d=''; process.stdin.on('data',c=>d+=c);
 process.stdin.on('end',()=>{ try { const b=JSON.parse(d).body; console.log(b.slice(0,600)+'…'); } catch(e) {} });
