@@ -41,7 +41,7 @@ function sendViaOutlook({ recipient, subject, body }) {
       '$m   = $ol.CreateItem(0)',
       '$m.To                = $p.recipient',
       '$m.Subject           = $p.subject',
-      '$m.Body              = $p.body',
+      '$m.HTMLBody          = $p.body',
       '$m.DeleteAfterSubmit = $true',
       '$m.Send()',
     ].join('; ');

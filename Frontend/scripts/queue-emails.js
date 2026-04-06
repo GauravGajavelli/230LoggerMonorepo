@@ -64,69 +64,60 @@ if (!nearest) {
 const nearestAssessment = nearest.name;
 const assessmentDate    = nearest.date_display;
 
-// ── Template rendering ────────────────────────────────────────────────────────
+// ── Template rendering (HTML) ─────────────────────────────────────────────────
 
-const SEP        = '--------------------------------------------------';
-const BREADCRUMB = `2526S CSSE230 -> Debugging Feedback -> ${fullName}`;
-const AUTOMATED_FOOTER = [
-  '',
-  SEP,
-  'This email was sent automatically -- replies are not monitored.',
-  'For questions, contact gajavegs@rose-hulman.edu.',
-].join('\n');
+const FONT  = 'font-family: Arial, Helvetica, sans-serif;';
+const CRUMB = `2526S CSSE230 &rsaquo; Debugging Feedback &rsaquo; ${fullName}`;
+const HR    = '<hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">';
+const FOOTER_HTML = `
+  ${HR}
+  <p style="${FONT} font-size:12px; color:#888; margin:0;">
+    This email was sent automatically -- replies are not monitored.<br>
+    For questions, contact gajavegs@rose-hulman.edu.
+  </p>`;
+
+function wrap(inner) {
+  return `<div style="${FONT} font-size:14px; color:#333; max-width:600px; line-height:1.5;">
+  <p style="font-size:12px; color:#999; margin:0 0 4px;">${CRUMB}</p>
+  ${HR}
+  ${inner}
+  ${FOOTER_HTML}
+</div>`;
+}
 
 function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
   const fullSubject  = `CSSE 230 -- ${shortName} feedback available (${patternCount} patterns, ${nearestAssessment})`;
   const shortSubject = `CSSE 230 -- ${shortName} feedback available (${patternCount} patterns)`;
   const subject = fullSubject.length <= 60 ? fullSubject : shortSubject;
-  const body = [
-    BREADCRUMB,
-    SEP,
-    `Your debugging feedback for '${fullName}' has been`,
-    `processed. ${patternCount} patterns were identified, relevant to`,
-    `${nearestAssessment} (${assessmentDate}).`,
-    '',
-    'View your feedback summary (PDF):',
-    '',
-    reportLink,
-    '',
-    'Or open the interactive feedback site:',
-    '',
-    feedbackLink,
-    '',
-    'This feedback is private to you and is not shared with course staff.',
-    '',
-    'If links appear blank, connect to eduroam or the Rose-Hulman VPN.',
-    AUTOMATED_FOOTER,
-  ].join('\n');
+  const body = wrap(`
+    <p>Your debugging feedback for <strong>${fullName}</strong> has been processed.
+       ${patternCount} pattern${patternCount !== 1 ? 's were' : ' was'} identified,
+       relevant to ${nearestAssessment} (${assessmentDate}).</p>
+    <p><strong>View your feedback summary (PDF):</strong><br>
+       <a href="${reportLink}">${reportLink}</a></p>
+    <p><strong>Or open the interactive feedback site:</strong><br>
+       <a href="${feedbackLink}">${feedbackLink}</a></p>
+    <p>This feedback is private to you and is not shared with course staff.</p>
+    <p style="font-size:12px; color:#888;">
+       If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);
   return { subject, body };
 }
 
 function renderMissingTar(uploadLink, reportLink) {
   const subject = `CSSE 230 -- ${shortName} feedback: action needed`;
-  const body = [
-    BREADCRUMB,
-    SEP,
-    `Your debugging feedback for '${fullName}' could not`,
-    'be generated because no run.tar file was found in your',
-    'submission.',
-    '',
-    'If you have your run.tar file, you can upload it to get',
-    'personalized feedback -- focused on just your highest-priority',
-    'practice areas:',
-    '',
-    uploadLink,
-    ...(reportLink ? [
-      '',
-      'While you locate your file, here is an exam review guide',
-      `covering the key topics for ${nearestAssessment}:`,
-      '',
-      reportLink,
-    ] : []),
-    '',
-    'If links appear blank, connect to eduroam or the Rose-Hulman VPN.',
-    AUTOMATED_FOOTER,
-  ].join('\n');
+  const reviewSection = reportLink ? `
+    <p>While you locate your file, here is an exam review guide
+       covering the key topics for ${nearestAssessment}:<br>
+       <a href="${reportLink}">${reportLink}</a></p>` : '';
+  const body = wrap(`
+    <p>Your debugging feedback for <strong>${fullName}</strong> could not be generated
+       because no run.tar file was found in your submission.</p>
+    <p>If you have your run.tar file, you can upload it to get personalized feedback
+       -- focused on just your highest-priority practice areas:<br>
+       <a href="${uploadLink}">${uploadLink}</a></p>
+    ${reviewSection}
+    <p style="font-size:12px; color:#888;">
+       If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);
   return { subject, body };
 }
 
