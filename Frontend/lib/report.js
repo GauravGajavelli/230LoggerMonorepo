@@ -196,7 +196,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           _categories: categories,
           _matchWeight: matchWeight,
           _extraLinks: caForAssmt
-            .filter(ca => !ca.url?.toLowerCase().includes('solution'))
+            .filter(ca => ca.url && !ca.url.toLowerCase().includes('solution'))
             .map(ca => ({ url: ca.url, label: ca.label })),
           pattern_name: patternName(fb),
           time_min: time,
