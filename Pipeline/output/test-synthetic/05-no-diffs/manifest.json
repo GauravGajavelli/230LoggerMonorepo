@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "createdAtUtc" : "2026-04-06T07:03:33.072836Z",
+  "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/05-no-diffs",
+  "runTarPath" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/05-no-diffs/run.tar",
+  "runTarSha256" : "ddb46c4fe49db189702d4261c20a000ccfd1233dd40bb9d1222ead2e1b601a04",
+  "extractedFiles" : [ {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/test-synthetic/05-no-diffs/work/run_tar_extracted/testRunInfo.json",
+    "sizeBytes" : 128
+  } ],
+  "diffArchives" : [ ],
+  "warnings" : [ ]
+}

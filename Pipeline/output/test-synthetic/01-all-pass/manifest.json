@@ -1,0 +1,24 @@
+{
+  "schemaVersion" : 1,
+  "createdAtUtc" : "2026-04-06T07:03:31.074116Z",
+  "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/01-all-pass",
+  "runTarPath" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/01-all-pass/run.tar",
+  "runTarSha256" : "91dba04f1b65009e68bac4f3cca47c318b95c0a0ade33326418c9f3423f7c595",
+  "extractedFiles" : [ {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/test-synthetic/01-all-pass/work/run_tar_extracted/testRunInfo.json",
+    "sizeBytes" : 353
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/test-synthetic/01-all-pass/work/run_tar_extracted/diffs_0_.tar.zip",
+    "sizeBytes" : 408
+  } ],
+  "diffArchives" : [ {
+    "filename" : "diffs_0_.tar.zip",
+    "baselineRunNumber" : 0,
+    "sha256" : "d9ef4f31c9c2c574c74bee20998d48355363ef751f494bcb8a2222dec96ea45d",
+    "baselineCount" : 1,
+    "patchCount" : 2,
+    "minPatchRunNumber" : 1,
+    "maxPatchRunNumber" : 3
+  } ],
+  "warnings" : [ ]
+}

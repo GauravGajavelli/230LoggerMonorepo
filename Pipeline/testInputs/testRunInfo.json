@@ -1,0 +1,64 @@
+{
+  "schema_version" : 1.0,
+  "prevRunNumber" : 13,
+  "runTimes" : {
+    "1" : "2026-01-19 05:11:53.896",
+    "2" : "2026-01-19 05:14:59.214",
+    "3" : "2026-01-19 05:16:16.741",
+    "4" : "2026-01-19 05:18:31.582",
+    "5" : "2026-01-19 05:20:20.275",
+    "6" : "2026-01-19 06:01:54.902",
+    "7" : "2026-01-19 06:15:06.454",
+    "8" : "2026-01-19 06:20:44.085",
+    "9" : "2026-01-19 06:30:25.288",
+    "10" : "2026-01-19 06:31:31.825",
+    "11" : "2026-01-19 08:36:16.065",
+    "12" : "2026-01-19 08:36:32.986",
+    "13" : "2026-01-19 08:36:43.295"
+  },
+  "redactDiffs" : false,
+  "rebaselining" : false,
+  "prevBaselineRunNumber" : 13,
+  "skipLogging" : false,
+  "strikes" : {
+    "1" : false,
+    "2" : false,
+    "0" : false
+  },
+  "randomSeed" : 1044210940,
+  "BSTConcurrencyTesting" : {
+    "testRemoveInInOrderIterator()" : {
+      "1" : "FAILED: java.lang.Error: Unresolved compilation problems: \n\tThe method iterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method iterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method remove(int) is undefined for the type BinarySearchTree<Integer>\n"
+    },
+    "testRemoveConcurrentModifcationException()" : {
+      "1" : "FAILED: java.lang.Error: Unresolved compilation problems: \n\tThe method remove(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method remove(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method remove(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method preOrderIterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method preOrderIterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method remove(int) is undefined for the type BinarySearchTree<Integer>\n"
+    },
+    "testPreOrderIteratorConcurrentModificationException()" : {
+      "1" : "FAILED: java.lang.Error: Unresolved compilation problems: \n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method preOrderIterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method preOrderIterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method preOrderIterator() is undefined for the type BinarySearchTree<Integer>\n",
+      "11" : "FAILED: org.opentest4j.AssertionFailedError: Did not throw ConcurrentModificationException",
+      "12" : "FAILED: org.opentest4j.AssertionFailedError: Did not throw ConcurrentModificationException",
+      "13" : "FAILED: org.opentest4j.AssertionFailedError: Did not throw ConcurrentModificationException"
+    },
+    "testRemoveInPreOrderIterator()" : {
+      "1" : "FAILED: java.lang.Error: Unresolved compilation problems: \n\tThe method preOrderIterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method preOrderIterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method remove(int) is undefined for the type BinarySearchTree<Integer>\n"
+    },
+    "testIterator()" : {
+      "1" : "FAILED: java.lang.Error: Unresolved compilation problems: \n\tThe method iterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n\tThe method iterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method iterator() is undefined for the type BinarySearchTree<Integer>\n\tThe method insert(int) is undefined for the type BinarySearchTree<Integer>\n"
+    }
+  },
+  "toIgnore" : { },
+  "BSTTesting" : {
+    "testInsertInts()" : {
+      "2" : "FAILED: java.lang.UnsupportedClassVersionError: BinarySearchTree has been compiled by a more recent version of the Java Runtime (class file version 68.0), this version of the Java Runtime only recognizes class file versions up to 59.0",
+      "3" : "FAILED: java.lang.UnsupportedClassVersionError: BinarySearchTree has been compiled by a more recent version of the Java Runtime (class file version 68.0), this version of the Java Runtime only recognizes class file versions up to 59.0",
+      "4" : "FAILED: java.lang.UnsupportedClassVersionError: BinarySearchTree has been compiled by a more recent version of the Java Runtime (class file version 68.0), this version of the Java Runtime only recognizes class file versions up to 59.0",
+      "5" : "FAILED: java.lang.UnsupportedClassVersionError: BinarySearchTree has been compiled by a more recent version of the Java Runtime (class file version 68.0), this version of the Java Runtime only recognizes class file versions up to 59.0",
+      "6" : "FAILED: org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@79207381>",
+      "7" : "FAILED: org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@23f5b5dc>",
+      "8" : "FAILED: org.opentest4j.AssertionFailedError: expected: <[]> but was: <BinarySearchTree@3f4faf53>",
+      "9" : "FAILED: org.opentest4j.AssertionFailedError: expected: <[2, 4, 5, 7, 10]> but was: <[5, 2, 4, 7, 10]>",
+      "10" : "SUCCESSFUL",
+      "13" : "SUCCESSFUL"
+    }
+  }
+}

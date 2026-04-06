@@ -220,6 +220,22 @@
     ]
   },
   {
+    "id": "exam2practice-sproutToDepth",
+    "source": "Exam 2 practice",
+    "sourceLabel": "Practice Exam 2 (2020-21)",
+    "url": "Exams/Exam 2/Exam2-202110-computer.pdf",
+    "targetFile": "BSTTesting.java",
+    "categories": ["insert", "height"],
+    "timeEstimate": "~20 min",
+    "intro": "Add sproutToDepth(int d) to BinarySearchTree.java so that every null child slot of any pre-existing node at depth < d is replaced with a new node whose value equals its parent's value. Only existing nodes are visited — newly sprouted nodes do not themselves sprout children. Special case: calling sproutToDepth(0) on an empty tree creates a root with value 0. This is a 2020-21 practice Exam 2 question combining full-tree structural modification with a depth parameter. Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_sproutToDepth_singleAndThreeNode() {\n    BST<Integer> bst = new BST<>();\n    bst.add(3);\n    bst.sproutToDepth(1);\n    assertEquals(\"[3, 3, 3]\", bst.toString());\n    assertEquals(1, bst.height());\n    bst = new BST<>();\n    bst.add(5); bst.add(2); bst.add(6);\n    bst.sproutToDepth(2);\n    assertEquals(\"[2, 2, 2, 5, 6, 6, 6]\", bst.toString());\n    points += 1;\n}",
+    "hints": [
+      "Write a recursive helper sproutHelper(node, currentDepth, targetDepth): if node is NULL_NODE or currentDepth >= targetDepth, return immediately — there is nothing to sprout.",
+      "At each existing node, check the left child: if it is NULL_NODE, create new BinaryNode(node.data) and assign it (do NOT recurse into it); if it is not NULL_NODE, recurse into it with currentDepth+1. Do the same for right.",
+      "The public method handles the empty-tree special case: if targetDepth >= 0 and root == NULL_NODE, set root = new BinaryNode(0). Otherwise call sproutHelper(root, 0, targetDepth)."
+    ]
+  },
+  {
     "id": "final-countOddOnlyIf",
     "source": "Final Exam",
     "sourceLabel": "Final Exam - practice",

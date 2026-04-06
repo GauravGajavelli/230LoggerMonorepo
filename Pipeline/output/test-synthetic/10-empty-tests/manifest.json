@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "createdAtUtc" : "2026-04-06T07:03:35.389176Z",
+  "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/10-empty-tests",
+  "runTarPath" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/10-empty-tests/run.tar",
+  "runTarSha256" : "d59e36a817899f9305f6a5f2a34af33e2c880245e2aa6cb3172ae875142e3fda",
+  "extractedFiles" : [ {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/test-synthetic/10-empty-tests/work/run_tar_extracted/testRunInfo.json",
+    "sizeBytes" : 130
+  } ],
+  "diffArchives" : [ ],
+  "warnings" : [ ]
+}

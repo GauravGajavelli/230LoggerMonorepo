@@ -1,0 +1,12 @@
+{
+  "archives" : [ {
+    "filename" : "diffs_0_.tar.zip",
+    "baselineRunNumber" : 0,
+    "sha256" : "d9ef4f31c9c2c574c74bee20998d48355363ef751f494bcb8a2222dec96ea45d",
+    "baselineCount" : 1,
+    "patchCount" : 2,
+    "minPatchRunNumber" : 1,
+    "maxPatchRunNumber" : 3
+  } ],
+  "schemaVersion" : 1
+}

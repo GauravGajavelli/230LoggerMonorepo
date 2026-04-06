@@ -1,0 +1,24 @@
+{
+  "schemaVersion" : 1,
+  "createdAtUtc" : "2026-04-06T07:03:33.559145Z",
+  "repoRoot" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/06-file-too-large",
+  "runTarPath" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/synthetic/06-file-too-large/run.tar",
+  "runTarSha256" : "a9a06abb264f1098024e19f1003eeaac6e14260e63b14e5784cafac6d404845b",
+  "extractedFiles" : [ {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/test-synthetic/06-file-too-large/work/run_tar_extracted/testRunInfo.json",
+    "sizeBytes" : 128
+  }, {
+    "path" : "/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/output/test-synthetic/06-file-too-large/work/run_tar_extracted/diffs_0_.tar.zip",
+    "sizeBytes" : 349
+  } ],
+  "diffArchives" : [ {
+    "filename" : "diffs_0_.tar.zip",
+    "baselineRunNumber" : 0,
+    "sha256" : "534f7f1adf65057a46d39fd317aa8de0346e0da958230cf29e5aa29be4e50694",
+    "baselineCount" : 1,
+    "patchCount" : 1,
+    "minPatchRunNumber" : 1,
+    "maxPatchRunNumber" : 1
+  } ],
+  "warnings" : [ ]
+}

@@ -1,0 +1,2 @@
+{"runNumber":1,"tests":[{"testClassSimple":"BSTTest","testDisplayName":"testContains","testId":"BSTTest#testContains","status":"FAILED","cause":"AssertionError"},{"testClassSimple":"BSTTest","testDisplayName":"testInsert","testId":"BSTTest#testInsert","status":"SUCCESSFUL"}]}
+{"runNumber":2,"tests":[{"testClassSimple":"BSTTest","testDisplayName":"testInsert","testId":"BSTTest#testInsert","status":"SUCCESSFUL"}]}
