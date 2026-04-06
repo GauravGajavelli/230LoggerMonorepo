@@ -131,6 +131,9 @@ The server auto-creates all database tables (`tokens`, `email_queue`, `pipeline_
 
 ## Windows Zenbook — one-time setup
 
+The relay is now a Node.js server (`relay-server.js`) managed by pm2.
+`relay-server.ps1` is kept as a fallback but is no longer the primary relay.
+
 ### 1. Windows Update + Outlook
 
 - Run Windows Update to completion; reboot.
@@ -139,6 +142,7 @@ The server auto-creates all database tables (`tokens`, `email_queue`, `pipeline_
 - Disable sleep so the relay stays alive:
   **Settings → System → Power & sleep → Sleep → Never** (both battery and plugged-in).
 - Plug in the power adapter permanently.
+- Pause Windows auto-updates during active send windows (Settings → Windows Update → Pause).
 
 ### 2. Set system environment variables
 
@@ -147,44 +151,62 @@ The server auto-creates all database tables (`tokens`, `email_queue`, `pipeline_
 | Variable | Value |
 |---|---|
 | `FEEDBACK_SERVER_URL` | `https://feedback.csse.rose-hulman.edu` |
-| `RELAY_SECRET` | same 64-char hex as `RELAY_SECRET` in `.env` |
+| `RELAY_SECRET` | same 64-char hex as `RELAY_SECRET` in Ubuntu `.env` |
 
 Sign out and back in (or reboot) for the variables to take effect.
 
-### 3. URL reservation — run once as Administrator
+### 3. Install Node.js and pm2
+
+Node.js 22+ is required. Verify:
 
 ```powershell
-netsh http add urlacl url=http://+:3001/ user=ROSE-HULMAN\gajavegs
-# Expected: URL reservation successfully added
+node --version   # should print v22.x.x
 ```
 
-This allows the relay script to bind port 3001 without requiring an admin prompt on every run.
+Install pm2 globally:
 
-### 4. Task Scheduler entry
+```powershell
+npm install -g pm2
+npm install -g pm2-windows-startup
+```
 
-Open **Task Scheduler → Create Task:**
+### 4. Start the relay with pm2
 
-| Field | Value |
-|---|---|
-| Name | `CSSE230 Relay Server` |
-| Security options | Run only when user is logged on |
-| Trigger | At log on |
-| Action program | `powershell.exe` |
-| Arguments | `-WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\path\to\Frontend\scripts\relay-server.ps1"` |
-| Start in | `C:\path\to\Frontend\scripts\` |
-
-To test manually before setting up the scheduler:
+**Important:** Run PowerShell as your normal user (not Administrator). Outlook must be open and signed in first.
 
 ```powershell
 cd C:\path\to\230LoggerMonorepo\Frontend\scripts
-.\relay-server.ps1 -Port 3001 -ServerUrl https://feedback.csse.rose-hulman.edu
+pm2 start relay-server.js --name relay
+pm2 save
+pm2-startup install   # auto-starts pm2 (and the relay) on Windows login
 ```
 
-Expected output:
+Expected output after start:
 ```
-[relay] Outlook COM initialized
-[relay] Listening on http://+:3001/
-[relay] Registered with server (pending emails will be pushed)
+[relay] Listening on port 3001
+[relay] Registered with https://feedback.csse.rose-hulman.edu (HTTP 200)
+```
+
+To verify it's running:
+```powershell
+pm2 list
+pm2 logs relay --lines 20
+```
+
+### 5. Updating the relay after a git pull
+
+pm2 caches nothing — the script is read from disk on each start. After pulling:
+
+```powershell
+pm2 restart relay
+```
+
+If a restart doesn't take effect (e.g. the process was in a bad state):
+
+```powershell
+pm2 delete relay
+pm2 start relay-server.js --name relay
+pm2 save
 ```
 
 ---
@@ -211,7 +233,15 @@ node scripts/generate-tokens.js bst roster.dev.csv
 
 ### Step 3 — Confirm relay registration
 
-Start `relay-server.ps1` on the Zenbook, then on Ubuntu:
+Ensure the relay is running on the Zenbook (`pm2 list` should show `relay` as `online`),
+then on Ubuntu confirm it registered:
+
+```bash
+curl -s http://localhost:3000/api/health
+# → {"status":"ok","relayLastHeartbeat":"<recent timestamp>","demo":true,...}
+```
+
+Or query the DB directly:
 
 ```bash
 sqlite3 db/feedback.db \
@@ -219,8 +249,10 @@ sqlite3 db/feedback.db \
 # → <zenbook-ip>|3001|<recent timestamp>
 ```
 
-If the row is empty, the Zenbook has not registered yet. Check that
-`FEEDBACK_SERVER_URL` and `RELAY_SECRET` are set correctly on the Zenbook.
+If the heartbeat is stale or missing:
+- Check `pm2 logs relay` on the Zenbook for errors
+- Restart: `pm2 restart relay`
+- Verify `FEEDBACK_SERVER_URL` and `RELAY_SECRET` env vars are set on the Zenbook
 
 ### Step 4 — Seed a test frontend.json
 
@@ -304,14 +336,17 @@ node scripts/queue-nudges.js bst
 
 Before removing `EMAIL_DEV_REDIRECT` and sending to real students:
 
+- [ ] Run `bash Pipeline/scripts/e2e-wuas-ubuntu.sh` — all checks pass
 - [ ] Test email arrives at `gajavegs@rose-hulman.edu` with `[DEV →` prefix
 - [ ] PDF report downloads and renders correctly (assessment cards, days-left badge, drill columns)
-- [ ] Report link and feedback site link both resolve to `https://feedback.csse.rose-hulman.edu/…`
-- [ ] `relay_status` shows a recent `last_heartbeat` (Zenbook is alive)
+- [ ] Feedback site loads without white screen or console errors
+- [ ] Report and feedback links both resolve to `https://feedback.csse.rose-hulman.edu/…`
+- [ ] `relay_status` shows a recent `last_heartbeat` (`pm2 logs relay` on Zenbook is clean)
 - [ ] Zenbook sleep is disabled; power adapter is plugged in
-- [ ] Windows auto-updates paused for the April 6–10 exam window
+- [ ] Windows auto-updates paused for the send window
 - [ ] `EMAIL_DEV_REDIRECT` line removed (or commented out) from `.env`
-- [ ] Server restarted after `.env` change
+- [ ] `pm2 restart feedback` run on Ubuntu after `.env` change
+- [ ] `npm run build` run in `Frontend/` if React app was updated since last build
 
 ---
 
@@ -320,11 +355,12 @@ Before removing `EMAIL_DEV_REDIRECT` and sending to real students:
 ### Emails stuck in `pending`
 
 ```bash
-sqlite3 db/feedback.db "SELECT relay_ip, relay_port, last_heartbeat FROM relay_status;"
+curl -s http://localhost:3000/api/health | python3 -m json.tool
+# check relayLastHeartbeat
 ```
 
-- Empty row → Zenbook has never registered. Start `relay-server.ps1`.
-- Stale heartbeat → Zenbook went offline. Restart `relay-server.ps1`; it re-registers on startup and immediately flushes pending emails.
+- Stale or missing heartbeat → relay is offline. On Zenbook: `pm2 restart relay` or `pm2 logs relay` to see why it stopped.
+- Relay restarts automatically flush pending emails.
 
 ### Emails stuck in `sending`
 
@@ -347,13 +383,33 @@ sqlite3 db/feedback.db \
 
 ### Relay rejects with 401
 
-`RELAY_SECRET` on the Zenbook does not match `RELAY_SECRET` in Ubuntu `.env`. Update the Windows system environment variable and restart `relay-server.ps1`.
+`RELAY_SECRET` on the Zenbook does not match `RELAY_SECRET` in Ubuntu `.env`.
+Update the Windows system environment variable and restart: `pm2 restart relay`.
+
+### Relay drops after a few minutes
+
+This was a known issue with `relay-server.ps1` (PowerShell `HttpListener` instability).
+The Node.js relay (`relay-server.js`) managed by pm2 does not have this problem —
+pm2 will auto-restart it if it crashes. If drops persist, check `pm2 logs relay` for errors.
+
+### Feedback site shows white screen
+
+The React app needs to be (re)built:
+
+```bash
+cd ~/230LoggerMonorepo/Frontend && npm run build
+pm2 restart feedback
+```
 
 ### Report PDF is blank or missing assessment cards
 
-- Check `data/bst/output/<student_id>/frontend.json` exists and has a `feedback` array.
-- Check `data/bst/assessment-config.json` exists and has at least one assessment with `concept_weights`.
-- Delete `data/bst/output/<student_id>/report.json` and retry — this forces a full regeneration.
+- Check `data/{assignment}/output/{student_id}/frontend.json` exists and has a `feedback` array.
+- Check `Pipeline/assignments/{assignment}_assessment_config.json` exists with at least one assessment.
+- Delete `report.json` and retry — forces full regeneration:
+  ```bash
+  rm data/{assignment}/output/{student_id}/report.json
+  cd Frontend && node scripts/regenerate-reports.js {assignment}
+  ```
 
 ### Fallback: relay is down, emails must go out now
 

@@ -86,12 +86,12 @@ fi
 
 header "C1. Pre-flight checks"
 
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/api/health" 2>/dev/null; echo)
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/api/health" 2>/dev/null; echo)
 HTTP_STATUS=$(echo "$HTTP_STATUS" | tr -d '[:space:]')
 if [ "$HTTP_STATUS" = "200" ]; then
-    pass "Server reachable ($PROD_URL/api/health → 200)"
+    pass "Server reachable (localhost:3000/api/health → 200)"
 else
-    fail "Server not reachable ($PROD_URL/api/health → ${HTTP_STATUS:-000}) — is node server.js running?"
+    fail "Server not reachable (localhost:3000/api/health → ${HTTP_STATUS:-000}) — is node server.js running?"
 fi
 
 RELAY_ROW=$(node --input-type=module << 'EOF'
@@ -143,7 +143,7 @@ fi
 header "C3. HTTP check — report and feedback endpoints"
 
 if [ -n "$TOKEN" ]; then
-    REPORT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/report?token=$TOKEN" 2>/dev/null; echo)
+    REPORT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/report?token=$TOKEN" 2>/dev/null; echo)
     REPORT_STATUS=$(echo "$REPORT_STATUS" | tr -d '[:space:]')
     if [ "$REPORT_STATUS" = "200" ]; then
         pass "/report?token=… → 200"
@@ -151,7 +151,7 @@ if [ -n "$TOKEN" ]; then
         fail "/report?token=… → ${REPORT_STATUS:-000}"
     fi
 
-    FEEDBACK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/feedback?token=$TOKEN" 2>/dev/null; echo)
+    FEEDBACK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/feedback?token=$TOKEN" 2>/dev/null; echo)
     FEEDBACK_STATUS=$(echo "$FEEDBACK_STATUS" | tr -d '[:space:]')
     if [ "$FEEDBACK_STATUS" = "200" ]; then
         pass "/feedback?token=… → 200"

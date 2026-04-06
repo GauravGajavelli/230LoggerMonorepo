@@ -2,7 +2,14 @@
 
 Tests the full pipeline from a single `.tar` file through to a received email with working
 report and feedback links. Assumes setup in `deployment-test-guide.md` is complete
-(Ubuntu server running, nginx configured, JAR built, DB initialized, Zenbook relay registered).
+(Ubuntu server running via pm2, nginx configured, JAR built, DB initialized, Zenbook relay
+running via pm2 with `relay-server.js`).
+
+**For WaS batch testing use the automated scripts instead:**
+```bash
+bash Pipeline/scripts/e2e-wuas-ubuntu.sh          # Ubuntu side
+bash Pipeline/scripts/e2e-wuas-mac.sh             # Mac side
+```
 
 ---
 
@@ -246,24 +253,15 @@ All commands from `Frontend/` on Ubuntu.
 ### C1. Pre-flight
 
 ```bash
-# nginx + Express are up
-curl -s https://feedback.csse.rose-hulman.edu/api/relay/register \
-  -X POST \
-  -H "Authorization: Bearer $RELAY_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"port":3001}' | cat
-# → {"ok":true}
+# nginx + Express are up (check from Ubuntu — public domain won't loopback)
+curl -s http://localhost:3000/api/health
+# → {"status":"ok","relayLastHeartbeat":"<recent timestamp>","demo":true,...}
 
-# Zenbook is registered
-node --input-type=module << 'EOF'
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT relay_ip, relay_port, last_heartbeat FROM relay_status").get();
-db.close();
-console.log(row);
-EOF
-# → { relay_ip: '<zenbook-ip>', relay_port: 3001, last_heartbeat: <recent timestamp> }
+# Zenbook relay is registered and heartbeat is recent
+sqlite3 db/feedback.db \
+  "SELECT relay_ip, relay_port, last_heartbeat FROM relay_status;"
+# → <zenbook-ip>|3001|<recent timestamp>
+# If stale: on Zenbook run `pm2 restart relay`
 
 # Dev redirect is active
 grep EMAIL_DEV_REDIRECT .env
