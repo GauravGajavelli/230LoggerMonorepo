@@ -3,6 +3,7 @@ import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 import { AssignmentList } from './AssignmentList';
 import { DetailView } from './DetailView';
 import { ReplayModal } from './ReplayModal';
+import { eventTracker } from '../utils/eventTracker';
 
 /* ── Lock icon ── */
 const LockIcon = () => (
@@ -166,6 +167,11 @@ function NullFeedbackScreen({ error: apiError, token }) {
  */
 export function FeedbackApp({ token }) {
   const { loading, error, apiError, allRuns, frontendData } = usePlaybackDataContext();
+
+  // Fire once on mount — used to measure time-on-site and session starts
+  useEffect(() => {
+    eventTracker.track('page_view', {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep the page title in sync with the assignment name once data loads
   useEffect(() => {

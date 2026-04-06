@@ -182,8 +182,8 @@ function renderAlsoOnExam(assessment, feedbackUrl) {
 }
 
 // Full exam drill column — single focal exam only
-function renderExamColumn(a, feedbackUrl) {
-  const visibleDrills = a.drills.slice(0, 3);
+function renderExamColumn(a, feedbackUrl, drillCap = 3) {
+  const visibleDrills = a.drills.slice(0, drillCap);
   const hiddenCount = a.drills.length - visibleDrills.length;
 
   const drillSections = visibleDrills.map((d, i) =>
@@ -235,6 +235,8 @@ export function renderReportHtml(reportData, feedbackUrl) {
     total_time,
     generated_at,
     review_video_url,
+    generic,
+    drill_cap,
   } = reportData;
 
   const generatedDate = generated_at ? generated_at.slice(0, 10) : '';
@@ -267,7 +269,15 @@ export function renderReportHtml(reportData, feedbackUrl) {
   // Framing sentence
   const focalIsExam = focalAssessment?.type === 'exam';
   let framingSentence;
-  if (focalIsExam && review_video_url) {
+  if (generic) {
+    if (focalAssessment && review_video_url) {
+      framingSentence = `Here is an exam review guide based on the <a href="${escHtml(review_video_url)}" style="color:var(--text-secondary)">${escHtml(focalAssessment.name)} review video</a>. These drills cover the key topics for upcoming assessments.`;
+    } else if (focalAssessment) {
+      framingSentence = `Here is an exam review guide for ${escHtml(focalAssessment.name)} (${timeDisplay(focalAssessment.days_left)}). These drills cover the key topics for upcoming assessments.`;
+    } else {
+      framingSentence = `Here is a class-wide review guide covering the key topics for upcoming assessments.`;
+    }
+  } else if (focalIsExam && review_video_url) {
     framingSentence = `The <a href="${escHtml(review_video_url)}" style="color:var(--text-secondary)">${escHtml(focalAssessment.name)} review</a> covers the expected exam content (minor differences possible). These patterns from your submission are your highest-priority practice targets with ${timeDisplay(focalAssessment.days_left)} until ${escHtml(focalAssessment.name)}.`;
   } else if (focalAssessment) {
     framingSentence = `These patterns from your submission are your highest-priority practice targets (${timeDisplay(focalAssessment.days_left)} until ${escHtml(focalAssessment.name)}).`;
@@ -280,7 +290,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
 
   // Focal exam drill column
   const examColumnHtml = focalAssessment
-    ? `<div class="columns">${renderExamColumn(focalAssessment, feedbackUrl)}</div>`
+    ? `<div class="columns">${renderExamColumn(focalAssessment, feedbackUrl, drill_cap ?? 3)}</div>`
     : '';
 
   // Secondary zone
@@ -488,6 +498,9 @@ export function renderReportHtml(reportData, feedbackUrl) {
   /* Fallback */
   .fallback-header { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
 
+  /* Generic report notice */
+  .generic-notice { font-size: 10px; color: var(--text-tertiary); font-style: italic; margin-bottom: 14px; }
+
   /* Footer */
   .footer { border-top: 1px solid var(--border); padding-top: 14px; }
   .footer-summary { font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; display: flex; justify-content: space-between; align-items: baseline; }
@@ -508,18 +521,21 @@ export function renderReportHtml(reportData, feedbackUrl) {
 <div class="main-content">
 <div class="sys-label">CSSE 230 Debugging Feedback</div>
 <div class="assignment-name">${escHtml(assignment.full_name)}</div>
-<div class="framing">${framingSentence}</div>
+${total_unique_drills === 0
+  ? `<div class="framing">No persistent debugging patterns were detected in your submission. This may mean your test run history shows no repeated failures, or that your submission did not include enough run data to identify patterns. Open the feedback site for details.</div>
+<hr class="header-rule">`
+  : `<div class="framing">${framingSentence}</div>
 <hr class="header-rule">
-
+${generic ? '<div class="generic-notice">Class-wide review guide -- upload your run.tar at the feedback site for personalized feedback targeting your specific weak areas.</div>' : ''}
 ${noAssessmentHeader}
 ${tableHtml}
 ${examColumnHtml}
-${hwRowsHtml}
+${hwRowsHtml}`}
 </div>
 
 <div class="footer">
   <div class="footer-summary">
-    <span>${total_unique_drills} drill${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total</span>
+    <span>${total_unique_drills} ${generic ? 'topic' : 'drill'}${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total</span>
     ${generatedDate ? `<span style="font-size:9px;color:var(--text-tertiary)">Generated ${escHtml(generatedDate)}</span>` : ''}
   </div>
   <a class="footer-link" href="${escHtml(feedbackUrl)}">Open full feedback site &rsaquo;</a>

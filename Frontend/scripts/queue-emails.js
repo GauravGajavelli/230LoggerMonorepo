@@ -17,6 +17,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import db from '../lib/db.js';
+import { generateGenericReport } from '../lib/report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -65,18 +66,18 @@ const assessmentDate    = nearest.date_display;
 
 // ── Template rendering ────────────────────────────────────────────────────────
 
-const SEP        = '---------------------------------------------------------------------';
+const SEP        = '--------------------------------------------------';
 const BREADCRUMB = `2526S CSSE230 -> Debugging Feedback -> ${fullName}`;
 const AUTOMATED_FOOTER = [
   '',
   SEP,
-  'This email was sent automatically \u2014 replies are not monitored.',
+  'This email was sent automatically -- replies are not monitored.',
   'For questions, contact gajavegs@rose-hulman.edu.',
 ].join('\n');
 
 function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
-  const fullSubject  = `CSSE 230 \u2014 ${shortName} feedback available (${patternCount} patterns, ${nearestAssessment})`;
-  const shortSubject = `CSSE 230 \u2014 ${shortName} feedback available (${patternCount} patterns)`;
+  const fullSubject  = `CSSE 230 -- ${shortName} feedback available (${patternCount} patterns, ${nearestAssessment})`;
+  const shortSubject = `CSSE 230 -- ${shortName} feedback available (${patternCount} patterns)`;
   const subject = fullSubject.length <= 60 ? fullSubject : shortSubject;
   const body = [
     BREADCRUMB,
@@ -94,14 +95,15 @@ function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
     feedbackLink,
     '',
     'This feedback is private to you and is not shared with course staff.',
-    SEP,
+    '',
+    'If links appear blank, connect to eduroam or the Rose-Hulman VPN.',
     AUTOMATED_FOOTER,
   ].join('\n');
   return { subject, body };
 }
 
-function renderMissingTar(link) {
-  const subject = `CSSE 230 \u2014 ${shortName} feedback: action needed`;
+function renderMissingTar(uploadLink, reportLink) {
+  const subject = `CSSE 230 -- ${shortName} feedback: action needed`;
   const body = [
     BREADCRUMB,
     SEP,
@@ -109,12 +111,20 @@ function renderMissingTar(link) {
     'be generated because no run.tar file was found in your',
     'submission.',
     '',
-    'If you have your run.tar file, you can upload it to generate',
-    'feedback:',
+    'If you have your run.tar file, you can upload it to get',
+    'personalized feedback -- focused on just your highest-priority',
+    'practice areas:',
     '',
-    link,
+    uploadLink,
+    ...(reportLink ? [
+      '',
+      'While you locate your file, here is an exam review guide',
+      `covering the key topics for ${nearestAssessment}:`,
+      '',
+      reportLink,
+    ] : []),
     '',
-    SEP,
+    'If links appear blank, connect to eduroam or the Rose-Hulman VPN.',
     AUTOMATED_FOOTER,
   ].join('\n');
   return { subject, body };
@@ -152,8 +162,8 @@ for (const { token, student_id, email } of tokenRows) {
     continue;
   }
 
-  const feedbackLink = `${BASE_URL}/feedback?token=${token}`;
-  const reportLink   = `${BASE_URL}/report?token=${token}`;
+  const feedbackLink   = `${BASE_URL}/feedback?token=${token}`;
+  const studentReportLink = `${BASE_URL}/report?token=${token}`;
   let subject, body;
 
   if (emailType === 'feedback_ready') {
@@ -165,12 +175,19 @@ for (const { token, student_id, email } of tokenRows) {
         patternCount = data.feedback?.length || 0;
       } catch { /* leave patternCount = 0 */ }
     }
-    ({ subject, body } = renderFeedbackReady(patternCount, reportLink, feedbackLink));
+    ({ subject, body } = renderFeedbackReady(patternCount, studentReportLink, feedbackLink));
     console.log(`  [feedback_ready] ${student_id} → ${email} (${patternCount} patterns)`);
     feedbackQueued++;
   } else {
-    ({ subject, body } = renderMissingTar(feedbackLink));
-    console.log(`  [missing_tar]    ${student_id} → ${email}`);
+    let genericReportLink = null;
+    try {
+      const reportPath = await generateGenericReport(student_id, assignment, token, DATA_DIR, BASE_URL);
+      if (reportPath) genericReportLink = studentReportLink;
+    } catch (err) {
+      console.warn(`  [warn] Generic report failed for ${student_id}: ${err.message}`);
+    }
+    ({ subject, body } = renderMissingTar(feedbackLink, genericReportLink));
+    console.log(`  [missing_tar]    ${student_id} → ${email}${genericReportLink ? ' (+ review guide)' : ''}`);
     missingQueued++;
   }
 

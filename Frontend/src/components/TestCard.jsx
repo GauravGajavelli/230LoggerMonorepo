@@ -116,9 +116,18 @@ function TestSourceModal({ testSource, onClose }) {
 }
 
 /* ── Practice drill modal ── */
-function PracticeDrillModal({ drill, onClose }) {
+function PracticeDrillModal({ drill, testId, onClose }) {
   const [hintsOpen, setHintsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const openedAt = useRef(Date.now());
+
+  const handleClose = useCallback(() => {
+    eventTracker.track('drill_closed', {
+      test_id: testId,
+      seconds: Math.round((Date.now() - openedAt.current) / 1000),
+    });
+    onClose();
+  }, [onClose, testId]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -126,15 +135,16 @@ function PracticeDrillModal({ drill, onClose }) {
   }, []);
 
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e) => { if (e.key === 'Escape') handleClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
+  }, [handleClose]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(drill.testCode || '').then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      eventTracker.track('drill_copy', { test_id: testId });
     });
   };
 
@@ -142,7 +152,7 @@ function PracticeDrillModal({ drill, onClose }) {
 
   return (
     <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: 50,
         background: 'rgba(15,23,42,.55)',
@@ -195,7 +205,7 @@ function PracticeDrillModal({ drill, onClose }) {
             )}
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               background: 'none', border: '1px solid rgba(255,255,255,.4)',
               color: '#fff', padding: '3px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 13,
@@ -254,7 +264,11 @@ function PracticeDrillModal({ drill, onClose }) {
           {drill.hints && drill.hints.length > 0 && (
             <div style={{ border: '1px solid #E2E8F0', borderRadius: 8, overflow: 'hidden' }}>
               <button
-                onClick={() => setHintsOpen(h => !h)}
+                onClick={() => {
+                  const next = !hintsOpen;
+                  setHintsOpen(next);
+                  if (next) eventTracker.track('hint_revealed', { test_id: testId });
+                }}
                 style={{
                   all: 'unset', display: 'flex', alignItems: 'center', gap: 6,
                   width: '100%', padding: '8px 14px', cursor: 'pointer',
@@ -966,7 +980,7 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
 
           {/* Practice drill modal */}
           {showDrill && test.drills?.[0] && (
-            <PracticeDrillModal drill={test.drills[0]} onClose={closeDrill} />
+            <PracticeDrillModal drill={test.drills[0]} testId={test.id} onClose={closeDrill} />
           )}
         </div>
       )}

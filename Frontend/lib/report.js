@@ -27,6 +27,17 @@ import { renderReportHtml } from './reportTemplate.js';
 
 const TYPE_PRIORITY = { exam: 3, assignment: 2, homework: 1 };
 
+const CATEGORY_LABELS = {
+  anagram:          'Anagram Detection',
+  priorityQueue:    'Priority Queue',
+  binarySearch:     'Binary Search',
+  euclid:           "Euclid's Algorithm",
+  ngramCounting:    'N-gram Counting',
+  comparable:       'Comparable / Sorting',
+  sortedLinkedList: 'Sorted Linked List',
+  treeSet:          'TreeSet / BST',
+};
+
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 // Assessments further out than this get no drill assignments (still appear in the table strip).
@@ -201,7 +212,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           pattern_name: patternName(fb),
           time_min: time,
           test_names: testNames(fb),
-          drill_anchor: drillAnchor(fb),
+          drill_anchor: drill ? drillAnchor(fb) : null,
           source: drill?.source || null,
           source_url: sourceUrl,
           source_label: sourceLabel,
@@ -429,4 +440,149 @@ export async function generateReportForToken(studentId, assignment, token, dataD
 
   await generateReport(studentId, assignment, dataDir, baseUrl);
   return generateReportForToken(studentId, assignment, token, dataDir, baseUrl);
+}
+
+/**
+ * Generates a class-wide "exam review guide" PDF for students who have no run.tar.
+ * Drills are assigned by concept_weight (highest first) rather than by student feedback.
+ * Returns the report PDF path, or null if the assessment config is missing.
+ */
+export async function generateGenericReport(studentId, assignment, token, dataDir, baseUrl) {
+  const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+  const assessmentCfgPath  = path.join(repoRoot, 'Pipeline', 'assignments', `${assignment}_assessment_config.json`);
+  const drillQuestionsPath = path.join(repoRoot, 'Pipeline', 'assignments', `${assignment}_drill_questions.json`);
+
+  if (!fs.existsSync(assessmentCfgPath)) return null;
+  const assessmentConfig = JSON.parse(fs.readFileSync(assessmentCfgPath, 'utf8'));
+
+  const drillQuestions = fs.existsSync(drillQuestionsPath)
+    ? JSON.parse(fs.readFileSync(drillQuestionsPath, 'utf8'))
+    : [];
+
+  // Build category → drills[] map
+  const drillsByCategory = new Map();
+  for (const drill of drillQuestions) {
+    for (const cat of (drill.categories || [])) {
+      if (!drillsByCategory.has(cat)) drillsByCategory.set(cat, []);
+      drillsByCategory.get(cat).push(drill);
+    }
+  }
+
+  const now = new Date();
+  const fullName      = assessmentConfig.full_name  || assignment;
+  const shortName     = assessmentConfig.short_name || assignment;
+  const reviewVideoUrl = assessmentConfig.review_video_url || null;
+  const feedbackUrl   = `${baseUrl}/feedback?token=${token}`;
+
+  const assessmentEntries = [];
+  for (const aCfg of (assessmentConfig.assessments || [])) {
+    const daysLeft = Math.ceil((new Date(aCfg.date + 'T12:00:00Z') - now) / MS_PER_DAY);
+    if (daysLeft > DRILL_HORIZON_DAYS) continue;
+
+    const drillsForAssmt = [];
+    const uncoveredConcepts = [];
+
+    // Sort concept_weights descending so highest-weight categories get drills first
+    const sortedConcepts = Object.entries(aCfg.concept_weights || {})
+      .sort(([, a], [, b]) => b - a);
+
+    for (const [category, weight] of sortedConcepts) {
+      if (weight <= 0) continue;
+      const candidates = drillsByCategory.get(category) || [];
+      if (candidates.length === 0) {
+        uncoveredConcepts.push({ name: category, weight_pct: Math.round(weight * 100) });
+        continue;
+      }
+      drillsForAssmt.push({
+        pattern_name: CATEGORY_LABELS[category] ?? category,
+        time_min:     estimateTime(candidates[0]),
+        test_names:   [],
+        weight_pct:   Math.round(weight * 100),
+        source:       candidates[0].source   || null,
+        source_url:   candidates[0].sourceUrl || null,
+        source_label: candidates[0].source   || null,
+        drill_anchor: null,
+        also_relevant_to: null,
+      });
+    }
+
+    const totalTime  = drillsForAssmt.reduce((s, d) => s + d.time_min, 0);
+    const overlapPct = Math.min(100, drillsForAssmt.reduce((s, d) => s + d.weight_pct, 0));
+    const gradeWeight   = aCfg.grade_weight ?? (aCfg.type === 'exam' ? 0.10 : 0.035);
+    const relevanceScore = (overlapPct / 100) * gradeWeight * urgencyFactor(daysLeft);
+
+    assessmentEntries.push({
+      id: aCfg.id, name: aCfg.name, date: aCfg.date,
+      date_display: aCfg.date_display, type: aCfg.type,
+      days_left: daysLeft, relevance_score: relevanceScore,
+      overlap_pct: overlapPct, drill_count: drillsForAssmt.length,
+      total_time: totalTime, drills: drillsForAssmt,
+      uncovered_concepts: uncoveredConcepts, all_links: [],
+    });
+  }
+
+  assessmentEntries.sort((a, b) => {
+    if (Math.abs(b.relevance_score - a.relevance_score) > 1e-9)
+      return b.relevance_score - a.relevance_score;
+    const dateDiff = new Date(a.date) - new Date(b.date);
+    if (dateDiff !== 0) return dateDiff;
+    return (TYPE_PRIORITY[b.type] || 0) - (TYPE_PRIORITY[a.type] || 0);
+  });
+
+  const seen = new Set();
+  let totalUniqueDrills = 0, totalTime = 0;
+  for (const a of assessmentEntries) {
+    for (const d of a.drills) {
+      if (!seen.has(d.pattern_name)) {
+        seen.add(d.pattern_name);
+        totalUniqueDrills++;
+        totalTime += d.time_min;
+      }
+    }
+  }
+
+  const reportData = {
+    student_id: studentId,
+    assignment: { full_name: fullName, short_name: shortName },
+    assessments:      assessmentEntries,
+    exam_assessments: assessmentEntries.filter(a => a.type === 'exam'),
+    hw_assessments:   assessmentEntries.filter(a => a.type !== 'exam'),
+    total_unique_drills: totalUniqueDrills,
+    total_time: totalTime,
+    generated_at: now.toISOString(),
+    review_video_url: reviewVideoUrl && reviewVideoUrl.length > 0 ? reviewVideoUrl : null,
+    generic:   true,
+    drill_cap: 4,
+  };
+
+  const outputDir    = path.join(dataDir, assignment, 'output', studentId);
+  fs.mkdirSync(outputDir, { recursive: true });
+  const reportPdfPath = path.join(outputDir, 'report.pdf');
+
+  const html = renderReportHtml(reportData, feedbackUrl);
+  const { default: puppeteer } = await import('puppeteer');
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 816, height: 1056 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+    const pdfScale = await page.evaluate(() => {
+      const PAGE_H = 1056;
+      const contentH = document.body.scrollHeight;
+      return contentH > PAGE_H ? Math.max(0.80, PAGE_H / contentH) : 1.0;
+    });
+    await page.pdf({
+      path: reportPdfPath, format: 'Letter',
+      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+      printBackground: true, preferCSSPageSize: true, scale: pdfScale,
+    });
+  } catch (err) {
+    console.error('[report] Generic report PDF generation failed:', err.message);
+    throw err;
+  } finally {
+    await browser.close();
+  }
+  return reportPdfPath;
 }
