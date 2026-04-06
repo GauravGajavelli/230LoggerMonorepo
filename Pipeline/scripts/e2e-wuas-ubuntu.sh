@@ -167,7 +167,7 @@ node --input-type=module << EOF
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-db.prepare("DELETE FROM email_queue WHERE assignment=? AND student_id=?").run('$ASSIGNMENT', '$STUDENT');
+db.prepare("DELETE FROM email_queue WHERE assignment=? AND token IN (SELECT token FROM tokens WHERE student_id=? AND assignment=?)").run('$ASSIGNMENT', '$STUDENT', '$ASSIGNMENT');
 db.close();
 EOF
 
@@ -182,7 +182,7 @@ EMAIL_ROW=$(node --input-type=module << EOF
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT subject, body FROM email_queue WHERE assignment=? AND student_id=? ORDER BY id DESC LIMIT 1").get('$ASSIGNMENT', '$STUDENT');
+const row = db.prepare("SELECT eq.subject, eq.body FROM email_queue eq JOIN tokens t ON eq.token=t.token WHERE eq.assignment=? AND t.student_id=? ORDER BY eq.id DESC LIMIT 1").get('$ASSIGNMENT', '$STUDENT');
 db.close();
 if (row) { process.stdout.write(JSON.stringify(row)); } else { process.stdout.write(''); }
 EOF
@@ -217,7 +217,7 @@ for i in 1 2 3; do
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT status, sent_at, error_msg FROM email_queue WHERE assignment=? AND student_id=? ORDER BY id DESC LIMIT 1").get('$ASSIGNMENT', '$STUDENT');
+const row = db.prepare("SELECT eq.status, eq.sent_at, eq.error_msg FROM email_queue eq JOIN tokens t ON eq.token=t.token WHERE eq.assignment=? AND t.student_id=? ORDER BY eq.id DESC LIMIT 1").get('$ASSIGNMENT', '$STUDENT');
 db.close();
 process.stdout.write(row ? JSON.stringify(row) : '');
 EOF
