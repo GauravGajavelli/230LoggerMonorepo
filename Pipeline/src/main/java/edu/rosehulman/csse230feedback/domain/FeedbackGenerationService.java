@@ -143,6 +143,9 @@ public class FeedbackGenerationService {
         // Parse response into Feedback records (includes per-diff notes)
         ParseResult parseResult = parseFeedbackResponse(response.content());
         List<Feedback> feedbackList = parseResult.feedbackList();
+        System.out.println("  LLM response: finish_reason=" + response.finishReason()
+            + ", tokens=" + (response.usage() != null ? response.usage().completionTokens() : "?")
+            + ", parsed=" + feedbackList.size() + " item(s)");
         Map<String, List<String>> diffNotesByTestId = parseResult.diffNotes();
 
         // Attach pre-built diffs (annotated with LLM notes) and relatedTestIds to each Feedback item

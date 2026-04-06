@@ -455,7 +455,7 @@ public class PrepareService {
                     if (!feedback.isEmpty()) {
                         feedback = refiner.refine(feedback,
                             llmService.stats().totalRequests() + 1, totalRequestsEstimate);
-                        System.out.println("Refinement pass complete"
+                        System.out.println("Refinement pass complete: " + feedback.size() + " item(s)"
                             + (attempt > 1 ? " (attempt " + attempt + ")" : ""));
                     }
 

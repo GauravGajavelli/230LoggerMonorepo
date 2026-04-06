@@ -26,7 +26,7 @@ All commands in this section run from `Frontend/` on Ubuntu.
 ```bash
 # Clear pipeline outputs
 rm -rf data/bst/output/gajavegs
-rm -rf Pipeline/cache/llm/*
+rm -rf ../Pipeline/cache/llm/*
 
 # Clear DB state for gajavegs/bst
 node --input-type=module << 'EOF'
@@ -73,9 +73,10 @@ The only way tokens change is if `SECRET_KEY` changes in `.env`.
 node scripts/process-batch.js bst "Binary Search Tree"
 ```
 
-Runs ingest → prepare → generateReport for `gajavegs`. Expect:
+Runs ingest → prepare → generateReport for `gajavegs`. Since A3 generated the token first,
+`process-batch.js` also generates the PDF via `generateReportForToken`. Expect:
 - First run: ~1–3 min (LLM calls); subsequent runs near-instant (cached)
-- Success log: `  ✓  gajavegs  (Ns)`
+- Success log: `  ✓  gajavegs  (Ns)` followed by `     PDF generated with token`
 
 Verify outputs:
 
@@ -84,13 +85,12 @@ ls data/bst/output/gajavegs/
 # frontend.json  report.json  report.pdf  (plus ingest artifacts)
 ```
 
-**Note:** `report.pdf` is generated here by `process-batch.js` calling `generateReport`.
-The PDF at this point has a placeholder/empty token in the feedback URL unless
-`process-batch.js` also calls `generateReportForToken`. Regenerate via A5 to be sure.
+If `report.pdf` is missing (e.g. A3 was skipped, or you need to regenerate after a URL change),
+run A5.
 
 ### A5. Regenerate the PDF with the real token
 
-This ensures the "Open drill" links in the PDF use the real token, not a placeholder:
+Only needed if A4 didn't produce a PDF, or you want to force-regenerate with `BASE_URL` changes:
 
 ```bash
 export TOKEN=$(node --input-type=module << 'EOF'
@@ -221,7 +221,7 @@ re-run the pipeline on Ubuntu with a cleared LLM cache:
 
 ```bash
 # On Ubuntu — clear cache, delete all outputs, re-run pipeline
-rm -rf Pipeline/cache/llm/*
+rm -rf ../Pipeline/cache/llm/*
 rm -rf data/bst/output/gajavegs/
 node scripts/process-batch.js bst "Binary Search Tree"
 
@@ -362,7 +362,7 @@ open "http://localhost:3000/report?token=$TOKEN"
 
 **Drill intros / assessment config changes** (Ubuntu — re-runs pipeline with fresh LLM calls):
 ```bash
-rm -rf Pipeline/cache/llm/*
+rm -rf ../Pipeline/cache/llm/*
 rm -rf data/bst/output/gajavegs/
 node scripts/process-batch.js bst "Binary Search Tree"
 # Then rsync to Mac and delete report.json/report.pdf as in B6
@@ -408,7 +408,7 @@ db.close();
 console.log('DB cleared for bst');
 EOF
 rm -rf data/bst/output/gajavegs
-rm -rf Pipeline/cache/llm/*
+rm -rf ../Pipeline/cache/llm/*
 # Then repeat from A2
 ```
 
