@@ -39,6 +39,18 @@ demo-full-cached: build
 setup-wuas-batch:
 	bash Pipeline/scripts/setup-wuas-batch.sh
 
+# Regenerate report.json + PDF for all wuas students (skips LLM — reuses existing frontend.json)
+regenerate-wuas-reports:
+	cd Frontend && node scripts/regenerate-reports.js wuas
+
+# WaS e2e test — Ubuntu side (regenerate reports, pre-flight, queue dev email, verify delivery)
+e2e-wuas-ubuntu:
+	bash Pipeline/scripts/e2e-wuas-ubuntu.sh
+
+# WaS e2e test — Mac side (rsync from Ubuntu, local server, open report + feedback)
+e2e-wuas-mac:
+	bash Pipeline/scripts/e2e-wuas-mac.sh
+
 # Run all tests: JUnit unit tests + ingest integration tests
 test: test-unit test-ingest
 

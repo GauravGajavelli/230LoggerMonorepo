@@ -10,7 +10,7 @@
 
 ## Week 2
 
-- **Monday, March 16, 2026:** (4) MCSS Fast! — Warmup due
+- **Monday, March 16, 2026:** (4) MCSS Fast! — Warmup And Stretching (WuaS) due
 - **Wednesday, March 18, 2026:** (5) ADT Overview — StacksQueues Design due
 - **Friday, March 20, 2026:** (6) Intro to Trees — HW2 due
 

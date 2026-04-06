@@ -1,0 +1,70 @@
+{
+  "assignment": "Warmup and Stretching",
+  "short_name": "WaS",
+  "full_name": "Warmup and Stretching",
+  "review_video_url": null,
+  "assessments": [
+    {
+      "id": "exam_2",
+      "name": "Exam 2",
+      "date": "2026-04-10",
+      "date_display": "April 10",
+      "type": "exam",
+      "grade_weight": 0.07,
+      "concept_weights": {
+        "binarySearch":    0.12,
+        "sortedLinkedList": 0.06,
+        "comparable":      0.08,
+        "treeSet":         0.04
+      }
+    },
+    {
+      "id": "hw5",
+      "name": "HW5",
+      "date": "2026-04-10",
+      "date_display": "April 10",
+      "type": "homework",
+      "grade_weight": 0.035,
+      "concept_weights": {
+        "binarySearch":    0.08,
+        "sortedLinkedList": 0.05
+      }
+    },
+    {
+      "id": "editor_trees_m1",
+      "name": "ET1",
+      "date": "2026-04-20",
+      "date_display": "April 20",
+      "type": "homework",
+      "grade_weight": 0.04,
+      "concept_weights": {
+        "comparable":      0.06,
+        "sortedLinkedList": 0.04
+      }
+    },
+    {
+      "id": "hw6",
+      "name": "HW6",
+      "date": "2026-04-24",
+      "date_display": "April 24",
+      "type": "homework",
+      "grade_weight": 0.035,
+      "concept_weights": {
+        "anagram":      0.10,
+        "ngramCounting": 0.08,
+        "priorityQueue": 0.04
+      }
+    },
+    {
+      "id": "editor_trees_m2",
+      "name": "ET2",
+      "date": "2026-04-27",
+      "date_display": "April 27",
+      "type": "homework",
+      "grade_weight": 0.04,
+      "concept_weights": {
+        "comparable": 0.04
+      }
+    }
+  ]
+}
