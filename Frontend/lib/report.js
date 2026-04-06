@@ -184,15 +184,20 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         // because the courseAppearance description describes the connection to another
         // pattern (e.g. "shortestWordAlongPath uses the same navigation as contains"),
         // not the drill practice task itself.
-        const sourceUrl   = drill?.sourceUrl   || caForAssmt[0]?.url   || null;
-        const sourceLabel = drill?.sourceLabel  || caForAssmt[0]?.label || null;
+        // Also exclude solution files from courseAppearances — they should not be linked
+        // as the primary source for a drill (LLM sometimes references solution URLs).
+        const nonSolutionCa = caForAssmt.filter(ca => !ca.url?.toLowerCase().includes('solution'));
+        const sourceUrl   = drill?.sourceUrl   || nonSolutionCa[0]?.url   || null;
+        const sourceLabel = drill?.sourceLabel  || nonSolutionCa[0]?.label || null;
         const drillIntro  = drill?.intro        || null;
 
         // Store internal tracking fields for dedup; stripped below
         entry.drills.push({
           _categories: categories,
           _matchWeight: matchWeight,
-          _extraLinks: caForAssmt.map(ca => ({ url: ca.url, label: ca.label })),
+          _extraLinks: caForAssmt
+            .filter(ca => !ca.url?.toLowerCase().includes('solution'))
+            .map(ca => ({ url: ca.url, label: ca.label })),
           pattern_name: patternName(fb),
           time_min: time,
           test_names: testNames(fb),
@@ -397,13 +402,13 @@ export async function generateReportForToken(studentId, assignment, token, dataD
       // CSS page height (11in = 1056px) rather than Puppeteer's default 600px.
       await page.setViewport({ width: 816, height: 1056 });
       await page.setContent(html, { waitUntil: 'domcontentloaded' });
-      // Measure content vs page; return scale as a number — no DOM mutation.
-      // Uses Puppeteer's native scale option rather than CSS zoom, which
-      // behaves inconsistently across platforms with preferCSSPageSize.
+      // Body uses min-height:11in (not fixed height) so it grows to fit content.
+      // Compare scrollHeight against the Letter page height constant — clientHeight
+      // is no longer a reliable sentinel since the body expands with content.
       const pdfScale = await page.evaluate(() => {
+        const PAGE_H   = 1056; // 11in at 96 dpi — one Letter page
         const contentH = document.body.scrollHeight;
-        const pageH    = document.body.clientHeight; // = 1056 after setViewport
-        return contentH > pageH ? Math.max(0.80, pageH / contentH) : 1.0;
+        return contentH > PAGE_H ? Math.max(0.80, PAGE_H / contentH) : 1.0;
       });
       await page.pdf({
         path: reportPdfPath,

@@ -22,8 +22,33 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
 
   const [tab, setTab] = useState('issues');
   const [highlightedTestId, setHighlightedTestId] = useState(null);
+  const [drillTestId, setDrillTestId] = useState(null);
   const [openedFeedbackIds, setOpenedFeedbackIds] = useState(new Set());
   const [hoveredBarId, setHoveredBarId] = useState(null);
+
+  // Convert a testId to the drill anchor format used in PDFs.
+  // Must match drillAnchor() in report.js.
+  function testIdToAnchor(testId) {
+    const hash = testId?.indexOf('#') ?? -1;
+    if (hash < 0) return null;
+    return 'drill-' + testId.substring(hash + 1).replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+  }
+
+  /* ── On mount: resolve URL hash to a drill target ── */
+  useEffect(() => {
+    const anchor = window.location.hash.slice(1); // strip leading #
+    if (!anchor.startsWith('drill-')) return;
+    const match = detailTests.find(t => testIdToAnchor(t.id) === anchor);
+    if (!match) return;
+    // Switch to whichever tab contains this test
+    if (failingTests.find(t => t.id === match.id))       setTab('issues');
+    else if (improvedTests.find(t => t.id === match.id)) setTab('improved');
+    else                                                  setTab('passing');
+    setHighlightedTestId(match.id);
+    setDrillTestId(match.id);
+    // Clear hash from URL bar without triggering a navigation
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }, [detailTests]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Bucketed test lists ── */
   const hasFeedback = t => !!(t.explanation || t.diffs?.length || t.drills?.length);
@@ -324,13 +349,13 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
 
           {/* Test cards per tab */}
           {tab === 'issues'   && failingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'improved' && improvedTests.map(t => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'passing'  && passingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
           ))}
 
           {/* Closure / mark reviewed */}

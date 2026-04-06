@@ -398,7 +398,7 @@ function FeedbackShimmer() {
  *   onCiteClick: (runNumber:number) => void,
  * }} props
  */
-export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened, assessmentConfig }) {
+export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened, assessmentConfig }) {
   const [manualOpen, setManualOpen] = useState(initiallyOpen ?? false);
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
@@ -412,6 +412,7 @@ export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpi
   const [diffsOpen, setDiffsOpen] = useState(false);
   const [explanationExpanded, setExplanationExpanded] = useState(false);
   const [shimmerDone, setShimmerDone] = useState(true);
+  const [drillGlow, setDrillGlow] = useState(false);
   const cardRef = useRef(null);
   const hasRevealedRef = useRef(!!initiallyOpen);
   const hasShimmeredRef = useRef(!!initiallyOpen); // skip shimmer for initially-open cards
@@ -437,6 +438,20 @@ export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpi
     }
   }, [forceOpen]);
 
+  // forceDrill: scroll to card, open it, then open the drill modal after scroll settles.
+  // Also triggers a brief glow on the card so the student sees where they landed.
+  useEffect(() => {
+    if (!forceDrill || !test.drills?.[0]) return;
+    setManualOpen(true);
+    if (cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    setDrillGlow(true);
+    const glowTimer  = setTimeout(() => setDrillGlow(false), 2000);
+    const drillTimer = setTimeout(() => setShowDrill(true), 600); // after scroll settles
+    return () => { clearTimeout(glowTimer); clearTimeout(drillTimer); };
+  }, [forceDrill]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => { setDiffIndex(0); }, [test.id]);
 
   // Shimmer on first expand: show skeleton for 380ms, then reveal real content
@@ -460,16 +475,27 @@ export function TestCard({ test, forceOpen, initiallyOpen, onCiteClick, runToEpi
 
   const bgColor = isFailing ? '#FFFBFB' : isImproved ? '#F8FAFF' : '#F7FDF9';
 
+  // Compute drill anchor id — must match drillAnchor() in report.js
+  const drillAnchorId = (() => {
+    const hash = test.id?.indexOf('#') ?? -1;
+    if (hash < 0) return undefined;
+    return 'drill-' + test.id.substring(hash + 1).replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+  })();
+
   return (
     <div
+      id={drillAnchorId}
       ref={cardRef}
       style={{
         border: `1px solid ${borderColor}`, borderRadius: 10, background: bgColor,
         marginBottom: 8, transition: 'box-shadow .15s, border-color .3s',
-        boxShadow: highlighted
+        boxShadow: drillGlow
+          ? '0 0 0 3px rgba(124,45,18,.35), 0 4px 20px rgba(124,45,18,.20)'
+          : highlighted
           ? '0 2px 12px rgba(245,158,11,.12)'
           : open && isFailing ? '0 2px 12px rgba(220,38,38,.08)'
           : 'none',
+        outline: drillGlow ? '2px solid rgba(124,45,18,.5)' : 'none',
       }}
     >
       {/* Header row */}

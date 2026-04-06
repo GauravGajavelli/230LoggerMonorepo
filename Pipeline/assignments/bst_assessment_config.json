@@ -17,7 +17,8 @@
         "size":     0.27
       },
       "resources": [
-        { "url": "Exams/Exam 2/Exam2-practice.zip", "label": "Exam 2 practice (zip)" }
+        { "url": "Exams/Exam 2/Exam2-202110-computer.pdf", "label": "Practice Exam 2 (Winter 2020-21)" },
+        { "url": "Exams/Exam 2/Exam2-201720-computer.pdf", "label": "Practice Exam 2 (Winter 2016-17)" }
       ]
     },
     {
@@ -104,7 +105,7 @@
         "toString":         0.02
       },
       "resources": [
-        { "url": "Exams/Exam 3/Exam3-practice.zip", "label": "Exam 3 practice (zip)" }
+        { "url": "Exams/Exam 3/Exam3-202130-computer.pdf", "label": "Practice Exam 3 (Winter 2021-22)" }
       ]
     },
     {
@@ -125,7 +126,7 @@
       },
       "resources": [
         { "url": "Exams/Final Exam/PracticeFinalExam.pdf",         "label": "Practice final (PDF)" },
-        { "url": "Exams/Final Exam/FinalPracticeComputerPart.zip", "label": "Practice final computer part (zip)" }
+        { "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf", "label": "Practice final computer part (2018-19)" }
       ]
     }
   ]

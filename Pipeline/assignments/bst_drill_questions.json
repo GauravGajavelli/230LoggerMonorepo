@@ -127,7 +127,7 @@
     "id": "exam2practice-buildSearchPathList",
     "source": "Exam 2 practice",
     "sourceLabel": "Practice Exam 2 (2020-21)",
-    "url": "Exams/Exam 2/Exam2-practice.zip",
+    "url": "Exams/Exam 2/Exam2-202110-computer.pdf",
     "targetFile": "BSTTesting.java",
     "categories": ["contains"],
     "timeEstimate": "~10 min",
@@ -143,7 +143,7 @@
     "id": "exam2practice-countSiblingDiffGreaterThan",
     "source": "Exam 2 practice",
     "sourceLabel": "Practice Exam 2 (2020-21)",
-    "url": "Exams/Exam 2/Exam2-practice.zip",
+    "url": "Exams/Exam 2/Exam2-202110-computer.pdf",
     "targetFile": "BSTTesting.java",
     "categories": ["size"],
     "timeEstimate": "~10 min",
@@ -153,6 +153,70 @@
       "Traverse every node (full-tree traversal, not BST search) and accumulate a count — same structure as getSumOfHeights() or size().",
       "At each BinaryNode, count 1 if both children are not NULL_NODE AND (right.data - left.data) > threshold; otherwise count 0. Then add the counts from left and right subtrees.",
       "The difference is always right.data - left.data (positive, since BSTs keep right > left), so no absolute value needed. Both children must be non-null — a node with only one child does not qualify."
+    ]
+  },
+  {
+    "id": "exam3practice-weightedHeight",
+    "source": "Exam 3 practice",
+    "sourceLabel": "Practice Exam 3 (Spring 2021)",
+    "url": "Exams/Exam 3/Exam3-202130-computer.pdf",
+    "targetFile": "BSTTesting.java",
+    "categories": ["height", "size", "efficiency"],
+    "timeEstimate": "~15 min",
+    "intro": "Add weightedHeight() to BinarySearchTree.java that returns the sum of (height × size) for every node in the tree. This is the computer part of the Spring 2021 practice Exam 3, and earns efficiency points only if it runs in O(N) with a single traversal — no calling height() or size() separately on each node. Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_weightedHeight_sevenNodeExample() {\n    BST<Integer> bst = new BST<>();\n    // Build: e=root(size 7, height 3), b(size 4, height 2), h(size 2, height 1)\n    //        a(size 1,h0), c(size 2,h1), g(size 1,h0)\n    //        d(size 1,h0), f(size 1,h0)\n    // weightedHeight = 3*7 + 2*4 + 1*2 + 0*1 + 1*2 + 0*1 + 0*1 + 0*1 = 21+8+2+2 = ... check with simpler tree\n    bst.add(10); bst.add(5); bst.add(15);\n    // root h=1,s=3 → 3; left h=0,s=1 → 0; right h=0,s=1 → 0\n    assertEquals(3, bst.weightedHeight());\n    bst.add(3);\n    // root h=2,s=4 → 8; left h=1,s=2 → 2; left.left h=0,s=1 → 0; right h=0,s=1 → 0\n    assertEquals(10, bst.weightedHeight());\n    points += 1;\n}",
+    "hints": [
+      "A naive approach calls height() and size() at every node, giving O(N²) — to earn efficiency points, compute both in one pass using a helper that returns a container holding {height, size, weightedHeightContribution}.",
+      "Define a helper class or use an int[] of length 3. At each node: height = 1 + max(leftHeight, rightHeight); size = 1 + leftSize + rightSize; contribution = height*size + leftContribution + rightContribution.",
+      "Base case for NULL_NODE: return height=-1, size=0, contribution=0. The root call then returns the total contribution directly."
+    ]
+  },
+  {
+    "id": "exam2-2017-pruneLeaves",
+    "source": "Exam 2 practice",
+    "sourceLabel": "Practice Exam 2 (Winter 2016-17)",
+    "url": "Exams/Exam 2/Exam2-201720-computer.pdf",
+    "targetFile": "BSTTesting.java",
+    "categories": ["remove"],
+    "timeEstimate": "~10 min",
+    "intro": "Add pruneLeaves() to BinarySearchTree.java that removes all leaf nodes from the tree. This is a Winter 2016-17 practice Exam 2 question using the same return-updated-subtree pointer pattern as remove(). Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_pruneLeaves_repeatedPruning() {\n    BST<Integer> bst = new BST<>();\n    bst.add(10); bst.add(5); bst.add(15); bst.add(3);\n    bst.pruneLeaves();\n    assertEquals(\"[5, 10, 15]\", bst.toString());\n    bst.pruneLeaves();\n    assertEquals(\"[10]\", bst.toString());\n    bst.pruneLeaves();\n    assertEquals(\"[]\", bst.toString());\n    points += 1;\n}",
+    "hints": [
+      "A leaf is a node whose both left and right children are NULL_NODE. In the recursive helper, return NULL_NODE when the current node is a leaf.",
+      "Use the same return-updated-subtree pattern as remove(): node.left = pruneHelper(node.left); node.right = pruneHelper(node.right); then check if both children are now NULL_NODE.",
+      "Process children before deciding whether to prune the current node (post-order): prune the children first, then check if the current node has become a leaf."
+    ]
+  },
+  {
+    "id": "exam2-2017-branchPoint",
+    "source": "Exam 2 practice",
+    "sourceLabel": "Practice Exam 2 (Winter 2016-17)",
+    "url": "Exams/Exam 2/Exam2-201720-computer.pdf",
+    "targetFile": "BSTTesting.java",
+    "categories": ["contains", "efficiency"],
+    "timeEstimate": "~15 min",
+    "intro": "Add branchPoint(T x, T y) to BinarySearchTree.java that returns the value at the deepest common ancestor of the BST search paths for x and y, or null if both paths end at the same NULL_NODE. This is a Winter 2016-17 practice Exam 2 question with efficiency points for O(height) — the same structured descent as shortestWordAlongPath. Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_branchPoint_basicCases() {\n    BST<Integer> bst = new BST<>();\n    bst.add(50); bst.add(25); bst.add(75); bst.add(12); bst.add(37);\n    // search paths for 12 and 37 diverge at 25\n    assertEquals(Integer.valueOf(25), bst.branchPoint(12, 37));\n    // search paths for 12 and 75 diverge at 50 (root)\n    assertEquals(Integer.valueOf(50), bst.branchPoint(12, 75));\n    // search paths for 12 and 25 diverge at 25 (25 is ancestor of 12)\n    assertEquals(Integer.valueOf(25), bst.branchPoint(12, 25));\n    points += 1;\n}",
+    "hints": [
+      "At each node, compare x and y to the current node's data: if both go left, recurse left; if both go right, recurse right; if they diverge (or one matches), the current node is the branch point.",
+      "This runs in O(height) because you follow a single path from root to the branch point — never backtrack or visit both subtrees.",
+      "Edge case: if x.compareTo(current) == 0 OR y.compareTo(current) == 0, the current node is on both search paths (one ends here), so it is the branch point."
+    ]
+  },
+  {
+    "id": "exam2-2017-countOneChildParents",
+    "source": "Exam 2 practice",
+    "sourceLabel": "Practice Exam 2 (Winter 2016-17)",
+    "url": "Exams/Exam 2/Exam2-201720-computer.pdf",
+    "targetFile": "BSTTesting.java",
+    "categories": ["size"],
+    "timeEstimate": "~10 min",
+    "intro": "Add countOneChildParents() to BinarySearchTree.java that returns the number of nodes that have exactly one child (either left or right, but not both). This is a Winter 2016-17 practice Exam 2 question using the same full-tree recursive accumulator pattern as size(). Paste this test into BSTTesting.java for a point back.",
+    "testCode": "@Test\npublic void practice_countOneChildParents_mixedTree() {\n    BST<Integer> bst = new BST<>();\n    assertEquals(0, bst.countOneChildParents());\n    bst.add(50); bst.add(25); bst.add(75); bst.add(12);\n    // 25 has only left child (12); 50 and 75 have 0 or 2 children\n    assertEquals(1, bst.countOneChildParents());\n    bst.add(37);\n    // now 25 has two children — no longer counts\n    assertEquals(0, bst.countOneChildParents());\n    points += 1;\n}",
+    "hints": [
+      "Traverse all nodes (full-tree, not BST search) and accumulate a count — same structure as size().",
+      "A node has exactly one child when: (left == NULL_NODE) XOR (right == NULL_NODE). In Java: (left == NULL_NODE) != (right == NULL_NODE).",
+      "Return 0 for NULL_NODE as the base case; otherwise return (isOneChildParent ? 1 : 0) + countHelper(left) + countHelper(right)."
     ]
   },
   {

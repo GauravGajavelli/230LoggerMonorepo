@@ -63,6 +63,17 @@ function encodeStudyPath(rawPath) {
   return rawPath.split('/').map(s => encodeURIComponent(s)).join('/');
 }
 
+// Returns the appropriate URL for a study material file.
+// .md files go through the /view renderer; PDFs and other files served directly.
+function studyMaterialUrl(rawPath, baseUrl) {
+  let origin = '';
+  try { origin = new URL(baseUrl).origin; } catch {}
+  if (rawPath.endsWith('.md')) {
+    return `${origin}/view?file=${encodeURIComponent(rawPath)}`;
+  }
+  return `${origin}/study-materials/${encodeStudyPath(rawPath)}`;
+}
+
 // Compact assessment table strip — all assessments in one table
 function renderAssessmentTable(allAssessments) {
   if (!allAssessments || allAssessments.length === 0) return '';
@@ -114,11 +125,12 @@ function renderExamDrillSection(drill, assessment, num, feedbackUrl) {
 
   let linksHtml = '';
   if (drill.source_url) {
-    let smBase = '/study-materials';
-    try { smBase = new URL(feedbackUrl).origin + '/study-materials'; } catch {}
-    const href = smBase + '/' + encodeStudyPath(drill.source_url);
+    const href = studyMaterialUrl(drill.source_url, feedbackUrl);
     const label = drill.source_label || drill.source || 'source';
     linksHtml += `<a class="drill-link" href="${escHtml(href)}" target="_blank">${escHtml(label)} &rsaquo;</a>`;
+  } else if (drill.source && drill.source !== 'Practice') {
+    // Has a named source but no linkable file — show provenance as plain text
+    linksHtml += `<span class="drill-link-fallback">From: ${escHtml(drill.source_label || drill.source)}</span>`;
   }
   if (drill.drill_anchor) {
     linksHtml += `<a class="drill-link" href="${escHtml(feedbackUrl)}#${escHtml(drill.drill_anchor)}">Open drill &rsaquo;</a>`;
@@ -147,12 +159,10 @@ function renderAlsoOnExam(assessment, feedbackUrl) {
   const overlapPct = assessment.overlap_pct || 0;
   if (overlapPct === 0 && uncovered.length === 0) return '';
 
-  let smBase = '/study-materials';
-  try { smBase = new URL(feedbackUrl).origin + '/study-materials'; } catch {}
   const allLinks = assessment.all_links || [];
   const linksHtml = allLinks.length > 0
     ? ' ' + allLinks.map(lk => {
-        const href = smBase + '/' + encodeStudyPath(lk.url);
+        const href = studyMaterialUrl(lk.url, feedbackUrl);
         return `<a class="exam-also-link" href="${escHtml(href)}" target="_blank">${escHtml(lk.label)} &rsaquo;</a>`;
       }).join(' ')
     : '';
@@ -258,7 +268,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   const focalIsExam = focalAssessment?.type === 'exam';
   let framingSentence;
   if (focalIsExam && review_video_url) {
-    framingSentence = `The <a href="${escHtml(review_video_url)}" style="color:var(--text-secondary)">${escHtml(focalAssessment.name)} review</a> covers the expected exam contents (minor differences possible). These patterns from your submission are your highest-priority practice targets with ${timeDisplay(focalAssessment.days_left)} until ${escHtml(focalAssessment.name)}.`;
+    framingSentence = `The <a href="${escHtml(review_video_url)}" style="color:var(--text-secondary)">${escHtml(focalAssessment.name)} review</a> covers the expected exam content (minor differences possible). These patterns from your submission are your highest-priority practice targets with ${timeDisplay(focalAssessment.days_left)} until ${escHtml(focalAssessment.name)}.`;
   } else if (focalAssessment) {
     framingSentence = `These patterns from your submission are your highest-priority practice targets (${timeDisplay(focalAssessment.days_left)} until ${escHtml(focalAssessment.name)}).`;
   } else {
@@ -303,7 +313,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   }
 
   @page { size: Letter; margin: 0; }
-  html { height: 11in; overflow: hidden; }
+  html { min-height: 11in; }
   body {
     font-family: Georgia, 'Palatino Linotype', Palatino, serif;
     font-size: 12px;
@@ -313,8 +323,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
     padding: 40px 52px 34px;
     max-width: 900px;
     margin: 0 auto;
-    height: 11in;
-    overflow: hidden;
+    min-height: 11in;
     display: flex;
     flex-direction: column;
   }
@@ -438,6 +447,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   .drill-also  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 2px; padding-left: 16px; }
   .drill-links { display: flex; gap: 12px; padding-left: 16px; flex-wrap: wrap; }
   .drill-link  { font-size: 11px; color: var(--text-secondary); text-decoration: none; }
+  .drill-link-fallback { font-size: 11px; color: var(--text-tertiary); font-style: italic; }
 
   /* "Also on this exam" section */
   .exam-also {

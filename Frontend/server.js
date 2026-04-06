@@ -11,6 +11,7 @@ import db from './lib/db.js';
 import { verifyToken } from './lib/tokens.js';
 import { logEvents } from './lib/events.js';
 import { generateReportForToken } from './lib/report.js';
+import { marked } from 'marked';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT       = path.resolve(__dirname, '..');
@@ -78,6 +79,56 @@ app.use(express.static(DIST_DIR, { index: false }));
 // Serve course study materials (exam solutions, homework specs) from Pipeline/testInputs/csse230/
 const STUDY_MATERIALS_DIR = path.join(REPO_ROOT, 'Pipeline', 'testInputs', 'csse230');
 app.use('/study-materials', express.static(STUDY_MATERIALS_DIR));
+
+// Markdown file viewer — renders .md files as styled HTML instead of raw text.
+// Only serves files inside STUDY_MATERIALS_DIR (path traversal protection).
+// PDFs and other files are served directly via the /study-materials static route.
+app.get('/view', (req, res) => {
+  const rawFile = req.query.file;
+  if (!rawFile) return res.status(400).send('Missing file parameter.');
+
+  const resolved = path.resolve(STUDY_MATERIALS_DIR, rawFile);
+  if (!resolved.startsWith(STUDY_MATERIALS_DIR + path.sep) && resolved !== STUDY_MATERIALS_DIR) {
+    return res.status(403).send('Forbidden.');
+  }
+  if (!resolved.endsWith('.md')) {
+    return res.redirect('/study-materials/' + rawFile.split('/').map(encodeURIComponent).join('/'));
+  }
+  if (!fs.existsSync(resolved)) return res.status(404).send('File not found.');
+
+  const mdContent = fs.readFileSync(resolved, 'utf8');
+  const body = marked.parse(mdContent);
+  const title = path.basename(rawFile, '.md').replace(/-/g, ' ');
+
+  res.type('html').send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} — CSSE 230</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 780px; margin: 40px auto; padding: 0 24px 60px; color: #111; line-height: 1.65; font-size: 15px; }
+  h1 { font-size: 1.6em; border-bottom: 2px solid #800000; padding-bottom: 8px; margin-bottom: 6px; }
+  h2 { font-size: 1.25em; margin-top: 2em; }
+  h3 { font-size: 1.05em; margin-top: 1.5em; }
+  code { font-family: 'Courier New', monospace; font-size: 0.88em; background: #f4f4f2; padding: 1px 4px; border-radius: 3px; }
+  pre { background: #f4f4f2; padding: 14px 16px; border-radius: 4px; overflow-x: auto; border-left: 3px solid #800000; }
+  pre code { background: none; padding: 0; font-size: 0.85em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #ccc; padding: 6px 12px; text-align: left; }
+  th { background: #f0efeb; font-weight: bold; }
+  blockquote { border-left: 3px solid #ccc; margin: 0; padding-left: 16px; color: #555; }
+  a { color: #800000; }
+  hr { border: none; border-top: 1px solid #ccc; margin: 2em 0; }
+  .back { font-size: 13px; color: #555; margin-bottom: 24px; display: block; font-style: italic; }
+</style>
+</head>
+<body>
+<a class="back" href="javascript:history.back()">← Back</a>
+${body}
+</body>
+</html>`);
+});
 
 // Root → login
 app.get('/', (_req, res) => res.redirect('/login'));
