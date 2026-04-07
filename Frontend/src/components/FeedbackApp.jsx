@@ -184,13 +184,20 @@ export function FeedbackApp({ token }) {
   const [view, setView] = useState(token ? 'detail' : 'list');
   const [replayRange, setReplayRange] = useState(null); // { start, end } | null
   const [reviewed, setReviewed] = useState(false);
+  const [openedFeedbackIds, setOpenedFeedbackIds] = useState(new Set());
   const [assignments, setAssignments] = useState([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(true);
 
-  // Sync reviewed state from server (persisted across sessions)
+  // Sync reviewed + openedTestIds from server (persisted across sessions)
   useEffect(() => {
     if (frontendData?.reviewed) setReviewed(true);
+    const ids = frontendData?.openedTestIds;
+    if (ids?.length) setOpenedFeedbackIds(prev => new Set([...prev, ...ids]));
   }, [frontendData]);
+
+  const handleFeedbackOpened = useCallback((testId) => {
+    setOpenedFeedbackIds(prev => new Set([...prev, testId]));
+  }, []);
 
   // Fetch all assignments for this student (identified by the current token)
   useEffect(() => {
@@ -261,6 +268,8 @@ export function FeedbackApp({ token }) {
           onReplayRun={handleReplayRun}
           onAllFeedbackSeen={handleAllFeedbackSeen}
           reviewed={reviewed}
+          openedFeedbackIds={openedFeedbackIds}
+          onFeedbackOpened={handleFeedbackOpened}
         />
       );
     }

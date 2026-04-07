@@ -17,17 +17,12 @@ const BackIcon = () => (
  * On desktop (≥1024px): sidebar (summary + timeline) left, test cards right.
  * On mobile: single column, stacked.
  */
-export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed }) {
-  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context, runToEpisode, assessmentConfig, frontendData } = usePlaybackDataContext();
+export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed, openedFeedbackIds, onFeedbackOpened }) {
+  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context, runToEpisode, assessmentConfig } = usePlaybackDataContext();
 
   const [tab, setTab] = useState('issues');
   const [highlightedTestId, setHighlightedTestId] = useState(null);
   const [drillTestId, setDrillTestId] = useState(null);
-  const [openedFeedbackIds, setOpenedFeedbackIds] = useState(() => {
-    if (reviewed) return new Set(feedbackMap.keys());
-    const prior = frontendData?.openedTestIds;
-    return prior?.length ? new Set(prior) : new Set();
-  });
   const [hoveredBarId, setHoveredBarId] = useState(null);
 
   // Convert a testId to the drill anchor format used in PDFs.
@@ -86,11 +81,6 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
   // Covers every feedback item regardless of whether an episode chip links to it.
   // Chip-navigation-only feedback (no chip) is still readable inline in the test card.
   const chipLinkedFeedbackIds = useMemo(() => new Set(feedbackMap.keys()), [feedbackMap]);
-
-  /* ── If reviewed arrives after mount (async fetch), backfill opened IDs ── */
-  useEffect(() => {
-    if (reviewed) setOpenedFeedbackIds(new Set(feedbackMap.keys()));
-  }, [reviewed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Fire onAllFeedbackSeen once all chip-linked feedback has been opened ── */
   const hasAutoReviewedRef = useRef(reviewed);
@@ -345,7 +335,7 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
             ].map((t) => {
               const fbTests = t.tests.filter(x => chipLinkedFeedbackIds.has(x.id));
               const hasFeedback = fbTests.length > 0;
-              const hasUnread = hasFeedback && fbTests.some(x => !openedFeedbackIds.has(x.id));
+              const hasUnread = !reviewed && hasFeedback && fbTests.some(x => !openedFeedbackIds.has(x.id));
               return (
                 <button key={t.key} onClick={() => { setTab(t.key); eventTracker.track('tab_switch', { tab: t.key }); }} style={{
                   all: 'unset', padding: '8px 16px', fontSize: 13,
@@ -364,13 +354,13 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
 
           {/* Test cards per tab */}
           {tab === 'issues'   && failingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} feedbackRead={openedFeedbackIds.has(t.id)} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} feedbackRead={reviewed || openedFeedbackIds.has(t.id)} onFeedbackOpened={() => onFeedbackOpened(t.id)} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'improved' && improvedTests.map(t => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} feedbackRead={openedFeedbackIds.has(t.id)} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} feedbackRead={reviewed || openedFeedbackIds.has(t.id)} onFeedbackOpened={() => onFeedbackOpened(t.id)} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'passing'  && passingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} feedbackRead={openedFeedbackIds.has(t.id)} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} feedbackRead={reviewed || openedFeedbackIds.has(t.id)} onFeedbackOpened={() => onFeedbackOpened(t.id)} assessmentConfig={assessmentConfig} />
           ))}
 
           {/* Reviewed confirmation — appears automatically once all feedback is opened */}
