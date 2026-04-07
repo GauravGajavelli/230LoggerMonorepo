@@ -412,7 +412,7 @@ function FeedbackShimmer() {
  *   onCiteClick: (runNumber:number) => void,
  * }} props
  */
-export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteClick, runToEpisode = {}, assessmentConfig }) {
+export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened, assessmentConfig }) {
   const [manualOpen, setManualOpen] = useState(initiallyOpen ?? false);
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
@@ -430,9 +430,10 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
   const hasRevealedRef = useRef(!!initiallyOpen);
   const hasShimmeredRef = useRef(!!initiallyOpen); // skip shimmer for initially-open cards
 
-  // Fire telemetry for initially-open cards (shimmer is skipped for these)
+  // Fire telemetry + callbacks for initially-open cards (shimmer is skipped for these)
   useEffect(() => {
     if (initiallyOpen) {
+      onFeedbackOpened?.();
       eventTracker.track('feedback_opened', { test_id: test.id });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -596,6 +597,7 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
             style={{ animation: !hasRevealedRef.current ? 'feedbackReveal 0.3s ease-out' : undefined }}
             onAnimationEnd={() => {
               hasRevealedRef.current = true;
+              onFeedbackOpened?.();
               eventTracker.track('feedback_opened', { test_id: test.id });
             }}
           >
