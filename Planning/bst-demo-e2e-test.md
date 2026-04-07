@@ -1,14 +1,22 @@
-# BST Demo — End-to-End Test Runbook
+# BST — End-to-End Test Runbook
 
-Tests the full pipeline from a single `.tar` file through to a received email with working
-report and feedback links. Assumes setup in `deployment-test-guide.md` is complete
-(Ubuntu server running via pm2, nginx configured, JAR built, DB initialized, Zenbook relay
-running via pm2 with `relay-server.js`).
+Tests the full pipeline from real `.tar` files through to received emails with working report
+and feedback links. Three students with tars (gajavegs + two real submissions) and one
+missing-tar case. Assumes the Ubuntu server is running via pm2, nginx configured, JAR built,
+DB initialized, and Zenbook relay running.
 
-**For WaS batch testing use the automated scripts instead:**
+---
+
+## Student IDs used in this runbook
+
+Set these once at the top of your shell session. All subsequent commands use them.
+
 ```bash
-bash Pipeline/scripts/e2e-wuas-ubuntu.sh          # Ubuntu side
-bash Pipeline/scripts/e2e-wuas-mac.sh             # Mac side
+export STU1=gajavegs            # your own student ID
+export STU2=<real-student-id-1> # replace with actual ID
+export STU3=<real-student-id-2> # replace with actual ID
+export STU_MT=gajavegs_mt       # missing-tar test case (no run.tar)
+export EMAIL=gajavegs@rose-hulman.edu  # all dev emails redirect here
 ```
 
 ---
@@ -18,25 +26,16 @@ bash Pipeline/scripts/e2e-wuas-mac.sh             # Mac side
 Run these any time you pull new code. All commands from `Frontend/` on Ubuntu.
 
 ```bash
-# 1. Install any new Node dependencies
 npm install
-
-# 2. Rebuild the JAR if Java source changed
 mvn -f ../Pipeline/pom.xml package -q -DskipTests
-
-# 3. Rebuild the React frontend if src/ changed
 npm run build
-
-# 4. Restart the server to pick up code + .env changes
 pm2 restart feedback
-
-# 5. Verify it's healthy
 curl -s http://localhost:3000/api/health
 ```
 
-**DB schema**: never needs manual intervention. `db.js` runs `CREATE TABLE IF NOT EXISTS`
-and idempotent `ALTER TABLE` on every server start — new columns appear automatically.
-Only clear DB data (A1) when you want a clean test run, not because of a schema change.
+**DB schema**: `db.js` runs `CREATE TABLE IF NOT EXISTS` and idempotent `ALTER TABLE` on every
+server start — new columns appear automatically. Only clear DB data (A1) when you want a
+clean test run.
 
 ---
 
@@ -45,7 +44,7 @@ Only clear DB data (A1) when you want a clean test run, not because of a schema 
 | Task | Where |
 |---|---|
 | Pipeline (ingest + prepare) | Ubuntu server |
-| Report design iteration | **Local Mac** — edit in IDE, instant feedback |
+| Report design iteration | Local Mac — edit in IDE, instant feedback |
 | Email copy iteration | Ubuntu server (read body from SQLite — no relay needed) |
 | Full e2e send test | Ubuntu server + Zenbook relay |
 
@@ -53,123 +52,128 @@ Only clear DB data (A1) when you want a clean test run, not because of a schema 
 
 ## Part A — Run the pipeline (Ubuntu server)
 
-All commands in this section run from `Frontend/` on Ubuntu.
+All commands from `Frontend/` on Ubuntu.
 
 ### A1. Full reset (start clean)
 
-**Quickest option — wipe the entire DB and let it recreate on server restart:**
+**Quickest — wipe the entire DB:**
 ```bash
 rm db/feedback.db
-pm2 restart feedback   # (or `node server.js` locally) — schema is recreated automatically
-```
-Use this when you want a completely clean slate and don't need to preserve relay registration
-(the Zenbook re-registers on its next heartbeat, within ~60s).
-
-**Per-assignment reset — preserves relay registration and other assignment data:**
-```bash
-# Clear pipeline outputs and LLM cache
-rm -rf data/bst/output/gajavegs data/bst/output/gajavegs_mt
+pm2 restart feedback   # schema recreates automatically; Zenbook re-registers within ~60s
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
 rm -rf ../Pipeline/cache/llm/*
+```
 
-# Clear DB state for bst
+**Per-assignment reset — preserves relay registration:**
+```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
 db.prepare("DELETE FROM email_queue   WHERE assignment='bst'").run();
 db.prepare("DELETE FROM pipeline_runs WHERE assignment='bst'").run();
+db.prepare("DELETE FROM events        WHERE token IN (SELECT token FROM tokens WHERE assignment='bst')").run();
 db.prepare("DELETE FROM tokens        WHERE assignment='bst'").run();
 db.close();
 console.log('DB cleared for bst');
 EOF
 
-# Restart the server so it picks up any .env changes and clears in-memory state
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
+rm -rf ../Pipeline/cache/llm/*
 pm2 restart feedback
 ```
 
-### A2. Place the tar file
+### A2. Place the tar files
 
 `process-batch.js` discovers students by scanning `data/bst/tars/` for subdirectories with a
-`run.tar` — it does **not** use the roster. Remove any leftover directories from previous runs first.
+`run.tar`. Remove leftover directories from previous runs first.
 
 ```bash
-# Remove any leftover tars from previous runs (e.g. teststu from a prior demo)
-rm -rf data/bst/tars/teststu
+# Remove any leftover tars
+rm -rf data/bst/tars/$STU1 data/bst/tars/$STU2 data/bst/tars/$STU3
 
-# gajavegs → has a tar → gets feedback_ready email + personalized report
-mkdir -p data/bst/tars/gajavegs
-cp /path/to/Pipeline/testInputs/run-demo.tar data/bst/tars/gajavegs/run.tar
+# STU1 — your own tar
+mkdir -p data/bst/tars/$STU1
+cp /path/to/your/run.tar data/bst/tars/$STU1/run.tar
 
-# gajavegs_mt → no tar directory → gets missing_tar email + generic report (2-page drill sheet)
-# Do NOT create data/bst/tars/gajavegs_mt — its absence is intentional
+# STU2 — first real submission
+mkdir -p data/bst/tars/$STU2
+cp /path/to/stu2/run.tar data/bst/tars/$STU2/run.tar
+
+# STU3 — second real submission
+mkdir -p data/bst/tars/$STU3
+cp /path/to/stu3/run.tar data/bst/tars/$STU3/run.tar
+
+# STU_MT — intentionally no tar (missing_tar email path)
+# Do NOT create data/bst/tars/$STU_MT
+ls data/bst/tars/
+# → gajavegs  <stu2-id>  <stu3-id>  (no gajavegs_mt — correct)
 ```
 
-### A3. Create a dev roster and generate tokens
+### A3. Create the dev roster and generate tokens
 
 ```bash
-printf "gajavegs,gajavegs@rose-hulman.edu\ngajavegs_mt,gajavegs@rose-hulman.edu\n" > data/roster.dev.csv
+printf "$STU1,$EMAIL\n$STU2,$EMAIL\n$STU3,$EMAIL\n$STU_MT,$EMAIL\n" > data/roster.dev.csv
 node scripts/generate-tokens.js bst roster.dev.csv
-# → gajavegs   → <token>  (gajavegs@rose-hulman.edu)
-# → gajavegs_mt → <token>  (gajavegs@rose-hulman.edu)
+# → 4 tokens upserted (deterministic HMAC — same token every time for same SECRET_KEY)
 ```
 
-**Token stability:** The token is a deterministic HMAC of `studentId:assignment` and `SECRET_KEY`.
-Re-running `generate-tokens.js` always produces the same value — it upserts, never changes.
-If you delete the DB row and re-run, you get the same token, so existing PDF links stay valid.
-The only way tokens change is if `SECRET_KEY` changes in `.env`.
+**Token stability:** Re-running `generate-tokens.js` always produces the same value. Deleting
+the DB row and re-running gives the same token, so existing PDF links stay valid. Only
+`SECRET_KEY` changes invalidate tokens.
 
 ### A4. Build the JAR and run the pipeline
 
 ```bash
-# Build the JAR if not already current (safe to re-run; takes ~30s)
 mvn -f ../Pipeline/pom.xml package -q -DskipTests
-
-# Confirm JAR exists
-ls ../Pipeline/target/csse230-feedback.jar
+ls ../Pipeline/target/csse230-feedback.jar  # confirm JAR exists
 
 node scripts/process-batch.js bst "Binary Search Tree"
 ```
 
-Runs ingest → prepare → generateReport for `gajavegs` only (`gajavegs_mt` has no tar so
-`process-batch.js` skips it — its missing_tar report is generated later by `queue-emails.js`).
-Since A3 generated the token first, the PDF is also generated via `generateReportForToken`. Expect:
-- First run: ~1–3 min (LLM calls); subsequent runs near-instant (cached)
-- Success log: `  ✓  gajavegs  (Ns)` followed by `     PDF generated with token`
+Processes all three students with tars (`$STU_MT` is skipped — no tar). Expect:
+- First run: ~1–3 min per student (LLM calls); subsequent runs near-instant (cached)
+- Success: `  ✓  <student-id>  (Ns)` followed by `     PDF generated with token`
 
-Verify outputs:
+Verify:
 
 ```bash
-ls data/bst/output/gajavegs/
-# frontend.json  report.json  report.pdf  (plus ingest artifacts)
+for s in $STU1 $STU2 $STU3; do
+  echo "=== $s ==="; ls data/bst/output/$s/; echo
+done
+# Each should show: frontend.json  report.json  report.pdf  (plus ingest artifacts)
 
-# gajavegs_mt has no output yet — that's correct, generic PDF is generated by queue-emails.js
-ls data/bst/output/gajavegs_mt/ 2>/dev/null || echo "absent — expected"
+ls data/bst/output/$STU_MT/ 2>/dev/null || echo "$STU_MT absent — expected"
 ```
 
-If `report.pdf` is missing (e.g. A3 was skipped, or you need to regenerate after a URL change),
-run A5.
+Check the batch log for any failures:
+```bash
+tail -20 data/bst/batch.log
+# → DONE   3 succeeded,  0 failed
+```
 
-### A5. Regenerate the PDF with the real token
+### A5. Regenerate a PDF with the real token (if needed)
 
-Only needed if A4 didn't produce a PDF, or you want to force-regenerate with `BASE_URL` changes:
+Only needed if A4 didn't produce a PDF, or after a `BASE_URL` change:
 
 ```bash
+# Example for STU1 — repeat for any student
 export TOKEN=$(node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT token FROM tokens WHERE student_id='gajavegs' AND assignment='bst'").get();
+const row = db.prepare("SELECT token FROM tokens WHERE student_id=? AND assignment='bst'").get(process.env.STU1);
 db.close();
 console.log(row?.token ?? '');
 EOF
 )
 echo "Token: $TOKEN"
 
-rm -f data/bst/output/gajavegs/report.pdf
+rm -f data/bst/output/$STU1/report.pdf
 node --input-type=module << EOF
 import { generateReportForToken } from './lib/report.js';
 import path from 'path';
-const result = await generateReportForToken('gajavegs', 'bst', '$TOKEN', path.resolve('data'), 'https://feedback.csse.rose-hulman.edu');
+const result = await generateReportForToken('$STU1', 'bst', '$TOKEN', path.resolve('data'), 'https://feedback.csse.rose-hulman.edu');
 console.log('PDF written:', result);
 EOF
 ```
@@ -177,72 +181,49 @@ EOF
 ### A6. Copy outputs to local Mac for report iteration
 
 ```bash
-# Run on your Mac — pull pipeline outputs AND assessment config down
+# Run on your Mac
 rsync -av csse@feedback:~/230LoggerMonorepo/Frontend/data/bst/ \
   /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/data/bst/
 ```
-
-This syncs the whole `data/bst/` tree, which includes both `output/gajavegs/frontend.json`
-and `assessment-config.json`. Without `assessment-config.json` the local report generates
-with empty assessment cards.
 
 ---
 
 ## Part B — Iterate on the report (local Mac)
 
-No relay, no Zenbook, no JAR needed. Just Node running locally against the files copied in A6.
-
-All commands run from `Frontend/` on your Mac.
+All commands from `Frontend/` on your Mac.
 
 ### B1. Local `.env`
-
-Make sure your local `.env` has:
 
 ```env
 BASE_URL=http://localhost:3000
 DEV_BYPASS_AUTH=true
-SECRET_KEY=<any hex string — can match prod or be different>
+SECRET_KEY=<match prod value>
 ```
-
-`DEV_BYPASS_AUTH=true` skips RoseFire so you can open `/feedback?token=…` directly without
-a Rose-Hulman login.
 
 Verify:
-
 ```bash
-# Required vars present
 grep -E "^(BASE_URL|SECRET_KEY|DEV_BYPASS_AUTH)" .env
-# BASE_URL=http://localhost:3000
-# DEV_BYPASS_AUTH=true
-# SECRET_KEY=<value>
-
-# HOLD_EMAILS must be absent (would block email queue inspection)
-grep "^HOLD_EMAILS" .env && echo "WARNING: remove HOLD_EMAILS for local testing" || echo "OK"
+grep "^HOLD_EMAILS" .env && echo "WARNING: remove HOLD_EMAILS" || echo "OK"
 ```
 
-### B2. Build the frontend and start the local server
+### B2. Build and start the local server
 
 ```bash
-# Build the React app if any frontend source changed since last build
 npm run build
-
 node server.js
-# → Server running on port 3000
 ```
 
-### B3. Get the local token
-
-The pipeline outputs are synced but the local DB has no token yet:
+### B3. Get local tokens
 
 ```bash
-echo "gajavegs,gajavegs@rose-hulman.edu" > data/roster.dev.csv
+printf "$STU1,$EMAIL\n$STU_MT,$EMAIL\n" > data/roster.dev.csv
 node scripts/generate-tokens.js bst roster.dev.csv
 
 export TOKEN=$(node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT token FROM tokens WHERE student_id='gajavegs' AND assignment='bst'").get();
+const row = db.prepare("SELECT token FROM tokens WHERE student_id=? AND assignment='bst'").get(process.env.STU1);
 db.close();
 console.log(row?.token ?? '');
 EOF
@@ -256,257 +237,382 @@ echo "Token: $TOKEN"
 open "http://localhost:3000/report?token=$TOKEN"
 ```
 
-The browser opens the PDF inline. Verify:
+- [ ] Assessment table shows upcoming exams/assignments
+- [ ] Bar column present; Exam 2 bar is red, HW bars blue
+- [ ] Drill cards present with name + source badge + time/weight meta + code block
+- [ ] "Open drill" link: `http://localhost:3000/feedback?token=<token>#drill-...`
+- [ ] Footer: drill count, total time, feedback site link
 
-- [ ] Assessment table shows 8 rows: Exam 2, HW5, EditorTrees M1, HW6, EditorTrees M2, EditorTrees M3, Exam 3, Final Exam
-- [ ] Bar column present; Exam 2 bar is red, HW bars are blue
-- [ ] Drill cards for Exam 2 show numbered sections (not card boxes)
-- [ ] "Open drill" link uses `http://localhost:3000/feedback?token=<real-token>#drill-...`
-- [ ] "Also on Exam 2" section lists study guide links
-- [ ] Footer shows drill count, total time, and the feedback site link
-
-### B5. Verify drill links work
+### B5. Verify the feedback site
 
 ```bash
 open "http://localhost:3000/feedback?token=$TOKEN"
 ```
 
-- [ ] Feedback site loads (not white screen — check browser console if blank)
-- [ ] `DEV_BYPASS_AUTH=true` in `.env` means no RoseFire login required locally
-- [ ] Drill anchors (`#drill-testcontainsnonbst--`) scroll to the right section
-
-**Confirming drill links are correct in production:**
-The "Open drill" href in the PDF is `BASE_URL/feedback?token=TOKEN#drill-...`.
-`BASE_URL` is set from `.env` at PDF generation time. On Ubuntu, `BASE_URL=https://feedback.csse.rose-hulman.edu`.
-So as long as the PDF is generated on Ubuntu (or regenerated via A5), the links point to prod.
-If the PDF was generated locally with `localhost`, the links won't work on Ubuntu — always regenerate via A5 after pulling to Ubuntu.
+- [ ] Assignment list loads with BST card showing correct passing/failing counts
+- [ ] Click BST card → detail view loads
+- [ ] Drill anchor links (`#drill-...`) scroll to correct section
+- [ ] "All assignments" back button returns to list
 
 ### B6. Check the generic report (missing_tar path)
 
-The generic report is generated per-student by `queue-emails.js` so the footer feedback site
-link is unique to each student's token. Run it locally to generate and inspect the 2-page
-drill sheet PDF without sending any email:
-
 ```bash
-# Local Mac — generates the PDF and queues the email (won't send without a relay)
 node scripts/queue-emails.js bst "Binary Search Tree"
-# → [feedback_ready] gajavegs   → gajavegs@rose-hulman.edu (N patterns)
-# → [missing_tar]    gajavegs_mt → gajavegs@rose-hulman.edu (+ review guide)
-```
+# → [feedback_ready] $STU1  → $EMAIL (N patterns)
+# → [missing_tar]    $STU_MT → $EMAIL (+ review guide)
 
-Open via the server:
-```bash
 open "http://localhost:3000/report?token=$(node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT token FROM tokens WHERE student_id='gajavegs_mt' AND assignment='bst'").get();
+const row = db.prepare("SELECT token FROM tokens WHERE student_id=? AND assignment='bst'").get(process.env.STU_MT);
 db.close();
 process.stdout.write(row?.token ?? '');
 EOF
 )"
 ```
 
-Check:
-- [ ] **Page 1**: generic notice strip visible, assessment table shows upcoming exams, focal exam column shows drill names + intro + time/weight meta + source badge + practice resource links (e.g. "Practice Exam 2 (Winter 2020-21) ›"), footer shows "N topics · M min total" and correct `feedback?token=…` link
-- [ ] **Page 2**: "Drill Sheet" header, 3 drill cards each with name + source badge, time/weight meta, study guide link (e.g. "Exam 2 - 2023 questions ›"), Java `@Test` code block
-- [ ] Code block text is selectable — copy `@Test` through closing `}`, paste into a text editor, verify indentation preserved
-- [ ] Footer does **not** say "Only you can see this feedback"
+- [ ] **Page 1**: generic notice strip, assessment table, drill names, practice resource links, footer with feedback link
+- [ ] **Page 2**: "Drill Sheet" header, drill cards with source badge + code blocks, no footer "Only you can see..."
+- [ ] Code blocks are selectable
 
-**To iterate on the generic report layout** (no pipeline re-run needed):
+**To re-iterate on the generic report:**
 ```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-db.prepare("DELETE FROM email_queue WHERE token IN (SELECT token FROM tokens WHERE student_id='gajavegs_mt' AND assignment='bst')").run();
+db.prepare("DELETE FROM email_queue WHERE token IN (SELECT token FROM tokens WHERE student_id=? AND assignment='bst')").run(process.env.STU_MT);
 db.close();
 EOF
-rm -rf data/bst/output/gajavegs_mt
+rm -rf data/bst/output/$STU_MT
 node scripts/queue-emails.js bst "Binary Search Tree"
-# Then re-open the report URL above
 ```
 
-### B7. Iterate on the report design
+### B7. Iterate on report design
 
-**Report layout/data only** (no LLM calls needed) — edit `lib/reportTemplate.js` or `lib/report.js`,
-then:
-
+**Layout only** (no LLM calls):
 ```bash
-rm data/bst/output/gajavegs/report.json data/bst/output/gajavegs/report.pdf
+rm data/bst/output/$STU1/report.json data/bst/output/$STU1/report.pdf
 open "http://localhost:3000/report?token=$TOKEN"
-# Regenerates in ~4s (Puppeteer launch)
+# Regenerates in ~4s
 ```
 
-**Verify new drill intros or assessment config changes** — these are baked into `frontend.json`
-at pipeline time, so deleting `report.json`/`report.pdf` alone is not enough. You need to
-re-run the pipeline on Ubuntu with a cleared LLM cache:
-
+**Drill content / assessment config changes** (re-runs pipeline on Ubuntu):
 ```bash
-# On Ubuntu — clear cache, delete all outputs, re-run pipeline
+# On Ubuntu
 rm -rf ../Pipeline/cache/llm/*
-rm -rf data/bst/output/gajavegs/
+rm -rf data/bst/output/$STU1/
 node scripts/process-batch.js bst "Binary Search Tree"
 
-# Then pull results back to Mac
+# Pull to Mac
 rsync -av csse@feedback:~/230LoggerMonorepo/Frontend/data/bst/ \
   /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/data/bst/
 
-# Then regenerate the report
-rm data/bst/output/gajavegs/report.json data/bst/output/gajavegs/report.pdf
+rm data/bst/output/$STU1/report.json data/bst/output/$STU1/report.pdf
 open "http://localhost:3000/report?token=$TOKEN"
 ```
-
-Repeat until satisfied.
 
 ---
 
 ## Part C — Full e2e send test (Ubuntu server)
 
-Once the report looks right, run the full send test on the Ubuntu server.
 All commands from `Frontend/` on Ubuntu.
 
 ### C1. Pre-flight
 
 ```bash
-# Verify .env is in e2e test state
 grep -E "^(EMAIL_DEV_REDIRECT|BASE_URL|SECRET_KEY|ROSEFIRE_SECRET|ROSEFIRE_REGISTRY_TOKEN)" .env
-# Required output (order may vary):
 # BASE_URL=https://feedback.csse.rose-hulman.edu
 # EMAIL_DEV_REDIRECT=gajavegs@rose-hulman.edu
-# ROSEFIRE_REGISTRY_TOKEN=<uuid>
-# ROSEFIRE_SECRET=<value>
+# ROSEFIRE_SECRET=<value>  (kept even though login page is disabled)
 # SECRET_KEY=<value>
 
-# Forbidden vars must be absent
 grep -E "^(HOLD_EMAILS|DEV_BYPASS_AUTH)" .env \
-  && echo "ERROR: remove these before running e2e" || echo "OK — forbidden vars absent"
+  && echo "ERROR: remove before e2e" || echo "OK"
 
-# nginx + Express are up (check from Ubuntu — public domain won't loopback)
 curl -s http://localhost:3000/api/health
-# → {"status":"ok","relayLastHeartbeat":"<recent timestamp>","demo":true,...}
+# → {"status":"ok","relayLastHeartbeat":"<recent>","students":<n>,...}
 
-# Zenbook relay is registered and heartbeat is recent
 sqlite3 db/feedback.db \
   "SELECT relay_ip, relay_port, last_heartbeat FROM relay_status;"
 # → <zenbook-ip>|3001|<recent timestamp>
 # If stale: on Zenbook run `pm2 restart relay`
 ```
 
-### C2. Check the report link
+### C2. Get tokens for all three students
 
+```bash
+node --input-type=module << 'EOF'
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const db = require('better-sqlite3')('db/feedback.db');
+for (const id of [process.env.STU1, process.env.STU2, process.env.STU3, process.env.STU_MT]) {
+  const row = db.prepare("SELECT token FROM tokens WHERE student_id=? AND assignment='bst'").get(id);
+  console.log(`${id}: ${row?.token ?? 'NO TOKEN'}`);
+}
+db.close();
+EOF
+```
+
+Export STU1's token for subsequent commands:
 ```bash
 export TOKEN=$(node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT token FROM tokens WHERE student_id='gajavegs' AND assignment='bst'").get();
+const row = db.prepare("SELECT token FROM tokens WHERE student_id=? AND assignment='bst'").get(process.env.STU1);
 db.close();
 console.log(row?.token ?? '');
 EOF
 )
-echo "https://feedback.csse.rose-hulman.edu/report?token=$TOKEN"
 ```
 
-Open in browser — should download the same PDF you verified locally.
+### C3. Spot-check two feedback sites
 
-### C3. Check the feedback site
-
+Open these in browser:
 ```bash
 echo "https://feedback.csse.rose-hulman.edu/feedback?token=$TOKEN"
 ```
 
-Open in browser:
-- [ ] Feedback site loads (not white screen)
-- [ ] Drill sections visible, anchors match PDF links
+- [ ] Assignment list shows BST card with correct passing/failing counts
+- [ ] Click BST → detail view loads with test cards and timeline
+- [ ] Back button returns to list
 
-### C4. Queue both emails
+Repeat for `$STU2`'s token — confirm different feedback data loads.
+
+### C4. Queue emails for all students
 
 ```bash
 node scripts/queue-emails.js bst "Binary Search Tree"
-# → [feedback_ready] gajavegs   → gajavegs@rose-hulman.edu (N patterns)
-# → [missing_tar]    gajavegs_mt → gajavegs@rose-hulman.edu (+ review guide)
+# → [feedback_ready] $STU1  → $EMAIL (N patterns)
+# → [feedback_ready] $STU2  → $EMAIL (N patterns)
+# → [feedback_ready] $STU3  → $EMAIL (N patterns)
+# → [missing_tar]    $STU_MT → $EMAIL (+ review guide)
 ```
 
-Inspect both before they send:
-
+Inspect before send:
 ```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const rows = db.prepare("SELECT subject, email_type, body FROM email_queue WHERE assignment='bst' ORDER BY id").all();
+const rows = db.prepare("SELECT subject, email_type, recipient FROM email_queue WHERE assignment='bst' ORDER BY id").all();
 db.close();
-for (const r of rows) {
-  console.log(`\n[${r.email_type}] ${r.subject}`);
-  console.log(r.body.slice(0, 300) + '...');
-}
+for (const r of rows) console.log(`[${r.email_type}] ${r.subject}  →  ${r.recipient}`);
 EOF
 ```
 
 Verify:
-- [ ] `feedback_ready` subject: `CSSE 230 -- BST feedback available (N patterns, Exam 2)`
-- [ ] `missing_tar` subject: `CSSE 230 -- BST feedback: action needed`
-- [ ] Both bodies contain `<hr` tags (not dashes)
-- [ ] Both bodies contain links as `<a href=` tags
-- [ ] `feedback_ready` body has both report and feedback links
-- [ ] `missing_tar` body has upload link and review guide link
+- [ ] 3× `feedback_ready`: `CSSE 230: Binary Search Tree Feedback Available (N patterns, Exam 2)`
+- [ ] 1× `missing_tar`: `CSSE 230: Binary Search Tree Feedback, Action Needed`
+- [ ] All recipients show `$EMAIL` (dev redirect active)
 
 ### C5. Confirm delivery
 
 ```bash
-node --input-type=module << 'EOF'
+sqlite3 db/feedback.db \
+  "SELECT email_type, student_id, status, sent_at FROM email_queue eq JOIN tokens t ON eq.token=t.token WHERE eq.assignment='bst' ORDER BY eq.id;"
+# All rows should reach status='sent' within ~30s
+```
+
+If still `pending` after 30s, re-check C1 (relay not registered or Zenbook asleep).
+
+### C6. Verify emails in inbox
+
+Check `gajavegs@rose-hulman.edu`. All subjects prefixed `[DEV to gajavegs@rose-hulman.edu]`.
+
+**feedback_ready email (check STU1's):**
+- [ ] Arrives and renders HTML — sans-serif font, `<hr>` as lines, no raw tags
+- [ ] Report PDF link: opens personalized report, shows assessment table and drill column
+- [ ] "Open drill ›" links in PDF use `https://feedback.csse.rose-hulman.edu/feedback?token=…#drill-…`
+- [ ] Feedback site link: loads interactive site with STU1's test card data
+- [ ] Time estimates under each link (~2 min report, ~5–10 min site)
+
+**missing_tar email:**
+- [ ] Arrives and renders HTML
+- [ ] Upload link opens the feedback site showing the upload widget (not a 404 or crash)
+- [ ] Review guide PDF link: 2-page generic report
+  - [ ] Page 1: assessment table, drill names, practice resource links
+  - [ ] Page 2: Drill Sheet with code blocks, no "Only you can see this feedback" in footer
+
+---
+
+## Part D — Non-happy-path tests
+
+Run once before the first real send on a live browser hitting
+`https://feedback.csse.rose-hulman.edu`.
+
+### D1 — Landing page and token routing
+
+**No token:**
+1. Open `https://feedback.csse.rose-hulman.edu/`
+   - [ ] Shows "Check your email" card — not a crash, not a login form
+
+2. Open `https://feedback.csse.rose-hulman.edu/login`
+   - [ ] Same "Check your email" card
+
+**Invalid token:**
+3. Open `https://feedback.csse.rose-hulman.edu/feedback?token=badtoken`
+   - [ ] Redirects to `/login?error=invalid`
+   - [ ] Page shows "That link has expired or is invalid. Use the link from your feedback email."
+
+**Missing token on feedback:**
+4. Open `https://feedback.csse.rose-hulman.edu/feedback` (no query string)
+   - [ ] Redirects to `/login` (shows "Check your email")
+
+**Valid token:**
+5. Open `https://feedback.csse.rose-hulman.edu/feedback?token=$TOKEN`
+   - [ ] Assignment list loads with BST card
+
+---
+
+### D2 — Assignment list and reviewed state
+
+1. Open `https://feedback.csse.rose-hulman.edu/feedback?token=$TOKEN`
+   - [ ] BST card appears under "New feedback"
+   - [ ] Status pill shows correct count ("N to review" or "All passing")
+   - [ ] Mini-bar colors match test counts
+
+2. Click BST card → detail view
+   - [ ] Back button ("All assignments") returns to list
+
+3. Open every feedback card (all tabs — Issues, Improved, Passing)
+   - [ ] Each tab's dot disappears as cards are opened
+   - [ ] When the last card is opened: green "✓ You've reviewed all feedback" banner appears
+   - [ ] Tab checkmarks (✓) appear
+
+4. Click "All assignments"
+   - [ ] BST card has moved to "Previously reviewed" section
+
+5. Open a new tab with the same URL
+   - [ ] Assignment list immediately shows BST under "Previously reviewed" (server-persisted)
+   - [ ] Click BST → detail view shows all tab checkmarks already set (no dots)
+
+6. Close and reopen the browser entirely, revisit the same URL
+   - [ ] Same result — "Previously reviewed" and all checkmarks intact
+
+---
+
+### D3 — Study materials links
+
+From STU1's report PDF or feedback site, find a drill with a source badge.
+
+**PDF source link:**
+1. Click a source badge in the report
+   - [ ] Opens study materials viewer (not 404)
+   - [ ] `.md` files render as HTML; `.pdf` files open or download
+
+**Feedback site source link:**
+2. On the feedback site, open a drill modal with a source badge
+   - [ ] Same checks as above
+   - [ ] No token required (study materials are public course content)
+
+---
+
+### D4 — Upload / reprocessing flow
+
+```bash
+# Create a clean token with no pipeline data
+echo "uploadtest,$EMAIL" > data/roster.dev.csv
+node scripts/generate-tokens.js bst roster.dev.csv
+
+export UTOKEN=$(node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const rows = db.prepare("SELECT email_type, status, sent_at, error_msg FROM email_queue WHERE assignment='bst' ORDER BY id").all();
+const row = db.prepare("SELECT token FROM tokens WHERE student_id='uploadtest' AND assignment='bst'").get();
 db.close();
-console.table(rows);
+console.log(row?.token ?? '');
 EOF
-# Both rows should reach status: 'sent' within ~30s
+)
+echo "https://feedback.csse.rose-hulman.edu/feedback?token=$UTOKEN"
 ```
 
-If still `pending` after 30 seconds, re-check C1 (relay not registered).
+1. Open the URL — shows "no run.tar found" message with file upload widget
+2. Upload `Pipeline/testInputs/run-demo.tar`
+   - [ ] Status changes to uploading, then success message
+3. Poll pipeline:
+   ```bash
+   sqlite3 db/feedback.db \
+     "SELECT student_id, status, source FROM pipeline_runs WHERE student_id='uploadtest' ORDER BY id DESC LIMIT 1;"
+   # → uploadtest|success|upload
+   ```
+4. Check for regeneration email:
+   ```bash
+   sqlite3 db/feedback.db \
+     "SELECT status, subject FROM email_queue WHERE token='$UTOKEN' ORDER BY id DESC LIMIT 1;"
+   # status='sent', subject contains "updated feedback"
+   ```
+   - [ ] Email arrives with "updated feedback" in subject
+5. Open `https://feedback.csse.rose-hulman.edu/feedback?token=$UTOKEN`
+   - [ ] Now shows the feedback list (not the upload prompt)
 
-### C6. Verify both emails in your inbox
+**Rejection cases:**
+6. Upload a `.zip` file renamed `.tar` → server rejects with error message
+7. Upload a second tar for `uploadtest` immediately → rate-limit message (max 3)
 
-Check `gajavegs@rose-hulman.edu`. Both subjects prefixed `[DEV → gajavegs@rose-hulman.edu]`.
+---
 
-**feedback_ready email:**
-- [ ] Email arrives
-- [ ] Renders HTML — sans-serif font, `<hr>` rules as lines, no raw tags
-- [ ] Report PDF link opens — personalized 1-page report with assessment table and drill column
-- [ ] "Open drill ›" links in PDF use `https://feedback.csse.rose-hulman.edu/feedback?token=…#drill-…`
-- [ ] Feedback site link opens the interactive site with your test card data
+### D5 — Telemetry
 
-**missing_tar email:**
-- [ ] Email arrives
-- [ ] Upload link opens `https://feedback.csse.rose-hulman.edu/feedback?token=…` showing the upload widget
-- [ ] Review guide PDF link opens the generic 2-page report
-- [ ] Generic report page 1: assessment table, focal exam drills, generic notice strip
-- [ ] Generic report page 2: "Drill Sheet" with 3 drill cards, code blocks selectable, numbered hints
+Open `https://feedback.csse.rose-hulman.edu/feedback?token=$TOKEN` in browser.
+
+```bash
+sqlite3 db/feedback.db \
+  "SELECT event_type, event_data, timestamp FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 20;"
+```
+
+- [ ] `page_view` appears after load
+- [ ] `card_expanded` appears after clicking a test card
+- [ ] `feedback_opened` appears after opening a feedback accordion, with `test_id` in event_data
+- [ ] `drill_opened` / `drill_closed` appear after opening and closing a drill modal
+- [ ] `tab_switch` appears after switching tabs
+- [ ] After opening all feedback cards: `feedback_reviewed` appears
+
+**Clean up test events before real send:**
+```bash
+sqlite3 db/feedback.db "DELETE FROM events WHERE token='$TOKEN';"
+```
+
+---
+
+### D6 — HTML email rendering
+
+With `EMAIL_DEV_REDIRECT` active (Part C), check the received email in Outlook:
+
+- [ ] Renders HTML — sans-serif font, `<hr>` as lines, no raw `<div>` tags visible
+- [ ] Links are clickable hyperlinks
+- [ ] No mid-sentence line breaks
+- [ ] Report and feedback links are distinct and correct
+- [ ] Footer: `gajavegs@rose-hulman.edu` contact, no "replies not monitored" double line
+
+If Outlook shows raw tags:
+```bash
+grep HTMLBody Frontend/scripts/relay-server.js
+# → '$m.HTMLBody = $p.body',
+```
 
 ---
 
 ## Reset between iterations
 
-**Report layout only** (local Mac — no pipeline re-run):
+**Report layout only** (Mac, no pipeline re-run):
 ```bash
-rm data/bst/output/gajavegs/report.json data/bst/output/gajavegs/report.pdf
+rm data/bst/output/$STU1/report.json data/bst/output/$STU1/report.pdf
 open "http://localhost:3000/report?token=$TOKEN"
 ```
 
-**Drill intros / assessment config changes** (Ubuntu — re-runs pipeline with fresh LLM calls):
+**Pipeline re-run, reuse LLM cache** (Ubuntu):
 ```bash
-rm -rf ../Pipeline/cache/llm/*
-rm -rf data/bst/output/gajavegs/
+rm -rf data/bst/output/$STU1/ data/bst/output/$STU2/ data/bst/output/$STU3/
 node scripts/process-batch.js bst "Binary Search Tree"
-# Then rsync to Mac and delete report.json/report.pdf as in B6
 ```
 
-**Cached pipeline re-run** (Ubuntu — re-runs pipeline, reuses LLM cache):
+**Pipeline re-run, fresh LLM calls** (Ubuntu, costs ~$0.07/student):
 ```bash
-rm -rf data/bst/output/gajavegs/
+rm -rf ../Pipeline/cache/llm/*
+rm -rf data/bst/output/$STU1/ data/bst/output/$STU2/ data/bst/output/$STU3/
 node scripts/process-batch.js bst "Binary Search Tree"
 ```
 
@@ -520,27 +626,31 @@ db.prepare("DELETE FROM email_queue WHERE assignment='bst'").run();
 db.close();
 EOF
 node scripts/queue-emails.js bst "Binary Search Tree"
+```
+
+**Generic report only**:
+```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-const row = db.prepare("SELECT subject, body FROM email_queue ORDER BY id DESC LIMIT 1").get();
+db.prepare("DELETE FROM email_queue WHERE token IN (SELECT token FROM tokens WHERE student_id=? AND assignment='bst')").run(process.env.STU_MT);
 db.close();
-console.log('Subject:', row?.subject);
-console.log('Body:\n', row?.body);
 EOF
+rm -rf data/bst/output/$STU_MT
+node scripts/queue-emails.js bst "Binary Search Tree"
 ```
 
-**Full reset — nuke the DB entirely** (fastest, Ubuntu or Mac):
+**Full reset — nuke DB** (fastest):
 ```bash
 rm db/feedback.db
-pm2 restart feedback   # schema recreates on startup; Zenbook re-registers within ~60s
-rm -rf data/bst/output/gajavegs data/bst/output/gajavegs_mt
+pm2 restart feedback
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
 rm -rf ../Pipeline/cache/llm/*
-# Then repeat from A2
+# Repeat from A2
 ```
 
-**Full reset — per-assignment, preserves relay registration** (Ubuntu):
+**Full reset — per-assignment, preserve relay**:
 ```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
@@ -548,279 +658,31 @@ const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
 db.prepare("DELETE FROM email_queue   WHERE assignment='bst'").run();
 db.prepare("DELETE FROM pipeline_runs WHERE assignment='bst'").run();
+db.prepare("DELETE FROM events        WHERE token IN (SELECT token FROM tokens WHERE assignment='bst')").run();
 db.prepare("DELETE FROM tokens        WHERE assignment='bst'").run();
 db.close();
 console.log('DB cleared for bst');
 EOF
-rm -rf data/bst/output/gajavegs data/bst/output/gajavegs_mt
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
 rm -rf ../Pipeline/cache/llm/*
 pm2 restart feedback
-mvn -f ../Pipeline/pom.xml package -q -DskipTests
-# Then repeat from A2
+# Repeat from A2
 ```
-
-**Generic report only** (re-generate without re-running pipeline):
-```bash
-node --input-type=module << 'EOF'
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const db = require('better-sqlite3')('db/feedback.db');
-db.prepare("DELETE FROM email_queue WHERE token IN (SELECT token FROM tokens WHERE student_id='gajavegs_mt' AND assignment='bst')").run();
-db.close();
-EOF
-rm -rf data/bst/output/gajavegs_mt
-node scripts/queue-emails.js bst "Binary Search Tree"
-# gajavegs_mt gets a fresh generic PDF; gajavegs is skipped (already queued)
-```
-
-**After deleting tokens and re-running generate-tokens.js:** The token value will be **identical**
-to before (HMAC is deterministic given the same SECRET_KEY). Any PDF links already sent remain valid.
-
----
-
-## Part D — Non-happy-path tests
-
-Run these once before the first real send. They only need to be done once — not per batch.
-All browser tests should be done on a real browser hitting `https://feedback.csse.rose-hulman.edu`
-(not localhost), since auth and URL routing differ.
-
----
-
-### D1 — RoseFire login (admin interface)
-
-RoseFire is LDAP-backed. If it works for your credentials it works for everyone.
-
-1. Open `https://feedback.csse.rose-hulman.edu/admin` in a fresh private window (no session).
-   - [ ] Redirects to RoseFire login page (not a white screen or 500)
-
-2. Log in with `gajavegs` / your Rose-Hulman password.
-   - [ ] Redirects back to `/admin` and shows the admin dashboard
-   - [ ] Your username is displayed somewhere in the UI (or no error)
-
-3. Log out (find the logout button or clear cookies).
-   - [ ] Session is cleared — revisiting `/admin` redirects to RoseFire again
-
-4. Attempt to access `/admin` from a normal student token URL (e.g. open `/admin` in the same browser you used for the student feedback URL).
-   - [ ] Blocked — either redirects to RoseFire or returns a permission error
-   - If `DEV_BYPASS_AUTH=true` is in `.env`, this test only applies to production (Ubuntu). Locally, admin auth is also bypassed.
-
----
-
-### D2 — Landing page flows
-
-```
-https://feedback.csse.rose-hulman.edu/
-```
-
-**Valid email:**
-1. Enter `gajavegs@rose-hulman.edu`
-   - [ ] Redirects to `/feedback?token=<your token>`
-   - [ ] Feedback site loads with your data
-
-**Unknown email (not in roster):**
-2. Enter `nobody@rose-hulman.edu`
-   - [ ] Shows "no feedback found for that address" message (not a crash)
-   - [ ] Does NOT reveal that the email exists in any other context
-
-**Non-Rose-Hulman email:**
-3. Enter `test@gmail.com`
-   - [ ] Shows appropriate rejection message
-   - [ ] Does NOT redirect
-
-**Rate limiting:**
-4. Submit the form 7 times in quick succession (any email)
-   - [ ] 7th request shows a rate-limit message (not a crash or silent failure)
-   - Wait ~1 min; the next submission should work again.
-
----
-
-### D3 — Study materials links
-
-From `gajavegs`'s report PDF or feedback site, find a drill with a source link (e.g. "BinaryHeaps preview ↗" badge).
-
-**PDF source link:**
-1. In the report PDF, click a source badge that links to a study material
-   - [ ] Opens the study materials viewer (not 404)
-   - [ ] `.md` files render as HTML (not raw markdown text)
-   - [ ] `.pdf` files either render inline or download cleanly
-
-**Feedback site source link:**
-2. On the feedback site, open a drill modal that has a source badge
-   - [ ] Click the source badge — same checks as above
-   - [ ] Badge shows urgency color (red ≤3d, orange ≤7d, yellow ≤14d, purple otherwise)
-
-If any link returns 404, check that `courseAppearances[].url` in `frontend.json` matches an actual path under `study-materials/`.
-
----
-
-### D4 — Upload / reprocessing flow
-
-This tests the path for missing_tar students who upload manually after receiving the email.
-Use the `gajavegs` token (already has a successful pipeline run — that's fine, upload rate-limiting is per student).
-
-**Happy path:**
-1. Open `https://feedback.csse.rose-hulman.edu/feedback?token=<token>`
-2. The feedback site shows your real data. For upload testing we need the null state —
-   either use a second test token with no pipeline run, or check the UI logic directly.
-
-   Easiest approach: create a clean test token with no pipeline data:
-   ```bash
-   # Ubuntu, from Frontend/
-   echo "uploadtest,gajavegs@rose-hulman.edu" > data/roster.dev.csv
-   node scripts/generate-tokens.js bst roster.dev.csv
-
-   export UTOKEN=$(node --input-type=module << 'EOF'
-   import { createRequire } from 'module';
-   const require = createRequire(import.meta.url);
-   const db = require('better-sqlite3')('db/feedback.db');
-   const row = db.prepare("SELECT token FROM tokens WHERE student_id='uploadtest' AND assignment='bst'").get();
-   db.close();
-   console.log(row?.token ?? '');
-   EOF
-   )
-   echo "Upload test URL: https://feedback.csse.rose-hulman.edu/feedback?token=$UTOKEN"
-   ```
-
-3. Open the upload test URL in a browser:
-   - [ ] Shows the "no run.tar found" message with a file upload widget (not white screen)
-   - [ ] `allowUpload: true` path — file picker is visible
-
-4. Upload a known-good `run.tar` (e.g. `Pipeline/testInputs/run-demo.tar`):
-   - [ ] Upload button accepts the file
-   - [ ] Status changes to "processing" or a spinner appears
-   - [ ] After ~1–3 min, status changes to success (or page shows feedback)
-
-5. Poll the DB for the pipeline run:
-   ```bash
-   sqlite3 db/feedback.db \
-     "SELECT student_id, status, source, error_msg FROM pipeline_runs WHERE student_id='uploadtest' ORDER BY id DESC LIMIT 1;"
-   # → uploadtest|success|upload|
-   ```
-
-6. Check for the regeneration email:
-   ```bash
-   sqlite3 db/feedback.db \
-     "SELECT status, subject FROM email_queue WHERE token='$UTOKEN' ORDER BY id DESC LIMIT 1;"
-   # status should reach 'sent' within ~30s of pipeline success
-   ```
-   - [ ] Email arrives at `gajavegs@rose-hulman.edu` with `[DEV →` prefix
-   - [ ] Subject mentions "updated feedback"
-
-7. Open the report for the upload test token:
-   ```bash
-   echo "https://feedback.csse.rose-hulman.edu/report?token=$UTOKEN"
-   ```
-   - [ ] PDF downloads and is not blank
-   - [ ] Feedback site at `/feedback?token=$UTOKEN` shows the processed data (not the upload prompt)
-
-**Rejection cases:**
-8. Try uploading a `.zip` file renamed to `.tar`:
-   - [ ] Server rejects it with an error message (not a crash, not silent acceptance)
-
-9. Try uploading a second tar for `uploadtest` within the rate limit window (immediately after step 4):
-   - [ ] Server rejects with rate-limit message
-
----
-
-### D5 — Telemetry events
-
-Requires the React app to be built (`npm run build` on Ubuntu) with the latest changes (page_view, drill events).
-
-```bash
-# Ubuntu — after build
-pm2 restart feedback
-```
-
-Open `https://feedback.csse.rose-hulman.edu/feedback?token=<gajavegs token>` in browser.
-
-**Check page_view:**
-```bash
-sqlite3 db/feedback.db \
-  "SELECT event_type, timestamp FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 10;"
-```
-- [ ] `page_view` row appears within a few seconds of loading
-
-**Check card_expanded:**
-1. Click any test card header to expand it
-   - [ ] `card_expanded` row appears in events table (fires on open, not on close)
-2. Click the same card header again to collapse, then expand again
-   - [ ] A second `card_expanded` row appears (fires every open, not just first)
-
-**Check diff_opened:**
-3. Expand a test card that shows a "Code change" section
-4. Click the "Code change" toggle to open it
-   - [ ] `diff_opened` row appears with `diff_count` matching the number of diffs shown
-
-**Check drill events:**
-5. Expand a test card that has a drill
-6. Click "✦ practice drill" button
-   - [ ] `drill_opened` row appears in events table
-7. Click the copy button on the drill code
-   - [ ] `drill_copy` row appears
-8. Click "Show hints"
-   - [ ] `hint_revealed` row appears
-9. Close the modal (✕ Close button)
-   - [ ] `drill_closed` row appears with a `seconds` value > 0
-
-Full query:
-```bash
-sqlite3 db/feedback.db \
-  "SELECT event_type, event_data, timestamp FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 15;"
-```
-
-**Clean up your own test events before real send:**
-```bash
-sqlite3 db/feedback.db \
-  "DELETE FROM events WHERE token='$TOKEN';"
-```
-
----
-
-### D6 — HTML email rendering
-
-With `EMAIL_DEV_REDIRECT` active, queue and send the test email (Part C), then check the received email:
-
-- [ ] Email renders in HTML (not plain text with raw `<div>` tags visible)
-- [ ] `<hr>` horizontal rules appear as visual lines, not dashes
-- [ ] Font is sans-serif throughout including the footer contact line
-- [ ] Links are clickable hyperlinks, not raw URLs
-- [ ] No mid-sentence line breaks splitting words
-- [ ] Report link and feedback link are distinct and correct
-- [ ] No double horizontal lines (one after breadcrumb, one before footer — that's correct)
-
-If Outlook shows raw HTML tags, check that `relay-server.js` uses `$m.HTMLBody` not `$m.Body`:
-```bash
-grep HTMLBody Frontend/scripts/relay-server.js
-# → '$m.HTMLBody          = $p.body',
-```
-
----
-
-### D7 — Validate assignment config (pre-batch)
-
-```bash
-# Ubuntu or Mac, from Frontend/
-node scripts/validate-assignment-config.js bst
-node scripts/validate-assignment-config.js wuas
-```
-- [ ] Both exit 0 (green checkmarks or "Passed")
-- [ ] No ERROR lines
-
-If any WARNINGs appear, review them — they may indicate drills without assessment coverage.
 
 ---
 
 ## Before sending to real students
 
-- [ ] **Part D complete** — all non-happy-path checks above passed
-- [ ] Run `node scripts/validate-assignment-config.js bst` — exits 0
-- [ ] Both emails received and verified in Outlook (C6) — including generic 2-page PDF
-- [ ] Remove or comment out `EMAIL_DEV_REDIRECT` in Ubuntu `.env`
-- [ ] `pm2 restart feedback` on Ubuntu after `.env` change
-- [ ] Replace `roster.dev.csv` with the real class roster at `data/roster.csv`
-- [ ] Re-run `generate-tokens.js bst` (no roster file arg → uses `data/roster.csv`)
-- [ ] Re-run `queue-emails.js bst "Binary Search Tree"`
-- [ ] Confirm PDFs generated with `BASE_URL=https://feedback.csse.rose-hulman.edu` (check one link in a PDF before bulk send)
-- [ ] Delete your own test events: `DELETE FROM events WHERE token='<your token>';`
-- [ ] `npm run build` run in `Frontend/` if React app changed since last build
-- [ ] Zenbook sleep disabled, power adapter connected, `pm2 list` shows relay online
+- [ ] Part D complete — all non-happy-path checks passed
+- [ ] All 3 students' reports verified in browser (one PDF per student, correct token in links)
+- [ ] Both email types received and HTML-rendered correctly in Outlook (C6)
+- [ ] `EMAIL_DEV_REDIRECT` removed (or commented out) from Ubuntu `.env`
+- [ ] `pm2 restart feedback` after `.env` change
+- [ ] Replace `roster.dev.csv` with real class roster at `data/roster.csv`
+- [ ] Re-run `node scripts/generate-tokens.js bst` (no roster arg → uses `data/roster.csv`)
+- [ ] Back up DB: `cp db/feedback.db db/feedback-pre-bst-send-$(date +%F).db`
+- [ ] Re-run `node scripts/queue-emails.js bst "Binary Search Tree"`
+- [ ] Verify `BASE_URL=https://feedback.csse.rose-hulman.edu` is set (check one PDF link)
+- [ ] Delete your own test events: `sqlite3 db/feedback.db "DELETE FROM events WHERE token='$TOKEN';"`
+- [ ] `npm run build` if any React source changed since last build
+- [ ] Zenbook: sleep disabled, power adapter connected, `pm2 list` shows relay online

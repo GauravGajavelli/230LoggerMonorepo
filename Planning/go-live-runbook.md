@@ -329,7 +329,7 @@ sqlite3 db/feedback.db \
    WHERE eq.assignment='bst' ORDER BY eq.id LIMIT 10;"
 ```
 
-Verify subject lines look correct: `CSSE 230 -- BST feedback available (N patterns, Exam 2)`
+Verify subject lines look correct: `CSSE 230: Binary Search Tree Feedback Available (N patterns, Exam 2)`
 
 ### 4c. Preview a full email body
 
@@ -410,9 +410,11 @@ sqlite3 db/feedback.db \
 
 Expected after loading the page and opening a drill:
 - `page_view` — fires on page load
+- `feedback_opened` — fires when a feedback accordion is expanded (with `test_id`)
 - `drill_opened` — fires when drill modal opens
 - `drill_closed` — fires on close (with `seconds` value)
 - `hint_revealed` — fires if you click "Show hints"
+- `feedback_reviewed` — fires once when all feedback cards have been opened
 
 If `page_view` is missing: the React build is stale — run `npm run build && pm2 restart feedback`.
 
@@ -510,7 +512,7 @@ pm2 restart feedback
 
 Check `gajavegs@rose-hulman.edu` (no `[DEV →]` prefix now):
 
-- [ ] Subject: `CSSE 230 -- BST feedback: action needed`
+- [ ] Subject: `CSSE 230: Binary Search Tree Feedback, Action Needed`
 - [ ] Renders HTML — sans-serif font, `<hr>` rules as lines
 - [ ] Upload link clickable → shows file upload widget at feedback site
 - [ ] Review guide link clickable → generic 2-page PDF loads
@@ -678,7 +680,7 @@ pm2 restart feedback
 These are the things most likely to catch you off-guard. Check them during Step 4 preview.
 
 ### Email content
-- [ ] **Subject line length**: subjects over ~60 chars get clipped in mobile preview panes. Check the longest one: `CSSE 230 -- BST feedback available (N patterns, Exam 2)` — if pattern count is double digits, it may push past 70 chars. The script already has a short-subject fallback; verify it triggers if needed.
+- [ ] **Subject line length**: subjects over ~60 chars get clipped in mobile preview panes. Check the longest one: `CSSE 230: Binary Search Tree Feedback Available (N patterns, Exam 2)` — if pattern count is double digits, it may push past 70 chars. The script already has a short-subject fallback (`CSSE 230: Binary Search Tree Feedback Available (N patterns)` without the exam name); verify it triggers if needed.
 - [ ] **Zero patterns**: a student who submitted but had no detectable patterns gets `(0 patterns, Exam 2)` in the subject. Confirm this looks intentional, not broken. Consider whether the body copy still reads well with "0 patterns were identified."
 - [ ] **Missing_tar with no assessment config**: `generateGenericReport` returns null, `reportLink` is null, email omits the review guide section. Confirm the email still makes sense without it — currently it just says "upload your tar" with no secondary link.
 - [ ] **Student email addresses**: verify no addresses in the roster have trailing spaces, typos, or non-`@rose-hulman.edu` domains that slipped through. A bounce won't break the relay but will show as `dead` after 3 attempts and won't retry automatically.
