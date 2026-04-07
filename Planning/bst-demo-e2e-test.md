@@ -1,9 +1,8 @@
 # BST — End-to-End Test Runbook
 
 Tests the full pipeline from real `.tar` files through to received emails with working report
-and feedback links. Three students with tars (gajavegs + two real submissions) and one
-missing-tar case. Assumes the Ubuntu server is running via pm2, nginx configured, JAR built,
-DB initialized, and Zenbook relay running.
+and feedback links. Five students with tars and one missing-tar case. Assumes the Ubuntu server
+is running via pm2, nginx configured, JAR built, DB initialized, and Zenbook relay running.
 
 ---
 
@@ -13,15 +12,17 @@ Student IDs are now **email prefixes** (everything before `@rose-hulman.edu`), n
 Set these once at the top of your shell session.
 
 ```bash
-export STU1=gajavegs            # email prefix for your own account
-export STU2=guffeygi            # email prefix for real student 1
-export STU3=theslikj            # email prefix for real student 2
+export STU1=baileyjn            # Jack-B-RHIT        (130 KB)
+export STU2=mirandac            # rhit-mirandac      (116 KB)
+export STU3=osujiun             # rhit-osujiun       (108 KB)
+export STU4=gheorgg             # rhit-gheorgg       ( 81 KB)
+export STU5=adusumn             # nirdeshadusumilli2007 (36 KB)
 export STU_MT=gajavegs-mt       # missing-tar test case (no run.tar)
 export EMAIL=gajavegs@rose-hulman.edu  # all dev emails redirect here
 ```
 
-The tar files in `Pipeline/testInputs/` are still named by GitHub username
-(`run-rhit-guffeygi.tar`). Map them to email-prefix directories in A2.
+All tars are inside `Pipeline/testInputs/studentTars/allTar-BST-Sp2026-7April.zip`.
+GitHub usernames (used in the zip) map to email-prefix directories as shown in A2.
 
 ---
 
@@ -64,7 +65,7 @@ All commands from `Frontend/` on Ubuntu.
 ```bash
 rm db/feedback.db
 pm2 restart feedback   # schema recreates automatically; Zenbook re-registers within ~60s
-rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU4 data/bst/output/$STU5 data/bst/output/$STU_MT
 rm -rf ../Pipeline/cache/llm/*
 ```
 
@@ -82,7 +83,7 @@ db.close();
 console.log('DB cleared for bst');
 EOF
 
-rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU4 data/bst/output/$STU5 data/bst/output/$STU_MT
 rm -rf ../Pipeline/cache/llm/*
 pm2 restart feedback
 ```
@@ -90,34 +91,38 @@ pm2 restart feedback
 ### A2. Place the tar files
 
 `process-batch.js` discovers students by scanning `data/bst/tars/` for subdirectories with a
-`run.tar`. Remove leftover directories from previous runs first.
+`run.tar`. Directories must be named by **email prefix** (= student ID).
 
-Tars in `Pipeline/testInputs/` are named `run-<githubUsername>.tar` — find the right filenames first:
-
-```bash
-ls ../Pipeline/testInputs/*.tar
-# → run-demo.tar  run-rhit-guffeygi.tar  run-rhit-theslikj.tar  ...
-```
-
-Then stage all three in one block. Directories must be named by **email prefix** (= student ID):
+All tars live in one zip. Extract them in a single block:
 
 ```bash
+ZIPFILE="../Pipeline/testInputs/studentTars/allTar-BST-Sp2026-7April.zip"
+
 # Remove any leftover tars from previous runs
-rm -rf data/bst/tars/$STU1 data/bst/tars/$STU2 data/bst/tars/$STU3
+rm -rf data/bst/tars/$STU1 data/bst/tars/$STU2 data/bst/tars/$STU3 data/bst/tars/$STU4 data/bst/tars/$STU5
 
-mkdir -p data/bst/tars/$STU1 && cp ../Pipeline/testInputs/run-demo.tar              data/bst/tars/$STU1/run.tar
-mkdir -p data/bst/tars/$STU2 && cp ../Pipeline/testInputs/run-rhit-guffeygi.tar     data/bst/tars/$STU2/run.tar
-mkdir -p data/bst/tars/$STU3 && cp ../Pipeline/testInputs/run-rhit-theslikj.tar     data/bst/tars/$STU3/run.tar
+for entry in \
+  "Jack-B-RHIT:$STU1" \
+  "rhit-mirandac:$STU2" \
+  "rhit-osujiun:$STU3" \
+  "rhit-gheorgg:$STU4" \
+  "nirdeshadusumilli2007:$STU5"; do
+  github="${entry%%:*}"
+  id="${entry##*:}"
+  mkdir -p data/bst/tars/$id
+  unzip -p "$ZIPFILE" "allTar-BST-Sp2026-7April/run-${github}.tar" > data/bst/tars/$id/run.tar
+done
 
 # STU_MT — intentionally no tar (missing_tar email path)
 # Do NOT create data/bst/tars/$STU_MT
 
-# Confirm exactly 3 directories, each with a run.tar
-ls data/bst/tars/
-find data/bst/tars -name run.tar
-# → data/bst/tars/gajavegs/run.tar
-# → data/bst/tars/<stu2-id>/run.tar
-# → data/bst/tars/<stu3-id>/run.tar
+# Confirm exactly 5 directories, each with a non-empty run.tar
+find data/bst/tars -name run.tar -size +0c
+# → data/bst/tars/baileyjn/run.tar
+# → data/bst/tars/mirandac/run.tar
+# → data/bst/tars/osujiun/run.tar
+# → data/bst/tars/gheorgg/run.tar
+# → data/bst/tars/adusumn/run.tar
 ```
 
 ### A3. Create the dev roster and generate tokens
@@ -126,16 +131,18 @@ Student IDs are derived from the email column (prefix before `@`). The first col
 reference label only — put anything there.
 
 ```bash
-printf "stu1,$STU1@rose-hulman.edu\nstu2,$STU2@rose-hulman.edu\nstu3,$STU3@rose-hulman.edu\nstu-mt,$STU_MT@rose-hulman.edu\n" \
+printf ",$STU1@rose-hulman.edu\n,$STU2@rose-hulman.edu\n,$STU3@rose-hulman.edu\n,$STU4@rose-hulman.edu\n,$STU5@rose-hulman.edu\n,$STU_MT@rose-hulman.edu\n" \
   > data/roster.dev.csv
 node scripts/generate-tokens.js bst roster.dev.csv
-# → gajavegs → <token>  (gajavegs@rose-hulman.edu)
-# → guffeygi → <token>  (guffeygi@rose-hulman.edu)
-# → theslikj → <token>  (theslikj@rose-hulman.edu)
+# → baileyjn  → <token>  (baileyjn@rose-hulman.edu)
+# → mirandac  → <token>  (mirandac@rose-hulman.edu)
+# → osujiun   → <token>  (osujiun@rose-hulman.edu)
+# → gheorgg   → <token>  (gheorgg@rose-hulman.edu)
+# → adusumn   → <token>  (adusumn@rose-hulman.edu)
 # → gajavegs-mt → <token>  (gajavegs-mt@rose-hulman.edu)
 ```
 
-All four emails will be redirected to `$EMAIL` via `EMAIL_DEV_REDIRECT`.
+All six emails will be redirected to `$EMAIL` via `EMAIL_DEV_REDIRECT`.
 
 **Token stability:** Re-running `generate-tokens.js` always produces the same value. Deleting
 the DB row and re-running gives the same token, so existing PDF links stay valid. Only
@@ -150,14 +157,15 @@ ls ../Pipeline/target/csse230-feedback.jar  # confirm JAR exists
 node scripts/process-batch.js bst "Binary Search Tree"
 ```
 
-Processes all three students with tars (`$STU_MT` is skipped — no tar). Expect:
-- First run: ~1–3 min per student (LLM calls); subsequent runs near-instant (cached)
+Processes all five students with tars (`$STU_MT` is skipped — no tar). Expect:
+- First run: ~1–3 min per student (LLM calls); LLM cache carries over from prior runs so
+  any student whose diffs were already seen will be near-instant
 - Success: `  ✓  <student-id>  (Ns)` followed by `     PDF generated with token`
 
 Verify:
 
 ```bash
-for s in $STU1 $STU2 $STU3; do
+for s in $STU1 $STU2 $STU3 $STU4 $STU5; do
   echo "=== $s ==="; ls data/bst/output/$s/; echo
 done
 # Each should show: frontend.json  report.json  report.pdf  (plus ingest artifacts)
@@ -168,7 +176,7 @@ ls data/bst/output/$STU_MT/ 2>/dev/null || echo "$STU_MT absent — expected"
 Check the batch log for any failures:
 ```bash
 tail -20 data/bst/batch.log
-# → DONE   3 succeeded,  0 failed
+# → DONE   5 succeeded,  0 failed
 ```
 
 ### A5. Regenerate a PDF with the real token (if needed)
@@ -359,14 +367,14 @@ sqlite3 db/feedback.db \
 # If stale: on Zenbook run `pm2 restart relay`
 ```
 
-### C2. Get tokens for all three students
+### C2. Get tokens for all students
 
 ```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-for (const id of [process.env.STU1, process.env.STU2, process.env.STU3, process.env.STU_MT]) {
+for (const id of [process.env.STU1, process.env.STU2, process.env.STU3, process.env.STU4, process.env.STU5, process.env.STU_MT]) {
   const row = db.prepare("SELECT token FROM tokens WHERE student_id=? AND assignment='bst'").get(id);
   console.log(`${id}: ${row?.token ?? 'NO TOKEN'}`);
 }
@@ -398,7 +406,7 @@ echo "https://feedback.csse.rose-hulman.edu/feedback?token=$TOKEN"
 - [ ] Click BST → detail view loads with test cards and timeline
 - [ ] Back button returns to list
 
-Repeat for `$STU2`'s token — confirm different feedback data loads.
+Repeat for `$STU3`'s token — confirm different feedback data loads (spot-check two is enough).
 
 ### C4. Queue emails for all students
 
@@ -407,6 +415,8 @@ node scripts/queue-emails.js bst "Binary Search Tree"
 # → [feedback_ready] $STU1  → $EMAIL (N patterns)
 # → [feedback_ready] $STU2  → $EMAIL (N patterns)
 # → [feedback_ready] $STU3  → $EMAIL (N patterns)
+# → [feedback_ready] $STU4  → $EMAIL (N patterns)
+# → [feedback_ready] $STU5  → $EMAIL (N patterns)
 # → [missing_tar]    $STU_MT → $EMAIL (+ review guide)
 ```
 
@@ -423,7 +433,7 @@ EOF
 ```
 
 Verify:
-- [ ] 3× `feedback_ready`: `CSSE 230: Binary Search Tree Feedback Available (N patterns, Exam 2)`
+- [ ] 5× `feedback_ready`: `CSSE 230: Binary Search Tree Feedback Available (N patterns, Exam 2)`
 - [ ] 1× `missing_tar`: `CSSE 230: Binary Search Tree Feedback, Action Needed`
 - [ ] All recipients show `$EMAIL` (dev redirect active)
 
@@ -671,14 +681,14 @@ open "http://localhost:3000/report?token=$TOKEN"
 
 **Pipeline re-run, reuse LLM cache** (Ubuntu):
 ```bash
-rm -rf data/bst/output/$STU1/ data/bst/output/$STU2/ data/bst/output/$STU3/
+rm -rf data/bst/output/$STU1/ data/bst/output/$STU2/ data/bst/output/$STU3/ data/bst/output/$STU4/ data/bst/output/$STU5/
 node scripts/process-batch.js bst "Binary Search Tree"
 ```
 
 **Pipeline re-run, fresh LLM calls** (Ubuntu, costs ~$0.07/student):
 ```bash
 rm -rf ../Pipeline/cache/llm/*
-rm -rf data/bst/output/$STU1/ data/bst/output/$STU2/ data/bst/output/$STU3/
+rm -rf data/bst/output/$STU1/ data/bst/output/$STU2/ data/bst/output/$STU3/ data/bst/output/$STU4/ data/bst/output/$STU5/
 node scripts/process-batch.js bst "Binary Search Tree"
 ```
 
@@ -711,7 +721,7 @@ node scripts/queue-emails.js bst "Binary Search Tree"
 ```bash
 rm db/feedback.db
 pm2 restart feedback
-rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU4 data/bst/output/$STU5 data/bst/output/$STU_MT
 rm -rf ../Pipeline/cache/llm/*
 # Repeat from A2
 ```
@@ -729,7 +739,7 @@ db.prepare("DELETE FROM tokens        WHERE assignment='bst'").run();
 db.close();
 console.log('DB cleared for bst');
 EOF
-rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU_MT
+rm -rf data/bst/output/$STU1 data/bst/output/$STU2 data/bst/output/$STU3 data/bst/output/$STU4 data/bst/output/$STU5 data/bst/output/$STU_MT
 rm -rf ../Pipeline/cache/llm/*
 pm2 restart feedback
 # Repeat from A2
@@ -740,7 +750,7 @@ pm2 restart feedback
 ## Before sending to real students
 
 - [ ] Part D complete — all non-happy-path checks passed
-- [ ] All 3 students' reports verified in browser (one PDF per student, correct token in links)
+- [ ] All 5 students' reports verified in browser (one PDF per student, correct token in links)
 - [ ] Both email types received and HTML-rendered correctly in Outlook (C6)
 - [ ] `EMAIL_DEV_REDIRECT` removed (or commented out) from Ubuntu `.env`
 - [ ] `pm2 restart feedback` after `.env` change
