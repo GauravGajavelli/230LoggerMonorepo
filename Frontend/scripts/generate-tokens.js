@@ -37,7 +37,7 @@ if (!fs.existsSync(rosterPath)) {
 
 const lines = fs.readFileSync(rosterPath, 'utf8')
   .split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-const dataLines = lines[0]?.toLowerCase().includes('student_id') ? lines.slice(1) : lines;
+const dataLines = lines[0]?.toLowerCase().includes('email') ? lines.slice(1) : lines;
 
 const upsert = db.prepare(`
   INSERT INTO tokens (token, student_id, email, assignment)
@@ -50,8 +50,10 @@ const rosterIds = new Set();
 let inserted = 0, skipped = 0;
 db.transaction(() => {
   for (const line of dataLines) {
-    const [studentId, email] = line.split(',').map(s => s.trim());
-    if (!studentId || !email) { console.warn(`  [skip] Malformed line: ${line}`); skipped++; continue; }
+    const parts = line.split(',').map(s => s.trim());
+    const email = parts.find(p => p.includes('@'));
+    if (!email) { console.warn(`  [skip] No email found on line: ${line}`); skipped++; continue; }
+    const studentId = email.split('@')[0];
     rosterIds.add(studentId);
     const token = generateToken(studentId, assignment, SECRET_KEY);
     upsert.run(token, studentId, email, assignment);

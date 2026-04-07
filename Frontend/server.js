@@ -324,8 +324,8 @@ app.get('/api/my-assignments', (req, res) => {
   if (!record) return res.status(401).json({ error: 'invalid token' });
 
   const tokenRows = db.prepare(
-    'SELECT token, student_id, assignment FROM tokens WHERE LOWER(email) = ? ORDER BY created_at DESC'
-  ).all(record.email.toLowerCase());
+    'SELECT token, student_id, assignment FROM tokens WHERE student_id = ? ORDER BY created_at DESC'
+  ).all(record.student_id);
 
   const assignments = tokenRows.map(row => {
     const jsonPath = path.join(DATA_DIR, row.assignment, 'output', row.student_id, 'frontend.json');
@@ -362,7 +362,7 @@ app.get('/api/my-assignments', (req, res) => {
     };
   });
 
-  res.json({ assignments });
+  res.json({ assignments: assignments.filter(a => a.status !== 'pending') });
 });
 
 function logNullFeedback(token, eventType) {

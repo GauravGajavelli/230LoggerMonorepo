@@ -9,15 +9,19 @@ DB initialized, and Zenbook relay running.
 
 ## Student IDs used in this runbook
 
-Set these once at the top of your shell session. All subsequent commands use them.
+Student IDs are now **email prefixes** (everything before `@rose-hulman.edu`), not GitHub usernames.
+Set these once at the top of your shell session.
 
 ```bash
-export STU1=gajavegs            # your own student ID
-export STU2=<real-student-id-1> # replace with actual ID
-export STU3=<real-student-id-2> # replace with actual ID
-export STU_MT=gajavegs_mt       # missing-tar test case (no run.tar)
+export STU1=gajavegs            # email prefix for your own account
+export STU2=guffeygi            # email prefix for real student 1
+export STU3=theslikj            # email prefix for real student 2
+export STU_MT=gajavegs-mt       # missing-tar test case (no run.tar)
 export EMAIL=gajavegs@rose-hulman.edu  # all dev emails redirect here
 ```
+
+The tar files in `Pipeline/testInputs/` are still named by GitHub username
+(`run-rhit-guffeygi.tar`). Map them to email-prefix directories in A2.
 
 ---
 
@@ -95,15 +99,15 @@ ls ../Pipeline/testInputs/*.tar
 # → run-demo.tar  run-rhit-guffeygi.tar  run-rhit-theslikj.tar  ...
 ```
 
-Then stage all three in one block (create directory and copy in the same line):
+Then stage all three in one block. Directories must be named by **email prefix** (= student ID):
 
 ```bash
 # Remove any leftover tars from previous runs
 rm -rf data/bst/tars/$STU1 data/bst/tars/$STU2 data/bst/tars/$STU3
 
-mkdir -p data/bst/tars/$STU1 && cp ../Pipeline/testInputs/run-demo.tar             data/bst/tars/$STU1/run.tar
-mkdir -p data/bst/tars/$STU2 && cp ../Pipeline/testInputs/run-rhit-<stu2-github>.tar data/bst/tars/$STU2/run.tar
-mkdir -p data/bst/tars/$STU3 && cp ../Pipeline/testInputs/run-rhit-<stu3-github>.tar data/bst/tars/$STU3/run.tar
+mkdir -p data/bst/tars/$STU1 && cp ../Pipeline/testInputs/run-demo.tar              data/bst/tars/$STU1/run.tar
+mkdir -p data/bst/tars/$STU2 && cp ../Pipeline/testInputs/run-rhit-guffeygi.tar     data/bst/tars/$STU2/run.tar
+mkdir -p data/bst/tars/$STU3 && cp ../Pipeline/testInputs/run-rhit-theslikj.tar     data/bst/tars/$STU3/run.tar
 
 # STU_MT — intentionally no tar (missing_tar email path)
 # Do NOT create data/bst/tars/$STU_MT
@@ -118,11 +122,20 @@ find data/bst/tars -name run.tar
 
 ### A3. Create the dev roster and generate tokens
 
+Student IDs are derived from the email column (prefix before `@`). The first column is a
+reference label only — put anything there.
+
 ```bash
-printf "$STU1,$EMAIL\n$STU2,$EMAIL\n$STU3,$EMAIL\n$STU_MT,$EMAIL\n" > data/roster.dev.csv
+printf "stu1,$STU1@rose-hulman.edu\nstu2,$STU2@rose-hulman.edu\nstu3,$STU3@rose-hulman.edu\nstu-mt,$STU_MT@rose-hulman.edu\n" \
+  > data/roster.dev.csv
 node scripts/generate-tokens.js bst roster.dev.csv
-# → 4 tokens upserted (deterministic HMAC — same token every time for same SECRET_KEY)
+# → gajavegs → <token>  (gajavegs@rose-hulman.edu)
+# → guffeygi → <token>  (guffeygi@rose-hulman.edu)
+# → theslikj → <token>  (theslikj@rose-hulman.edu)
+# → gajavegs-mt → <token>  (gajavegs-mt@rose-hulman.edu)
 ```
+
+All four emails will be redirected to `$EMAIL` via `EMAIL_DEV_REDIRECT`.
 
 **Token stability:** Re-running `generate-tokens.js` always produces the same value. Deleting
 the DB row and re-running gives the same token, so existing PDF links stay valid. Only
@@ -479,6 +492,8 @@ Run once before the first real send on a live browser hitting
    - [ ] BST card appears under "New feedback"
    - [ ] Status pill shows correct count ("N to review" or "All passing")
    - [ ] Mini-bar colors match test counts
+   - [ ] **Only STU1's assignments appear** — no other students' cards visible
+   - [ ] **No 0/0 cards** — pending assignments (no pipeline data) are hidden
 
 2. Click BST card → detail view
    - [ ] Back button ("All assignments") returns to list
@@ -487,32 +502,46 @@ Run once before the first real send on a live browser hitting
    - [ ] Each tab's dot disappears as cards are opened
    - [ ] When the last card is opened: green "✓ You've reviewed all feedback" banner appears
    - [ ] Tab checkmarks (✓) appear
+   - [ ] **Card is still closeable** after opening (click header to collapse)
 
-4. Click "All assignments"
+4. Open a drill modal ("✦ practice drill" button)
+   - [ ] Drill modal appears
+   - [ ] Close the drill (✕ or Escape)
+   - [ ] **Feedback card is still closeable after closing the drill** (click header to collapse)
+
+5. From STU1's **PDF report**: click an "Open drill ›" link (links to `#drill-…`)
+   - [ ] Feedback site opens, scrolls to the correct test card, drill modal auto-opens
+   - [ ] Close the drill
+   - [ ] **Feedback card is still closeable** (was permanently stuck open before fix)
+
+6. Click "All assignments"
    - [ ] BST card has moved to "Previously reviewed" section
 
-5. Open a new tab with the same URL
+7. Open a new tab with the same URL
    - [ ] Assignment list immediately shows BST under "Previously reviewed" (server-persisted)
    - [ ] Click BST → detail view shows all tab checkmarks already set (no dots)
 
-6. Close and reopen the browser entirely, revisit the same URL
+8. Close and reopen the browser entirely, revisit the same URL
    - [ ] Same result — "Previously reviewed" and all checkmarks intact
 
 ---
 
 ### D3 — Study materials links
 
-From STU1's report PDF or feedback site, find a drill with a source badge.
+From STU1's feedback site, find a test card with a course appearance pill or a drill with a
+source badge.
 
-**PDF source link:**
-1. Click a source badge in the report
-   - [ ] Opens study materials viewer (not 404)
-   - [ ] `.md` files render as HTML; `.pdf` files open or download
+1. Click a **course appearance pill** (e.g. "Exam 2 ↗") on a collapsed or expanded test card
+   - [ ] Opens in a new tab
+   - [ ] `.md` files render as **styled HTML** via `/view?file=…` — not raw text
+   - [ ] `.pdf` files open or download directly
 
-**Feedback site source link:**
-2. On the feedback site, open a drill modal with a source badge
+2. Open a drill modal → click the **source badge** (e.g. "Exam 2 · 3d ↗")
    - [ ] Same checks as above
-   - [ ] No token required (study materials are public course content)
+   - [ ] No token required (study materials are public)
+
+3. Quick URL check — `.md` links should go to `/view?file=…`, not `/study-materials/…`:
+   - Right-click a pill → Copy Link → confirm URL starts with `/view?file=`
 
 ---
 
@@ -562,19 +591,50 @@ echo "https://feedback.csse.rose-hulman.edu/feedback?token=$UTOKEN"
 
 ### D5 — Telemetry
 
-Open `https://feedback.csse.rose-hulman.edu/feedback?token=$TOKEN` in browser.
+Click through STU1's feedback site (open a card, switch tabs, open a drill, open all feedback
+cards). Then run this script on Ubuntu to verify everything landed:
 
 ```bash
-sqlite3 db/feedback.db \
-  "SELECT event_type, event_data, timestamp FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 20;"
+node --input-type=module << 'EOF'
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const db = require('better-sqlite3')('db/feedback.db');
+const token = process.env.TOKEN;
+const rows = db.prepare(
+  'SELECT event_type, event_data, timestamp FROM events WHERE token=? ORDER BY id'
+).all(token);
+db.close();
+
+const counts = {};
+const feedbackOpened = [];
+for (const r of rows) {
+  counts[r.event_type] = (counts[r.event_type] || 0) + 1;
+  if (r.event_type === 'feedback_opened') {
+    try { feedbackOpened.push(JSON.parse(r.event_data)?.test_id); } catch {}
+  }
+}
+
+console.log('Event counts:');
+for (const [k, v] of Object.entries(counts)) console.log(`  ${k}: ${v}`);
+if (feedbackOpened.length) console.log('\nfeedback_opened test_ids:', feedbackOpened);
+
+const missing = [];
+if (!counts.page_view)        missing.push('page_view');
+if (!counts.card_expanded)    missing.push('card_expanded');
+if (!counts.feedback_opened)  missing.push('feedback_opened');
+if (!counts.feedback_reviewed) missing.push('feedback_reviewed (open all feedback cards first)');
+if (missing.length) console.log('\n⚠  Missing:', missing.join(', '));
+else                console.log('\n✓  All expected event types present');
+EOF
 ```
 
-- [ ] `page_view` appears after load
-- [ ] `card_expanded` appears after clicking a test card
-- [ ] `feedback_opened` appears after opening a feedback accordion, with `test_id` in event_data
-- [ ] `drill_opened` / `drill_closed` appear after opening and closing a drill modal
-- [ ] `tab_switch` appears after switching tabs
-- [ ] After opening all feedback cards: `feedback_reviewed` appears
+Expected after a full click-through:
+- [ ] `page_view: 1`
+- [ ] `card_expanded: ≥1`
+- [ ] `feedback_opened: N` — one per feedback card, each with a distinct `test_id`
+- [ ] `tab_switch: ≥1`
+- [ ] `drill_opened: ≥1` (if you opened a drill)
+- [ ] `feedback_reviewed: 1` — auto-fires when the last feedback card is opened
 
 **Clean up test events before real send:**
 ```bash

@@ -50,6 +50,8 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
     else                                                  setTab('passing');
     setHighlightedTestId(match.id);
     setDrillTestId(match.id);
+    setTimeout(() => setHighlightedTestId(null), 3000);
+    setTimeout(() => setDrillTestId(null), 1000); // clear after forceDrill effect fires
     // Clear hash from URL bar without triggering a navigation
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
   }, [detailTests]); // eslint-disable-line react-hooks/exhaustive-deps

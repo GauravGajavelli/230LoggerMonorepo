@@ -559,7 +559,7 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
               {test.courseAppearances.map((ap, i) => (
                 ap.url ? (
                   <a key={i}
-                     href={`/study-materials/${ap.url.split('/').map(encodeURIComponent).join('/')}`}
+                     href={ap.url.endsWith('.md') ? `/view?file=${encodeURIComponent(ap.url)}` : `/study-materials/${ap.url.split('/').map(encodeURIComponent).join('/')}`}
                      target="_blank" rel="noopener noreferrer"
                      style={{
                        fontFamily: "'IBM Plex Mono', monospace",
@@ -747,7 +747,9 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
                     display: 'inline-block',
                   };
                   const href = ap.url
-                    ? `/study-materials/${ap.url.split('/').map(encodeURIComponent).join('/')}`
+                    ? ap.url.endsWith('.md')
+                      ? `/view?file=${encodeURIComponent(ap.url)}`
+                      : `/study-materials/${ap.url.split('/').map(encodeURIComponent).join('/')}`
                     : null;
                   return (
                     <div key={i} style={{ position: 'relative', display: 'inline-block' }}
@@ -853,7 +855,9 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
                         padding: '1px 6px', borderRadius: 4, whiteSpace: 'nowrap',
                       };
                       const sourceHref = drill.sourceUrl
-                        ? `/study-materials/${drill.sourceUrl.split('/').map(encodeURIComponent).join('/')}`
+                        ? drill.sourceUrl.endsWith('.md')
+                          ? `/view?file=${encodeURIComponent(drill.sourceUrl)}`
+                          : `/study-materials/${drill.sourceUrl.split('/').map(encodeURIComponent).join('/')}`
                         : null;
                       return sourceHref ? (
                         <a href={sourceHref} target="_blank" rel="noopener noreferrer"
