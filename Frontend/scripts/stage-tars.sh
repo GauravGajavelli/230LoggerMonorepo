@@ -75,7 +75,7 @@ while IFS= read -r line; do
 
   if [[ "$size" -eq 0 ]]; then
     printf "  SKIP(empty)   %s\n" "$student_id"
-    ((SKIPPED_EMPTY++))
+    (( ++SKIPPED_EMPTY ))
     continue
   fi
 
@@ -83,21 +83,21 @@ while IFS= read -r line; do
     existing_size=$(stat -c%s "$dest/run.tar" 2>/dev/null || stat -f%z "$dest/run.tar")
     if [[ "$existing_size" -eq "$size" ]]; then
       printf "  SKIP(same)    %s (%sB)\n" "$student_id" "$size"
-      ((SKIPPED_SAME++))
+      (( ++SKIPPED_SAME ))
       continue
     fi
     # Different size — student resubmitted
     unzip -p "$ZIPFILE" "$name" > "$dest/run.tar"
     printf "  UPDATED       %s (%sB → %sB)\n" "$student_id" "$existing_size" "$size"
     UPDATED_IDS+=("$student_id")
-    ((UPDATED++))
+    (( ++UPDATED ))
     continue
   fi
 
   mkdir -p "$dest"
   unzip -p "$ZIPFILE" "$name" > "$dest/run.tar"
   printf "  NEW           %s (%sB)\n" "$student_id" "$size"
-  ((NEW++))
+  (( ++NEW ))
 
 done < <(unzip -l "$ZIPFILE" | awk 'NF>=4 && $NF ~ /\.tar$/ {print $1, $NF}')
 

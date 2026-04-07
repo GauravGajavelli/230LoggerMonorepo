@@ -193,7 +193,7 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed, o
         </h1>
         {submittedAt && (
           <p style={{ fontSize: 12, color: '#64748B', margin: 0, fontFamily: "'IBM Plex Mono', monospace" }}>
-            Submitted {submittedAt}
+            Processed {submittedAt}
           </p>
         )}
       </div>
