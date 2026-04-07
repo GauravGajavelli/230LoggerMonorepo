@@ -43,6 +43,22 @@ real send. `pm2 restart feedback` is required after any `.env` change.
 
 ---
 
+## After a `git pull` — run before anything else
+
+Any time you pull new code onto Ubuntu, from `Frontend/`:
+
+```bash
+npm install                                              # new dependencies
+mvn -f ../Pipeline/pom.xml package -q -DskipTests       # new Java source
+npm run build                                            # new React source
+pm2 restart feedback                                     # pick up all changes
+curl -s http://localhost:3000/api/health                 # confirm healthy
+```
+
+DB schema is self-migrating — no manual action needed.
+
+---
+
 ## Pre-conditions
 
 Before starting this runbook:
@@ -56,6 +72,24 @@ Before starting this runbook:
 - [ ] You have the real student roster at `data/roster.csv` (see note below)
 - [ ] Tars are in place at `data/bst/tars/<student_id>/run.tar` for all submissions
 - [ ] After any `.env` change: `pm2 restart feedback` (required for changes to take effect)
+
+Verify `.env` is in production state before proceeding:
+
+```bash
+# Required vars — all must be present and non-placeholder
+grep -E "^(BASE_URL|SECRET_KEY|ROSEFIRE_SECRET|ROSEFIRE_REGISTRY_TOKEN|RELAY_SECRET)" .env
+# BASE_URL=https://feedback.csse.rose-hulman.edu
+# ROSEFIRE_REGISTRY_TOKEN=<uuid>
+# ROSEFIRE_SECRET=<value>
+# RELAY_SECRET=<value>
+# SECRET_KEY=<value>
+
+# Dev vars — all must be absent (not just commented out)
+grep -E "^(EMAIL_DEV_REDIRECT|DEMO_TOKEN|DEV_BYPASS_AUTH|HOLD_EMAILS)" .env \
+  && echo "ERROR: remove dev vars before real send" || echo "OK — dev vars absent"
+```
+
+`HOLD_EMAILS` is added back deliberately in Step 3 — it must be absent here at the start.
 
 ### roster.csv vs roster.dev.csv
 

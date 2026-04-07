@@ -13,6 +13,33 @@ bash Pipeline/scripts/e2e-wuas-mac.sh             # Mac side
 
 ---
 
+## After a `git pull` — before running anything
+
+Run these any time you pull new code. All commands from `Frontend/` on Ubuntu.
+
+```bash
+# 1. Install any new Node dependencies
+npm install
+
+# 2. Rebuild the JAR if Java source changed
+mvn -f ../Pipeline/pom.xml package -q -DskipTests
+
+# 3. Rebuild the React frontend if src/ changed
+npm run build
+
+# 4. Restart the server to pick up code + .env changes
+pm2 restart feedback
+
+# 5. Verify it's healthy
+curl -s http://localhost:3000/api/health
+```
+
+**DB schema**: never needs manual intervention. `db.js` runs `CREATE TABLE IF NOT EXISTS`
+and idempotent `ALTER TABLE` on every server start — new columns appear automatically.
+Only clear DB data (A1) when you want a clean test run, not because of a schema change.
+
+---
+
 ## Where to run what
 
 | Task | Where |
@@ -171,6 +198,19 @@ SECRET_KEY=<any hex string — can match prod or be different>
 `DEV_BYPASS_AUTH=true` skips RoseFire so you can open `/feedback?token=…` directly without
 a Rose-Hulman login.
 
+Verify:
+
+```bash
+# Required vars present
+grep -E "^(BASE_URL|SECRET_KEY|DEV_BYPASS_AUTH)" .env
+# BASE_URL=http://localhost:3000
+# DEV_BYPASS_AUTH=true
+# SECRET_KEY=<value>
+
+# HOLD_EMAILS must be absent (would block email queue inspection)
+grep "^HOLD_EMAILS" .env && echo "WARNING: remove HOLD_EMAILS for local testing" || echo "OK"
+```
+
 ### B2. Build the frontend and start the local server
 
 ```bash
@@ -320,6 +360,19 @@ All commands from `Frontend/` on Ubuntu.
 ### C1. Pre-flight
 
 ```bash
+# Verify .env is in e2e test state
+grep -E "^(EMAIL_DEV_REDIRECT|BASE_URL|SECRET_KEY|ROSEFIRE_SECRET|ROSEFIRE_REGISTRY_TOKEN)" .env
+# Required output (order may vary):
+# BASE_URL=https://feedback.csse.rose-hulman.edu
+# EMAIL_DEV_REDIRECT=gajavegs@rose-hulman.edu
+# ROSEFIRE_REGISTRY_TOKEN=<uuid>
+# ROSEFIRE_SECRET=<value>
+# SECRET_KEY=<value>
+
+# Forbidden vars must be absent
+grep -E "^(HOLD_EMAILS|DEV_BYPASS_AUTH)" .env \
+  && echo "ERROR: remove these before running e2e" || echo "OK — forbidden vars absent"
+
 # nginx + Express are up (check from Ubuntu — public domain won't loopback)
 curl -s http://localhost:3000/api/health
 # → {"status":"ok","relayLastHeartbeat":"<recent timestamp>","demo":true,...}
@@ -329,10 +382,6 @@ sqlite3 db/feedback.db \
   "SELECT relay_ip, relay_port, last_heartbeat FROM relay_status;"
 # → <zenbook-ip>|3001|<recent timestamp>
 # If stale: on Zenbook run `pm2 restart relay`
-
-# Dev redirect is active
-grep EMAIL_DEV_REDIRECT .env
-# → EMAIL_DEV_REDIRECT=gajavegs@rose-hulman.edu
 ```
 
 ### C2. Check the report link
@@ -669,7 +718,7 @@ Open `https://feedback.csse.rose-hulman.edu/feedback?token=<gajavegs token>` in 
 **Check page_view:**
 ```bash
 sqlite3 db/feedback.db \
-  "SELECT event_type, created_at FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 10;"
+  "SELECT event_type, timestamp FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 10;"
 ```
 - [ ] `page_view` row appears within a few seconds of loading
 
@@ -687,7 +736,7 @@ sqlite3 db/feedback.db \
 Full query:
 ```bash
 sqlite3 db/feedback.db \
-  "SELECT event_type, event_data, created_at FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 15;"
+  "SELECT event_type, event_data, timestamp FROM events WHERE token='$TOKEN' ORDER BY id DESC LIMIT 15;"
 ```
 
 **Clean up your own test events before real send:**
