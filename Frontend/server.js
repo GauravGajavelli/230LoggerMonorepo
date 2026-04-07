@@ -398,6 +398,13 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   }
   const record = verifyToken(token);
   if (!record) return res.status(401).json({ error: 'invalid token' });
+  const alreadyProcessed = db.prepare(
+    "SELECT id FROM pipeline_runs WHERE student_id=(SELECT student_id FROM tokens WHERE token=?) AND assignment=(SELECT assignment FROM tokens WHERE token=?) AND status='success' LIMIT 1"
+  ).get(token, token);
+  if (alreadyProcessed) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(409).json({ error: 'Feedback has already been generated for this assignment. Check your email for the report link, or use the feedback site link above.' });
+  }
   if (!isUploadAllowed(token)) {
     if (req.file) fs.unlink(req.file.path, () => {});
     return res.status(429).json({ error: 'Upload limit reached (max 3 resubmissions per assignment).' });
@@ -706,7 +713,7 @@ function runPipeline(tarDir, outputDir, assignment, studentId, runId) {
 
 const EMAIL_FONT   = 'font-family: Arial, Helvetica, sans-serif;';
 const EMAIL_HR     = '<hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">';
-const EMAIL_FOOTER = `${EMAIL_HR}<p style="${EMAIL_FONT} font-size:12px; color:#888; margin:0;">This email was sent automatically — replies are not monitored.<br>For questions, contact gajavegs@rose-hulman.edu.</p>`;
+const EMAIL_FOOTER = `${EMAIL_HR}<p style="${EMAIL_FONT} font-size:12px; color:#888; margin:0;">This email was sent automatically. Replies are not monitored.<br>For questions, contact gajavegs@rose-hulman.edu.</p>`;
 function wrapEmail(crumb, inner) {
   return `<div style="${EMAIL_FONT} font-size:14px; color:#333; max-width:600px; line-height:1.5;"><p style="font-size:12px; color:#999; margin:0 0 4px;">${crumb}</p>${EMAIL_HR}${inner}${EMAIL_FOOTER}</div>`;
 }
@@ -733,8 +740,8 @@ export function queueEmail(token, recipient, assignment, displayName, emailType)
     subject = `CSSE 230: Updated ${shortName} Feedback Available`;
     body = wrapEmail(crumb, `
       <p>Your debugging feedback for <strong>${fullName}</strong> has been regenerated with your latest data.</p>
-      <p><strong>View your updated feedback summary (PDF):</strong><br><a href="${reportLink}">${reportLink}</a></p>
-      <p><strong>Or open the interactive feedback site:</strong><br><a href="${feedbackLink}">${feedbackLink}</a></p>
+      <p><strong>View your updated feedback summary (PDF, ~3 min):</strong><br><a href="${reportLink}">${reportLink}</a></p>
+      <p><strong>Or open the interactive feedback site (~5–10 min):</strong><br><a href="${feedbackLink}">${feedbackLink}</a></p>
       <p style="font-size:12px; color:#888;">If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);
   } else if (emailType === 'generation_failed') {
     subject = `CSSE 230: ${shortName} Feedback Generation Failed`;

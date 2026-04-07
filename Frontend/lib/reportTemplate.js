@@ -136,10 +136,6 @@ function renderExamDrillSection(drill, assessment, num, feedbackUrl) {
     linksHtml += `<a class="drill-link" href="${escHtml(feedbackUrl)}#${escHtml(drill.drill_anchor)}">Open drill &rsaquo;</a>`;
   }
 
-  const alsoNote = drill.also_relevant_to
-    ? `<div class="drill-also">Also relevant to ${escHtml(drill.also_relevant_to)}</div>`
-    : '';
-
   return `
     <div class="drill-section">
       <div class="drill-header">
@@ -148,7 +144,6 @@ function renderExamDrillSection(drill, assessment, num, feedbackUrl) {
       ${introText ? `<div class="drill-intro">${escHtml(introText)}</div>` : ''}
       <div class="drill-tests">${testLine}</div>
       <div class="drill-meta">${metaLine}</div>
-      ${alsoNote}
       ${linksHtml ? `<div class="drill-links">${linksHtml}</div>` : ''}
     </div>`;
 }
@@ -526,7 +521,6 @@ export function renderReportHtml(reportData, feedbackUrl) {
     border-radius: 2px;
   }
   .drill-meta  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 2px; padding-left: 16px; }
-  .drill-also  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 2px; padding-left: 16px; }
   .drill-links { display: flex; gap: 12px; padding-left: 16px; flex-wrap: wrap; }
   .drill-link  { font-size: 11px; color: var(--text-secondary); text-decoration: none; }
   .drill-link-fallback { font-size: 11px; color: var(--text-tertiary); font-style: italic; }

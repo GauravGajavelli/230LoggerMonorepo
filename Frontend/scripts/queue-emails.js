@@ -72,7 +72,7 @@ const HR    = '<hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">
 const FOOTER_HTML = `
   ${HR}
   <p style="${FONT} font-size:12px; color:#888; margin:0;">
-    This email was sent automatically -- replies are not monitored.<br>
+    This email was sent automatically. Replies are not monitored.<br>
     For questions, contact gajavegs@rose-hulman.edu.
   </p>`;
 
@@ -93,12 +93,10 @@ function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
     <p>Your debugging feedback for <strong>${fullName}</strong> has been processed.
        ${patternCount} pattern${patternCount !== 1 ? 's were' : ' was'} identified,
        relevant to ${nearestAssessment} (${assessmentDate}).</p>
-    <p><strong>View your feedback summary (PDF):</strong><br>
-       <a href="${reportLink}">${reportLink}</a><br>
-       <span style="font-size:12px; color:#888;">~2 min · quick overview of your highest-priority patterns</span></p>
-    <p><strong>Or open the interactive feedback site:</strong><br>
-       <a href="${feedbackLink}">${feedbackLink}</a><br>
-       <span style="font-size:12px; color:#888;">~5–10 min · drill practice, code diffs, and detailed explanations</span></p>
+    <p><strong>View your feedback summary (PDF, ~3 min):</strong><br>
+       <a href="${reportLink}">${reportLink}</a></p>
+    <p><strong>Or open the interactive feedback site (~5–10 min):</strong><br>
+       <a href="${feedbackLink}">${feedbackLink}</a></p>
     <p>This feedback is private to you and is not shared with course staff.</p>
     <p style="font-size:12px; color:#888;">
        If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);

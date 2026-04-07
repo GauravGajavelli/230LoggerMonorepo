@@ -87,6 +87,14 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
   // Chip-navigation-only feedback (no chip) is still readable inline in the test card.
   const chipLinkedFeedbackIds = useMemo(() => new Set(feedbackMap.keys()), [feedbackMap]);
 
+  /* ── If reviewed arrives after mount (async fetch), backfill all IDs so dots clear ── */
+  useEffect(() => {
+    if (reviewed) {
+      hasAutoReviewedRef.current = true; // prevent re-firing onAllFeedbackSeen
+      setOpenedFeedbackIds(new Set(feedbackMap.keys()));
+    }
+  }, [reviewed]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* ── Auto-mark reviewed when all chip-linked feedback items have been opened ── */
   const hasAutoReviewedRef = useRef(reviewed); // start true if server already says reviewed
   useEffect(() => {
