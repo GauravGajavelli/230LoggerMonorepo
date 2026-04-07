@@ -131,15 +131,54 @@ ${body}
 </html>`);
 });
 
-// Root → login
-app.get('/', (_req, res) => res.redirect('/login'));
+const CHECK_EMAIL_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSSE 230 Debugging Feedback</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9;
+           color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #800000; color: #fff; padding: 14px 28px;
+             box-shadow: 0 2px 8px rgba(0,0,0,.22); }
+    header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+    main { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 64px 20px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 36px 40px; max-width: 420px; width: 100%;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06); text-align: center; }
+    h2 { margin: 0 0 12px; font-size: 20px; font-weight: 700; }
+    p  { margin: 0; font-size: 14px; color: #64748b; line-height: 1.6; }
+    .error { margin-top: 14px; padding: 10px 14px; background: #fef2f2; color: #b91c1c;
+             border: 1px solid #fecaca; border-radius: 8px; font-size: 13px; display: none; }
+    footer { text-align: center; padding: 20px; font-size: 12px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <header><h1>CSSE 230 · Debugging Feedback</h1></header>
+  <main>
+    <div class="card">
+      <h2>Check your email</h2>
+      <p>Access your personalized feedback using the link sent to your Rose-Hulman email address after the assignment deadline.</p>
+      <div class="error" id="err"></div>
+    </div>
+  </main>
+  <footer>CSSE 230 Data Structures &nbsp;·&nbsp; Rose-Hulman Institute of Technology</footer>
+  <script>
+    const e = new URLSearchParams(location.search).get('error');
+    if (e === 'invalid') {
+      const el = document.getElementById('err');
+      el.textContent = 'That link has expired or is invalid. Use the link from your feedback email.';
+      el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>`;
 
-// Login page — inject the RoseFire registry token so the client can open the popup
-app.get('/login', (_req, res) => {
-  const html = fs.readFileSync(path.join(__dirname, 'public', 'landing.html'), 'utf8')
-    .replace('__ROSEFIRE_REGISTRY_TOKEN__', ROSEFIRE_REGISTRY_TOKEN);
-  res.type('html').send(html);
-});
+// Root and login → simple "check your email" page (login via RoseFire disabled for now)
+app.get('/', (_req, res) => res.type('html').send(CHECK_EMAIL_HTML));
+app.get('/login', (_req, res) => res.type('html').send(CHECK_EMAIL_HTML));
 
 // Demo — no auth, serves the React app which loads /data/frontend.json
 app.get('/demo', (_req, res) => res.sendFile(path.join(DIST_DIR, 'index.html')));
@@ -239,7 +278,20 @@ app.get('/api/data', (req, res) => {
   }
 
   try {
-    res.json(JSON.parse(fs.readFileSync(jsonPath, 'utf8')));
+    const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    const isReviewed = !!db.prepare(
+      "SELECT id FROM events WHERE token=? AND event_type='feedback_reviewed' LIMIT 1"
+    ).get(token);
+    data.reviewed = isReviewed;
+    const openedRows = db.prepare(
+      "SELECT event_data FROM events WHERE token=? AND event_type='feedback_opened'"
+    ).all(token);
+    data.openedTestIds = [...new Set(
+      openedRows
+        .map(r => { try { return JSON.parse(r.event_data)?.test_id; } catch { return null; } })
+        .filter(Boolean)
+    )];
+    res.json(data);
   } catch {
     res.status(500).json({ error: 'Failed to read feedback data.' });
   }
@@ -259,6 +311,58 @@ app.get('/api/assessment-config', (req, res) => {
   } catch {
     res.json({});
   }
+});
+
+// ─── API: all assignments for a student (identified by any of their tokens) ──
+
+app.get('/api/my-assignments', (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: 'token required' });
+  if (DEMO_TOKEN && token === DEMO_TOKEN) return res.json({ assignments: [] });
+
+  const record = verifyToken(token);
+  if (!record) return res.status(401).json({ error: 'invalid token' });
+
+  const tokenRows = db.prepare(
+    'SELECT token, student_id, assignment FROM tokens WHERE LOWER(email) = ? ORDER BY created_at DESC'
+  ).all(record.email.toLowerCase());
+
+  const assignments = tokenRows.map(row => {
+    const jsonPath = path.join(DATA_DIR, row.assignment, 'output', row.student_id, 'frontend.json');
+    let summary = { passing: 0, failing: 0, improved: 0, total: 0 };
+    let title = row.assignment;
+    let submittedAt = null;
+    let dataReady = false;
+
+    if (fs.existsSync(jsonPath)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        const histories = data.testHistories || [];
+        summary.total    = histories.length;
+        summary.failing  = histories.filter(h => h.isLingeringFailure).length;
+        summary.improved = histories.filter(h => !h.isLingeringFailure && h.failureIntervals?.length > 0).length;
+        summary.passing  = histories.filter(h => !h.isLingeringFailure && (!h.failureIntervals || h.failureIntervals.length === 0)).length;
+        title      = data.context?.assignmentName || row.assignment;
+        submittedAt = data.context?.submittedAt   || null;
+        dataReady  = true;
+      } catch { /* use defaults */ }
+    }
+
+    const isReviewed = dataReady && !!db.prepare(
+      "SELECT id FROM events WHERE token=? AND event_type='feedback_reviewed' LIMIT 1"
+    ).get(row.token);
+
+    return {
+      token:      row.token,
+      assignment: row.assignment,
+      title,
+      submittedAt,
+      status:  !dataReady ? 'pending' : isReviewed ? 'reviewed' : 'new',
+      ...summary,
+    };
+  });
+
+  res.json({ assignments });
 });
 
 function logNullFeedback(token, eventType) {

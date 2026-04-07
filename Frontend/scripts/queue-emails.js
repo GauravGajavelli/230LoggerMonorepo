@@ -94,9 +94,11 @@ function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
        ${patternCount} pattern${patternCount !== 1 ? 's were' : ' was'} identified,
        relevant to ${nearestAssessment} (${assessmentDate}).</p>
     <p><strong>View your feedback summary (PDF):</strong><br>
-       <a href="${reportLink}">${reportLink}</a></p>
+       <a href="${reportLink}">${reportLink}</a><br>
+       <span style="font-size:12px; color:#888;">~2 min · quick overview of your highest-priority patterns</span></p>
     <p><strong>Or open the interactive feedback site:</strong><br>
-       <a href="${feedbackLink}">${feedbackLink}</a></p>
+       <a href="${feedbackLink}">${feedbackLink}</a><br>
+       <span style="font-size:12px; color:#888;">~5–10 min · drill practice, code diffs, and detailed explanations</span></p>
     <p>This feedback is private to you and is not shared with course staff.</p>
     <p style="font-size:12px; color:#888;">
        If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);

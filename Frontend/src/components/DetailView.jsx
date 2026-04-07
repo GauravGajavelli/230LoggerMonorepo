@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 import { TimelineChart } from './TimelineChart';
 import { EpisodeChips } from './EpisodeChips';
@@ -17,13 +17,17 @@ const BackIcon = () => (
  * On desktop (≥1024px): sidebar (summary + timeline) left, test cards right.
  * On mobile: single column, stacked.
  */
-export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
-  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context, runToEpisode, assessmentConfig } = usePlaybackDataContext();
+export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed }) {
+  const { episodes, feedbackMap, allRuns, detailTests, detailSummary, context, runToEpisode, assessmentConfig, frontendData } = usePlaybackDataContext();
 
   const [tab, setTab] = useState('issues');
   const [highlightedTestId, setHighlightedTestId] = useState(null);
   const [drillTestId, setDrillTestId] = useState(null);
-  const [openedFeedbackIds, setOpenedFeedbackIds] = useState(new Set());
+  const [openedFeedbackIds, setOpenedFeedbackIds] = useState(() => {
+    if (reviewed) return new Set(feedbackMap.keys());
+    const prior = frontendData?.openedTestIds;
+    return prior?.length ? new Set(prior) : new Set();
+  });
   const [hoveredBarId, setHoveredBarId] = useState(null);
 
   // Convert a testId to the drill anchor format used in PDFs.
@@ -80,6 +84,18 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
   // Covers every feedback item regardless of whether an episode chip links to it.
   // Chip-navigation-only feedback (no chip) is still readable inline in the test card.
   const chipLinkedFeedbackIds = useMemo(() => new Set(feedbackMap.keys()), [feedbackMap]);
+
+  /* ── Auto-mark reviewed when all chip-linked feedback items have been opened ── */
+  const hasAutoReviewedRef = useRef(reviewed); // start true if server already says reviewed
+  useEffect(() => {
+    if (hasAutoReviewedRef.current) return;
+    if (chipLinkedFeedbackIds.size === 0) return;
+    const allSeen = [...chipLinkedFeedbackIds].every(id => openedFeedbackIds.has(id));
+    if (allSeen) {
+      hasAutoReviewedRef.current = true;
+      onAllFeedbackSeen?.();
+    }
+  }, [openedFeedbackIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── testId → name lookup for chip labels ── */
   const testNameById = useMemo(
@@ -358,33 +374,18 @@ export function DetailView({ onBack, onReplayRun, onMarkReviewed, reviewed }) {
             <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
           ))}
 
-          {/* Closure / mark reviewed */}
-          <div style={{
-            marginTop: 24, padding: '16px 20px', background: '#FFFFFF',
-            border: '1px solid #E2E8F0', borderRadius: 12, textAlign: 'center',
-            boxShadow: '0 1px 3px rgba(0,0,0,.04)',
-          }}>
-            {reviewed ? (
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>
-                ✓ You've marked this as reviewed. You can come back anytime.
+          {/* Reviewed confirmation — appears automatically once all feedback is opened */}
+          {reviewed && (
+            <div style={{
+              marginTop: 24, padding: '14px 20px', background: '#F0FDF4',
+              border: '1px solid #BBF7D0', borderRadius: 12, textAlign: 'center',
+              boxShadow: '0 1px 3px rgba(0,0,0,.04)',
+            }}>
+              <p style={{ fontSize: 13, color: '#166534', margin: 0 }}>
+                ✓ You've reviewed all feedback. Come back anytime.
               </p>
-            ) : (
-              <>
-                <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px' }}>
-                  Done reviewing? You can come back anytime before the next assignment.
-                </p>
-                <button
-                  onClick={onMarkReviewed}
-                  style={{
-                    all: 'unset', padding: '8px 20px', fontSize: 13, fontWeight: 600,
-                    color: '#FFF', background: '#800000', borderRadius: 8, cursor: 'pointer',
-                  }}
-                >
-                  Mark as reviewed ✓
-                </button>
-              </>
-            )}
-          </div>
+            </div>
+          )}
 
         </div>{/* /dv-main */}
 

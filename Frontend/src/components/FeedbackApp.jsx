@@ -184,6 +184,23 @@ export function FeedbackApp({ token }) {
   const [view, setView] = useState(token ? 'detail' : 'list');
   const [replayRange, setReplayRange] = useState(null); // { start, end } | null
   const [reviewed, setReviewed] = useState(false);
+  const [assignments, setAssignments] = useState([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
+
+  // Sync reviewed state from server (persisted across sessions)
+  useEffect(() => {
+    if (frontendData?.reviewed) setReviewed(true);
+  }, [frontendData]);
+
+  // Fetch all assignments for this student (identified by the current token)
+  useEffect(() => {
+    if (!token) { setAssignmentsLoading(false); return; }
+    fetch(`/api/my-assignments?token=${token}`)
+      .then(r => r.json())
+      .then(data => { if (data.assignments) setAssignments(data.assignments); })
+      .catch(() => {})
+      .finally(() => setAssignmentsLoading(false));
+  }, [token]);
 
   const detailScrollRef = useRef(0);
 
@@ -197,39 +214,56 @@ export function FeedbackApp({ token }) {
     requestAnimationFrame(() => window.scrollTo(0, detailScrollRef.current));
   };
 
-  const handleMarkReviewed = () => {
+  const handleAllFeedbackSeen = useCallback(() => {
     setReviewed(true);
-    setView('list');
-  };
+    // Mark the current assignment as reviewed in the local assignments list too
+    setAssignments(prev => prev.map(a => a.token === token ? { ...a, status: 'reviewed' } : a));
+    eventTracker.track('feedback_reviewed', {});
+    eventTracker.flush(); // persist immediately so next visit shows correct state
+  }, [token]);
+
+  const handleSelectAssignment = useCallback((selectedToken) => {
+    if (!selectedToken || selectedToken === token) {
+      setView('detail');
+    } else {
+      // Different assignment — navigate to its URL (full page load with new token)
+      window.location.href = `/feedback?token=${selectedToken}`;
+    }
+  }, [token]);
 
   /* ── Derive main content ── */
   let mainContent;
-  if (loading) {
-    mainContent = <SkeletonAssignmentList />;
-  } else if (apiError) {
-    mainContent = <NullFeedbackScreen error={apiError} token={token} />;
-  } else if (error && allRuns.length === 0) {
-    mainContent = (
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0',
-      }}>
-        <div style={{ textAlign: 'center', color: '#EF4444' }}>
-          <p style={{ fontWeight: 600 }}>Error loading data</p>
-          <p style={{ fontSize: 13, color: '#64748B' }}>{error.message}</p>
-        </div>
-      </div>
-    );
-  } else if (view === 'list') {
-    mainContent = <AssignmentList onSelectAssignment={() => setView('detail')} reviewed={reviewed} />;
+  if (view === 'list') {
+    mainContent = assignmentsLoading
+      ? <SkeletonAssignmentList />
+      : <AssignmentList assignments={assignments} onSelectAssignment={handleSelectAssignment} />;
   } else {
-    mainContent = (
-      <DetailView
-        onBack={() => setView('list')}
-        onReplayRun={handleReplayRun}
-        onMarkReviewed={handleMarkReviewed}
-        reviewed={reviewed}
-      />
-    );
+    // Detail view — gated on the current token's data loading
+    if (loading) {
+      mainContent = <SkeletonAssignmentList />;
+    } else if (apiError) {
+      mainContent = <NullFeedbackScreen error={apiError} token={token} />;
+    } else if (error && allRuns.length === 0) {
+      mainContent = (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0',
+        }}>
+          <div style={{ textAlign: 'center', color: '#EF4444' }}>
+            <p style={{ fontWeight: 600 }}>Error loading data</p>
+            <p style={{ fontSize: 13, color: '#64748B' }}>{error.message}</p>
+          </div>
+        </div>
+      );
+    } else {
+      mainContent = (
+        <DetailView
+          onBack={() => setView('list')}
+          onReplayRun={handleReplayRun}
+          onAllFeedbackSeen={handleAllFeedbackSeen}
+          reviewed={reviewed}
+        />
+      );
+    }
   }
 
   return (
@@ -296,9 +330,6 @@ export function FeedbackApp({ token }) {
         <InfoIcon />
         <span style={{ fontSize: 12, color: '#64748B' }}>
           Part of an IRB-approved research study.
-        </span>
-        <span style={{ fontSize: 12, color: '#800000', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>
-          Learn more
         </span>
       </footer>
 

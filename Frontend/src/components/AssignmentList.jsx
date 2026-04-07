@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 
 /* ── Icons ── */
 const NewDot = () => <span className="feedback-unseen-tab" />;
@@ -15,14 +14,6 @@ const ChevronIcon = () => (
   </svg>
 );
 
-const PLACEHOLDER_REVIEWED = {
-  id: 'linked-lists',
-  title: 'Linked Lists',
-  dueDate: 'Mar 3, 2026',
-  submittedAt: 'Mar 3, 2026 · 10:02 PM',
-  status: 'reviewed',
-  passing: 9, failing: 0, improved: 2, total: 9,
-};
 
 /* ── Status pill ── */
 function StatusPill({ status, failing }) {
@@ -49,6 +40,19 @@ function StatusPill({ status, failing }) {
         fontFamily: "'IBM Plex Mono', monospace",
       }}>
         All passing
+      </span>
+    );
+  }
+  if (status === 'pending') {
+    return (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        padding: '3px 10px', borderRadius: 20,
+        background: '#F1F5F9', border: '1px solid #E2E8F0',
+        fontSize: 11, fontWeight: 500, color: '#94A3B8',
+        fontFamily: "'IBM Plex Mono', monospace",
+      }}>
+        Pending
       </span>
     );
   }
@@ -145,9 +149,9 @@ function AssignmentCard({ assignment, onClick }) {
 
 /**
  * Assignment list landing page — wireframe style.
+ * assignments: array of { token, assignment, title, submittedAt, status, passing, failing, improved, total }
  */
-export function AssignmentList({ onSelectAssignment, reviewed }) {
-  const { context, detailSummary } = usePlaybackDataContext();
+export function AssignmentList({ onSelectAssignment, assignments = [] }) {
   const token = new URLSearchParams(window.location.search).get('token');
   const [uploadState, setUploadState] = useState('idle'); // idle | uploading | success | error
   const [uploadMsg, setUploadMsg] = useState('');
@@ -180,27 +184,9 @@ export function AssignmentList({ onSelectAssignment, reviewed }) {
     }
   }, [token]);
 
-  const submittedAt = context?.submittedAt
-    ? new Date(context.submittedAt).toLocaleString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric',
-        hour: 'numeric', minute: '2-digit', hour12: true,
-      })
-    : '—';
-
-  const bstCard = {
-    id: 'bst',
-    title: context?.assignmentName || 'Binary Search Tree',
-    dueDate: null,
-    submittedAt,
-    status: reviewed ? 'reviewed' : 'new',
-    passing: detailSummary.passing,
-    failing: detailSummary.failing,
-    improved: detailSummary.improved,
-    total: detailSummary.total,
-  };
-
-  const newAssignments     = reviewed ? [] : [bstCard];
-  const reviewedAssignments = reviewed ? [bstCard, PLACEHOLDER_REVIEWED] : [PLACEHOLDER_REVIEWED];
+  const newAssignments      = assignments.filter(a => a.status !== 'reviewed');
+  const reviewedAssignments = assignments.filter(a => a.status === 'reviewed');
+  const currentAssignment   = assignments.find(a => a.token === token);
 
   return (
     <div style={{
@@ -230,7 +216,7 @@ export function AssignmentList({ onSelectAssignment, reviewed }) {
             <NewDot />New feedback
           </div>
           {newAssignments.map((a) => (
-            <AssignmentCard key={a.id} assignment={a} onClick={onSelectAssignment} />
+            <AssignmentCard key={a.token} assignment={a} onClick={() => onSelectAssignment(a.token)} />
           ))}
         </div>
       )}
@@ -246,8 +232,8 @@ export function AssignmentList({ onSelectAssignment, reviewed }) {
           </div>
           {reviewedAssignments.map((a) => (
             <AssignmentCard
-              key={a.id} assignment={a}
-              onClick={a.id === 'bst' ? onSelectAssignment : undefined}
+              key={a.token} assignment={a}
+              onClick={() => onSelectAssignment(a.token)}
             />
           ))}
         </div>
@@ -260,14 +246,16 @@ export function AssignmentList({ onSelectAssignment, reviewed }) {
             fontSize: 12, color: '#94A3B8', cursor: 'pointer', userSelect: 'none',
             listStyle: 'none', display: 'flex', alignItems: 'center', gap: 4,
           }}>
-            <span style={{ fontSize: 10 }}>▸</span> Submit a newer run.tar for updated feedback
+            <span style={{ fontSize: 10 }}>▸</span> Submit a newer run.tar
+            {currentAssignment ? ` for ${currentAssignment.title}` : ''}{' '}for updated feedback
           </summary>
           <div style={{
             marginTop: 10, padding: '12px 14px',
             background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8,
           }}>
             <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 10px', lineHeight: 1.5 }}>
-              Upload a new run.tar if you've made changes since your initial submission.
+              Upload a new run.tar for <strong>{currentAssignment?.title ?? 'this assignment'}</strong> if
+              you've made changes since your initial submission.
               You'll receive an email when updated feedback is ready (up to 3 resubmissions).
             </p>
             {uploadState !== 'success' && (
