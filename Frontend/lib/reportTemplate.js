@@ -392,7 +392,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
     line-height: 1.5;
     color: var(--text-primary);
     background: #fff;
-    padding: 40px 52px 34px;
+    padding: 40px 52px 18px;
     max-width: 900px;
     margin: 0 auto;
     min-height: 11in;
@@ -475,7 +475,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
 
   /* Drill sections — numbered list style, no card boxes */
   .drill-section {
-    padding: 8px 0 6px;
+    padding: 6px 0 4px;
     border-bottom: 1px solid #e4e4e4;
   }
   .drill-header {
@@ -688,7 +688,7 @@ export function renderDrillSheetPageHtml(reportData, feedbackUrl) {
     line-height: 1.5;
     color: var(--text-primary);
     background: #fff;
-    padding: 40px 52px 34px;
+    padding: 40px 52px 18px;
     max-width: 900px;
     margin: 0 auto;
     min-height: 11in;

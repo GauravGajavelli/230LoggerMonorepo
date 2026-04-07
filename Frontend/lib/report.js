@@ -418,8 +418,9 @@ export async function generateReportForToken(studentId, assignment, token, dataD
       // is no longer a reliable sentinel since the body expands with content.
       const pdfScale = await page.evaluate(() => {
         const PAGE_H     = 1056; // 11in at 96 dpi — one Letter page
+        const MARGIN     = 40;   // safety buffer — PDF pagination can split before scrollHeight hits PAGE_H
         const hasDrills  = !!document.querySelector('.page-drills');
-        const PAGE_LIMIT = hasDrills ? PAGE_H * 2 : PAGE_H;
+        const PAGE_LIMIT = (hasDrills ? PAGE_H * 2 : PAGE_H) - MARGIN;
         const contentH   = document.body.scrollHeight;
         return contentH > PAGE_LIMIT ? Math.max(0.80, PAGE_LIMIT / contentH) : 1.0;
       });
