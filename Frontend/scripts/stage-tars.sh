@@ -99,7 +99,7 @@ while IFS= read -r line; do
   printf "  NEW           %s (%sB)\n" "$student_id" "$size"
   ((NEW++))
 
-done < <(unzip -l "$ZIPFILE" | awk 'NR>3 && NF==4')
+done < <(unzip -l "$ZIPFILE" | awk 'NF>=4 && $NF ~ /\.tar$/ {print $1, $NF}')
 
 echo ""
 echo "── Summary ───────────────────────────────"
