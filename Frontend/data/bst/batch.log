@@ -7,3 +7,9 @@
 2026-04-07 12:06:56  START  1 students  (full batch)
 2026-04-07 12:09:55  SUCCESS  gajavegs  (180s)
 2026-04-07 12:09:55  DONE   1 succeeded,  0 failed
+2026-04-07 13:45:02  START  2 students  (full batch)
+2026-04-07 13:47:53  START  3 students  (--skip-existing)
+2026-04-07 13:50:14  SUCCESS  gajavegs  (141s)
+2026-04-07 13:54:04  SUCCESS  rhit-guffeygi  (230s)
+2026-04-07 13:54:06  SUCCESS  rhit-theslikj  (2s)
+2026-04-07 13:54:06  DONE   3 succeeded,  0 failed

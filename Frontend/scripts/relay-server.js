@@ -22,12 +22,19 @@ import http from 'http';
 import https from 'https';
 import { spawn } from 'child_process';
 
-const SERVER_URL   = process.env.FEEDBACK_SERVER_URL;
-const RELAY_SECRET = process.env.RELAY_SECRET;
-const PORT         = parseInt(process.env.RELAY_PORT || '3001', 10);
+const SERVER_URL      = process.env.FEEDBACK_SERVER_URL;
+const RELAY_SECRET    = process.env.RELAY_SECRET;
+const PORT            = parseInt(process.env.RELAY_PORT || '3001', 10);
+const IDLE_RESTART_MS = parseInt(process.env.RELAY_IDLE_RESTART_MS || '60000', 10);
 
 if (!SERVER_URL)   { console.error('FEEDBACK_SERVER_URL is not set'); process.exit(1); }
 if (!RELAY_SECRET) { console.error('RELAY_SECRET is not set'); process.exit(1); }
+
+// ── Watchdog state ────────────────────────────────────────────────────────────
+// If no email has been sent (or attempted) within IDLE_RESTART_MS, exit so pm2
+// restarts the process with a fresh Outlook COM connection.
+let lastActivityAt = Date.now();
+let inFlightCount  = 0;
 
 // ── Send one email by spawning a PowerShell child process ─────────────────────
 // Payload is written to the child's stdin as JSON so no shell-escaping is needed.
@@ -120,8 +127,11 @@ const server = http.createServer(async (req, res) => {
         return res.end('{"error":"recipient, subject, and body are required"}');
       }
 
+      inFlightCount++;
+      lastActivityAt = Date.now();
       try {
         await sendViaOutlook({ recipient, subject, body });
+        lastActivityAt = Date.now();
         console.log(`[relay] Sent to ${recipient}`);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end('{"ok":true}');
@@ -129,6 +139,8 @@ const server = http.createServer(async (req, res) => {
         console.error(`[relay] Outlook error for ${recipient}:`, err.message);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: err.message }));
+      } finally {
+        inFlightCount--;
       }
     });
     return;
@@ -144,6 +156,19 @@ server.listen(PORT, () => {
     .then(status => console.log(`[relay] Registered with ${SERVER_URL} (HTTP ${status})`))
     .catch(err  => console.warn(`[relay] Registration failed: ${err.message} (will retry on restart)`));
 });
+
+// ── Idle watchdog ─────────────────────────────────────────────────────────────
+// Check every 15 s. If no email activity for IDLE_RESTART_MS, exit cleanly so
+// pm2 restarts the process — giving a fresh Outlook COM connection.
+setInterval(() => {
+  if (inFlightCount > 0) return; // don't interrupt an in-progress send
+  const idleMs = Date.now() - lastActivityAt;
+  if (idleMs >= IDLE_RESTART_MS) {
+    console.log(`[relay] Idle for ${Math.round(idleMs / 1000)}s — restarting for fresh Outlook connection.`);
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 2000); // force-exit if server.close stalls
+  }
+}, 15_000);
 
 process.on('SIGINT',  () => { console.log('[relay] Stopping.'); server.close(); process.exit(0); });
 process.on('SIGTERM', () => { console.log('[relay] Stopping.'); server.close(); process.exit(0); });

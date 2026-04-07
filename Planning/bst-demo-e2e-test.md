@@ -88,26 +88,32 @@ pm2 restart feedback
 `process-batch.js` discovers students by scanning `data/bst/tars/` for subdirectories with a
 `run.tar`. Remove leftover directories from previous runs first.
 
+Tars in `Pipeline/testInputs/` are named `run-<githubUsername>.tar` — find the right filenames first:
+
 ```bash
-# Remove any leftover tars
+ls ../Pipeline/testInputs/*.tar
+# → run-demo.tar  run-rhit-guffeygi.tar  run-rhit-theslikj.tar  ...
+```
+
+Then stage all three in one block (create directory and copy in the same line):
+
+```bash
+# Remove any leftover tars from previous runs
 rm -rf data/bst/tars/$STU1 data/bst/tars/$STU2 data/bst/tars/$STU3
 
-# STU1 — your own tar
-mkdir -p data/bst/tars/$STU1
-cp /path/to/your/run.tar data/bst/tars/$STU1/run.tar
-
-# STU2 — first real submission
-mkdir -p data/bst/tars/$STU2
-cp /path/to/stu2/run.tar data/bst/tars/$STU2/run.tar
-
-# STU3 — second real submission
-mkdir -p data/bst/tars/$STU3
-cp /path/to/stu3/run.tar data/bst/tars/$STU3/run.tar
+mkdir -p data/bst/tars/$STU1 && cp ../Pipeline/testInputs/run-demo.tar             data/bst/tars/$STU1/run.tar
+mkdir -p data/bst/tars/$STU2 && cp ../Pipeline/testInputs/run-rhit-<stu2-github>.tar data/bst/tars/$STU2/run.tar
+mkdir -p data/bst/tars/$STU3 && cp ../Pipeline/testInputs/run-rhit-<stu3-github>.tar data/bst/tars/$STU3/run.tar
 
 # STU_MT — intentionally no tar (missing_tar email path)
 # Do NOT create data/bst/tars/$STU_MT
+
+# Confirm exactly 3 directories, each with a run.tar
 ls data/bst/tars/
-# → gajavegs  <stu2-id>  <stu3-id>  (no gajavegs_mt — correct)
+find data/bst/tars -name run.tar
+# → data/bst/tars/gajavegs/run.tar
+# → data/bst/tars/<stu2-id>/run.tar
+# → data/bst/tars/<stu3-id>/run.tar
 ```
 
 ### A3. Create the dev roster and generate tokens
