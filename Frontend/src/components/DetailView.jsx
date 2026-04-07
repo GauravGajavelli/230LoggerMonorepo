@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { usePlaybackDataContext } from '../context/PlaybackDataContext';
 import { TimelineChart } from './TimelineChart';
 import { EpisodeChips } from './EpisodeChips';
@@ -23,11 +23,6 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
   const [tab, setTab] = useState('issues');
   const [highlightedTestId, setHighlightedTestId] = useState(null);
   const [drillTestId, setDrillTestId] = useState(null);
-  const [openedFeedbackIds, setOpenedFeedbackIds] = useState(() => {
-    if (reviewed) return new Set(feedbackMap.keys());
-    const prior = frontendData?.openedTestIds;
-    return prior?.length ? new Set(prior) : new Set();
-  });
   const [hoveredBarId, setHoveredBarId] = useState(null);
 
   // Convert a testId to the drill anchor format used in PDFs.
@@ -87,40 +82,19 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
   // Chip-navigation-only feedback (no chip) is still readable inline in the test card.
   const chipLinkedFeedbackIds = useMemo(() => new Set(feedbackMap.keys()), [feedbackMap]);
 
-  /* ── If reviewed arrives after mount (async fetch), backfill all IDs so dots clear ── */
-  useEffect(() => {
-    if (reviewed) {
-      hasAutoReviewedRef.current = true; // prevent re-firing onAllFeedbackSeen
-      setOpenedFeedbackIds(new Set(feedbackMap.keys()));
-    }
-  }, [reviewed]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /* ── Auto-mark reviewed when all chip-linked feedback items have been opened ── */
-  const hasAutoReviewedRef = useRef(reviewed); // start true if server already says reviewed
-  useEffect(() => {
-    if (hasAutoReviewedRef.current) return;
-    if (chipLinkedFeedbackIds.size === 0) return;
-    const allSeen = [...chipLinkedFeedbackIds].every(id => openedFeedbackIds.has(id));
-    if (allSeen) {
-      hasAutoReviewedRef.current = true;
-      onAllFeedbackSeen?.();
-    }
-  }, [openedFeedbackIds]); // eslint-disable-line react-hooks/exhaustive-deps
-
   /* ── testId → name lookup for chip labels ── */
   const testNameById = useMemo(
     () => Object.fromEntries(detailTests.map(t => [t.id, t.name])),
     [detailTests]
   );
 
-  /* ── Episodes annotated with feedback presence + opened state ── */
+  /* ── Episodes annotated with feedback presence ── */
   const episodesWithFeedback = useMemo(() =>
     episodes.map(ep => ({
       ...ep,
-      hasFeedback:    ep.linkedTestId ? feedbackMap.has(ep.linkedTestId)        : false,
-      feedbackOpened: ep.linkedTestId ? openedFeedbackIds.has(ep.linkedTestId)  : false,
+      hasFeedback: ep.linkedTestId ? feedbackMap.has(ep.linkedTestId) : false,
     })),
-    [episodes, feedbackMap, openedFeedbackIds]
+    [episodes, feedbackMap]
   );
 
   /* ── Cumulative timeline data: one point per run ── */
@@ -163,10 +137,6 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
     if (failingTests.some(t => t.id === linkedId))       setTab('issues');
     else if (improvedTests.some(t => t.id === linkedId)) setTab('improved');
     else                                                  setTab('passing');
-
-    if (episode.hasFeedback) {
-      setOpenedFeedbackIds(prev => new Set([...prev, linkedId]));
-    }
 
     setHighlightedTestId(linkedId);
     setTimeout(() => setHighlightedTestId(null), 3000);
@@ -351,9 +321,7 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
               { key: 'improved', label: `Improved (${improvedTests.length})`,       tests: improvedTests },
               { key: 'passing',  label: `Passing (${passingTests.length})`,         tests: passingTests },
             ].map((t) => {
-              const fbTests = t.tests.filter(x => chipLinkedFeedbackIds.has(x.id));
-              const hasFeedback = fbTests.length > 0;
-              const allSeen = hasFeedback && fbTests.every(x => openedFeedbackIds.has(x.id));
+              const hasFeedback = t.tests.some(x => chipLinkedFeedbackIds.has(x.id));
               return (
                 <button key={t.key} onClick={() => { setTab(t.key); eventTracker.track('tab_switch', { tab: t.key }); }} style={{
                   all: 'unset', padding: '8px 16px', fontSize: 13,
@@ -364,10 +332,7 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
                   display: 'flex', alignItems: 'center', gap: 5,
                 }}>
                   {t.label}
-                  {hasFeedback && (allSeen
-                    ? <span className="feedback-seen" title="All feedback reviewed">✓</span>
-                    : <span className="feedback-unseen-tab" title="Has unreviewed feedback" />
-                  )}
+                  {hasFeedback && <span className="feedback-unseen-tab" title="Has feedback" />}
                 </button>
               );
             })}
@@ -375,13 +340,13 @@ export function DetailView({ onBack, onReplayRun, onAllFeedbackSeen, reviewed })
 
           {/* Test cards per tab */}
           {tab === 'issues'   && failingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'improved' && improvedTests.map(t => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} assessmentConfig={assessmentConfig} />
           ))}
           {tab === 'passing'  && passingTests.map(t  => (
-            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} onFeedbackOpened={() => setOpenedFeedbackIds(prev => new Set([...prev, t.id]))} assessmentConfig={assessmentConfig} />
+            <TestCard key={t.id} test={t} forceOpen={highlightedTestId === t.id} forceDrill={drillTestId === t.id} initiallyOpen={t.id === firstFeedbackId} onCiteClick={onReplayRun} runToEpisode={runToEpisode} assessmentConfig={assessmentConfig} />
           ))}
 
           {/* Reviewed confirmation — appears automatically once all feedback is opened */}

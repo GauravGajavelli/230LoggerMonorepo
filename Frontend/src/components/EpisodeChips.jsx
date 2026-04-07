@@ -63,10 +63,7 @@ export function EpisodeChips({ episodes, onJump, testNameById = {} }) {
               <span style={{
                 fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0,
               }}>{areaLabel}</span>
-              {ep.hasFeedback && (ep.feedbackOpened
-                ? <span className="feedback-seen" style={{ marginLeft: 2, flexShrink: 0 }} title="Feedback reviewed">✓</span>
-                : <span className="feedback-unseen-chip" style={{ marginLeft: 2, flexShrink: 0 }} title="Has feedback" />
-              )}
+              {ep.hasFeedback && <span className="feedback-unseen-chip" style={{ marginLeft: 2, flexShrink: 0 }} title="Has feedback" />}
             </div>
             {/* Line 2: → linked test name (only for non-feedback chips; feedback chips use it as the primary label) */}
             {linkedTestName && !ep.hasFeedback && (
