@@ -50,7 +50,7 @@ function Send-OutlookEmail($outlook, $recipient, $subject, $body) {
   $mail = $outlook.CreateItem(0)   # 0 = olMailItem
   $mail.To                = $recipient
   $mail.Subject           = $subject
-  $mail.Body              = $body     # plaintext — Moodle-style format
+  $mail.HTMLBody          = $body     # HTML — Outlook sets charset=utf-8 automatically
   $mail.DeleteAfterSubmit = $true     # MANDATORY: suppress Sent Items copy per IRB protocol
   $mail.Send()
 }
@@ -126,7 +126,7 @@ while ($listener.IsListening) {
     }
 
     try {
-      Send-OutlookEmail $outlook $payload.recipient $payload.subject $payload.body  # plaintext
+      Send-OutlookEmail $outlook $payload.recipient $payload.subject $payload.body
       Write-Host "[relay] Sent to $($payload.recipient)"
       Write-JsonResponse $ctx 200 '{"ok":true}'
     } catch {

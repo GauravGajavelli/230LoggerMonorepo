@@ -741,7 +741,7 @@ export function queueEmail(token, recipient, assignment, displayName, emailType)
     body = wrapEmail(crumb, `
       <p>Your debugging feedback for <strong>${fullName}</strong> has been regenerated with your latest data.</p>
       <p><strong>View your updated feedback summary (PDF, ~3 min):</strong><br><a href="${reportLink}">${reportLink}</a></p>
-      <p><strong>Or open the interactive feedback site (~5–10 min):</strong><br><a href="${feedbackLink}">${feedbackLink}</a></p>
+      <p><strong>Or open the interactive feedback site (~5&ndash;10 min):</strong><br><a href="${feedbackLink}">${feedbackLink}</a></p>
       <p style="font-size:12px; color:#888;">If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);
   } else if (emailType === 'generation_failed') {
     subject = `CSSE 230: ${shortName} Feedback Generation Failed`;

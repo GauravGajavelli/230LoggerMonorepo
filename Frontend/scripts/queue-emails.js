@@ -95,7 +95,7 @@ function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
        relevant to ${nearestAssessment} (${assessmentDate}).</p>
     <p><strong>View your feedback summary (PDF, ~3 min):</strong><br>
        <a href="${reportLink}">${reportLink}</a></p>
-    <p><strong>Or open the interactive feedback site (~5–10 min):</strong><br>
+    <p><strong>Or open the interactive feedback site (~5&ndash;10 min):</strong><br>
        <a href="${feedbackLink}">${feedbackLink}</a></p>
     <p>This feedback is private to you and is not shared with course staff.</p>
     <p style="font-size:12px; color:#888;">
