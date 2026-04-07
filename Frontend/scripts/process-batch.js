@@ -96,6 +96,13 @@ function runPipelineForStudent(studentId) {
   });
 }
 
+const logPath = path.join(DATA_DIR, assignment, 'batch.log');
+function logLine(line) {
+  const ts = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  fs.appendFileSync(logPath, `${ts}  ${line}\n`);
+}
+logLine(`START  ${students.length} students  (${skipExisting ? '--skip-existing' : 'full batch'})`);
+
 let succeeded = 0;
 const errors = [];
 
@@ -130,18 +137,25 @@ for (const studentId of students) {
     } else {
       console.log(`     No token found for ${studentId}/${assignment} — skipping PDF (run generate-tokens.js first)`);
     }
-    console.log(`  ✓  ${studentId}  (${Math.round((Date.now()-t0)/1000)}s)`);
+    const elapsed = Math.round((Date.now()-t0)/1000);
+    console.log(`  ✓  ${studentId}  (${elapsed}s)`);
+    logLine(`SUCCESS  ${studentId}  (${elapsed}s)`);
     succeeded++;
   } catch (err) {
     db.prepare("UPDATE pipeline_runs SET status='error',error_msg=?,finished_at=datetime('now') WHERE id=?")
       .run(err.message.slice(0, 500), runId);
-    console.log(`  ✗  ${studentId}  (${Math.round((Date.now()-t0)/1000)}s) — ${err.message}`);
+    const elapsed = Math.round((Date.now()-t0)/1000);
+    console.log(`  ✗  ${studentId}  (${elapsed}s) — ${err.message}`);
+    logLine(`ERROR    ${studentId}  (${elapsed}s)  ${err.message.split('\n')[0]}`);
     errors.push({ studentId, error: err.message });
   }
 }
 
+logLine(`DONE   ${succeeded} succeeded,  ${errors.length} failed`);
+
 console.log(`\n── Summary ──────────────────────────`);
 console.log(`  ${succeeded} succeeded,  ${errors.length} failed`);
+console.log(`  Log: ${logPath}`);
 if (errors.length) {
   console.log('\nFailed:');
   for (const { studentId, error } of errors) console.log(`  ${studentId}: ${error}`);

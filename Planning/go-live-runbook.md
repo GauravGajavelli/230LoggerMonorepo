@@ -199,6 +199,18 @@ Then run the pipeline:
 # First run — processes all staged students
 node scripts/process-batch.js bst "Binary Search Tree"
 
+# Progress is logged to data/bst/batch.log — tail it in another terminal to monitor:
+# tail -f data/bst/batch.log
+
+# If interrupted, resume without re-running already-finished students:
+node scripts/process-batch.js bst "Binary Search Tree" --skip-existing
+# --skip-existing skips anyone who already has frontend.json.
+# This means errors are also retried automatically — a failed ingest or prepare never
+# produces frontend.json, so those students are included in the next run.
+# Exception: PDF/report generation failures (soft warnings after pipeline success) are NOT
+# retried this way because frontend.json already exists. Use regenerate-reports.js for those:
+#   node scripts/regenerate-reports.js bst
+
 # If some tars arrived late (re-run stage-tars.sh first), process only new ones:
 node scripts/process-batch.js bst "Binary Search Tree" --skip-existing
 
