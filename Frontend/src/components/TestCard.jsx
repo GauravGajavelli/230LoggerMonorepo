@@ -514,7 +514,7 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
     >
       {/* Header row */}
       <button
-        onClick={() => canExpand && setManualOpen(!manualOpen)}
+        onClick={() => { if (!canExpand) return; if (!manualOpen) eventTracker.track('card_expanded', { test_id: test.id }); setManualOpen(!manualOpen); }}
         style={{
           all: 'unset', display: 'flex', alignItems: 'center', gap: 10,
           width: '100%', padding: '12px 16px',
@@ -897,7 +897,7 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
             return (
               <div style={{ marginTop: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <button onClick={() => setDiffsOpen(o => !o)} style={{
+                  <button onClick={() => { setDiffsOpen(o => { if (!o) eventTracker.track('diff_opened', { test_id: test.id, diff_count: total }); return !o; }); }} style={{
                     all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
                     fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                     letterSpacing: '.08em', color: '#94A3B8',

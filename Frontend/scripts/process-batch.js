@@ -20,11 +20,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // The pipeline JAR resolves prompt templates relative to cwd, which must be the repo root
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
-const assignment  = process.argv[2];
-const displayName = process.argv[3] || process.env.ASSIGNMENT_DISPLAY_NAME || assignment;
+const args        = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const flags       = new Set(process.argv.slice(2).filter(a => a.startsWith('--')));
+const assignment  = args[0];
+const displayName = args[1] || process.env.ASSIGNMENT_DISPLAY_NAME || assignment;
+const skipExisting = flags.has('--skip-existing');
 
 if (!assignment) {
-  console.error('Usage: node scripts/process-batch.js <assignment-slug> [display-name]');
+  console.error('Usage: node scripts/process-batch.js <assignment-slug> [display-name] [--skip-existing]');
   process.exit(1);
 }
 
@@ -45,13 +48,21 @@ if (!fs.existsSync(PIPELINE_JAR)) {
   process.exit(1);
 }
 
-const students = fs.readdirSync(tarsDir).filter(entry =>
+let students = fs.readdirSync(tarsDir).filter(entry =>
   fs.statSync(path.join(tarsDir, entry)).isDirectory()
   && fs.existsSync(path.join(tarsDir, entry, 'run.tar'))
 );
 
+if (skipExisting) {
+  const before = students.length;
+  students = students.filter(id =>
+    !fs.existsSync(path.join(DATA_DIR, assignment, 'output', id, 'frontend.json'))
+  );
+  console.log(`--skip-existing: ${before - students.length} already processed, ${students.length} new`);
+}
+
 if (students.length === 0) {
-  console.log(`No run.tar files found in ${tarsDir}`); process.exit(0);
+  console.log(`No students to process.`); process.exit(0);
 }
 console.log(`Processing ${students.length} student(s) — ${assignment} (${displayName})\n`);
 

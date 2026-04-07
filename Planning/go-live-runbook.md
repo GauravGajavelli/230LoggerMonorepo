@@ -118,6 +118,65 @@ sqlite3 db/feedback.db \
 
 ---
 
+## Step 0 — Unpack and stage the tars
+
+Dr. Krohn provides a zip of the form `allTar-BST-Sp2026.zip` containing files named
+`run-<githubUsername>.tar`. The pipeline expects `data/bst/tars/<studentId>/run.tar`.
+
+```bash
+# On Ubuntu, from Frontend/
+bash scripts/stage-tars.sh /path/to/allTar-BST-Sp2026.zip bst
+```
+
+The script skips 0-byte tars (→ `missing_tar` path) and skips students already staged
+(safe to re-run when a new zip arrives). Your own tar (`run-GauravGajavelli.tar`) is
+included in the zip and staged as `gajavegs` automatically.
+
+**Verify:**
+```bash
+ls data/bst/tars/ | wc -l     # number of students with real tars
+ls data/bst/tars/              # confirm expected IDs
+```
+
+### If a new zip arrives later with additional tars
+
+```bash
+# Stage only the new ones — already-staged students are skipped
+bash scripts/stage-tars.sh /path/to/allTar-BST-Sp2026-v2.zip bst
+
+# Process only the newly staged students (those without frontend.json)
+node scripts/process-batch.js bst "Binary Search Tree" --skip-existing
+```
+
+Then re-run `generate-tokens.js` and `queue-emails.js` — both are idempotent and will
+skip students already queued.
+
+### If a student resubmits (tar size changed — UPDATED in stage-tars.sh output)
+
+`stage-tars.sh` detects size changes and prints an `UPDATED` block with a ready-made command:
+
+```
+⚠  Updated students need reprocessing and email queue reset:
+     rhit-guffeygi
+     rhit-wakefib
+
+To reprocess updated students only, run:
+  node scripts/reprocess-students.js bst rhit-guffeygi rhit-wakefib
+```
+
+Copy that command and run it from `Frontend/`. It will:
+1. Delete the student's pipeline output (forces fresh ingest + prepare)
+2. Cancel any queued email (`status='cancelled'`) so queue-emails.js will re-queue
+3. Re-run ingest → prepare → PDF generation
+
+Then re-queue emails for those students only:
+```bash
+node scripts/queue-emails.js bst "Binary Search Tree"
+# Already-queued (non-cancelled) students are skipped; only the reprocessed ones get new emails
+```
+
+---
+
 ## Step 1 — Validate config, then run the pipeline
 
 First, verify all three config files are present and internally consistent:
@@ -137,10 +196,13 @@ ls ../Pipeline/target/csse230-feedback.jar   # confirm it exists
 Then run the pipeline:
 
 ```bash
-# Normal run — reuses LLM cache from e2e test if same student data
+# First run — processes all staged students
 node scripts/process-batch.js bst "Binary Search Tree"
 
-# Full cache clear (only needed if you want fresh LLM calls, e.g. prompt changed):
+# If some tars arrived late (re-run stage-tars.sh first), process only new ones:
+node scripts/process-batch.js bst "Binary Search Tree" --skip-existing
+
+# Full cache clear (only if you want fresh LLM calls, e.g. prompt changed):
 # rm -rf ../Pipeline/cache/llm/*
 # node scripts/process-batch.js bst "Binary Search Tree"
 ```
@@ -314,7 +376,7 @@ Check:
 - [ ] "Open drill ›" links use `https://feedback.csse.rose-hulman.edu/feedback?token=…#drill-…`
 - [ ] No phantom "Open drill ›" links for tests with no drill
 
-### 4e. Preview the feedback site
+### 4e. Preview the feedback site and verify interaction logging
 
 Open `https://feedback.csse.rose-hulman.edu/feedback?token=<same token>` in browser.
 
@@ -323,9 +385,29 @@ Open `https://feedback.csse.rose-hulman.edu/feedback?token=<same token>` in brow
 - [ ] Drill button visible where expected
 - [ ] Click "✦ practice drill" — modal opens with correct content
 
+While you're here, confirm telemetry is recording (critical — nudge targeting depends on it):
+
+```bash
+export TOKEN=$(sqlite3 db/feedback.db \
+  "SELECT token FROM tokens WHERE student_id='gajavegs' AND assignment='bst'")
+
+sqlite3 db/feedback.db \
+  "SELECT event_type, event_data, timestamp FROM events \
+   WHERE token='$TOKEN' ORDER BY id DESC LIMIT 10;"
+```
+
+Expected after loading the page and opening a drill:
+- `page_view` — fires on page load
+- `drill_opened` — fires when drill modal opens
+- `drill_closed` — fires on close (with `seconds` value)
+- `hint_revealed` — fires if you click "Show hints"
+
+If `page_view` is missing: the React build is stale — run `npm run build && pm2 restart feedback`.
+
 ### 4f. Preview a missing_tar email and generic report
 
-If you have already run the pipeline and a missing_tar student exists in the queue, grab their token from the DB:
+After Step 3 queues emails, any student without a tar will have a `missing_tar` entry.
+Grab a token to preview:
 
 ```bash
 sqlite3 db/feedback.db \
@@ -334,25 +416,14 @@ sqlite3 db/feedback.db \
    WHERE eq.assignment='bst' AND eq.email_type='missing_tar' LIMIT 1;"
 ```
 
-**Dev shortcut — test the generic PDF without a prod send:**
-
-Add `gajavegs_mt` to `data/roster.dev.csv` (or `roster.csv`), ensure there is **no** `data/bst/tars/gajavegs_mt/` directory, then:
-
-```bash
-node scripts/generate-tokens.js bst roster.dev.csv
-node scripts/queue-emails.js bst "Binary Search Tree"
-# → [missing_tar] gajavegs_mt → gajavegs@rose-hulman.edu (+ review guide)
-```
-
-The generic PDF is written immediately to `data/bst/output/gajavegs_mt/report.pdf` — open it directly without waiting for email delivery:
+Open `https://feedback.csse.rose-hulman.edu/report?token=<token>` in browser. The generic
+PDF is also written to `data/bst/output/<student_id>/report.pdf` immediately — scp it to
+your Mac if you want to check it before the send:
 
 ```bash
-# On Ubuntu → Mac:
-scp csse@feedback:~/230LoggerMonorepo/Frontend/data/bst/output/gajavegs_mt/report.pdf /tmp/generic_report.pdf
+scp csse@feedback:~/230LoggerMonorepo/Frontend/data/bst/output/<student_id>/report.pdf /tmp/generic_report.pdf
 open /tmp/generic_report.pdf
 ```
-
-Or open via the browser: `https://feedback.csse.rose-hulman.edu/report?token=<gajavegs_mt token>`
 
 Check:
 
@@ -370,153 +441,95 @@ Check:
 - [ ] Code block text is **selectable and copyable** — select `@Test` through the closing `}`, paste into a text editor, verify indentation is preserved
 - [ ] Hints are numbered (1. 2. 3.), all 3 visible, no toggle needed
 
+### 4g. Clear your preview interactions
+
+You clicked around in 4d/4e generating real `page_view` and `drill_*` events. Clear them
+now — nudge targeting queries the events table to find students who haven't opened their
+feedback, and your test clicks would make you look like an engaged student.
+
+```bash
+export TOKEN=$(sqlite3 db/feedback.db \
+  "SELECT token FROM tokens WHERE student_id='gajavegs' AND assignment='bst'")
+
+sqlite3 db/feedback.db "DELETE FROM events WHERE token='$TOKEN';"
+
+# Confirm cleared
+sqlite3 db/feedback.db \
+  "SELECT COUNT(*) FROM events WHERE token='$TOKEN';"
+# → 0
+```
+
+Do this after **every** preview session, not just the first one.
+
 ---
 
-## Step 5 — Canary send (prod email validation)
+## Step 5 — Canary send (missing_tar validation)
 
-The preview steps above use the browser and the DB. This step sends real emails to your
-inbox — with `EMAIL_DEV_REDIRECT` removed but `HOLD_EMAILS` still set — so you see exactly
-what students will see in Outlook, including HTML rendering, link clickability, and PDF loading.
+You're on `roster.csv` permanently with a real tar, so you'll receive the `feedback_ready`
+email automatically in Step 6. This step only validates the `missing_tar` path with a
+single canary — `gajavegs_mt`.
 
-### 5a. Add canary rows to the roster
-
-Append two rows to `data/roster.csv` (or a temp file if you don't want them in the real roster):
-
-```
-gajavegs_fb,gajavegs@rose-hulman.edu
-gajavegs_mt,gajavegs@rose-hulman.edu
-```
-
-Place a tar for the feedback_ready canary:
+### 5a. Add canary to roster and remove EMAIL_DEV_REDIRECT
 
 ```bash
-mkdir -p data/bst/tars/gajavegs_fb
-cp data/bst/tars/<any_real_student>/run.tar data/bst/tars/gajavegs_fb/run.tar
-# Leave data/bst/tars/gajavegs_mt/ absent — this one gets the missing_tar path
-```
+# Add missing_tar canary — no tar directory for this one
+echo "gajavegs_mt,gajavegs@rose-hulman.edu" >> data/roster.csv
+# Confirm no tar exists for it
+ls data/bst/tars/gajavegs_mt 2>/dev/null && echo "WARNING: remove this dir" || echo "OK"
 
-### 5b. Remove EMAIL_DEV_REDIRECT only (keep HOLD_EMAILS)
-
-```bash
-# Edit .env — remove EMAIL_DEV_REDIRECT and DEMO_TOKEN, but keep HOLD_EMAILS=true
+# Remove EMAIL_DEV_REDIRECT and DEMO_TOKEN, keep HOLD_EMAILS=true
 nano .env
 pm2 restart feedback
 
-# Verify only HOLD_EMAILS remains active:
+# Verify
 grep -E "^(EMAIL_DEV_REDIRECT|DEMO_TOKEN|HOLD_EMAILS)" .env
-# Should print:
+# Should print only:
 # HOLD_EMAILS=true
 ```
 
-### 5c. Run pipeline and queue canary emails
+### 5b. Queue canary only, then release
+
+Queue with only the canary in roster (real students not yet queued):
 
 ```bash
-node scripts/process-batch.js bst "Binary Search Tree"
-# gajavegs_fb should succeed; gajavegs_mt has no tar so pipeline skips it
-
-node scripts/generate-tokens.js bst  # upserts canary tokens
+node scripts/generate-tokens.js bst
 node scripts/queue-emails.js bst "Binary Search Tree"
-# → [feedback_ready] gajavegs_fb → gajavegs@rose-hulman.edu
-# → [missing_tar]    gajavegs_mt → gajavegs@rose-hulman.edu (+ review guide)
-```
+# → [missing_tar] gajavegs_mt → gajavegs@rose-hulman.edu (+ review guide)
 
-### 5d. Release canary emails only
-
-```bash
-# Release just the canary rows — leave all real students pending
-node --input-type=module << 'EOF'
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const db = require('better-sqlite3')('db/feedback.db');
-const tokens = db.prepare(
-  "SELECT token FROM tokens WHERE student_id IN ('gajavegs_fb','gajavegs_mt') AND assignment='bst'"
-).all().map(r => r.token);
-for (const token of tokens) {
-  db.prepare("UPDATE email_queue SET status='pending' WHERE token=?").run(token);
-  // status is already pending — we need to actually push them via the API
-}
-db.close();
-console.log('Canary tokens:', tokens);
-EOF
-```
-
-Actually, since `HOLD_EMAILS=true` blocks the drain loop, trigger a one-time push for just the canary rows by temporarily calling the internal drain with a targeted approach — easiest is to just briefly remove `HOLD_EMAILS`, let it fire, then re-add it within 60 seconds before the real student emails go out:
-
-```bash
-# 1. Note the time
-date
-
-# 2. Remove HOLD_EMAILS temporarily, restart
+# Release — only gajavegs_mt is pending so only it sends
 sed -i '/^HOLD_EMAILS/d' .env
 pm2 restart feedback
-
-# 3. Wait ~90 seconds for the drain loop to fire and push all pending (canary + real students)
-#    — OR immediately re-add HOLD_EMAILS if you want only canaries to go out
-#    The drain loop runs every 60s; canary emails process in ~10s each.
-#    If you re-add HOLD_EMAILS before the loop runs you block everything again.
-#    Simplest: just let all emails go and skip the hold for real students.
+# Email arrives within ~2 minutes
 ```
 
-> **Note**: There is no way to selectively drain only specific rows without code changes.
-> The practical choice is: either let all pending emails send when you release, or use the
-> preview-only approach (Step 4) and trust the browser preview + DB inspection.
->
-> If you want a true prod email validation before real students receive theirs, the safest
-> flow is: canary rows only → remove HOLD_EMAILS → both canary emails arrive → verify →
-> then queue the real student emails.
+### 5c. Validate in Outlook
 
-So the recommended canary sequence is:
+Check `gajavegs@rose-hulman.edu` (no `[DEV →]` prefix now):
 
-```bash
-# Queue ONLY canary emails first (real students not yet queued)
-node scripts/queue-emails.js bst "Binary Search Tree"
-# (real students: skipped — already queued or not in roster yet)
-
-# Remove HOLD_EMAILS and release
-sed -i '/^HOLD_EMAILS/d' .env
-pm2 restart feedback
-# Both canary emails send within ~2 minutes
-```
-
-### 5e. Validate in Outlook
-
-Check `gajavegs@rose-hulman.edu`. You should receive two emails (no `[DEV →]` prefix now):
-
-**feedback_ready email:**
-- [ ] Renders in HTML — sans-serif font, `<hr>` rules visible as lines
-- [ ] Subject: `CSSE 230 -- BST feedback available (N patterns, Exam 2)`
-- [ ] Report link is clickable → PDF downloads and is not blank
-- [ ] Feedback link is clickable → feedback site loads with real data
-- [ ] "Open drill ›" links in PDF open the correct drill modal
-
-**missing_tar email:**
 - [ ] Subject: `CSSE 230 -- BST feedback: action needed`
-- [ ] Upload link present and clickable → shows file upload widget
-- [ ] Review guide link present → generic PDF loads with notice strip
-- [ ] Generic PDF shows drills, not blank, no "Open drill ›" links
+- [ ] Renders HTML — sans-serif font, `<hr>` rules as lines
+- [ ] Upload link clickable → shows file upload widget at feedback site
+- [ ] Review guide link clickable → generic 2-page PDF loads
+- [ ] Generic PDF page 1: assessment table, focal exam drills, generic notice strip
+- [ ] Generic PDF page 2: "Drill Sheet" with 3 drill cards, code selectable, hints numbered
 
-### 5f. Clean up canary rows
+### 5d. Clean up canary
 
 ```bash
-# Remove canary rows from roster.csv (edit manually or:)
-grep -v "gajavegs_fb\|gajavegs_mt" data/roster.csv > /tmp/roster_clean.csv
+grep -v "^gajavegs_mt," data/roster.csv > /tmp/roster_clean.csv
 mv /tmp/roster_clean.csv data/roster.csv
 
-# Remove canary DB rows (optional — won't affect real students)
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-db.prepare("DELETE FROM email_queue   WHERE token IN (SELECT token FROM tokens WHERE student_id IN ('gajavegs_fb','gajavegs_mt'))").run();
-db.prepare("DELETE FROM pipeline_runs WHERE student_id IN ('gajavegs_fb','gajavegs_mt')").run();
-db.prepare("DELETE FROM events        WHERE token IN (SELECT token FROM tokens WHERE student_id IN ('gajavegs_fb','gajavegs_mt'))").run();
-db.prepare("DELETE FROM tokens        WHERE student_id IN ('gajavegs_fb','gajavegs_mt') AND assignment='bst'").run();
+db.prepare("DELETE FROM email_queue   WHERE token IN (SELECT token FROM tokens WHERE student_id='gajavegs_mt' AND assignment='bst')").run();
+db.prepare("DELETE FROM tokens        WHERE student_id='gajavegs_mt' AND assignment='bst'").run();
 db.close();
-console.log('Canary rows removed');
+console.log('Canary removed');
 EOF
 
-rm -rf data/bst/tars/gajavegs_fb data/bst/tars/gajavegs_mt
-rm -rf data/bst/output/gajavegs_fb data/bst/output/gajavegs_mt
+rm -rf data/bst/output/gajavegs_mt
 ```
 
 ---
@@ -682,7 +695,7 @@ These are the things most likely to catch you off-guard. Check them during Step 
 
 ### Research data
 - [ ] **Your own events**: clear your `gajavegs` events from the DB before any analysis run (see Pre-conditions). Do this even if you didn't click around much — `page_view` fires on every load.
-- [ ] **Canary rows**: if you used `gajavegs_fb` / `gajavegs_mt` canary entries, delete their events and tokens before analysis (cleanup commands in Step 5f).
+- [ ] **Canary rows**: if you used the `gajavegs_mt` canary, its cleanup is in Step 5d — no events to clear since it has no feedback site.
 - [ ] **Nudge timing**: nudges sent too early (> 2 days before exam) are blocked by the calendar guard. Use `--force` only if you have a specific reason. Check `daysUntil` in the script output.
 
 ---

@@ -722,15 +722,26 @@ sqlite3 db/feedback.db \
 ```
 - [ ] `page_view` row appears within a few seconds of loading
 
+**Check card_expanded:**
+1. Click any test card header to expand it
+   - [ ] `card_expanded` row appears in events table (fires on open, not on close)
+2. Click the same card header again to collapse, then expand again
+   - [ ] A second `card_expanded` row appears (fires every open, not just first)
+
+**Check diff_opened:**
+3. Expand a test card that shows a "Code change" section
+4. Click the "Code change" toggle to open it
+   - [ ] `diff_opened` row appears with `diff_count` matching the number of diffs shown
+
 **Check drill events:**
-1. Expand a test card that has a drill
-2. Click "✦ practice drill" button
+5. Expand a test card that has a drill
+6. Click "✦ practice drill" button
    - [ ] `drill_opened` row appears in events table
-3. Click the copy button on the drill code
+7. Click the copy button on the drill code
    - [ ] `drill_copy` row appears
-4. Click "Show hints"
+8. Click "Show hints"
    - [ ] `hint_revealed` row appears
-5. Close the modal (✕ Close button)
+9. Close the modal (✕ Close button)
    - [ ] `drill_closed` row appears with a `seconds` value > 0
 
 Full query:

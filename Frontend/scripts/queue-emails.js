@@ -145,7 +145,7 @@ for (const { token, student_id, email } of tokenRows) {
   }
 
   const alreadyQueued = db.prepare(
-    "SELECT id FROM email_queue WHERE token=? AND email_type=? AND assignment=?"
+    "SELECT id FROM email_queue WHERE token=? AND email_type=? AND assignment=? AND status != 'cancelled'"
   ).get(token, emailType, assignment);
   if (alreadyQueued) {
     console.log(`  [skip] ${student_id} — already queued`);
