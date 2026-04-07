@@ -46,11 +46,13 @@ const upsert = db.prepare(`
     token = excluded.token, email = excluded.email
 `);
 
+const rosterIds = new Set();
 let inserted = 0, skipped = 0;
 db.transaction(() => {
   for (const line of dataLines) {
     const [studentId, email] = line.split(',').map(s => s.trim());
     if (!studentId || !email) { console.warn(`  [skip] Malformed line: ${line}`); skipped++; continue; }
+    rosterIds.add(studentId);
     const token = generateToken(studentId, assignment, SECRET_KEY);
     upsert.run(token, studentId, email, assignment);
     console.log(`  ${studentId} → ${token}  (${email})`);
@@ -58,4 +60,20 @@ db.transaction(() => {
   }
 })();
 
-console.log(`\nDone. ${inserted} tokens for assignment "${assignment}", ${skipped} skipped.`);
+// Remove tokens for students no longer in the roster. Pending emails must be
+// cancelled first to satisfy the FK constraint (foreign_keys = ON).
+const stale = db.prepare(
+  "SELECT token, student_id FROM tokens WHERE assignment = ?"
+).all(assignment).filter(r => !rosterIds.has(r.student_id));
+
+if (stale.length > 0) {
+  db.transaction(() => {
+    for (const { token, student_id } of stale) {
+      db.prepare("DELETE FROM email_queue WHERE token = ? AND status = 'pending'").run(token);
+      db.prepare('DELETE FROM tokens WHERE token = ?').run(token);
+      console.log(`  [removed] ${student_id} no longer in roster — token revoked, pending emails cancelled`);
+    }
+  })();
+}
+
+console.log(`\nDone. ${inserted} upserted, ${skipped} skipped, ${stale.length} removed for assignment "${assignment}".`);

@@ -579,9 +579,12 @@ function runPipeline(tarDir, outputDir, assignment, studentId, runId) {
 
 // ─── Email queue helper ───────────────────────────────────────────────────────
 
-const SEP = '---------------------------------------------------------------------';
-const BREADCRUMB = '2526S CSSE230 -> Debugging Feedback';
-const AUTOMATED_FOOTER = `\n${SEP}\nThis email was sent automatically \u2014 replies are not monitored.\nFor questions, contact gajavegs@rose-hulman.edu.`;
+const EMAIL_FONT   = 'font-family: Arial, Helvetica, sans-serif;';
+const EMAIL_HR     = '<hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">';
+const EMAIL_FOOTER = `${EMAIL_HR}<p style="${EMAIL_FONT} font-size:12px; color:#888; margin:0;">This email was sent automatically — replies are not monitored.<br>For questions, contact gajavegs@rose-hulman.edu.</p>`;
+function wrapEmail(crumb, inner) {
+  return `<div style="${EMAIL_FONT} font-size:14px; color:#333; max-width:600px; line-height:1.5;"><p style="font-size:12px; color:#999; margin:0 0 4px;">${crumb}</p>${EMAIL_HR}${inner}${EMAIL_FOOTER}</div>`;
+}
 
 // Reads Pipeline/assignments/{assignment}_assessment_config.json if present, returns parsed JSON or null.
 function loadAssessmentConfig(assignment) {
@@ -600,12 +603,20 @@ export function queueEmail(token, recipient, assignment, displayName, emailType)
   const shortName = cfg?.short_name || displayName;
 
   let subject, body;
+  const crumb = `2526S CSSE230 &rsaquo; Debugging Feedback &rsaquo; ${fullName}`;
   if (emailType === 'regeneration_ready') {
     subject = `CSSE 230: Updated ${shortName} Feedback Available`;
-    body = `${BREADCRUMB} -> ${fullName}\n${SEP}\nYour debugging feedback for '${fullName}' has been\nregenerated with your latest data.\n\nView your updated feedback summary (PDF):\n\n${reportLink}\n\nOr open the interactive feedback site:\n\n${feedbackLink}\n\n${SEP}${AUTOMATED_FOOTER}`;
+    body = wrapEmail(crumb, `
+      <p>Your debugging feedback for <strong>${fullName}</strong> has been regenerated with your latest data.</p>
+      <p><strong>View your updated feedback summary (PDF):</strong><br><a href="${reportLink}">${reportLink}</a></p>
+      <p><strong>Or open the interactive feedback site:</strong><br><a href="${feedbackLink}">${feedbackLink}</a></p>
+      <p style="font-size:12px; color:#888;">If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);
   } else if (emailType === 'generation_failed') {
     subject = `CSSE 230: ${shortName} Feedback Generation Failed`;
-    body = `${BREADCRUMB} -> ${fullName}\n${SEP}\nWe were unable to generate your debugging feedback for '${fullName}'.\n\nYou can try uploading your run.tar file again at:\n\n${feedbackLink}\n\nIf the problem persists, contact gajavegs@rose-hulman.edu.\n\n${SEP}${AUTOMATED_FOOTER}`;
+    body = wrapEmail(crumb, `
+      <p>We were unable to generate your debugging feedback for <strong>${fullName}</strong>.</p>
+      <p>You can try uploading your run.tar file again at the feedback site:<br><a href="${feedbackLink}">${feedbackLink}</a></p>
+      <p>If the problem persists, contact gajavegs@rose-hulman.edu.</p>`);
   } else {
     console.error(`[email] queueEmail called for unexpected type: ${emailType} — use batch scripts for ${emailType}`);
     return;
