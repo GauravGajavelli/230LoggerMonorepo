@@ -121,6 +121,25 @@ function renderMissingTar(uploadLink, reportLink) {
   return { subject, body };
 }
 
+function renderNoIssues(reportLink, feedbackLink) {
+  const fullSubject  = `CSSE 230: ${shortName} Feedback (no issues flagged, ${nearestAssessment})`;
+  const shortSubject = `CSSE 230: ${shortName} Feedback (no issues flagged)`;
+  const subject = fullSubject.length <= 60 ? fullSubject : shortSubject;
+  const reviewSection = reportLink ? `
+    <p><strong>View an exam review guide for ${nearestAssessment} (${assessmentDate}):</strong><br>
+       <a href="${reportLink}">${reportLink}</a></p>` : '';
+  const body = wrap(`
+    <p>Your debugging feedback for <strong>${fullName}</strong> has been processed.
+       No issues were flagged in the required tests &mdash; your implementation is looking good.</p>
+    ${reviewSection}
+    <p><strong>You can also open the interactive feedback site:</strong><br>
+       <a href="${feedbackLink}">${feedbackLink}</a></p>
+    <p>This feedback is private to you and is not shared with course staff.</p>
+    <p style="font-size:12px; color:#888;">
+       If links appear blank, connect to eduroam or the Rose-Hulman VPN.</p>`);
+  return { subject, body };
+}
+
 // ── Queue emails ──────────────────────────────────────────────────────────────
 
 const tokenRows = db.prepare('SELECT token, student_id, email FROM tokens WHERE assignment=?').all(assignment);
@@ -129,7 +148,7 @@ if (!tokenRows.length) {
   process.exit(1);
 }
 
-let feedbackQueued = 0, missingQueued = 0, skipped = 0;
+let feedbackQueued = 0, noIssuesQueued = 0, missingQueued = 0, skipped = 0;
 
 for (const { token, student_id, email } of tokenRows) {
   const hasTar = fs.existsSync(path.join(DATA_DIR, assignment, 'tars', student_id, 'run.tar'));
@@ -137,7 +156,22 @@ for (const { token, student_id, email } of tokenRows) {
     "SELECT id FROM pipeline_runs WHERE student_id=? AND assignment=? AND status='success' ORDER BY id DESC LIMIT 1"
   ).get(student_id, assignment);
 
-  const emailType = hasSuccess ? 'feedback_ready' : (!hasTar ? 'missing_tar' : null);
+  // Read drill/pattern counts before determining email type
+  let patternCount = 0, drillCount = 0;
+  if (hasSuccess) {
+    const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', student_id, 'frontend.json');
+    if (fs.existsSync(frontendJsonPath)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8'));
+        patternCount = data.feedback?.length || 0;
+        drillCount   = data.practiceDrills?.length || 0;
+      } catch { /* leave at 0 */ }
+    }
+  }
+
+  const emailType = hasSuccess
+    ? (drillCount > 0 ? 'feedback_ready' : 'no_issues')
+    : (!hasTar ? 'missing_tar' : null);
   if (!emailType) {
     console.log(`  [skip] ${student_id} — tar exists but pipeline not successful yet`);
     skipped++;
@@ -158,17 +192,20 @@ for (const { token, student_id, email } of tokenRows) {
   let subject, body;
 
   if (emailType === 'feedback_ready') {
-    const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', student_id, 'frontend.json');
-    let patternCount = 0;
-    if (fs.existsSync(frontendJsonPath)) {
-      try {
-        const data = JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8'));
-        patternCount = data.feedback?.length || 0;
-      } catch { /* leave patternCount = 0 */ }
-    }
     ({ subject, body } = renderFeedbackReady(patternCount, studentReportLink, feedbackLink));
     console.log(`  [feedback_ready] ${student_id} → ${email} (${patternCount} patterns)`);
     feedbackQueued++;
+  } else if (emailType === 'no_issues') {
+    let genericReportLink = null;
+    try {
+      const reportPath = await generateGenericReport(student_id, assignment, token, DATA_DIR, BASE_URL);
+      if (reportPath) genericReportLink = studentReportLink;
+    } catch (err) {
+      console.warn(`  [warn] Generic report failed for ${student_id}: ${err.message}`);
+    }
+    ({ subject, body } = renderNoIssues(genericReportLink, feedbackLink));
+    console.log(`  [no_issues]      ${student_id} → ${email}${genericReportLink ? ' (+ review guide)' : ''}`);
+    noIssuesQueued++;
   } else {
     let genericReportLink = null;
     try {
@@ -187,4 +224,4 @@ for (const { token, student_id, email } of tokenRows) {
   ).run(token, email, subject, body, emailType, assignment);
 }
 
-console.log(`\nDone. ${feedbackQueued} feedback_ready, ${missingQueued} missing_tar queued; ${skipped} skipped.`);
+console.log(`\nDone. ${feedbackQueued} feedback_ready, ${noIssuesQueued} no_issues, ${missingQueued} missing_tar queued; ${skipped} skipped.`);
