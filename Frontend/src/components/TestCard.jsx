@@ -412,7 +412,7 @@ function FeedbackShimmer() {
  *   onCiteClick: (runNumber:number) => void,
  * }} props
  */
-export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened, assessmentConfig }) {
+export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteClick, runToEpisode = {}, feedbackRead = false, onFeedbackOpened, assessmentConfig }) {
   const [manualOpen, setManualOpen] = useState(initiallyOpen ?? false);
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
@@ -534,8 +534,8 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
             <ClockIcon />{test.changedAt}
           </span>
         )}
-        {hasFeedback && !open && (
-          <span className="feedback-unseen-tab" style={{ width: 7, height: 7 }} title="Has feedback" />
+        {hasFeedback && !feedbackRead && !open && (
+          <span className="feedback-unseen-tab" style={{ width: 7, height: 7 }} title="Unread feedback" />
         )}
         {canExpand && <ChevronIcon open={open} />}
       </button>
