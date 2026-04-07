@@ -69,8 +69,8 @@ Before starting this runbook:
 - [ ] Frontend is built: `npm run build` (rebuild if any `src/` files changed since e2e)
 - [ ] Zenbook relay is online: `pm2 list` shows `relay` as `online`
 - [ ] Your own test events are cleared from the DB (see D5 in the e2e doc)
-- [ ] You have the real student roster at `data/roster.csv` (see note below)
-- [ ] Tars are in place at `data/bst/tars/<student_id>/run.tar` for all submissions
+- [ ] You have the real student roster at `data/bst/roster.csv` (see note below) — **must be in place before Stage 0**
+- [ ] Tars are in place at `data/bst/tars/<student_id>/run.tar` for all submissions (student_id = email prefix, not GitHub name)
 - [ ] After any `.env` change: `pm2 restart feedback` (required for changes to take effect)
 
 Verify `.env` is in production state before proceeding:
@@ -93,10 +93,15 @@ grep -E "^(EMAIL_DEV_REDIRECT|DEMO_TOKEN|DEV_BYPASS_AUTH|HOLD_EMAILS)" .env \
 
 ### roster.csv vs roster.dev.csv
 
-`roster.dev.csv` is for e2e testing only. `roster.csv` is what `generate-tokens.js bst` reads
-by default (no second argument) and what gets used for the real send.
+`roster.dev.csv` is for e2e testing only. `data/bst/roster.csv` is the production roster used
+by both `stage-tars.sh` (GitHub username → email prefix lookup) and `generate-tokens.js`.
 
-**Add yourself to `roster.csv`:**
+The roster format is `student_id,email` where `student_id` is the student's **GitHub username** —
+this is the key used by `stage-tars.sh` to map tar filenames to email-prefix student IDs.
+`generate-tokens.js` derives the actual stable student ID from the email prefix (e.g.,
+`beloremd@rose-hulman.edu` → `beloremd`), so the `student_id` column is only used by stage-tars.sh.
+
+**Add yourself to `data/bst/roster.csv`:**
 
 ```
 gajavegs,gajavegs@rose-hulman.edu
@@ -107,7 +112,7 @@ real email every cycle (no canary setup needed for the `feedback_ready` path), a
 test the upload flow and drill interactions using your own entry without cleanup.
 
 The `missing_tar` canary (`gajavegs_mt`) is still useful the first time to validate that
-specific email template, but your permanent roster entry covers the happy path from then on.
+specific email template — see Step 5 for the updated canary approach.
 
 **Before running research queries on the events table**, clear your own interactions:
 
@@ -116,26 +121,46 @@ sqlite3 db/feedback.db \
   "DELETE FROM events WHERE token=(SELECT token FROM tokens WHERE student_id='gajavegs' AND assignment='bst');"
 ```
 
+### Student IDs — email prefix, not GitHub username
+
+After Step 0, everything downstream uses the **email prefix** as the stable student ID:
+- `data/bst/tars/` directories are named by email prefix (e.g., `beloremd/`, `guffeygi/`)
+- `pipeline_runs`, `tokens`, `events`, `email_queue` all use email prefix as `student_id`
+- GitHub usernames appear only in `data/bst/roster.csv` (as the lookup key) and in the tar filenames from Dr. Krohn
+
+`stage-tars.sh` is the translation boundary that maps GitHub name → email prefix.
+
 ---
 
 ## Step 0 — Unpack and stage the tars
 
-Dr. Krohn provides a zip of the form `allTar-BST-Sp2026.zip` containing files named
-`run-<githubUsername>.tar`. The pipeline expects `data/bst/tars/<studentId>/run.tar`.
+> **Pre-condition:** `data/bst/roster.csv` must be in place before this step.
+> The script reads it to translate GitHub usernames → email-prefix student IDs.
+
+Dr. Krohn provides a zip of the form `allTar-BST-Sp2026.zip`. The zip typically contains a
+directory layer (e.g., `allTar-BST-Sp2026-7April/`) with files named `run-<githubUsername>.tar`
+inside. The script handles this automatically.
 
 ```bash
 # On Ubuntu, from Frontend/
 bash scripts/stage-tars.sh /path/to/allTar-BST-Sp2026.zip bst
 ```
 
-The script skips 0-byte tars (→ `missing_tar` path) and skips students already staged
-(safe to re-run when a new zip arrives). Your own tar (`run-GauravGajavelli.tar`) is
-included in the zip and staged as `gajavegs` automatically.
+What the script does:
+- Reads `data/bst/roster.csv` to build a GitHub username → email prefix map
+- For each `run-<githubUsername>.tar` entry in the zip, strips trailing resubmission suffixes
+  (e.g., `run-cahoonlh-1.tar` → looks up `cahoonlh` in the roster map)
+- Stages the tar as `data/bst/tars/<emailPrefix>/run.tar`
+- Skips 0-byte tars (→ `missing_tar` email path) and already-staged students (safe to re-run)
+- Falls back to the GitHub username as the ID if the username isn't in roster (with a warning)
+
+Your own tar (`run-gajavegs.tar` or similar) is staged as `gajavegs` automatically if your
+GitHub username appears in the roster with your `gajavegs@rose-hulman.edu` email.
 
 **Verify:**
 ```bash
 ls data/bst/tars/ | wc -l     # number of students with real tars
-ls data/bst/tars/              # confirm expected IDs
+ls data/bst/tars/              # should show email prefixes: beloremd/ guffeygi/ cahoonlh/ ...
 ```
 
 ### If a new zip arrives later with additional tars
@@ -157,14 +182,14 @@ skip students already queued.
 
 ```
 ⚠  Updated students need reprocessing and email queue reset:
-     rhit-guffeygi
-     rhit-wakefib
+     guffeygi
+     wakefib
 
 To reprocess updated students only, run:
-  node scripts/reprocess-students.js bst rhit-guffeygi rhit-wakefib
+  node scripts/reprocess-students.js bst guffeygi wakefib
 ```
 
-Copy that command and run it from `Frontend/`. It will:
+IDs in this output are email prefixes (not GitHub names). Copy that command and run it from `Frontend/`. It will:
 1. Delete the student's pipeline output (forces fresh ingest + prepare)
 2. Cancel any queued email (`status='cancelled'`) so queue-emails.js will re-queue
 3. Re-run ingest → prepare → PDF generation
@@ -237,8 +262,8 @@ investigate before proceeding.
 ## Step 2 — Generate tokens for the full roster
 
 ```bash
-node scripts/generate-tokens.js bst
-# reads data/roster.csv by default
+node scripts/generate-tokens.js bst bst/roster.csv
+# reads data/bst/roster.csv; derives student_id from email prefix (e.g., beloremd@... → beloremd)
 ```
 
 Tokens are deterministic. If some tokens already exist from e2e testing, this upserts them
@@ -303,6 +328,45 @@ Done. 17 feedback_ready, 3 missing_tar queued; 0 skipped.
 ```
 
 Emails are now in the DB with `status='pending'` but **will not send** until you release the hold.
+
+---
+
+## Step 3b — Full email preview via redirect (optional but recommended)
+
+This step sends every queued email to **you** instead of students, so you can check every
+subject line and body in real Outlook before anyone else sees them. It costs nothing extra —
+you'll just reset the queue to `pending` afterward.
+
+```bash
+# Add dev redirect (send everything to yourself)
+echo "EMAIL_DEV_REDIRECT=gajavegs@rose-hulman.edu" >> .env
+pm2 restart feedback
+
+# Release the hold — all pending emails fire to you (subject prefix: [DEV → real@email])
+sed -i '/^HOLD_EMAILS/d' .env
+pm2 restart feedback
+```
+
+Check your Outlook inbox. Verify every subject and body looks correct. Then reset the queue so
+the emails send for real in Step 6:
+
+```bash
+# After reviewing: reset all sent emails back to pending
+sqlite3 db/feedback.db \
+  "UPDATE email_queue SET status='pending', attempts=0, error_msg=NULL \
+   WHERE assignment='bst' AND status='sent';"
+
+# Remove the redirect and hold before continuing
+# (Edit .env to remove EMAIL_DEV_REDIRECT; HOLD_EMAILS will be re-added in Step 6)
+nano .env   # remove EMAIL_DEV_REDIRECT line
+pm2 restart feedback
+
+# Confirm redirect is gone
+grep "EMAIL_DEV_REDIRECT" .env && echo "ERROR: still set" || echo "OK"
+```
+
+> **LLM cache note:** reprocessing any students after this preview is free — LLM responses are
+> cached in `Pipeline/cache/llm/` from the first run.
 
 ---
 
@@ -475,13 +539,27 @@ You're on `roster.csv` permanently with a real tar, so you'll receive the `feedb
 email automatically in Step 6. This step only validates the `missing_tar` path with a
 single canary — `gajavegs_mt`.
 
-### 5a. Add canary to roster and remove EMAIL_DEV_REDIRECT
+### 5a. Create canary token directly and remove EMAIL_DEV_REDIRECT
+
+`generate-tokens.js` derives student_id from the email prefix, so adding
+`gajavegs_mt,gajavegs@rose-hulman.edu` to the roster would just upsert the existing `gajavegs`
+token (same email). Instead, insert the canary token directly into the DB:
 
 ```bash
-# Add missing_tar canary — no tar directory for this one
-echo "gajavegs_mt,gajavegs@rose-hulman.edu" >> data/roster.csv
-# Confirm no tar exists for it
+# Confirm no tar exists for the canary
 ls data/bst/tars/gajavegs_mt 2>/dev/null && echo "WARNING: remove this dir" || echo "OK"
+
+# Insert canary token directly (student_id='gajavegs_mt', email routes to your inbox)
+node --input-type=module << 'EOF'
+import 'dotenv/config';
+import db from './lib/db.js';
+import { generateToken } from './lib/tokens.js';
+const token = generateToken('gajavegs_mt', 'bst', process.env.SECRET_KEY);
+db.prepare('INSERT OR REPLACE INTO tokens (token, student_id, email, assignment) VALUES (?,?,?,?)')
+  .run(token, 'gajavegs_mt', 'gajavegs@rose-hulman.edu', 'bst');
+console.log('Canary token created:', token);
+db.close();
+EOF
 
 # Remove EMAIL_DEV_REDIRECT and DEMO_TOKEN, keep HOLD_EMAILS=true
 nano .env
@@ -495,10 +573,9 @@ grep -E "^(EMAIL_DEV_REDIRECT|DEMO_TOKEN|HOLD_EMAILS)" .env
 
 ### 5b. Queue canary only, then release
 
-Queue with only the canary in roster (real students not yet queued):
+`queue-emails.js` will find the new `gajavegs_mt` token, see no tar, and queue a `missing_tar` email:
 
 ```bash
-node scripts/generate-tokens.js bst
 node scripts/queue-emails.js bst "Binary Search Tree"
 # → [missing_tar] gajavegs_mt → gajavegs@rose-hulman.edu (+ review guide)
 
@@ -521,16 +598,15 @@ Check `gajavegs@rose-hulman.edu` (no `[DEV →]` prefix now):
 
 ### 5d. Clean up canary
 
-```bash
-grep -v "^gajavegs_mt," data/roster.csv > /tmp/roster_clean.csv
-mv /tmp/roster_clean.csv data/roster.csv
+The canary was inserted directly into the DB (not via roster), so only DB cleanup is needed:
 
+```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const db = require('better-sqlite3')('db/feedback.db');
-db.prepare("DELETE FROM email_queue   WHERE token IN (SELECT token FROM tokens WHERE student_id='gajavegs_mt' AND assignment='bst')").run();
-db.prepare("DELETE FROM tokens        WHERE student_id='gajavegs_mt' AND assignment='bst'").run();
+db.prepare("DELETE FROM email_queue WHERE token IN (SELECT token FROM tokens WHERE student_id='gajavegs_mt' AND assignment='bst')").run();
+db.prepare("DELETE FROM tokens      WHERE student_id='gajavegs_mt' AND assignment='bst'").run();
 db.close();
 console.log('Canary removed');
 EOF
@@ -549,7 +625,7 @@ With canary validated and dev switches gone:
 echo "HOLD_EMAILS=true" >> .env
 pm2 restart feedback
 
-node scripts/generate-tokens.js bst    # generates tokens for all real roster students
+node scripts/generate-tokens.js bst bst/roster.csv    # generates tokens for all real roster students
 node scripts/queue-emails.js bst "Binary Search Tree"
 # → N feedback_ready, M missing_tar queued
 
@@ -664,7 +740,7 @@ Check on Mac (`scp csse@feedback:/tmp/nudge_*.html /tmp/ && open /tmp/nudge_feed
 
 - [ ] **feedback nudge**: mentions pattern count, links to report + feedback site, sans-serif, `<hr>` rules
 - [ ] **missing_tar nudge**: mentions exam name + date, links to review guide (if exists) + upload prompt, no mention of "patterns"
-- [ ] Neither contains `\u2014` em dashes or raw `--` dashes outside of `--` separators
+- [ ] No encoding artifacts (`ΓÇô`, `ΓÇö`, or similar CP437 garbage) — the relay uses `$mail.HTMLBody` (UTF-8 charset) and templates use HTML entities (`&ndash;`, `&mdash;`) so this should never occur, but confirm on first send of each template type
 - [ ] VPN note present in both
 
 Release:
