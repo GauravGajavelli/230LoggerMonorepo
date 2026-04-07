@@ -57,6 +57,15 @@ All commands in this section run from `Frontend/` on Ubuntu.
 
 ### A1. Full reset (start clean)
 
+**Quickest option — wipe the entire DB and let it recreate on server restart:**
+```bash
+rm db/feedback.db
+pm2 restart feedback   # (or `node server.js` locally) — schema is recreated automatically
+```
+Use this when you want a completely clean slate and don't need to preserve relay registration
+(the Zenbook re-registers on its next heartbeat, within ~60s).
+
+**Per-assignment reset — preserves relay registration and other assignment data:**
 ```bash
 # Clear pipeline outputs and LLM cache
 rm -rf data/bst/output/gajavegs data/bst/output/gajavegs_mt
@@ -522,7 +531,16 @@ console.log('Body:\n', row?.body);
 EOF
 ```
 
-**Full reset** (Ubuntu):
+**Full reset — nuke the DB entirely** (fastest, Ubuntu or Mac):
+```bash
+rm db/feedback.db
+pm2 restart feedback   # schema recreates on startup; Zenbook re-registers within ~60s
+rm -rf data/bst/output/gajavegs data/bst/output/gajavegs_mt
+rm -rf ../Pipeline/cache/llm/*
+# Then repeat from A2
+```
+
+**Full reset — per-assignment, preserves relay registration** (Ubuntu):
 ```bash
 node --input-type=module << 'EOF'
 import { createRequire } from 'module';
