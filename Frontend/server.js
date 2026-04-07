@@ -517,11 +517,31 @@ function recordEmailFailure(id, errorMsg) {
   console.warn(`[email] ${status} (attempt ${attempts}): ${errorMsg}`);
 }
 
+// After a successful send, restart the process after 60s of email inactivity.
+// pm2 auto-restarts on exit(0), keeping the server fresh without manual intervention.
+let restartTimer = null;
+function scheduleRestartAfterSend() {
+  if (restartTimer) clearTimeout(restartTimer);
+  restartTimer = setTimeout(() => {
+    const stillPending = db.prepare("SELECT COUNT(*) as n FROM email_queue WHERE status='pending'").get().n;
+    if (stillPending === 0) {
+      console.log('[email] Quiet after send — restarting to keep fresh');
+      process.exit(0);
+    }
+  }, 60_000);
+}
+
 async function pushAllPending() {
   const pending = db.prepare(
     "SELECT * FROM email_queue WHERE status='pending' ORDER BY created_at LIMIT 20"
   ).all();
-  for (const email of pending) await pushEmail(email);
+  let sent = 0;
+  for (const email of pending) {
+    await pushEmail(email);
+    const row = db.prepare('SELECT status FROM email_queue WHERE id=?').get(email.id);
+    if (row?.status === 'sent') sent++;
+  }
+  if (sent > 0) scheduleRestartAfterSend();
 }
 
 // ─── Background: retry loop ───────────────────────────────────────────────────

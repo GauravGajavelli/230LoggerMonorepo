@@ -418,8 +418,8 @@ If `page_view` is missing: the React build is stale — run `npm run build && pm
 
 ### 4f. Preview a missing_tar email and generic report
 
-After Step 3 queues emails, any student without a tar will have a `missing_tar` entry.
-Grab a token to preview:
+The generic report is generated per-student by `queue-emails.js` so the footer feedback site
+link is unique to each student's token. After Step 3 queues emails, grab a token to preview:
 
 ```bash
 sqlite3 db/feedback.db \
@@ -428,30 +428,22 @@ sqlite3 db/feedback.db \
    WHERE eq.assignment='bst' AND eq.email_type='missing_tar' LIMIT 1;"
 ```
 
-Open `https://feedback.csse.rose-hulman.edu/report?token=<token>` in browser. The generic
-PDF is also written to `data/bst/output/<student_id>/report.pdf` immediately — scp it to
-your Mac if you want to check it before the send:
-
-```bash
-scp csse@feedback:~/230LoggerMonorepo/Frontend/data/bst/output/<student_id>/report.pdf /tmp/generic_report.pdf
-open /tmp/generic_report.pdf
-```
+Open `https://feedback.csse.rose-hulman.edu/report?token=<token>` in browser.
 
 Check:
 
 **Page 1 (summary):**
-- [ ] Generic notice strip visible: "Class-wide review guide -- upload your run.tar..."
+- [ ] Generic notice strip visible: "Class-wide review guide. Upload your run.tar..."
 - [ ] Assessment table shows upcoming exams with dates and drill counts
-- [ ] Focal exam column shows drill names, intro, time/weight meta, source badge
-- [ ] No "Open drill ›" links on page 1 (those are in page 2 — or rather, the test cards link to the feedback site, which shows the upload widget for missing_tar students)
-- [ ] Footer shows "N topics · M min total"
+- [ ] Focal exam column shows drill names, intro, time/weight meta, source badge, and practice resource links (e.g. "Practice Exam 2 (Winter 2020-21) ›")
+- [ ] Footer shows "N topics · M min total" and correct `feedback?token=…` link — no "Only you can see this feedback" line
 
 **Page 2 (drill sheet):**
 - [ ] Page 2 exists — PDF is at least 2 pages
 - [ ] "Drill Sheet" header with maroon left border
-- [ ] 3 drill cards, each with: name + source badge, time/weight meta, italic intro, "Paste into: BSTTesting.java", Java `@Test` code block, numbered hints
+- [ ] 3 drill cards, each with: name + source badge, time/weight meta, study guide link (e.g. "Exam 2 - 2023 questions ›"), Java `@Test` code block
 - [ ] Code block text is **selectable and copyable** — select `@Test` through the closing `}`, paste into a text editor, verify indentation is preserved
-- [ ] Hints are numbered (1. 2. 3.), all 3 visible, no toggle needed
+- [ ] No hints, no "Paste into:" lines
 
 ### 4g. Clear your preview interactions
 
