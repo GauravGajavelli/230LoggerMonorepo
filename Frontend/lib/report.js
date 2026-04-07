@@ -23,7 +23,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { renderReportHtml } from './reportTemplate.js';
+import { renderReportHtml, renderDrillSheetPageHtml } from './reportTemplate.js';
 
 const TYPE_PRIORITY = { exam: 3, assignment: 2, homework: 1 };
 
@@ -500,9 +500,8 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
         time_min:     estimateTime(candidates[0]),
         test_names:   [],
         weight_pct:   Math.round(weight * 100),
-        source:       candidates[0].source      || null,
-        source_url:   candidates[0].sourceUrl  || null,
-        source_label: candidates[0].source     || null,
+        source:       candidates[0].source       || null,
+        source_label: candidates[0].sourceLabel || candidates[0].source || null,
         drill_anchor: null,
         also_relevant_to: null,
         drill_intro:  candidates[0].intro      || null,
@@ -535,10 +534,11 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     return (TYPE_PRIORITY[b.type] || 0) - (TYPE_PRIORITY[a.type] || 0);
   });
 
+  const DRILL_CAP = 3;
   const seen = new Set();
   let totalUniqueDrills = 0, totalTime = 0;
   for (const a of assessmentEntries) {
-    for (const d of a.drills) {
+    for (const d of a.drills.slice(0, DRILL_CAP)) {
       if (!seen.has(d.pattern_name)) {
         seen.add(d.pattern_name);
         totalUniqueDrills++;
@@ -558,32 +558,57 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     generated_at: now.toISOString(),
     review_video_url: reviewVideoUrl && reviewVideoUrl.length > 0 ? reviewVideoUrl : null,
     generic:   true,
-    drill_cap: 3,
+    drill_cap: DRILL_CAP,
   };
 
   const outputDir    = path.join(dataDir, assignment, 'output', studentId);
   fs.mkdirSync(outputDir, { recursive: true });
   const reportPdfPath = path.join(outputDir, 'report.pdf');
 
-  const html = renderReportHtml(reportData, feedbackUrl);
+  const htmlPage1 = renderReportHtml(reportData, feedbackUrl);
+  const htmlPage2 = renderDrillSheetPageHtml(reportData, feedbackUrl);
+
   const { default: puppeteer } = await import('puppeteer');
+  const { PDFDocument } = await import('pdf-lib');
+
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   });
   try {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 816, height: 1056 });
-    await page.setContent(html, { waitUntil: 'domcontentloaded' });
-    const pdfScale = await page.evaluate(() => {
-      const PAGE_H = 1056;
-      const contentH = document.body.scrollHeight;
-      return contentH > PAGE_H ? Math.max(0.80, PAGE_H / contentH) : 1.0;
-    });
-    await page.pdf({
-      path: reportPdfPath, format: 'Letter',
-      margin: { top: '0', right: '0', bottom: '0', left: '0' },
-      printBackground: true, preferCSSPageSize: true, scale: pdfScale,
-    });
+    async function renderPage(html) {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 816, height: 1056 });
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
+      const scale = await page.evaluate(() => {
+        const PAGE_H   = 1056;
+        const contentH = document.body.scrollHeight;
+        return contentH > PAGE_H ? Math.max(0.60, PAGE_H / contentH) : 1.0;
+      });
+      const pdfBytes = await page.pdf({
+        format: 'Letter',
+        margin: { top: '0', right: '0', bottom: '0', left: '0' },
+        printBackground: true, preferCSSPageSize: true, scale,
+      });
+      await page.close();
+      return pdfBytes;
+    }
+
+    const [bytes1, bytes2] = await Promise.all([
+      renderPage(htmlPage1),
+      htmlPage2 ? renderPage(htmlPage2) : Promise.resolve(null),
+    ]);
+
+    if (bytes2) {
+      const merged = await PDFDocument.create();
+      for (const bytes of [bytes1, bytes2]) {
+        const doc   = await PDFDocument.load(bytes);
+        const pages = await merged.copyPages(doc, doc.getPageIndices());
+        pages.forEach(p => merged.addPage(p));
+      }
+      fs.writeFileSync(reportPdfPath, await merged.save());
+    } else {
+      fs.writeFileSync(reportPdfPath, bytes1);
+    }
   } catch (err) {
     console.error('[report] Generic report PDF generation failed:', err.message);
     throw err;

@@ -98,7 +98,7 @@ function wrap(inner) {
 }
 
 function renderNudge(patternCount, reportLink, feedbackLink) {
-  const subject = `CSSE 230 -- ${shortName} feedback reminder (${nearestAssessment}, ${assessmentDate})`;
+  const subject = `CSSE 230: ${shortName} Feedback Reminder (${nearestAssessment}, ${assessmentDate})`;
   const body = wrap(`
     <p>Your debugging feedback for <strong>${fullName}</strong> is still available.
        ${patternCount} pattern${patternCount !== 1 ? 's were' : ' was'} flagged as relevant
@@ -113,7 +113,7 @@ function renderNudge(patternCount, reportLink, feedbackLink) {
 }
 
 function renderMissingTarNudge(uploadLink, reportLink) {
-  const subject = `CSSE 230 -- ${shortName} exam review reminder (${nearestAssessment}, ${assessmentDate})`;
+  const subject = `CSSE 230: ${shortName} Exam Review Reminder (${nearestAssessment}, ${assessmentDate})`;
   const body = wrap(`
     <p>A reminder that your exam review guide for <strong>${fullName}</strong> is still available
        ahead of ${nearestAssessment} (${assessmentDate}).</p>

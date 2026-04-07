@@ -332,7 +332,10 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       queueEmail(token, record.email, assignment,
         process.env.ASSIGNMENT_DISPLAY_NAME || assignment, 'regeneration_ready');
     })
-    .catch(() => {});
+    .catch(() => {
+      queueEmail(token, record.email, assignment,
+        process.env.ASSIGNMENT_DISPLAY_NAME || assignment, 'generation_failed');
+    });
 });
 
 // ─── API: health ──────────────────────────────────────────────────────────────
@@ -362,7 +365,39 @@ app.get('/report', async (req, res) => {
   if (!fs.existsSync(reportPdfPath)) {
     const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', student_id, 'frontend.json');
     if (!fs.existsSync(frontendJsonPath)) {
-      return res.status(404).send('Feedback not yet generated for this student.');
+      const isProcessing = !!db.prepare(
+        "SELECT id FROM pipeline_runs WHERE student_id=? AND assignment=? AND status='processing' ORDER BY id DESC LIMIT 1"
+      ).get(student_id, assignment);
+      const message = isProcessing
+        ? 'Your feedback report is being generated. This usually takes 5–10 minutes.'
+        : 'Your feedback report has not been generated yet. Upload your run.tar on the feedback site to get started.';
+      return res.status(202).send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Report Not Ready</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, 'Palatino Linotype', Palatino, serif; background: #fafafa;
+           display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 3px;
+            padding: 40px 52px; max-width: 460px; width: 100%; }
+    h1 { font-size: 17px; color: #222; margin-bottom: 14px; }
+    p  { font-size: 13px; line-height: 1.65; color: #555; margin-bottom: 10px; }
+    a  { color: #800000; font-size: 13px; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Report Not Ready Yet</h1>
+    <p>${message}</p>
+    ${isProcessing ? '<p>You\'ll receive an email with a direct link once it\'s ready.</p>' : ''}
+    <a href="/feedback?token=${encodeURIComponent(token)}">Return to feedback site</a>
+  </div>
+</body>
+</html>`);
     }
     try {
       await generateReportForToken(student_id, assignment, token, DATA_DIR, BASE_URL);
@@ -447,7 +482,7 @@ async function pushEmail(email) {
 
   const actualRecipient = EMAIL_DEV_REDIRECT ?? email.recipient;
   const actualSubject   = EMAIL_DEV_REDIRECT
-    ? `[DEV → ${email.recipient}] ${email.subject}`
+    ? `[DEV to ${email.recipient}] ${email.subject}`
     : email.subject;
 
   try {
@@ -566,8 +601,11 @@ export function queueEmail(token, recipient, assignment, displayName, emailType)
 
   let subject, body;
   if (emailType === 'regeneration_ready') {
-    subject = `CSSE 230 \u2014 Updated ${shortName} feedback available`;
+    subject = `CSSE 230: Updated ${shortName} Feedback Available`;
     body = `${BREADCRUMB} -> ${fullName}\n${SEP}\nYour debugging feedback for '${fullName}' has been\nregenerated with your latest data.\n\nView your updated feedback summary (PDF):\n\n${reportLink}\n\nOr open the interactive feedback site:\n\n${feedbackLink}\n\n${SEP}${AUTOMATED_FOOTER}`;
+  } else if (emailType === 'generation_failed') {
+    subject = `CSSE 230: ${shortName} Feedback Generation Failed`;
+    body = `${BREADCRUMB} -> ${fullName}\n${SEP}\nWe were unable to generate your debugging feedback for '${fullName}'.\n\nYou can try uploading your run.tar file again at:\n\n${feedbackLink}\n\nIf the problem persists, contact gajavegs@rose-hulman.edu.\n\n${SEP}${AUTOMATED_FOOTER}`;
   } else {
     console.error(`[email] queueEmail called for unexpected type: ${emailType} — use batch scripts for ${emailType}`);
     return;

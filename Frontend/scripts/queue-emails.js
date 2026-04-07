@@ -86,8 +86,8 @@ function wrap(inner) {
 }
 
 function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
-  const fullSubject  = `CSSE 230 -- ${shortName} feedback available (${patternCount} patterns, ${nearestAssessment})`;
-  const shortSubject = `CSSE 230 -- ${shortName} feedback available (${patternCount} patterns)`;
+  const fullSubject  = `CSSE 230: ${shortName} Feedback Available (${patternCount} patterns, ${nearestAssessment})`;
+  const shortSubject = `CSSE 230: ${shortName} Feedback Available (${patternCount} patterns)`;
   const subject = fullSubject.length <= 60 ? fullSubject : shortSubject;
   const body = wrap(`
     <p>Your debugging feedback for <strong>${fullName}</strong> has been processed.
@@ -104,7 +104,7 @@ function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
 }
 
 function renderMissingTar(uploadLink, reportLink) {
-  const subject = `CSSE 230 -- ${shortName} feedback: action needed`;
+  const subject = `CSSE 230: ${shortName} Feedback, Action Needed`;
   const reviewSection = reportLink ? `
     <p>While you locate your file, here is an exam review guide
        covering the key topics for ${nearestAssessment}:<br>
@@ -113,7 +113,7 @@ function renderMissingTar(uploadLink, reportLink) {
     <p>Your debugging feedback for <strong>${fullName}</strong> could not be generated
        because no run.tar file was found in your submission.</p>
     <p>If you have your run.tar file, you can upload it to get personalized feedback
-       -- focused on just your highest-priority practice areas:<br>
+       focused on just your highest-priority practice areas:<br>
        <a href="${uploadLink}">${uploadLink}</a></p>
     ${reviewSection}
     <p style="font-size:12px; color:#888;">

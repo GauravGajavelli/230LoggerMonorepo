@@ -208,13 +208,13 @@ function renderExamColumn(a, feedbackUrl, drillCap = 3) {
 }
 
 // Compact secondary zone row (non-focal exams + HW)
-function renderHwRow(a, feedbackUrl) {
+function renderHwRow(a, feedbackUrl, generic = false) {
   const typeTag = a.type === 'exam'
     ? `<span style="font-size:9px;letter-spacing:0.05em;font-style:normal;color:var(--text-tertiary);margin-right:4px">[Exam]</span>`
     : '';
   const drillText = `${a.drill_count} drill${a.drill_count !== 1 ? 's' : ''} · ${a.total_time} min`
     + (a.overlap_pct > 0 ? ` (~${a.overlap_pct}% of ${a.type === 'exam' ? 'exam' : 'HW'})` : '');
-  const linkHtml = `<a class="hw-link" href="${escHtml(feedbackUrl)}">see all &rsaquo;</a>`;
+  const linkHtml = generic ? '' : `<a class="hw-link" href="${escHtml(feedbackUrl)}">see all &rsaquo;</a>`;
   return `
     <div class="hw-row">
       ${typeTag}<span class="hw-name">${escHtml(a.name)}</span>
@@ -254,14 +254,12 @@ function renderDrillSheet(reportData, feedbackUrl) {
       ? `<div class="drill-card-target">Paste into: <code>${escHtml(drill.target_file)}</code></div>` : '';
     const codeHtml   = drill.test_code
       ? `<pre class="drill-code">${escHtml(drill.test_code)}</pre>` : '';
-    const hintsHtml  = drill.hints?.length > 0
-      ? `<ol class="drill-hints">${drill.hints.map(h => `<li>${escHtml(h)}</li>`).join('')}</ol>` : '';
 
     return `
       <div class="drill-card">
         <div class="drill-card-name">${escHtml(drill.pattern_name)}${badge}</div>
         ${metaParts.length ? `<div class="drill-card-meta">${metaParts.join(' · ')}</div>` : ''}
-        ${introHtml}${targetHtml}${codeHtml}${hintsHtml}
+        ${introHtml}${targetHtml}${codeHtml}
       </div>`;
   }).join('');
 
@@ -347,11 +345,11 @@ export function renderReportHtml(reportData, feedbackUrl) {
     ? `<div class="columns">${renderExamColumn(focalAssessment, feedbackUrl, drill_cap ?? 3)}</div>`
     : '';
 
-  // Secondary zone
-  const hwRowsHtml = secondaryAssessments.length > 0
+  // Secondary zone — hidden for generic reports (links go nowhere for missing-tar students)
+  const hwRowsHtml = (!generic && secondaryAssessments.length > 0)
     ? `<div class="hw-zone">
         <div class="hw-zone-label">Also prepares you for</div>
-        ${secondaryAssessments.map(a => renderHwRow(a, feedbackUrl)).join('')}
+        ${secondaryAssessments.map(a => renderHwRow(a, feedbackUrl, generic)).join('')}
       </div>`
     : '';
 
@@ -359,7 +357,8 @@ export function renderReportHtml(reportData, feedbackUrl) {
     ? `<p class="fallback-header">${total_unique_drills} debugging pattern${total_unique_drills !== 1 ? 's were' : ' was'} identified in your submission.</p>`
     : '';
 
-  const drillSheetHtml = generic ? renderDrillSheet(reportData, feedbackUrl) : '';
+  // Drill sheet is rendered as a separate PDF page for generic reports
+  const drillSheetHtml = generic ? '' : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -625,7 +624,7 @@ ${total_unique_drills === 0
 <hr class="header-rule">`
   : `<div class="framing">${framingSentence}</div>
 <hr class="header-rule">
-${generic ? '<div class="generic-notice">Class-wide review guide -- upload your run.tar at the feedback site for personalized feedback targeting your specific weak areas.</div>' : ''}
+${generic ? '<div class="generic-notice">Class-wide review guide. Upload your run.tar at the feedback site for personalized feedback targeting your specific weak areas.</div>' : ''}
 ${noAssessmentHeader}
 ${tableHtml}
 ${examColumnHtml}
@@ -645,6 +644,110 @@ ${drillSheetHtml}`}
   </div>
 </div>
 
+</body>
+</html>`;
+}
+
+/**
+ * Renders a standalone single-page HTML for the drill sheet (page 2 of generic reports).
+ * Intended to be rendered independently by Puppeteer and merged via pdf-lib.
+ */
+export function renderDrillSheetPageHtml(reportData, feedbackUrl) {
+  const { assignment, total_unique_drills, total_time, generated_at } = reportData;
+  const generatedDate = generated_at ? generated_at.slice(0, 10) : '';
+
+  const drillContent = renderDrillSheet(reportData, feedbackUrl);
+  if (!drillContent) return null;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escHtml(assignment.full_name)} - Drill Sheet</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --text-primary:   #111;
+    --text-secondary: #3a3a3a;
+    --text-tertiary:  #777;
+    --border:         #c0c0c0;
+    --accent:         #800000;
+  }
+  @page { size: Letter; margin: 0; }
+  html { min-height: 11in; }
+  body {
+    font-family: Georgia, 'Palatino Linotype', Palatino, serif;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: #fff;
+    padding: 40px 52px 34px;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 11in;
+    display: flex;
+    flex-direction: column;
+  }
+  .main-content { flex: 1; }
+  .page-drills-header {
+    font-family: Georgia, 'Palatino Linotype', Palatino, serif;
+    font-size: 16px; font-weight: bold; color: var(--text-primary);
+    border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 4px;
+  }
+  .page-drills-subtitle {
+    font-size: 10px; color: var(--text-tertiary); font-style: italic;
+    margin-bottom: 18px; padding-left: 13px;
+  }
+  .drill-card {
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px; margin-bottom: 18px; break-inside: avoid;
+  }
+  .drill-card-name { font-size: 13px; font-weight: bold; color: var(--text-primary); margin-bottom: 3px; }
+  .drill-card-badge {
+    display: inline-block; font-size: 9px; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-tertiary);
+    background: #f0f0f0; border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 3px; margin-left: 8px; vertical-align: middle;
+  }
+  .drill-card-meta  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 5px; }
+  .drill-card-intro { font-size: 11px; color: var(--text-secondary); font-style: italic; line-height: 1.55; margin-bottom: 5px; }
+  .drill-card-target { font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; }
+  .drill-card-target code {
+    font-family: 'Courier New', Courier, monospace; font-size: 10px;
+    background: #f0f0f0; padding: 1px 3px; border-radius: 2px;
+  }
+  .drill-code {
+    font-family: 'Courier New', Courier, monospace; font-size: 9.5px;
+    background: #f5f5f5; border: 1px solid #ddd; border-left: 3px solid var(--border);
+    padding: 7px 10px; margin: 5px 0; white-space: pre;
+    overflow-x: hidden; line-height: 1.45; color: var(--text-secondary);
+  }
+  .footer { border-top: 1px solid var(--border); padding-top: 14px; }
+  .footer-summary { font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; display: flex; justify-content: space-between; align-items: baseline; }
+  .footer-link    { display: block; font-size: 11px; color: var(--text-secondary); text-decoration: none; margin-bottom: 5px; }
+  .footer-privacy { font-size: 10px; color: var(--text-tertiary); line-height: 1.5; }
+  /* Override: no page-break on the drill section since this IS its own page */
+  .page-drills { break-before: auto; padding-top: 0; }
+  .muted { color: var(--text-tertiary); }
+  @media print { html, body { overflow: visible; } }
+</style>
+</head>
+<body>
+<div class="main-content">
+${drillContent}
+</div>
+<div class="footer">
+  <div class="footer-summary">
+    <span>${total_unique_drills} topic${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total</span>
+    ${generatedDate ? `<span style="font-size:9px;color:var(--text-tertiary)">Generated ${escHtml(generatedDate)}</span>` : ''}
+  </div>
+  <a class="footer-link" href="${escHtml(feedbackUrl)}">Open full feedback site &rsaquo;</a>
+  <div class="footer-privacy">
+    Drills are optional and supplement, not replace, your own review.<br>
+    Only you can see this feedback. Questions? gajavegs@rose-hulman.edu
+  </div>
+</div>
 </body>
 </html>`;
 }
