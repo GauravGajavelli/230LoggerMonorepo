@@ -412,13 +412,12 @@ function FeedbackShimmer() {
  *   onCiteClick: (runNumber:number) => void,
  * }} props
  */
-export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteClick, runToEpisode = {}, onFeedbackOpened, assessmentConfig }) {
+export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteClick, runToEpisode = {}, assessmentConfig }) {
   const [manualOpen, setManualOpen] = useState(initiallyOpen ?? false);
   const [diffIndex, setDiffIndex] = useState(0);
   const [hoveredRun, setHoveredRun] = useState(null);
   const [hoveredPill, setHoveredPill] = useState(null);
   const [hoveredConcept, setHoveredConcept] = useState(null);
-  const [hasOpenedFeedback, setHasOpenedFeedback] = useState(false);
   const [showTestSource, setShowTestSource] = useState(false);
   const closeTestSource = useCallback(() => setShowTestSource(false), []);
   const [showDrill, setShowDrill] = useState(false);
@@ -431,11 +430,9 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
   const hasRevealedRef = useRef(!!initiallyOpen);
   const hasShimmeredRef = useRef(!!initiallyOpen); // skip shimmer for initially-open cards
 
-  // Fire telemetry + callbacks for initially-open cards (shimmer is skipped for these)
+  // Fire telemetry for initially-open cards (shimmer is skipped for these)
   useEffect(() => {
     if (initiallyOpen) {
-      setHasOpenedFeedback(true);
-      onFeedbackOpened?.();
       eventTracker.track('feedback_opened', { test_id: test.id });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -536,8 +533,8 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
             <ClockIcon />{test.changedAt}
           </span>
         )}
-        {hasFeedback && !hasOpenedFeedback && (
-          <span className="feedback-unseen-tab" style={{ width: 7, height: 7 }} title="Has unreviewed feedback" />
+        {hasFeedback && !open && (
+          <span className="feedback-unseen-tab" style={{ width: 7, height: 7 }} title="Has feedback" />
         )}
         {canExpand && <ChevronIcon open={open} />}
       </button>
@@ -599,8 +596,6 @@ export function TestCard({ test, forceOpen, forceDrill, initiallyOpen, onCiteCli
             style={{ animation: !hasRevealedRef.current ? 'feedbackReveal 0.3s ease-out' : undefined }}
             onAnimationEnd={() => {
               hasRevealedRef.current = true;
-              setHasOpenedFeedback(true);
-              onFeedbackOpened?.();
               eventTracker.track('feedback_opened', { test_id: test.id });
             }}
           >
