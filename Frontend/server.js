@@ -26,6 +26,7 @@ const PIPELINE_JAR = path.resolve(process.env.PIPELINE_JAR || path.join(__dirnam
 const LLM_CACHE_DIR = path.resolve(process.env.LLM_CACHE_DIR || path.join(__dirname, '..', 'Pipeline', 'cache', 'llm'));
 const DEMO_TOKEN  = process.env.DEMO_TOKEN || null;
 const EMAIL_DEV_REDIRECT  = process.env.EMAIL_DEV_REDIRECT || null;
+const HOLD_EMAILS = process.env.HOLD_EMAILS === 'true';
 const DEMO_JSON   = path.join(__dirname, 'public', 'data', 'frontend.json');
 // RoseFire — ROSEFIRE_SECRET is the secretOrPrivateKey you provided when registering your app.
 // ROSEFIRE_REGISTRY_TOKEN is the UUID returned by registration (safe to embed in client HTML).
@@ -389,7 +390,7 @@ app.post('/api/relay/register', requireRelayAuth, async (req, res) => {
   console.log(`[relay] registered at ${ip}:${port}`);
   res.json({ ok: true });
   // Drain any emails that queued while relay was offline — fire and forget
-  setImmediate(pushAllPending);
+  if (!HOLD_EMAILS) setImmediate(pushAllPending);
 });
 
 app.get('/api/emails/stats', requireRelayAuth, (_req, res) => {
@@ -494,8 +495,8 @@ setInterval(async () => {
   db.prepare("UPDATE email_queue SET status='pending' WHERE status='sending' AND last_attempt < datetime('now','-5 minutes')").run();
   // Reset failed emails for retry after 5-min backoff
   db.prepare("UPDATE email_queue SET status='pending' WHERE status='failed' AND attempts < 3 AND last_attempt < datetime('now','-5 minutes')").run();
-  // Push any pending (newly queued or retried)
-  await pushAllPending();
+  // Push any pending (newly queued or retried) — skip if HOLD_EMAILS is set
+  if (!HOLD_EMAILS) await pushAllPending();
   // Alert if relay hasn't registered recently
   const relay = db.prepare('SELECT last_heartbeat FROM relay_status WHERE id=1').get();
   if (relay?.last_heartbeat) {

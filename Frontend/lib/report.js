@@ -417,9 +417,11 @@ export async function generateReportForToken(studentId, assignment, token, dataD
       // Compare scrollHeight against the Letter page height constant — clientHeight
       // is no longer a reliable sentinel since the body expands with content.
       const pdfScale = await page.evaluate(() => {
-        const PAGE_H   = 1056; // 11in at 96 dpi — one Letter page
-        const contentH = document.body.scrollHeight;
-        return contentH > PAGE_H ? Math.max(0.80, PAGE_H / contentH) : 1.0;
+        const PAGE_H     = 1056; // 11in at 96 dpi — one Letter page
+        const hasDrills  = !!document.querySelector('.page-drills');
+        const PAGE_LIMIT = hasDrills ? PAGE_H * 2 : PAGE_H;
+        const contentH   = document.body.scrollHeight;
+        return contentH > PAGE_LIMIT ? Math.max(0.80, PAGE_LIMIT / contentH) : 1.0;
       });
       await page.pdf({
         path: reportPdfPath,
@@ -498,11 +500,15 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
         time_min:     estimateTime(candidates[0]),
         test_names:   [],
         weight_pct:   Math.round(weight * 100),
-        source:       candidates[0].source   || null,
-        source_url:   candidates[0].sourceUrl || null,
-        source_label: candidates[0].source   || null,
+        source:       candidates[0].source      || null,
+        source_url:   candidates[0].sourceUrl  || null,
+        source_label: candidates[0].source     || null,
         drill_anchor: null,
         also_relevant_to: null,
+        drill_intro:  candidates[0].intro      || null,
+        test_code:    candidates[0].testCode   || null,
+        hints:        candidates[0].hints      || [],
+        target_file:  candidates[0].targetFile || null,
       });
     }
 
@@ -552,7 +558,7 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     generated_at: now.toISOString(),
     review_video_url: reviewVideoUrl && reviewVideoUrl.length > 0 ? reviewVideoUrl : null,
     generic:   true,
-    drill_cap: 4,
+    drill_cap: 3,
   };
 
   const outputDir    = path.join(dataDir, assignment, 'output', studentId);

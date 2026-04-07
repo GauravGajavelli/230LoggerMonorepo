@@ -224,6 +224,60 @@ function renderHwRow(a, feedbackUrl) {
     </div>`;
 }
 
+function renderDrillSheet(reportData, feedbackUrl) {
+  const { assessments, exam_assessments, hw_assessments, drill_cap, generic } = reportData;
+  if (!generic) return '';
+
+  const examZone = exam_assessments ?? assessments?.filter(a => a.type === 'exam') ?? [];
+  const hwZone   = hw_assessments   ?? assessments?.filter(a => a.type !== 'exam') ?? [];
+  const focalAssessment =
+    examZone.filter(a => a.drill_count > 0)[0] ??
+    hwZone.filter(a => a.drill_count > 0)[0] ?? null;
+
+  if (!focalAssessment) return '';
+
+  const cap = drill_cap ?? 3;
+  const visibleDrills = focalAssessment.drills.slice(0, cap);
+  const cappedMore    = focalAssessment.drills.length - visibleDrills.length;
+
+  const cards = visibleDrills.map(drill => {
+    const badge = drill.source
+      ? `<span class="drill-card-badge">${escHtml(drill.source)}</span>`
+      : '';
+    const metaParts = [];
+    if (drill.time_min)   metaParts.push(`~${drill.time_min} min`);
+    if (drill.weight_pct) metaParts.push(`~${drill.weight_pct}% of ${focalAssessment.type === 'exam' ? 'exam' : 'HW'}`);
+
+    const introHtml  = drill.drill_intro
+      ? `<div class="drill-card-intro">${escHtml(sanitize(drill.drill_intro))}</div>` : '';
+    const targetHtml = drill.target_file
+      ? `<div class="drill-card-target">Paste into: <code>${escHtml(drill.target_file)}</code></div>` : '';
+    const codeHtml   = drill.test_code
+      ? `<pre class="drill-code">${escHtml(drill.test_code)}</pre>` : '';
+    const hintsHtml  = drill.hints?.length > 0
+      ? `<ol class="drill-hints">${drill.hints.map(h => `<li>${escHtml(h)}</li>`).join('')}</ol>` : '';
+
+    return `
+      <div class="drill-card">
+        <div class="drill-card-name">${escHtml(drill.pattern_name)}${badge}</div>
+        ${metaParts.length ? `<div class="drill-card-meta">${metaParts.join(' · ')}</div>` : ''}
+        ${introHtml}${targetHtml}${codeHtml}${hintsHtml}
+      </div>`;
+  }).join('');
+
+  const moreNote = cappedMore > 0
+    ? `<div style="font-size:10px;color:var(--text-tertiary);font-style:italic;margin-top:8px">+ ${cappedMore} more drill${cappedMore !== 1 ? 's' : ''} at the feedback site</div>`
+    : '';
+
+  return `
+    <div class="page-drills">
+      <div class="page-drills-header">Drill Sheet</div>
+      <div class="page-drills-subtitle">Copy each test into ${escHtml(focalAssessment.name)} practice — paste and run for points back.</div>
+      ${cards}
+      ${moreNote}
+    </div>`;
+}
+
 export function renderReportHtml(reportData, feedbackUrl) {
 
   const {
@@ -304,6 +358,8 @@ export function renderReportHtml(reportData, feedbackUrl) {
   const noAssessmentHeader = tableAssessments.length === 0
     ? `<p class="fallback-header">${total_unique_drills} debugging pattern${total_unique_drills !== 1 ? 's were' : ' was'} identified in your submission.</p>`
     : '';
+
+  const drillSheetHtml = generic ? renderDrillSheet(reportData, feedbackUrl) : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -440,6 +496,11 @@ export function renderReportHtml(reportData, feedbackUrl) {
     -webkit-line-clamp: 3;
     overflow: hidden;
   }
+  .drill-intro-full {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+  }
   .drill-tests {
     font-size: 11px;
     color: var(--text-secondary);
@@ -458,6 +519,44 @@ export function renderReportHtml(reportData, feedbackUrl) {
   .drill-links { display: flex; gap: 12px; padding-left: 16px; flex-wrap: wrap; }
   .drill-link  { font-size: 11px; color: var(--text-secondary); text-decoration: none; }
   .drill-link-fallback { font-size: 11px; color: var(--text-tertiary); font-style: italic; }
+
+  /* Page 2 — Drill Sheet */
+  .page-drills { break-before: page; padding-top: 32px; }
+  .page-drills-header {
+    font-family: Georgia, 'Palatino Linotype', Palatino, serif;
+    font-size: 16px; font-weight: bold; color: var(--text-primary);
+    border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 4px;
+  }
+  .page-drills-subtitle {
+    font-size: 10px; color: var(--text-tertiary); font-style: italic;
+    margin-bottom: 18px; padding-left: 13px;
+  }
+  .drill-card {
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px; margin-bottom: 18px; break-inside: avoid;
+  }
+  .drill-card-name { font-size: 13px; font-weight: bold; color: var(--text-primary); margin-bottom: 3px; }
+  .drill-card-badge {
+    display: inline-block; font-size: 9px; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-tertiary);
+    background: #f0f0f0; border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 3px; margin-left: 8px; vertical-align: middle;
+  }
+  .drill-card-meta  { font-size: 10px; color: var(--text-tertiary); margin-bottom: 5px; }
+  .drill-card-intro { font-size: 11px; color: var(--text-secondary); font-style: italic; line-height: 1.55; margin-bottom: 5px; }
+  .drill-card-target { font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; }
+  .drill-card-target code {
+    font-family: 'Courier New', Courier, monospace; font-size: 10px;
+    background: #f0f0f0; padding: 1px 3px; border-radius: 2px;
+  }
+  .drill-code {
+    font-family: 'Courier New', Courier, monospace; font-size: 9.5px;
+    background: #f5f5f5; border: 1px solid #ddd; border-left: 3px solid var(--border);
+    padding: 7px 10px; margin: 5px 0; white-space: pre;
+    overflow-x: hidden; line-height: 1.45; color: var(--text-secondary);
+  }
+  .drill-hints { font-size: 10.5px; color: var(--text-secondary); margin: 5px 0 0 0; padding-left: 18px; line-height: 1.55; }
+  .drill-hints li { margin-bottom: 3px; }
 
   /* "Also on this exam" section */
   .exam-also {
@@ -512,7 +611,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   .column  { min-width: 0; }
 
   @media print {
-    html, body { overflow: hidden; }
+    html, body { overflow: visible; }
   }
 </style>
 </head>
@@ -530,7 +629,8 @@ ${generic ? '<div class="generic-notice">Class-wide review guide -- upload your 
 ${noAssessmentHeader}
 ${tableHtml}
 ${examColumnHtml}
-${hwRowsHtml}`}
+${hwRowsHtml}
+${drillSheetHtml}`}
 </div>
 
 <div class="footer">
