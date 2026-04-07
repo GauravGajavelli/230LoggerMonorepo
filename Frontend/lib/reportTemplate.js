@@ -154,12 +154,25 @@ function renderExamDrillSection(drill, assessment, num, feedbackUrl) {
 }
 
 // "Also on this exam" section — coverage summary + uncovered concepts + study guide links
-function renderAlsoOnExam(assessment, feedbackUrl) {
+function renderAlsoOnExam(assessment, feedbackUrl, generic = false) {
+  const allLinks = assessment.all_links || [];
+  if (generic) {
+    // For generic reports, skip the student-specific coverage text — just show resource links.
+    if (allLinks.length === 0) return '';
+    const linksHtml = allLinks.map(lk => {
+      const href = studyMaterialUrl(lk.url, feedbackUrl);
+      return `<a class="exam-also-link" href="${escHtml(href)}" target="_blank">${escHtml(lk.label)} &rsaquo;</a>`;
+    }).join(' ');
+    return `
+    <div class="exam-also">
+      <span class="exam-also-label">Practice resources:</span> ${linksHtml}
+    </div>`;
+  }
+
   const uncovered = (assessment.uncovered_concepts || []).filter(c => c.weight_pct > 0);
   const overlapPct = assessment.overlap_pct || 0;
   if (overlapPct === 0 && uncovered.length === 0) return '';
 
-  const allLinks = assessment.all_links || [];
   const linksHtml = allLinks.length > 0
     ? ' ' + allLinks.map(lk => {
         const href = studyMaterialUrl(lk.url, feedbackUrl);
@@ -182,7 +195,7 @@ function renderAlsoOnExam(assessment, feedbackUrl) {
 }
 
 // Full exam drill column — single focal exam only
-function renderExamColumn(a, feedbackUrl, drillCap = 3) {
+function renderExamColumn(a, feedbackUrl, drillCap = 3, generic = false) {
   const visibleDrills = a.drills.slice(0, drillCap);
   const hiddenCount = a.drills.length - visibleDrills.length;
 
@@ -194,7 +207,7 @@ function renderExamColumn(a, feedbackUrl, drillCap = 3) {
     ? `<div class="muted" style="font-size:11px;margin-top:4px">and ${hiddenCount} more — see feedback site</div>`
     : '';
 
-  const alsoOnExam = renderAlsoOnExam(a, feedbackUrl);
+  const alsoOnExam = renderAlsoOnExam(a, feedbackUrl, generic);
 
   return `
     <div class="column">
@@ -248,18 +261,17 @@ function renderDrillSheet(reportData, feedbackUrl) {
     if (drill.time_min)   metaParts.push(`~${drill.time_min} min`);
     if (drill.weight_pct) metaParts.push(`~${drill.weight_pct}% of ${focalAssessment.type === 'exam' ? 'exam' : 'HW'}`);
 
-    const introHtml  = drill.drill_intro
-      ? `<div class="drill-card-intro">${escHtml(sanitize(drill.drill_intro))}</div>` : '';
-    const targetHtml = drill.target_file
-      ? `<div class="drill-card-target">Paste into: <code>${escHtml(drill.target_file)}</code></div>` : '';
-    const codeHtml   = drill.test_code
+    const sourceLinkHtml = drill.source_url
+      ? `<div class="drill-card-target"><a href="${escHtml(studyMaterialUrl(drill.source_url, feedbackUrl))}" target="_blank" style="color:var(--text-secondary);text-decoration:none;">${escHtml(drill.source_label || drill.source || 'Source')} &rsaquo;</a></div>`
+      : '';
+    const codeHtml = drill.test_code
       ? `<pre class="drill-code">${escHtml(drill.test_code)}</pre>` : '';
 
     return `
       <div class="drill-card">
         <div class="drill-card-name">${escHtml(drill.pattern_name)}${badge}</div>
         ${metaParts.length ? `<div class="drill-card-meta">${metaParts.join(' · ')}</div>` : ''}
-        ${introHtml}${targetHtml}${codeHtml}
+        ${sourceLinkHtml}${codeHtml}
       </div>`;
   }).join('');
 
@@ -270,7 +282,7 @@ function renderDrillSheet(reportData, feedbackUrl) {
   return `
     <div class="page-drills">
       <div class="page-drills-header">Drill Sheet</div>
-      <div class="page-drills-subtitle">Copy each test into ${escHtml(focalAssessment.name)} practice — paste and run for points back.</div>
+      <div class="page-drills-subtitle">Curated practice problems covering the key ${escHtml(focalAssessment.name)} topics from the review video.</div>
       ${cards}
       ${moreNote}
     </div>`;
@@ -342,7 +354,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
 
   // Focal exam drill column
   const examColumnHtml = focalAssessment
-    ? `<div class="columns">${renderExamColumn(focalAssessment, feedbackUrl, drill_cap ?? 3)}</div>`
+    ? `<div class="columns">${renderExamColumn(focalAssessment, feedbackUrl, drill_cap ?? 3, generic)}</div>`
     : '';
 
   // Secondary zone — hidden for generic reports (links go nowhere for missing-tar students)
@@ -640,7 +652,7 @@ ${drillSheetHtml}`}
   <a class="footer-link" href="${escHtml(feedbackUrl)}">Open full feedback site &rsaquo;</a>
   <div class="footer-privacy">
     Drills are optional and supplement, not replace, your own review.<br>
-    Only you can see this feedback. Questions? gajavegs@rose-hulman.edu
+    ${generic ? '' : 'Only you can see this feedback. '}Questions? gajavegs@rose-hulman.edu
   </div>
 </div>
 
@@ -723,10 +735,6 @@ export function renderDrillSheetPageHtml(reportData, feedbackUrl) {
     padding: 7px 10px; margin: 5px 0; white-space: pre;
     overflow-x: hidden; line-height: 1.45; color: var(--text-secondary);
   }
-  .footer { border-top: 1px solid var(--border); padding-top: 14px; }
-  .footer-summary { font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; display: flex; justify-content: space-between; align-items: baseline; }
-  .footer-link    { display: block; font-size: 11px; color: var(--text-secondary); text-decoration: none; margin-bottom: 5px; }
-  .footer-privacy { font-size: 10px; color: var(--text-tertiary); line-height: 1.5; }
   /* Override: no page-break on the drill section since this IS its own page */
   .page-drills { break-before: auto; padding-top: 0; }
   .muted { color: var(--text-tertiary); }
@@ -736,17 +744,6 @@ export function renderDrillSheetPageHtml(reportData, feedbackUrl) {
 <body>
 <div class="main-content">
 ${drillContent}
-</div>
-<div class="footer">
-  <div class="footer-summary">
-    <span>${total_unique_drills} topic${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total</span>
-    ${generatedDate ? `<span style="font-size:9px;color:var(--text-tertiary)">Generated ${escHtml(generatedDate)}</span>` : ''}
-  </div>
-  <a class="footer-link" href="${escHtml(feedbackUrl)}">Open full feedback site &rsaquo;</a>
-  <div class="footer-privacy">
-    Drills are optional and supplement, not replace, your own review.<br>
-    Only you can see this feedback. Questions? gajavegs@rose-hulman.edu
-  </div>
 </div>
 </body>
 </html>`;

@@ -501,7 +501,7 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
         test_names:   [],
         weight_pct:   Math.round(weight * 100),
         source:       candidates[0].source       || null,
-        source_url:   candidates[0].sourceUrl   || null,
+        source_url:   candidates[0].url || candidates[0].sourceUrl || null,
         source_label: candidates[0].sourceLabel || candidates[0].source || null,
         drill_anchor: null,
         also_relevant_to: null,
@@ -523,7 +523,7 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
       days_left: daysLeft, relevance_score: relevanceScore,
       overlap_pct: overlapPct, drill_count: drillsForAssmt.length,
       total_time: totalTime, drills: drillsForAssmt,
-      uncovered_concepts: uncoveredConcepts, all_links: [],
+      uncovered_concepts: uncoveredConcepts, all_links: aCfg.resources || [],
     });
   }
 

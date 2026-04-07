@@ -358,7 +358,8 @@ app.get('/report', async (req, res) => {
   if (!record) return res.redirect('/login?error=invalid');
 
   const { student_id, assignment } = record;
-  logEvents(token, [{ type: 'report_viewed', data: { student_id, assignment } }]);
+  const frontendJsonExists = fs.existsSync(path.join(DATA_DIR, assignment, 'output', student_id, 'frontend.json'));
+  logEvents(token, [{ type: 'report_viewed', data: { student_id, assignment, generic: !frontendJsonExists } }]);
   const reportPdfPath = path.join(DATA_DIR, assignment, 'output', student_id, 'report.pdf');
 
   // Generate/regenerate if missing (e.g. first visit after pipeline ran)
