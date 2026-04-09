@@ -33,8 +33,7 @@ const ENV_FILE = path.join(__dirname, '.env');
 function readEnvNow() {
   try { return dotenv.parse(fs.readFileSync(ENV_FILE, 'utf8')); } catch { return {}; }
 }
-function getHoldEmails()       { return readEnvNow().HOLD_EMAILS === 'true'; }
-function getEmailDevRedirect() { return readEnvNow().EMAIL_DEV_REDIRECT || null; }
+function getHoldEmails() { return readEnvNow().HOLD_EMAILS === 'true'; }
 const DEMO_JSON   = path.join(__dirname, 'public', 'data', 'frontend.json');
 // RoseFire — ROSEFIRE_SECRET is the secretOrPrivateKey you provided when registering your app.
 // ROSEFIRE_REGISTRY_TOKEN is the UUID returned by registration (safe to embed in client HTML).
@@ -600,11 +599,8 @@ async function pushEmail(email) {
     return; // relay not registered yet — leave pending for next retry cycle
   }
 
-  const emailDevRedirect = getEmailDevRedirect();
-  const actualRecipient = emailDevRedirect ?? email.recipient;
-  const actualSubject   = emailDevRedirect
-    ? `[DEV to ${email.recipient}] ${email.subject}`
-    : email.subject;
+  const actualRecipient = email.recipient;
+  const actualSubject   = email.subject;
 
   try {
     const res = await fetch(`http://${relay.relay_ip}:${relay.relay_port}/send`, {
@@ -615,11 +611,7 @@ async function pushEmail(email) {
     });
     if (res.ok) {
       db.prepare("UPDATE email_queue SET status='sent',sent_at=datetime('now') WHERE id=?").run(email.id);
-      if (emailDevRedirect) {
-        console.log(`[email] DEV redirect → ${actualRecipient} (real: ${email.recipient}, ${email.email_type})`);
-      } else {
-        console.log(`[email] sent → ${email.recipient} (${email.email_type})`);
-      }
+      console.log(`[email] sent → ${email.recipient} (${email.email_type})`);
     } else {
       recordEmailFailure(email.id, `Relay returned HTTP ${res.status}`);
     }

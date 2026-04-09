@@ -31,6 +31,8 @@ if (!assignment) {
 
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, '..', 'data'));
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+const EMAIL_DEV_REDIRECT = process.env.EMAIL_DEV_REDIRECT || null;
+if (EMAIL_DEV_REDIRECT) console.log(`[dev] EMAIL_DEV_REDIRECT active — all emails will be queued to ${EMAIL_DEV_REDIRECT}`);
 
 // ── Assessment config ─────────────────────────────────────────────────────────
 
@@ -227,9 +229,14 @@ for (const { token, student_id, email } of tokenRows) {
     missingQueued++;
   }
 
+  const actualRecipient = EMAIL_DEV_REDIRECT ?? email;
+  const actualSubject   = EMAIL_DEV_REDIRECT
+    ? `[DEV to ${email}] ${subject}`
+    : subject;
+
   db.prepare(
     'INSERT INTO email_queue (token,recipient,subject,body,email_type,assignment) VALUES (?,?,?,?,?,?)'
-  ).run(token, email, subject, body, emailType, assignment);
+  ).run(token, actualRecipient, actualSubject, body, emailType, assignment);
 }
 
 console.log(`\nDone. ${feedbackQueued} feedback_ready, ${noIssuesQueued} no_issues, ${missingQueued} missing_tar queued; ${skipped} skipped.`);
