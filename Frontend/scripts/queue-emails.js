@@ -85,11 +85,15 @@ function wrap(inner) {
 </div>`;
 }
 
-function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
+function renderFeedbackReady(patternCount, reportLink, feedbackLink, isCorrection = false) {
   const fullSubject  = `CSSE 230: ${shortName} Feedback Available (${patternCount} patterns, ${nearestAssessment})`;
   const shortSubject = `CSSE 230: ${shortName} Feedback Available (${patternCount} patterns)`;
   const subject = fullSubject.length <= 60 ? fullSubject : shortSubject;
+  const apology = isCorrection
+    ? `<p><em>Apologies for the earlier email, there was an issue with the feedback system that sent a generic review guide instead of your personalized feedback. Please use the links below instead.</em></p>${'<hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">'}`
+    : '';
   const body = wrap(`
+    ${apology}
     <p>Your debugging feedback for <strong>${fullName}</strong> has been processed.
        ${patternCount} pattern${patternCount !== 1 ? 's were' : ' was'} identified,
        relevant to ${nearestAssessment} (${assessmentDate}).</p>
@@ -160,11 +164,17 @@ for (const { token, student_id, email } of tokenRows) {
   let patternCount = 0, drillCount = 0;
   if (hasSuccess) {
     const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', student_id, 'frontend.json');
+    const reportJsonPath   = path.join(DATA_DIR, assignment, 'output', student_id, 'report.json');
     if (fs.existsSync(frontendJsonPath)) {
       try {
         const data = JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8'));
         patternCount = data.feedback?.length || 0;
-        drillCount   = data.practiceDrills?.length || 0;
+      } catch { /* leave at 0 */ }
+    }
+    if (fs.existsSync(reportJsonPath)) {
+      try {
+        const report = JSON.parse(fs.readFileSync(reportJsonPath, 'utf8'));
+        drillCount = report.total_unique_drills || 0;
       } catch { /* leave at 0 */ }
     }
   }
@@ -192,8 +202,11 @@ for (const { token, student_id, email } of tokenRows) {
   let subject, body;
 
   if (emailType === 'feedback_ready') {
-    ({ subject, body } = renderFeedbackReady(patternCount, studentReportLink, feedbackLink));
-    console.log(`  [feedback_ready] ${student_id} → ${email} (${patternCount} patterns)`);
+    const hadNoIssues = !!db.prepare(
+      "SELECT id FROM email_queue WHERE token=? AND assignment=? AND email_type='no_issues'"
+    ).get(token, assignment);
+    ({ subject, body } = renderFeedbackReady(patternCount, studentReportLink, feedbackLink, hadNoIssues));
+    console.log(`  [feedback_ready] ${student_id} → ${email} (${patternCount} patterns)${hadNoIssues ? ' [correction]' : ''}`);
     feedbackQueued++;
   } else if (emailType === 'no_issues') {
     let genericReportLink = null;
