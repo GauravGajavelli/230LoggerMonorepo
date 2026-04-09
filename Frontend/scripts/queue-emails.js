@@ -85,15 +85,13 @@ function wrap(inner) {
 </div>`;
 }
 
-function renderFeedbackReady(patternCount, reportLink, feedbackLink, isCorrection = false) {
+function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
   const fullSubject  = `CSSE 230: ${shortName} Feedback Available (${patternCount} patterns, ${nearestAssessment})`;
   const shortSubject = `CSSE 230: ${shortName} Feedback Available (${patternCount} patterns)`;
   const subject = fullSubject.length <= 60 ? fullSubject : shortSubject;
-  const apology = isCorrection
-    ? `<p><em>Apologies for the earlier email, there was an issue with the feedback system that sent a generic review guide instead of your personalized feedback. Please use the links below instead.</em></p>${'<hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">'}`
-    : '';
   const body = wrap(`
-    ${apology}
+    <p><em>Apologies for the earlier email, there was an issue with the feedback system that sent a generic review guide instead of your personalized feedback. Please use the links below instead.</em></p>
+    <hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">
     <p>Your debugging feedback for <strong>${fullName}</strong> has been processed.
        ${patternCount} pattern${patternCount !== 1 ? 's were' : ' was'} identified,
        relevant to ${nearestAssessment} (${assessmentDate}).</p>
@@ -202,11 +200,8 @@ for (const { token, student_id, email } of tokenRows) {
   let subject, body;
 
   if (emailType === 'feedback_ready') {
-    const hadNoIssues = !!db.prepare(
-      "SELECT id FROM email_queue WHERE token=? AND assignment=? AND email_type='no_issues'"
-    ).get(token, assignment);
-    ({ subject, body } = renderFeedbackReady(patternCount, studentReportLink, feedbackLink, hadNoIssues));
-    console.log(`  [feedback_ready] ${student_id} → ${email} (${patternCount} patterns)${hadNoIssues ? ' [correction]' : ''}`);
+    ({ subject, body } = renderFeedbackReady(patternCount, studentReportLink, feedbackLink));
+    console.log(`  [feedback_ready] ${student_id} → ${email} (${patternCount} patterns)`);
     feedbackQueued++;
   } else if (emailType === 'no_issues') {
     let genericReportLink = null;
