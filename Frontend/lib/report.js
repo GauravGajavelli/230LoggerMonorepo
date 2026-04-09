@@ -144,7 +144,8 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
 
   const frontendData = JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8'));
   const feedbackItems = frontendData.feedback || [];
-  const generatedAt = new Date();
+  const _now = new Date();
+  const generatedAt = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate()); // local midnight today
 
   // Load assessment config (optional — report degrades gracefully without it)
   let assessmentConfig = null;
@@ -169,7 +170,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         // Skip assessments beyond the drill horizon — they appear in the table strip
         // but are too far out to prioritize drills for now.
         const aCfgDaysLeft = Math.ceil(
-          (new Date(aCfg.date + 'T12:00:00Z') - generatedAt) / MS_PER_DAY
+          (new Date(aCfg.date + 'T00:00:00') - generatedAt) / MS_PER_DAY
         );
         if (aCfgDaysLeft > DRILL_HORIZON_DAYS) continue;
 
@@ -299,7 +300,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
       // overlap_pct: sum of surviving drill weights, capped at 100
       const overlapPct = Math.min(100, Math.round(entry.rawOverlap * 100));
       const daysLeft = Math.ceil(
-        (new Date(a.date + 'T12:00:00Z') - generatedAt) / MS_PER_DAY
+        (new Date(a.date + 'T00:00:00') - generatedAt) / MS_PER_DAY
       );
       const gradeWeight = a.grade_weight != null
         ? a.grade_weight
@@ -471,7 +472,8 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     }
   }
 
-  const now = new Date();
+  const _n = new Date();
+  const now = new Date(_n.getFullYear(), _n.getMonth(), _n.getDate()); // local midnight today
   const fullName      = assessmentConfig.full_name  || assignment;
   const shortName     = assessmentConfig.short_name || assignment;
   const reviewVideoUrl = assessmentConfig.review_video_url || null;
@@ -479,7 +481,7 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
 
   const assessmentEntries = [];
   for (const aCfg of (assessmentConfig.assessments || [])) {
-    const daysLeft = Math.ceil((new Date(aCfg.date + 'T12:00:00Z') - now) / MS_PER_DAY);
+    const daysLeft = Math.ceil((new Date(aCfg.date + 'T00:00:00') - now) / MS_PER_DAY);
     if (daysLeft > DRILL_HORIZON_DAYS) continue;
 
     const drillsForAssmt = [];
