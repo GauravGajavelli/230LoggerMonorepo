@@ -1,5 +1,4 @@
 // dotenv MUST be first — sets process.env before any lib module reads it
-// override:true ensures .env always wins over inherited shell variables
 import dotenv from 'dotenv';
 dotenv.config({ override: true });
 import express from 'express';
@@ -27,8 +26,15 @@ const DIST_DIR    = path.resolve(process.env.DIST_DIR   || path.join(__dirname, 
 const PIPELINE_JAR = path.resolve(process.env.PIPELINE_JAR || path.join(__dirname, '..', 'Pipeline', 'target', 'csse230-feedback.jar'));
 const LLM_CACHE_DIR = path.resolve(process.env.LLM_CACHE_DIR || path.join(__dirname, '..', 'Pipeline', 'cache', 'llm'));
 const DEMO_TOKEN  = process.env.DEMO_TOKEN || null;
-const EMAIL_DEV_REDIRECT  = process.env.EMAIL_DEV_REDIRECT || null;
-const HOLD_EMAILS = process.env.HOLD_EMAILS === 'true';
+
+// Re-read .env on each call so HOLD_EMAILS and EMAIL_DEV_REDIRECT take effect
+// immediately after file edits — no restart required.
+const ENV_FILE = path.join(__dirname, '.env');
+function readEnvNow() {
+  try { return dotenv.parse(fs.readFileSync(ENV_FILE, 'utf8')); } catch { return {}; }
+}
+function getHoldEmails()       { return readEnvNow().HOLD_EMAILS === 'true'; }
+function getEmailDevRedirect() { return readEnvNow().EMAIL_DEV_REDIRECT || null; }
 const DEMO_JSON   = path.join(__dirname, 'public', 'data', 'frontend.json');
 // RoseFire — ROSEFIRE_SECRET is the secretOrPrivateKey you provided when registering your app.
 // ROSEFIRE_REGISTRY_TOKEN is the UUID returned by registration (safe to embed in client HTML).
@@ -539,7 +545,7 @@ app.post('/api/relay/register', requireRelayAuth, async (req, res) => {
   console.log(`[relay] registered at ${ip}:${port}`);
   res.json({ ok: true });
   // Drain any emails that queued while relay was offline — fire and forget
-  if (!HOLD_EMAILS) setImmediate(pushAllPending);
+  if (!getHoldEmails()) setImmediate(pushAllPending);
 });
 
 app.get('/api/emails/stats', requireRelayAuth, (_req, res) => {
@@ -594,8 +600,9 @@ async function pushEmail(email) {
     return; // relay not registered yet — leave pending for next retry cycle
   }
 
-  const actualRecipient = EMAIL_DEV_REDIRECT ?? email.recipient;
-  const actualSubject   = EMAIL_DEV_REDIRECT
+  const emailDevRedirect = getEmailDevRedirect();
+  const actualRecipient = emailDevRedirect ?? email.recipient;
+  const actualSubject   = emailDevRedirect
     ? `[DEV to ${email.recipient}] ${email.subject}`
     : email.subject;
 
@@ -608,7 +615,7 @@ async function pushEmail(email) {
     });
     if (res.ok) {
       db.prepare("UPDATE email_queue SET status='sent',sent_at=datetime('now') WHERE id=?").run(email.id);
-      if (EMAIL_DEV_REDIRECT) {
+      if (emailDevRedirect) {
         console.log(`[email] DEV redirect → ${actualRecipient} (real: ${email.recipient}, ${email.email_type})`);
       } else {
         console.log(`[email] sent → ${email.recipient} (${email.email_type})`);
@@ -665,7 +672,7 @@ setInterval(async () => {
   // Reset failed emails for retry after 5-min backoff
   db.prepare("UPDATE email_queue SET status='pending' WHERE status='failed' AND attempts < 3 AND last_attempt < datetime('now','-5 minutes')").run();
   // Push any pending (newly queued or retried) — skip if HOLD_EMAILS is set
-  if (!HOLD_EMAILS) await pushAllPending();
+  if (!getHoldEmails()) await pushAllPending();
   // Alert if relay hasn't registered recently
   const relay = db.prepare('SELECT last_heartbeat FROM relay_status WHERE id=1').get();
   if (relay?.last_heartbeat) {
