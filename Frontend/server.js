@@ -1,5 +1,7 @@
 // dotenv MUST be first — sets process.env before any lib module reads it
-import 'dotenv/config';
+// override:true ensures .env always wins over inherited shell variables
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
