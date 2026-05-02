@@ -233,7 +233,7 @@ function renderHwRow(a, feedbackUrl, generic = false) {
 }
 
 function renderDrillSheet(reportData, feedbackUrl) {
-  const { assessments, exam_assessments, hw_assessments, drill_cap, generic } = reportData;
+  const { assessments, exam_assessments, hw_assessments, drill_cap, generic, review_video_url } = reportData;
   if (!generic) return '';
 
   const examZone = exam_assessments ?? assessments?.filter(a => a.type === 'exam') ?? [];
@@ -277,7 +277,7 @@ function renderDrillSheet(reportData, feedbackUrl) {
   return `
     <div class="page-drills">
       <div class="page-drills-header">Drill Sheet</div>
-      <div class="page-drills-subtitle">Curated practice problems covering the key ${escHtml(focalAssessment.name)} topics from the review video.</div>
+      <div class="page-drills-subtitle">Curated practice problems covering the key ${escHtml(focalAssessment.name)} topics from the ${review_video_url ? 'review video' : 'review materials'}.</div>
       ${cards}
       ${moreNote}
     </div>`;

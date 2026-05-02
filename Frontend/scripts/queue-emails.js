@@ -155,7 +155,9 @@ if (!tokenRows.length) {
 let feedbackQueued = 0, noIssuesQueued = 0, missingQueued = 0, skipped = 0;
 
 for (const { token, student_id, email } of tokenRows) {
-  const hasTar = fs.existsSync(path.join(DATA_DIR, assignment, 'tars', student_id, 'run.tar'));
+  const tarPath = path.join(DATA_DIR, assignment, 'tars', student_id, 'run.tar');
+  // Treat 0-byte tars as missing — student opened the project but never ran the tests.
+  const hasTar = fs.existsSync(tarPath) && fs.statSync(tarPath).size > 0;
   const hasSuccess = db.prepare(
     "SELECT id FROM pipeline_runs WHERE student_id=? AND assignment=? AND status='success' ORDER BY id DESC LIMIT 1"
   ).get(student_id, assignment);
@@ -179,14 +181,15 @@ for (const { token, student_id, email } of tokenRows) {
     }
   }
 
+  // Email-type decision:
+  //   pipeline succeeded  → personalized feedback_ready (if drills) or generic no_issues
+  //   pipeline didn't succeed and tar is missing/0-byte → generic missing_tar
+  //   pipeline didn't succeed but tar has bytes → also missing_tar (the student tried, but
+  //     ingest/rerun couldn't extract usable runs from it — same student-facing remedy:
+  //     "we couldn't generate personalized feedback; here's a class-wide review guide")
   const emailType = hasSuccess
     ? (drillCount > 0 ? 'feedback_ready' : 'no_issues')
-    : (!hasTar ? 'missing_tar' : null);
-  if (!emailType) {
-    console.log(`  [skip] ${student_id} — tar exists but pipeline not successful yet`);
-    skipped++;
-    continue;
-  }
+    : 'missing_tar';
 
   const alreadyQueued = db.prepare(
     "SELECT id FROM email_queue WHERE token=? AND email_type=? AND assignment=? AND status != 'cancelled'"
@@ -206,12 +209,12 @@ for (const { token, student_id, email } of tokenRows) {
     console.log(`  [feedback_ready] ${student_id} → ${email} (${patternCount} patterns)`);
     feedbackQueued++;
   } else if (emailType === 'no_issues') {
-    let genericReportLink = null;
-    try {
-      const reportPath = await generateGenericReport(student_id, assignment, token, DATA_DIR, BASE_URL);
-      if (reportPath) genericReportLink = studentReportLink;
-    } catch (err) {
-      console.warn(`  [warn] Generic report failed for ${student_id}: ${err.message}`);
+    // process-batch.js already generated the generic review guide PDF when feedback was empty.
+    // Just confirm it exists on disk before linking it from the email.
+    const reportPdfPath = path.join(DATA_DIR, assignment, 'output', student_id, 'report.pdf');
+    const genericReportLink = fs.existsSync(reportPdfPath) ? studentReportLink : null;
+    if (!genericReportLink) {
+      console.warn(`  [warn] no_issues: review guide PDF missing for ${student_id} — re-run process-batch.js`);
     }
     ({ subject, body } = renderNoIssues(genericReportLink, feedbackLink));
     console.log(`  [no_issues]      ${student_id} → ${email}${genericReportLink ? ' (+ review guide)' : ''}`);

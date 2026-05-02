@@ -52,7 +52,13 @@
       "Bash(grep -v \"^#\" \"C:/Users/gajavegs/230LoggerMonorepo/Pipeline/.env\" | grep -v \"^$\" | grep -i \"model\\\\|provider\")",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" MVN=\"$HOME/.local/apache-maven-3.9.6/bin/mvn\" && \"$MVN\" -f Pipeline/pom.xml package -q -DskipTests 2>&1 && echo \"BUILD OK\")",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" java -jar Pipeline/target/csse230-feedback.jar prepare \\\\\n  -i Pipeline/output/run-demo-full \\\\\n  -o Frontend/public/data/frontend.json \\\\\n  --assignment-name \"Binary Search Tree\" \\\\\n  --student-id \"demo-student\" \\\\\n  --assignment-config Pipeline/assignments/bst.json \\\\\n  --cache-dir Pipeline/cache/llm \\\\\n  --clear-cache 2>&1)",
-      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" \"/c/Program Files/Java/jdk-21/bin/java\" -jar Pipeline/target/csse230-feedback.jar prepare \\\\\n  -i Pipeline/output/run-demo-full \\\\\n  -o Frontend/public/data/frontend.json \\\\\n  --assignment-name \"Binary Search Tree\" \\\\\n  --student-id \"demo-student\" \\\\\n  --assignment-config Pipeline/assignments/bst.json \\\\\n  --cache-dir Pipeline/cache/llm \\\\\n  --clear-cache 2>&1)"
+      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" \"/c/Program Files/Java/jdk-21/bin/java\" -jar Pipeline/target/csse230-feedback.jar prepare \\\\\n  -i Pipeline/output/run-demo-full \\\\\n  -o Frontend/public/data/frontend.json \\\\\n  --assignment-name \"Binary Search Tree\" \\\\\n  --student-id \"demo-student\" \\\\\n  --assignment-config Pipeline/assignments/bst.json \\\\\n  --cache-dir Pipeline/cache/llm \\\\\n  --clear-cache 2>&1)",
+      "Bash(unzip -l \"Homework 7/stringhashset-202630.zip\")",
+      "Bash(unzip -l \"Exams/Exam 3/Exam3-practice.zip\")",
+      "Bash(unzip -l \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/redactedTars/allTar-StringHashSet-Sp2026-2May.zip\")",
+      "Bash(unzip -p \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Homework 7/stringhashset-202630.zip\" \"stringhashset-202630/src/StringHashSetTest.java\")",
+      "Bash(unzip -l \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Final Exam/FinalPracticeComputerPart.zip\")",
+      "Bash(unzip -p \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Exam 3/Exam3-practice.zip\" \"Exam3-practice/Exam3Practice/src/numcollided/StringHashSetTest.java\")"
     ]
   }
 }

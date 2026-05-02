@@ -1,0 +1,42 @@
+{
+  "assignment": "String Hash Set",
+  "short_name": "StringHashSet",
+  "full_name": "String Hash Set (HW7)",
+  "assessments": [
+    {
+      "id": "exam_3",
+      "name": "Exam 3",
+      "date": "2026-05-06",
+      "date_display": "May 6",
+      "type": "exam",
+      "grade_weight": 0.10,
+      "concept_weights": {
+        "hashing": 0.40,
+        "rehash": 0.30,
+        "add":     0.20,
+        "contains": 0.10
+      },
+      "resources": [
+        { "url": "Exams/Exam 3/Exam3-202320.md", "label": "Exam 3 — 2023 questions (non-solution)" },
+        { "url": "Exams/Exam 3/Exam3-practice.zip", "label": "Practice Exam 3 (zip)" },
+        { "url": "Exams/Exam 3/Exam3-202130-computer.pdf", "label": "Practice Exam 3 (Winter 2020-21 computer part)" }
+      ]
+    },
+    {
+      "id": "final_exam",
+      "name": "Final Exam",
+      "date": "2026-05-27",
+      "date_display": "May 27",
+      "type": "exam",
+      "grade_weight": 0.15,
+      "concept_weights": {
+        "hashing": 0.25,
+        "rehash":  0.15,
+        "iterator": 0.10
+      },
+      "resources": [
+        { "url": "Exams/Final Exam/PracticeFinalExam.pdf", "label": "Practice Final Exam" }
+      ]
+    }
+  ]
+}

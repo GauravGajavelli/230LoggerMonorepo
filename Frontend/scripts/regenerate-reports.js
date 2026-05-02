@@ -16,7 +16,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import db from '../lib/db.js';
-import { generateReport, generateReportForToken } from '../lib/report.js';
+import { generateReport, generateReportForToken, generateGenericReport } from '../lib/report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -52,17 +52,31 @@ const errors = [];
 for (const studentId of students.sort()) {
   const t0 = Date.now();
   try {
-    await generateReport(studentId, assignment, DATA_DIR, BASE_URL);
+    const frontendJsonPath = path.join(outputDir, studentId, 'frontend.json');
+    let patternCount = 0;
+    try {
+      patternCount = (JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8')).feedback || []).length;
+    } catch { /* leave at 0 */ }
 
     const tokenRow = db.prepare(
       'SELECT token FROM tokens WHERE student_id=? AND assignment=?'
     ).get(studentId, assignment);
 
-    if (tokenRow) {
-      await generateReportForToken(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
-      console.log(`  ✓  ${studentId}  (${Math.round((Date.now() - t0) / 1000)}s)`);
+    if (patternCount > 0) {
+      await generateReport(studentId, assignment, DATA_DIR, BASE_URL);
+      if (tokenRow) {
+        await generateReportForToken(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
+        console.log(`  ✓  ${studentId}  (${Math.round((Date.now() - t0) / 1000)}s) — personalized, ${patternCount} pattern${patternCount !== 1 ? 's' : ''}`);
+      } else {
+        console.log(`  ✓  ${studentId}  (${Math.round((Date.now() - t0) / 1000)}s) — no token, PDF skipped`);
+      }
     } else {
-      console.log(`  ✓  ${studentId}  (${Math.round((Date.now() - t0) / 1000)}s) — no token, PDF skipped`);
+      if (tokenRow) {
+        await generateGenericReport(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
+        console.log(`  ✓  ${studentId}  (${Math.round((Date.now() - t0) / 1000)}s) — generic review guide, 0 patterns`);
+      } else {
+        console.log(`  ✓  ${studentId}  (${Math.round((Date.now() - t0) / 1000)}s) — no token, PDF skipped (would have been generic)`);
+      }
     }
     succeeded++;
   } catch (err) {

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "exam3practice-numCollidedEntries-empty",
+    "source": "Exam 3 practice",
+    "sourceLabel": "Exam 3 practice — numCollided (warm-up)",
+    "url": "Exams/Exam 3/Exam3-practice.zip",
+    "targetFile": "StringHashSetTest.java",
+    "categories": ["add", "hashing"],
+    "timeEstimate": "~5 min",
+    "intro": "Practice the collision-counting question that appears on Exam 3 practice. Add a public int numCollidedEntries() method to StringHashSet that returns how many added items landed in a bucket that already had at least one entry — this is exactly the per-bucket walk your toRawString does, but counting instead of formatting. Then paste this test into StringHashSetTest.java for a point back. The empty case is the warm-up; harder variants follow.",
+    "testCode": "@Test\npublic void practice_numCollidedEntries_emptySet() {\n    assertEquals(0, mHashSet.numCollidedEntries());\n    sPoints += 1;\n}",
+    "hints": [
+      "An entry 'collided' if it was inserted into a bucket that was already non-null at the moment of insertion. With separate chaining, that means it became the 2nd, 3rd, ... node in some chain.",
+      "Walk each bucket once. For each bucket, count nodes beyond the head: a chain of length k contributes (k - 1) collided entries; an empty bucket contributes 0; a singleton contributes 0.",
+      "An empty hash set has no entries, so the count is 0. Keep the implementation O(N) — visit each entry exactly once."
+    ]
+  },
+  {
+    "id": "exam3practice-numCollidedEntries-knownLayout",
+    "source": "Exam 3 practice",
+    "sourceLabel": "Exam 3 practice — numCollided (medium)",
+    "url": "Exams/Exam 3/Exam3-practice.zip",
+    "targetFile": "StringHashSetTest.java",
+    "categories": ["add", "hashing"],
+    "timeEstimate": "~10 min",
+    "intro": "Same numCollidedEntries() method as the warm-up, but now with a known pre-rehash layout from your testAddAndRawStringNoRehash test. After adding hello, hi, caio, hola, shalom, bonjour in that order, two of the six entries collided into existing chains (one in bucket 1, one in bucket 2). Paste this test into StringHashSetTest.java for a point back.",
+    "testCode": "@Test\npublic void practice_numCollidedEntries_sixItemsTwoCollisions() {\n    mHashSet.add(\"hello\");\n    mHashSet.add(\"hi\");\n    mHashSet.add(\"caio\");\n    mHashSet.add(\"hola\");\n    mHashSet.add(\"shalom\");\n    mHashSet.add(\"bonjour\");\n    assertEquals(2, mHashSet.numCollidedEntries());\n    sPoints += 1;\n}",
+    "hints": [
+      "From your testAddAndRawStringNoRehash, the pre-rehash layout is — 0: hola; 1: bonjour shalom; 2: caio hello; 3: empty; 4: hi. Buckets 1 and 2 each have a chain of length 2, so each contributes 1 collided entry.",
+      "Make sure your method uses the same field your toRawString iterates over. If toRawString is correct, numCollidedEntries should be a near-trivial loop on the same data.",
+      "Beware off-by-one: you want (chainLength - 1) per bucket, not chainLength. A bucket with one item has 0 collisions, not 1."
+    ]
+  },
+  {
+    "id": "exam3-rehashTriggerCount",
+    "source": "Exam 3",
+    "sourceLabel": "Exam 3 — Problem 4(c) translated to HW7's parameters",
+    "url": "Exams/Exam 3/Exam3-202320.md",
+    "targetFile": "StringHashSetTest.java",
+    "categories": ["rehash"],
+    "timeEstimate": "~10 min",
+    "intro": "Exam 3 Problem 4(c)(ii) asks: with M=10 and λ ≤ .60, what is the minimum number of adds before the first capacity-doubling rehash? (Answer: 7, since ⌈.60·10⌉ + 1 = 7.) Translate the same threshold reasoning to HW7's parameters (M=5, λ ≤ 2): the table grows on the add that pushes size past 2·5 = 10. After that add, your toRawString is laid out across more than 5 buckets. This drill checks that you can identify the boundary precisely. Paste it into StringHashSetTest.java for a point back.",
+    "testCode": "@Test\npublic void practice_rehash_happensOnEleventhAdd() {\n    String[] tenItems = { \"hello\", \"hi\", \"caio\", \"hola\", \"shalom\", \"bonjour\", \"ni-hao\", \"aloha\", \"tere\", \"sveiki\" };\n    for (String s : tenItems) {\n        mHashSet.add(s);\n    }\n    assertFalse(\"Pre-rehash table should still have exactly 5 bucket lines (0-4)\",\n        mHashSet.toRawString().contains(\"5:\"));\n    mHashSet.add(\"mulishani\");\n    assertTrue(\"Post-rehash table should expose at least bucket 5\",\n        mHashSet.toRawString().contains(\"5:\"));\n    sPoints += 1;\n}",
+    "hints": [
+      "λ (lambda) = size / capacity. HW7's threshold is λ ≤ 2, i.e. rehash when adding would push size past 2 · capacity. With initial capacity 5, the threshold is 10 entries; the 11th add triggers the grow.",
+      "Pre-rehash, your toRawString prints lines '0:' through '4:'. Post-rehash, more bucket lines appear (the new capacity is at least 7, since testAddAndRawStringRehash already asserts a '6:' line exists).",
+      "If your test fails on the pre-rehash assertion, your add() may already be growing the table too eagerly (e.g., growing on the 10th item instead of the 11th). The rule is: the *11th* item triggers the rehash, because adding it is what would push λ above 2."
+    ]
+  }
+]

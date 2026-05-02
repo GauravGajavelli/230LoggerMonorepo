@@ -1,0 +1,76 @@
+{
+  "assignmentName": "String Hash Set",
+  "excludeTestClasses": [],
+  "courseContext": {
+    "concepts": [
+      {
+        "concept": "Polynomial string hash code (31x+y)",
+        "testCategories": ["hashing"],
+        "futureAppearances": [
+          {
+            "label": "Exam 3 — probing index from raw hash",
+            "url": "Exams/Exam 3/Exam3-202320.md",
+            "description": "Problem 4(a)/(b) ask for the first four indices a hash value visits under quadratic and linear probing. The mod-by-capacity step is the same arithmetic that maps stringHashCode output to a bucket in your separate-chaining table."
+          }
+        ]
+      },
+      {
+        "concept": "Separate chaining: collision resolution by adding to the front of a bucket's list",
+        "testCategories": ["add", "contains"],
+        "futureAppearances": [
+          {
+            "label": "Exam 3 — separate chaining T/F",
+            "url": "Exams/Exam 3/Exam3-202320.md",
+            "description": "Problem 1(c) ('every entry of the chained array stores either a node-reference or null') tests the same invariant your toRawString output displays — bucket = head-of-chain or null."
+          },
+          {
+            "label": "Exam 3 — numCollidedEntries (practice)",
+            "url": "Exams/Exam 3/Exam3-practice.zip",
+            "description": "The practice exam asks you to count entries that hashed into a non-empty bucket. The same per-bucket walk you do in toRawString is what lets you decide whether a particular add 'collided'."
+          }
+        ]
+      },
+      {
+        "concept": "Load factor and capacity-doubling rehash",
+        "testCategories": ["rehash"],
+        "futureAppearances": [
+          {
+            "label": "Exam 3 — minimum adds to trigger first rehash",
+            "url": "Exams/Exam 3/Exam3-202320.md",
+            "description": "Problem 4(c)(ii) asks how many adds are needed before the table grows. With M=10 and λ ≤ .60 the answer is 7 — same lambda-threshold arithmetic you implemented for HW7 with M=5 and λ ≤ 2."
+          },
+          {
+            "label": "Exam 3 — rehash diagram",
+            "url": "Exams/Exam 3/Exam3-202320.md",
+            "description": "Problem 4(c)(iii) requires re-bucketing five items into a doubled-capacity chained table — the same redistribution your testAddAndRawStringRehash exercises after the 11th add."
+          },
+          {
+            "label": "Final Exam — issues in hash table implementation",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "The Final's hash content is conceptual: capacity choice, load-factor selection, and amortized-vs-worst-case cost of rehash all show up as discussion questions you can answer from your own implementation experience."
+          }
+        ]
+      },
+      {
+        "concept": "Iterator across an array of chained buckets",
+        "testCategories": ["iterator", "iterator_edge_cases"],
+        "futureAppearances": []
+      },
+      {
+        "concept": "Removing an element from a chained bucket",
+        "testCategories": ["remove"],
+        "futureAppearances": []
+      },
+      {
+        "concept": "Element-count and empty-state tracking",
+        "testCategories": ["size", "empty_state", "clear"],
+        "futureAppearances": []
+      },
+      {
+        "concept": "Set toString formatting",
+        "testCategories": ["toString"],
+        "futureAppearances": []
+      }
+    ]
+  }
+}

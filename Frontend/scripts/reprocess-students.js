@@ -18,7 +18,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import db from '../lib/db.js';
-import { generateReport, generateReportForToken } from '../lib/report.js';
+import { generateReport, generateReportForToken, generateGenericReport } from '../lib/report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT  = path.resolve(__dirname, '..', '..');
@@ -108,14 +108,30 @@ for (const studentId of students) {
     await runPipelineForStudent(studentId);
     db.prepare("UPDATE pipeline_runs SET status='success',finished_at=datetime('now') WHERE id=?").run(runId);
 
-    try { await generateReport(studentId, assignment, DATA_DIR, BASE_URL); } catch {}
-
-    if (tokenRow) {
+    const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', studentId, 'frontend.json');
+    let patternCount = 0;
+    if (fs.existsSync(frontendJsonPath)) {
       try {
-        await generateReportForToken(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
-        console.log(`     PDF regenerated`);
+        patternCount = (JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8')).feedback || []).length;
+      } catch { /* leave at 0 */ }
+    }
+
+    if (patternCount > 0) {
+      try { await generateReport(studentId, assignment, DATA_DIR, BASE_URL); } catch {}
+      if (tokenRow) {
+        try {
+          await generateReportForToken(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
+          console.log(`     PDF regenerated (personalized, ${patternCount} pattern${patternCount !== 1 ? 's' : ''})`);
+        } catch (e) {
+          console.warn(`  ⚠  ${studentId} PDF failed: ${e.message}`);
+        }
+      }
+    } else if (tokenRow) {
+      try {
+        await generateGenericReport(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
+        console.log(`     PDF regenerated (generic review guide — 0 patterns)`);
       } catch (e) {
-        console.warn(`  ⚠  ${studentId} PDF failed: ${e.message}`);
+        console.warn(`  ⚠  ${studentId} generic PDF failed: ${e.message}`);
       }
     }
     console.log(`  ✓  ${studentId}  (${Math.round((Date.now()-t0)/1000)}s)`);

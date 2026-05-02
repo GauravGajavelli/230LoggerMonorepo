@@ -389,12 +389,28 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
 }
 
 // Convenience: generate report with the actual token URL substituted in.
+// Automatically routes to the generic class-wide review guide when the student's
+// frontend.json has no feedback patterns — avoids producing an empty personalized PDF.
 export async function generateReportForToken(studentId, assignment, token, dataDir, baseUrl) {
   const outputDir    = path.join(dataDir, assignment, 'output', studentId);
   const reportPdfPath = path.join(outputDir, 'report.pdf');
   const reportJsonPath = path.join(outputDir, 'report.json');
+  const frontendJsonPath = path.join(outputDir, 'frontend.json');
 
   const feedbackUrl = `${baseUrl}/feedback?token=${token}`;
+
+  // Case-2 routing: if the prepare step produced no patterns (or frontend.json is
+  // missing entirely), the personalized report layout would render empty. Use the
+  // generic class-wide review guide instead so the on-disk PDF is immediately useful.
+  let patternCount = 0;
+  if (fs.existsSync(frontendJsonPath)) {
+    try {
+      patternCount = (JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8')).feedback || []).length;
+    } catch { /* leave at 0 */ }
+  }
+  if (patternCount === 0) {
+    return generateGenericReport(studentId, assignment, token, dataDir, baseUrl);
+  }
 
   if (fs.existsSync(reportJsonPath)) {
     const reportData = JSON.parse(fs.readFileSync(reportJsonPath, 'utf8'));

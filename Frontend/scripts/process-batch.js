@@ -14,7 +14,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import db from '../lib/db.js';
-import { generateReport, generateReportForToken } from '../lib/report.js';
+import { generateReport, generateReportForToken, generateGenericReport } from '../lib/report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // The pipeline JAR resolves prompt templates relative to cwd, which must be the repo root
@@ -115,27 +115,54 @@ for (const studentId of students) {
   try {
     await runPipelineForStudent(studentId); // top-level await — requires "type":"module"
     db.prepare("UPDATE pipeline_runs SET status='success',finished_at=datetime('now') WHERE id=?").run(runId);
-    // Generate report.json, then PDF if a token exists in the DB.
-    // PDF is generated via generateReportForToken so the real token URL is embedded.
-    try {
-      await generateReport(studentId, assignment, DATA_DIR, BASE_URL);
-    } catch (reportErr) {
-      console.warn(`  ⚠  ${studentId} report.json generation failed: ${reportErr.message}`);
-      console.warn(reportErr.stack);
+
+    // Decide which report flavor to generate based on whether prepare produced any
+    // feedback patterns. With zero patterns, the personalized report would be empty —
+    // generate the class-wide review guide instead so the on-disk report.pdf is
+    // immediately correct (no need for queue-emails to overwrite it later).
+    const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', studentId, 'frontend.json');
+    let patternCount = 0;
+    if (fs.existsSync(frontendJsonPath)) {
+      try {
+        patternCount = (JSON.parse(fs.readFileSync(frontendJsonPath, 'utf8')).feedback || []).length;
+      } catch { /* leave at 0 */ }
     }
+
     const tokenRow = db.prepare(
       "SELECT token FROM tokens WHERE student_id=? AND assignment=?"
     ).get(studentId, assignment);
-    if (tokenRow) {
+
+    if (patternCount > 0) {
       try {
-        await generateReportForToken(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
-        console.log(`     PDF generated with token`);
-      } catch (pdfErr) {
-        console.warn(`  ⚠  ${studentId} PDF generation failed: ${pdfErr.message}`);
-        console.warn(pdfErr.stack);
+        await generateReport(studentId, assignment, DATA_DIR, BASE_URL);
+      } catch (reportErr) {
+        console.warn(`  ⚠  ${studentId} report.json generation failed: ${reportErr.message}`);
+        console.warn(reportErr.stack);
+      }
+      if (tokenRow) {
+        try {
+          await generateReportForToken(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
+          console.log(`     PDF generated with token (personalized, ${patternCount} pattern${patternCount !== 1 ? 's' : ''})`);
+        } catch (pdfErr) {
+          console.warn(`  ⚠  ${studentId} PDF generation failed: ${pdfErr.message}`);
+          console.warn(pdfErr.stack);
+        }
+      } else {
+        console.log(`     No token found for ${studentId}/${assignment} — skipping PDF (run generate-tokens.js first)`);
       }
     } else {
-      console.log(`     No token found for ${studentId}/${assignment} — skipping PDF (run generate-tokens.js first)`);
+      // No patterns flagged → class-wide review guide, no empty personalized PDF.
+      if (tokenRow) {
+        try {
+          await generateGenericReport(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
+          console.log(`     PDF generated with token (generic review guide — 0 patterns)`);
+        } catch (pdfErr) {
+          console.warn(`  ⚠  ${studentId} generic PDF generation failed: ${pdfErr.message}`);
+          console.warn(pdfErr.stack);
+        }
+      } else {
+        console.log(`     No token found for ${studentId}/${assignment} — skipping generic PDF (run generate-tokens.js first)`);
+      }
     }
     const elapsed = Math.round((Date.now()-t0)/1000);
     console.log(`  ✓  ${studentId}  (${elapsed}s)`);

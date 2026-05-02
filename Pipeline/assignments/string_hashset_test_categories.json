@@ -1,0 +1,93 @@
+{
+  "categories": {
+    "hashing": {
+      "description": "Polynomial 31x+y string hash code computation",
+      "tests": [
+        "StringHashSetTest#testStringHashCode()"
+      ]
+    },
+    "add": {
+      "description": "Adding elements via separate chaining, including duplicate detection and bulk addAll",
+      "tests": [
+        "StringHashSetTest#testAddAndRawStringNoCollision()",
+        "StringHashSetTest#testAddAndRawStringNoRehash()",
+        "StringHashSetTest#testAddDuplicate()",
+        "StringHashSetTest#testAddAll()"
+      ]
+    },
+    "contains": {
+      "description": "Locating an element by walking its bucket's chain",
+      "tests": [
+        "StringHashSetTest#testContains()"
+      ]
+    },
+    "remove": {
+      "description": "Removing an element from a chained bucket",
+      "tests": [
+        "StringHashSetTest#testRemove()"
+      ]
+    },
+    "rehash": {
+      "description": "Capacity doubling and item redistribution when load factor reaches the threshold",
+      "tests": [
+        "StringHashSetTest#testAddAndRawStringRehash()"
+      ]
+    },
+    "size": {
+      "description": "Tracking element count across add/remove/clear",
+      "tests": [
+        "StringHashSetTest#testSize()"
+      ]
+    },
+    "empty_state": {
+      "description": "Empty hash set detection (size 0, isEmpty true)",
+      "tests": [
+        "StringHashSetTest#testEmptyHashSet()"
+      ]
+    },
+    "clear": {
+      "description": "Resetting the table to all-null buckets while preserving capacity",
+      "tests": [
+        "StringHashSetTest#testClear()"
+      ]
+    },
+    "iterator": {
+      "description": "Iterating over all elements across non-empty buckets",
+      "tests": [
+        "StringHashSetTest#testIteratorNextHasNext()",
+        "StringHashSetTest#testIteratorDifferentReturns()"
+      ]
+    },
+    "iterator_edge_cases": {
+      "description": "Iterator NoSuchElementException at end and ConcurrentModificationException on mutation",
+      "tests": [
+        "StringHashSetTest#testIteratorNoSuchElementException()",
+        "StringHashSetTest#testIteratorConcurrentModificationException()"
+      ]
+    },
+    "toString": {
+      "description": "Formatting the hash set's contents as a bracketed comma-separated string",
+      "tests": [
+        "StringHashSetTest#testToString()"
+      ]
+    }
+  },
+  "testToCategories": {
+    "StringHashSetTest#testStringHashCode()": ["hashing"],
+    "StringHashSetTest#testAddAndRawStringNoCollision()": ["add"],
+    "StringHashSetTest#testAddAndRawStringNoRehash()": ["add"],
+    "StringHashSetTest#testAddDuplicate()": ["add"],
+    "StringHashSetTest#testAddAll()": ["add"],
+    "StringHashSetTest#testContains()": ["contains"],
+    "StringHashSetTest#testRemove()": ["remove"],
+    "StringHashSetTest#testAddAndRawStringRehash()": ["rehash"],
+    "StringHashSetTest#testSize()": ["size"],
+    "StringHashSetTest#testEmptyHashSet()": ["empty_state"],
+    "StringHashSetTest#testClear()": ["clear"],
+    "StringHashSetTest#testIteratorNextHasNext()": ["iterator"],
+    "StringHashSetTest#testIteratorDifferentReturns()": ["iterator"],
+    "StringHashSetTest#testIteratorNoSuchElementException()": ["iterator_edge_cases"],
+    "StringHashSetTest#testIteratorConcurrentModificationException()": ["iterator_edge_cases"],
+    "StringHashSetTest#testToString()": ["toString"]
+  }
+}
