@@ -32,19 +32,19 @@
     ]
   },
   {
-    "id": "exam3-rehashTriggerCount",
+    "id": "exam3-rehashCount-newMethod",
     "source": "Exam 3",
-    "sourceLabel": "Exam 3 — Problem 4(c) translated to HW7's parameters",
+    "sourceLabel": "Exam 3 — extends Problem 4(c) lambda-threshold reasoning",
     "url": "Exams/Exam 3/Exam3-202320.md",
     "targetFile": "StringHashSetTest.java",
     "categories": ["rehash"],
-    "timeEstimate": "~10 min",
-    "intro": "Exam 3 Problem 4(c)(ii) asks: with M=10 and λ ≤ .60, what is the minimum number of adds before the first capacity-doubling rehash? (Answer: 7, since ⌈.60·10⌉ + 1 = 7.) Translate the same threshold reasoning to HW7's parameters (M=5, λ ≤ 2): the table grows on the add that pushes size past 2·5 = 10. After that add, your toRawString is laid out across more than 5 buckets. This drill checks that you can identify the boundary precisely. Paste it into StringHashSetTest.java for a point back.",
-    "testCode": "@Test\npublic void practice_rehash_happensOnEleventhAdd() {\n    String[] tenItems = { \"hello\", \"hi\", \"caio\", \"hola\", \"shalom\", \"bonjour\", \"ni-hao\", \"aloha\", \"tere\", \"sveiki\" };\n    for (String s : tenItems) {\n        mHashSet.add(s);\n    }\n    assertFalse(\"Pre-rehash table should still have exactly 5 bucket lines (0-4)\",\n        mHashSet.toRawString().contains(\"5:\"));\n    mHashSet.add(\"mulishani\");\n    assertTrue(\"Post-rehash table should expose at least bucket 5\",\n        mHashSet.toRawString().contains(\"5:\"));\n    sPoints += 1;\n}",
+    "timeEstimate": "~12 min",
+    "intro": "Exam 3 Problem 4(c) asks you to reason about *when* a capacity-doubling rehash happens given M and λ. To make that reasoning testable on your own implementation, add a new method `public int rehashCount()` to StringHashSet that returns how many rehashes have occurred since construction. You'll need a private instance field that you increment exactly once each time your resize/rehash branch runs. Then paste this test into StringHashSetTest.java for a point back. The test pins down two boundary cases — before the first rehash, and right after it — so you can confirm your add()'s threshold logic is exact rather than off-by-one.",
+    "testCode": "@Test\npublic void practice_rehashCount_zeroBeforeFirstRehash() {\n    assertEquals(0, mHashSet.rehashCount());\n    String[] preThreshold = { \"hello\", \"hi\", \"caio\", \"hola\", \"shalom\", \"bonjour\", \"ni-hao\", \"aloha\", \"tere\", \"sveiki\" };\n    for (String s : preThreshold) mHashSet.add(s);\n    assertEquals(\"rehashCount must still be 0 right at the threshold\", 0, mHashSet.rehashCount());\n    mHashSet.add(\"mulishani\");\n    assertEquals(\"rehashCount must be exactly 1 after the add that triggered growth\", 1, mHashSet.rehashCount());\n    sPoints += 1;\n}",
     "hints": [
-      "λ (lambda) = size / capacity. HW7's threshold is λ ≤ 2, i.e. rehash when adding would push size past 2 · capacity. With initial capacity 5, the threshold is 10 entries; the 11th add triggers the grow.",
-      "Pre-rehash, your toRawString prints lines '0:' through '4:'. Post-rehash, more bucket lines appear (the new capacity is at least 7, since testAddAndRawStringRehash already asserts a '6:' line exists).",
-      "If your test fails on the pre-rehash assertion, your add() may already be growing the table too eagerly (e.g., growing on the 10th item instead of the 11th). The rule is: the *11th* item triggers the rehash, because adding it is what would push λ above 2."
+      "Add a private int field initialized to 0 — e.g. `private int mRehashCount = 0;` — and a one-line public getter that returns it. The field tracks lifetime rehash count, not the count since the last clear().",
+      "Increment the field inside the branch that actually grows the array (your resize / rehash helper). Don't increment on every add() — only on the adds that crossed the lambda threshold and triggered a grow.",
+      "If the second assertion fails with a count of 0, your resize branch isn't running on the 11th add — re-read your threshold check. If it fails with 2, you may be calling resize from inside resize (e.g. recursive add during re-bucketing) — re-bucket directly into the new array instead of going through add()."
     ]
   }
 ]

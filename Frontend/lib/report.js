@@ -112,9 +112,12 @@ function dedupByPrimaryConcept(drills, conceptWeights) {
       (conceptWeights?.[c] ?? 0) > (conceptWeights?.[bestCat] ?? 0) ? c : bestCat
     , cats[0]);
     const existing = best.get(primaryCat);
-    if (!existing || d._matchWeight > existing._matchWeight) {
-      best.set(primaryCat, d);
-    }
+    if (!existing) { best.set(primaryCat, d); continue; }
+    // Prefer real drills over review-only when they share a primary concept,
+    // regardless of matchWeight. Otherwise tiebreak by matchWeight.
+    if (existing._reviewOnly && !d._reviewOnly) { best.set(primaryCat, d); continue; }
+    if (!existing._reviewOnly && d._reviewOnly) continue;
+    if (d._matchWeight > existing._matchWeight) best.set(primaryCat, d);
   }
   return [...best.values()];
 }
@@ -163,7 +166,15 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
   for (const fb of feedbackItems) {
     const categories = resolveCategories(fb.testId, testToCategories);
     const drill = fb.drills?.[0] || null;
-    const time = estimateTime(drill);
+    const courseApps = fb.courseAppearances || [];
+    // If the LLM couldn't produce a drill AND there are no course-appearance
+    // links to fall back on, the row would be visually empty — skip it. The
+    // pattern is still visible in the interactive feedback site via frontend.json.
+    // Otherwise we'll synthesize a "concept review" entry below: same row in the
+    // report, but no fake practice time and no testCode.
+    if (!drill && courseApps.length === 0) continue;
+    const reviewOnly = !drill;
+    const time = reviewOnly ? 0 : estimateTime(drill);
 
     if (assessmentConfig?.assessments) {
       for (const aCfg of assessmentConfig.assessments) {
@@ -201,12 +212,16 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         const nonSolutionCa = caForAssmt.filter(ca => !ca.url?.toLowerCase().includes('solution'));
         const sourceUrl   = drill?.sourceUrl   || nonSolutionCa[0]?.url   || null;
         const sourceLabel = drill?.sourceLabel  || nonSolutionCa[0]?.label || null;
-        const drillIntro  = drill?.intro        || null;
+        // For review-only rows, fall back to the course-appearance description so
+        // the student sees *why* the concept matters, not just a bare link.
+        const drillIntro = drill?.intro
+          || (reviewOnly ? (nonSolutionCa[0]?.description || categoryDescriptions[categories[0]] || null) : null);
 
         // Store internal tracking fields for dedup; stripped below
         entry.drills.push({
           _categories: categories,
           _matchWeight: matchWeight,
+          _reviewOnly: reviewOnly,
           _extraLinks: caForAssmt
             .filter(ca => ca.url && !ca.url.toLowerCase().includes('solution'))
             .map(ca => ({ url: ca.url, label: ca.label })),
@@ -218,6 +233,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           source_url: sourceUrl,
           source_label: sourceLabel,
           drill_intro: drillIntro,
+          review_only: reviewOnly,
         });
       }
     } else {
@@ -346,12 +362,15 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     }
   }
 
-  // Unique drill count and total time (deduplicated by pattern_name across all assessments)
+  // Unique drill count and total time (deduplicated by pattern_name across all assessments).
+  // Review-only entries are excluded — they're concept-review surfacings, not practice drills,
+  // so the headline "X drills, ~Y min" reflects only items the student can actually work on.
   const seen = new Set();
   let totalUniqueDrills = 0;
   let totalTime = 0;
   for (const a of sortedAssessments) {
     for (const d of a.drills) {
+      if (d.review_only) continue;
       if (!seen.has(d.pattern_name)) {
         seen.add(d.pattern_name);
         totalUniqueDrills++;
@@ -360,7 +379,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     }
   }
   if (assessmentMap.has('__none__')) {
-    const noneDrills = assessmentMap.get('__none__').drills;
+    const noneDrills = assessmentMap.get('__none__').drills.filter(d => !d.review_only);
     totalUniqueDrills = noneDrills.length;
     totalTime = noneDrills.reduce((s, d) => s + d.time_min, 0);
   }

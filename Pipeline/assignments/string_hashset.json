@@ -54,7 +54,18 @@
       {
         "concept": "Iterator across an array of chained buckets",
         "testCategories": ["iterator", "iterator_edge_cases"],
-        "futureAppearances": []
+        "futureAppearances": [
+          {
+            "label": "java.util.Iterator contract",
+            "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Iterator.html",
+            "description": "Every iterator you write — for hash sets, EditorTrees, graphs — must satisfy the same hasNext()/next()/NoSuchElementException contract this interface specifies. Re-reading the docs after a failing iterator test usually surfaces the rule that was violated."
+          },
+          {
+            "label": "ConcurrentModificationException — fail-fast iterators",
+            "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/ConcurrentModificationException.html",
+            "description": "The modCount/expectedModCount pattern that detects mutation during iteration recurs in every mutable collection you'll write. Your CME tests are checking that pattern — if they fail, the fix is structural, not a one-off."
+          }
+        ]
       },
       {
         "concept": "Removing an element from a chained bucket",

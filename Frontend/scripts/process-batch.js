@@ -66,32 +66,65 @@ if (students.length === 0) {
 }
 console.log(`Processing ${students.length} student(s) — ${assignment} (${displayName})\n`);
 
+// Optional rerun deps directory. If RERUN_DEPS_DIR is set in .env (or as an env var),
+// process-batch will run the rerun command between ingest and prepare so prepare gets
+// enriched_runs/ (stack traces, exception types, per-test durations). This produces
+// markedly higher-quality LLM feedback than --allow-basic-fallback. The directory must
+// contain the JUnit/jackson/etc. jars matching the assignment's testSupport runtime —
+// for HW7, that's the dir produced by unzipping stringhashset-202630.zip.
+const RERUN_DEPS_DIR = process.env.RERUN_DEPS_DIR
+  ? path.resolve(process.env.RERUN_DEPS_DIR)
+  : null;
+
 function runPipelineForStudent(studentId) {
   return new Promise((resolve, reject) => {
     const tarDir    = path.join(tarsDir, studentId);
     const outputDir = path.join(DATA_DIR, assignment, 'output', studentId);
     fs.mkdirSync(outputDir, { recursive: true });
 
+    const onPrepareDone = (err2, _o2, stderr2) => {
+      if (err2) return reject(new Error(`prepare: ${(stderr2 || err2.message).slice(0, 300)}`));
+      resolve();
+    };
+
+    const startPrepare = () => {
+      const assignmentConfigPath  = path.join(ASSIGNMENTS_DIR, `${assignment}.json`);
+      const assessmentCalendarPath = path.join(ASSIGNMENTS_DIR, `${assignment}_assessment_config.json`);
+      const enrichedDirExists = fs.existsSync(path.join(outputDir, 'enriched_runs'));
+      const prepareArgs = ['-jar', PIPELINE_JAR, 'prepare',
+        '-i', outputDir, '-o', path.join(outputDir, 'frontend.json'),
+        '--assignment-name', displayName, '--student-id', studentId,
+        '--cache-dir', LLM_CACHE_DIR];
+      // Only allow basic fallback when rerun didn't produce enriched_runs/ — otherwise
+      // we'd silently lose the enrichment we just generated.
+      if (!enrichedDirExists) prepareArgs.push('--allow-basic-fallback');
+      if (fs.existsSync(assignmentConfigPath)) {
+        prepareArgs.push('--assignment-config', assignmentConfigPath);
+      }
+      if (fs.existsSync(assessmentCalendarPath)) {
+        prepareArgs.push('--assessment-calendar', assessmentCalendarPath);
+      }
+      execFile('java', prepareArgs, { timeout: 0, cwd: REPO_ROOT }, onPrepareDone);
+    };
+
     execFile('java', ['-jar', PIPELINE_JAR, 'ingest', '-i', tarDir, '-o', outputDir],
       { timeout: 120_000, cwd: REPO_ROOT }, (err, _o, stderr) => {
         if (err) return reject(new Error(`ingest: ${(stderr || err.message).slice(0, 300)}`));
-        const assignmentConfigPath  = path.join(ASSIGNMENTS_DIR, `${assignment}.json`);
-        const assessmentCalendarPath = path.join(ASSIGNMENTS_DIR, `${assignment}_assessment_config.json`);
-        const prepareArgs = ['-jar', PIPELINE_JAR, 'prepare',
-          '-i', outputDir, '-o', path.join(outputDir, 'frontend.json'),
-          '--assignment-name', displayName, '--student-id', studentId,
-          '--cache-dir', LLM_CACHE_DIR, '--allow-basic-fallback'];
-        if (fs.existsSync(assignmentConfigPath)) {
-          prepareArgs.push('--assignment-config', assignmentConfigPath);
+
+        if (RERUN_DEPS_DIR && fs.existsSync(RERUN_DEPS_DIR)) {
+          execFile('java', ['-jar', PIPELINE_JAR, 'rerun',
+              '-i', outputDir, '-o', outputDir, '--deps', RERUN_DEPS_DIR],
+            { timeout: 600_000, cwd: REPO_ROOT }, (errR, _oR, stderrR) => {
+              if (errR) {
+                // Don't hard-fail the whole student on rerun failure — fall back to basic prepare
+                // and let the warning be visible in the batch log.
+                console.warn(`  ⚠  ${studentId} rerun failed (${(stderrR || errR.message).slice(0, 200)}); continuing with --allow-basic-fallback`);
+              }
+              startPrepare();
+            });
+        } else {
+          startPrepare();
         }
-        if (fs.existsSync(assessmentCalendarPath)) {
-          prepareArgs.push('--assessment-calendar', assessmentCalendarPath);
-        }
-        execFile('java', prepareArgs,
-          { timeout: 0, cwd: REPO_ROOT }, (err2, _o2, stderr2) => {
-            if (err2) return reject(new Error(`prepare: ${(stderr2 || err2.message).slice(0, 300)}`));
-            resolve();
-          });
       });
   });
 }
