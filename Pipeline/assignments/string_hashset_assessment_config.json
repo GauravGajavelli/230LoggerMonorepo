@@ -11,10 +11,9 @@
       "type": "exam",
       "grade_weight": 0.10,
       "concept_weights": {
-        "hashing": 0.40,
-        "rehash": 0.30,
-        "add":     0.20,
-        "contains": 0.10
+        "hashing": 0.04,
+        "rehash":  0.06,
+        "add":     0.03
       },
       "resources": [
         { "url": "Exams/Exam 3/Exam3-202320.md", "label": "Exam 3 — 2023 questions (non-solution)" },
@@ -30,9 +29,8 @@
       "type": "exam",
       "grade_weight": 0.15,
       "concept_weights": {
-        "hashing": 0.25,
-        "rehash":  0.15,
-        "iterator": 0.10
+        "hashing": 0.03,
+        "rehash":  0.02
       },
       "resources": [
         { "url": "Exams/Final Exam/PracticeFinalExam.pdf", "label": "Practice Final Exam" }
