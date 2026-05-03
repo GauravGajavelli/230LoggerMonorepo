@@ -102,10 +102,17 @@ function resolveCategories(testId, testToCategories) {
  * Deduplicates drills within an assessment entry so concept percentages are mutually exclusive.
  * Each drill's "primary concept" = the category with the highest concept_weight for this assessment.
  * Among drills sharing the same primary concept, keep only the one with the highest matchWeight.
+ *
+ * Orphan drills (_orphan: true) bypass dedup entirely — they don't address any concept the
+ * upcoming exam tests, so they aren't competing for an exam-coverage slot. Each represents a
+ * distinct failing test the student should still see as practice. Bucketing them together
+ * by primary concept would silently hide N-1 of N iterator failures (mirandac's case).
  */
 function dedupByPrimaryConcept(drills, conceptWeights) {
   const best = new Map(); // primaryCat → drill entry
+  const orphans = [];
   for (const d of drills) {
+    if (d._orphan) { orphans.push(d); continue; }
     const cats = d._categories || [];
     if (cats.length === 0) continue;
     const primaryCat = cats.reduce((bestCat, c) =>
@@ -119,7 +126,7 @@ function dedupByPrimaryConcept(drills, conceptWeights) {
     if (!existing._reviewOnly && d._reviewOnly) continue;
     if (d._matchWeight > existing._matchWeight) best.set(primaryCat, d);
   }
-  return [...best.values()];
+  return [...best.values(), ...orphans];
 }
 
 export async function generateReport(studentId, assignment, dataDir, baseUrl) {
@@ -167,12 +174,15 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     const categories = resolveCategories(fb.testId, testToCategories);
     const drill = fb.drills?.[0] || null;
     const courseApps = fb.courseAppearances || [];
-    // If the LLM couldn't produce a drill AND there are no course-appearance
-    // links to fall back on, the row would be visually empty — skip it. The
-    // pattern is still visible in the interactive feedback site via frontend.json.
-    // Otherwise we'll synthesize a "concept review" entry below: same row in the
-    // report, but no fake practice time and no testCode.
-    if (!drill && courseApps.length === 0) continue;
+    // No early skip: if the LLM couldn't produce a drill, we still want a
+    // concept-review row to surface — provided the concept appears in some
+    // upcoming assessment's concept_weights (matchWeight check below filters
+    // for that). The user's rule was "pad with concept-review entries if it'll
+    // actually help on the test" — the matchWeight filter is what enforces the
+    // "help on the test" half. Items with no drill AND no concept on the test
+    // fall through both the inner loop (matchWeight=0 everywhere) and the
+    // orphan fallback (orphans require drill !== null) — silently skipped, the
+    // pattern is still visible on the interactive feedback site.
     const reviewOnly = !drill;
     const time = reviewOnly ? 0 : estimateTime(drill);
 
@@ -212,8 +222,22 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         // Also exclude solution files from courseAppearances — they should not be linked
         // as the primary source for a drill (LLM sometimes references solution URLs).
         const nonSolutionCa = caForAssmt.filter(ca => !ca.url?.toLowerCase().includes('solution'));
-        const sourceUrl   = drill?.sourceUrl   || nonSolutionCa[0]?.url   || null;
-        const sourceLabel = drill?.sourceLabel  || nonSolutionCa[0]?.label || null;
+        // For review-only rows the source URL falls back through three layers:
+        // (1) the drill's own sourceUrl, (2) a non-solution courseAppearance for
+        // this assessment, (3) the assessment's own resources (e.g. practice exam
+        // zip). Layer 3 is what makes the concept-review row useful for failures
+        // in concepts that have no curated courseAppearance — the student still
+        // gets *something* to click on that's relevant to the upcoming exam.
+        const firstNonSolutionResource = (aCfg.resources || [])
+          .find(r => r.url && !r.url.toLowerCase().includes('solution'));
+        const sourceUrl = drill?.sourceUrl
+          || nonSolutionCa[0]?.url
+          || firstNonSolutionResource?.url
+          || null;
+        const sourceLabel = drill?.sourceLabel
+          || nonSolutionCa[0]?.label
+          || firstNonSolutionResource?.label
+          || null;
         // For review-only rows, fall back to the course-appearance description so
         // the student sees *why* the concept matters, not just a bare link.
         const drillIntro = drill?.intro

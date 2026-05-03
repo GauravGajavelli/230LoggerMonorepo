@@ -231,12 +231,19 @@ public class PracticeDrillService {
         // When no assessment calendar is available, any category-matching drill scores 1.0
         // so the first match wins (original behaviour).
         LocalDate today = LocalDate.now();
+        // Match strictly on the drill's author-declared categories (the JSON's
+        // `categories` field). The LLM-derived drillCategoryMap is supplementary
+        // for ranking only — using it as a *filter* led to drills being matched
+        // to failing tests whose category had no overlap with the drill's
+        // intended concepts (e.g. an iterator-failing test pulling the
+        // numCollidedEntries drill because the LLM thought "bucket-walking is
+        // iterator-like"). The result was drill cards with a pattern title
+        // about iterators and a body about chain counting — confusing.
         DrillQuestion match = drillQuestions.stream()
             .filter(q -> !usedIds.contains(q.id()))
             .filter(q -> {
-                List<String> effective = drillCategoryMap.getOrDefault(
-                    q.id(), q.categories() != null ? q.categories() : List.of());
-                return effective.stream().anyMatch(categories::contains);
+                List<String> staticCats = q.categories() != null ? q.categories() : List.of();
+                return staticCats.stream().anyMatch(categories::contains);
             })
             .max(Comparator.comparingDouble(q ->
                 scoreDrill(q, drillCategoryMap, assessmentCalendar, today)))
