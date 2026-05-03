@@ -23,10 +23,16 @@ import { generateReport, generateReportForToken, generateGenericReport } from '.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT  = path.resolve(__dirname, '..', '..');
 
-const [assignment, ...students] = process.argv.slice(2);
+const rawArgs = process.argv.slice(2);
+const clearCache = rawArgs.includes('--clear-cache');
+const positional = rawArgs.filter(a => !a.startsWith('--'));
+const [assignment, ...students] = positional;
 
 if (!assignment || students.length === 0) {
-  console.error('Usage: node scripts/reprocess-students.js <assignment> <student_id> [...]');
+  console.error('Usage: node scripts/reprocess-students.js <assignment> <student_id> [...] [--clear-cache]');
+  console.error('  --clear-cache  Wipe Pipeline/cache/llm before reprocessing. Use after a Pipeline');
+  console.error('                 code/prompt change so the new logic actually runs (otherwise prepare');
+  console.error('                 reuses cached LLM responses and your fix has no visible effect).');
   process.exit(1);
 }
 
@@ -39,6 +45,18 @@ const ASSIGNMENTS_DIR = path.resolve(path.join(__dirname, '..', '..', 'Pipeline'
 if (!fs.existsSync(PIPELINE_JAR)) {
   console.error(`ERROR: Pipeline JAR not found: ${PIPELINE_JAR}`);
   process.exit(1);
+}
+
+// One-time cache wipe (not per-student) when --clear-cache is passed. Avoids
+// the bug where prepare's --clear-cache flag wipes the cache before each
+// student's run — that would re-wipe entries the previous student just cached
+// and double-charge for shared LLM calls (drill_category_map, etc.).
+if (clearCache && fs.existsSync(LLM_CACHE_DIR)) {
+  const entries = fs.readdirSync(LLM_CACHE_DIR);
+  for (const e of entries) {
+    fs.rmSync(path.join(LLM_CACHE_DIR, e), { recursive: true, force: true });
+  }
+  console.log(`[clear-cache] Removed ${entries.length} entr${entries.length === 1 ? 'y' : 'ies'} from ${LLM_CACHE_DIR}`);
 }
 
 function runPipelineForStudent(studentId) {
