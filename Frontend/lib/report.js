@@ -292,6 +292,39 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           review_only: false,
         });
       }
+
+      // Review-only-orphan fallback: feedback item with no drill, no concept on
+      // any upcoming assessment — but courseAppearances (e.g. Java API docs) DO
+      // exist and are non-circular. Without this path, mirandac's iterator
+      // failures showed nothing at all after the strict-bank-match fix dropped
+      // the cross-concept matches and the LLM couldn't generate passable
+      // iterator drills. Render as a concept-review card with the Java-docs
+      // link as the source.
+      if (!pushedToAny && reviewOnly && firstEligibleAssmt && courseApps.length > 0) {
+        const nonSolutionCa = courseApps.filter(ca => !ca.url?.toLowerCase().includes('solution'));
+        if (nonSolutionCa.length > 0) {
+          if (!assessmentMap.has(firstEligibleAssmt.id)) {
+            assessmentMap.set(firstEligibleAssmt.id, { config: firstEligibleAssmt, drills: [], rawOverlap: 0 });
+          }
+          const entry = assessmentMap.get(firstEligibleAssmt.id);
+          entry.drills.push({
+            _categories: categories,
+            _matchWeight: 0,
+            _reviewOnly: true,
+            _orphan: true,
+            _extraLinks: nonSolutionCa.slice(1).map(ca => ({ url: ca.url, label: ca.label })),
+            pattern_name: patternName(fb),
+            time_min: 0,
+            test_names: testNames(fb),
+            drill_anchor: null,
+            source: null,
+            source_url: nonSolutionCa[0].url,
+            source_label: nonSolutionCa[0].label,
+            drill_intro: nonSolutionCa[0].description || categoryDescriptions[categories[0]] || null,
+            review_only: true,
+          });
+        }
+      }
     } else {
       // No assessment config — collect drills under a synthetic "no-assessment" entry
       if (!assessmentMap.has('__none__')) {
