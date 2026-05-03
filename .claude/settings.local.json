@@ -61,7 +61,8 @@
       "Bash(unzip -p \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Exam 3/Exam3-practice.zip\" \"Exam3-practice/Exam3Practice/src/numcollided/StringHashSetTest.java\")",
       "Bash(node --check lib/report.js)",
       "Bash(node --check /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/scripts/reprocess-students.js)",
-      "Bash(node --check /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/lib/report.js)"
+      "Bash(node --check /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/lib/report.js)",
+      "Bash(node --check lib/reportTemplate.js)"
     ]
   }
 }

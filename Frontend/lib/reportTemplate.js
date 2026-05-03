@@ -121,7 +121,12 @@ function renderExamDrillSection(drill, assessment, num, feedbackUrl) {
 
   const introText = drill.drill_intro ? sanitize(drill.drill_intro) : null;
 
-  const metaLine = `~${drill.time_min} min · ~${drill.weight_pct}% of ${assessment.type === 'exam' ? 'exam' : 'HW'}`;
+  // Review-only rows are concept-review surfacings, not timed practice drills.
+  // Showing "~0 min · ~0% of exam" reads as a placeholder; "Concept review" is the
+  // honest label and tells the student this is reading material, not a coding task.
+  const metaLine = drill.review_only
+    ? `Concept review`
+    : `~${drill.time_min} min · ~${drill.weight_pct}% of ${assessment.type === 'exam' ? 'exam' : 'HW'}`;
 
   let linksHtml = '';
   if (drill.source_url) {

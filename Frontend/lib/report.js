@@ -410,9 +410,18 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     .filter(([id]) => id !== '__none__')
     .map(([, entry]) => {
       const a = entry.config;
-      // Sort drills: time asc (all are already deduplicated by concept)
+      // Sort drills: real (actionable) drills first, then review-only rows;
+      // within each group sort by time ascending. This keeps the column's drill_cap
+      // (default 3) from hiding the only real drill behind several review-only rows
+      // that all have time_min=0 — neawedba's case where the rehash drill was
+      // overflow-cut by three iterator concept-review rows.
       const drills = entry.drills
-        .sort((x, y) => x.time_min - y.time_min);
+        .sort((x, y) => {
+          const xReview = x.review_only ? 1 : 0;
+          const yReview = y.review_only ? 1 : 0;
+          if (xReview !== yReview) return xReview - yReview;
+          return x.time_min - y.time_min;
+        });
       const totalTime = drills.reduce((s, d) => s + d.time_min, 0);
       // overlap_pct: sum of surviving drill weights, capped at 100. Defensive
       // against non-numeric rawOverlap so the rendered text never contains "null%".
