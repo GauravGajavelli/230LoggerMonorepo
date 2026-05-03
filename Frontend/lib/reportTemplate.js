@@ -109,15 +109,25 @@ function renderAssessmentTable(allAssessments, drillCap = 3) {
         `</div>`
       : '';
 
-    // Strip-row count must reflect what's actually printed in the column body —
-    // drillCap caps the visible cards at (default) 3. Showing the raw drill_count
-    // here (e.g. "5 drills") while only 3 cards are rendered below caused a
-    // confusing "where are the other 2?" mismatch in neawedba's PDF.
-    const visibleCount = Math.min(a.drill_count, drillCap);
-    const overflowSuffix = a.drill_count > drillCap ? ` (+${a.drill_count - drillCap} more)` : '';
-    const drillText = visibleCount > 0
-      ? `${visibleCount} drill${visibleCount !== 1 ? 's' : ''} · ${a.total_time} min${overflowSuffix}`
-      : '—';
+    // Strip-row count must reflect what's actually printed in the column body
+    // (drillCap-capped) AND distinguish real drills from concept reviews — both
+    // were being labeled "drills" before, so a row like baileyjn's "5 drills"
+    // hid that 3 of the 5 were review-only links with no testCode.
+    const visibleDrills = (a.drills || []).slice(0, drillCap);
+    const visReal   = visibleDrills.filter(d => !d.review_only).length;
+    const visReview = visibleDrills.filter(d =>  d.review_only).length;
+    const overflowCount = a.drill_count - visibleDrills.length;
+    const overflowSuffix = overflowCount > 0 ? ` (+${overflowCount} more)` : '';
+    let drillText;
+    if (a.drill_count === 0) {
+      drillText = '—';
+    } else {
+      const parts = [];
+      if (visReal > 0)   parts.push(`${visReal} drill${visReal !== 1 ? 's' : ''}`);
+      if (visReview > 0) parts.push(`${visReview} review${visReview !== 1 ? 's' : ''}`);
+      if (visReal > 0)   parts.push(`${a.total_time} min`);  // omit "0 min" when only reviews
+      drillText = parts.join(' · ') + overflowSuffix;
+    }
 
     const daysText = a.days_left > 0 ? timeDisplay(a.days_left) : '';
 
@@ -318,12 +328,33 @@ export function renderReportHtml(reportData, feedbackUrl) {
     exam_assessments,
     hw_assessments,
     total_unique_drills,
+    total_review_concepts,
     total_time,
     generated_at,
     review_video_url,
     generic,
     drill_cap,
   } = reportData;
+  const totalReviews = total_review_concepts ?? 0;
+
+  // Adaptive footer/strip summary: real drills and concept reviews are different
+  // *kinds* of items and shouldn't share a "drills" label. Composes to:
+  //   "2 drills · 3 concept reviews · 17 min total"   (mixed, baileyjn)
+  //   "1 drill · 12 min total"                        (no reviews)
+  //   "2 concept reviews"                             (review-only, mirandac — no time stat)
+  //   "5 topics · 22 min total"                       (generic flow, untouched)
+  function summaryText(real, reviews, timeMin, isGeneric) {
+    if (isGeneric) {
+      const t = real + reviews;
+      return `${t} topic${t !== 1 ? 's' : ''} · ${timeMin} min total`;
+    }
+    const parts = [];
+    if (real > 0)    parts.push(`${real} drill${real !== 1 ? 's' : ''}`);
+    if (reviews > 0) parts.push(`${reviews} concept review${reviews !== 1 ? 's' : ''}`);
+    if (parts.length === 0) return `0 drills · 0 min total`;
+    if (real > 0) parts.push(`${timeMin} min total`);
+    return parts.join(' · ');
+  }
 
   const generatedDate = generated_at ? generated_at.slice(0, 10) : '';
 
@@ -652,7 +683,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
 <div class="main-content">
 <div class="sys-label">CSSE 230 Debugging Feedback</div>
 <div class="assignment-name">${escHtml(assignment.full_name)}</div>
-${total_unique_drills === 0
+${total_unique_drills === 0 && totalReviews === 0
   ? `<div class="framing">No persistent debugging patterns were detected in your submission. This may mean your test run history shows no repeated failures, or that your submission did not include enough run data to identify patterns. Open the feedback site for details.</div>
 <hr class="header-rule">`
   : `<div class="framing">${framingSentence}</div>
@@ -667,7 +698,7 @@ ${drillSheetHtml}`}
 
 <div class="footer">
   <div class="footer-summary">
-    <span>${total_unique_drills} ${generic ? 'topic' : 'drill'}${total_unique_drills !== 1 ? 's' : ''} · ${total_time} min total</span>
+    <span>${summaryText(total_unique_drills, totalReviews, total_time, generic)}</span>
     ${generatedDate ? `<span style="font-size:9px;color:var(--text-tertiary)">Generated ${escHtml(generatedDate)}</span>` : ''}
   </div>
   <a class="footer-link" href="${escHtml(feedbackUrl)}">Open full feedback site &rsaquo;</a>

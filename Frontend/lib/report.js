@@ -474,20 +474,31 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     }
   }
 
-  // Row count and total time across all assessments, deduplicated by pattern_name.
-  // Review-only rows ARE counted as items so the renderer's "no content" empty-state
-  // check (total_unique_drills === 0 in reportTemplate.js) doesn't fire when concept-
-  // review rows are the only thing the student has. Their time_min is 0, so they
-  // contribute to the count without inflating "Y min". Footer reads as "1 drill · 0 min"
-  // for a pure review-only case — slightly imprecise wording but better than a misleading
-  // empty state that hides the row sitting right there in the JSON.
-  const seen = new Set();
-  let totalUniqueDrills = 0;
+  // Per-row totals. Dedup key = pattern_name + test_names[0] so each *failing
+  // test* counts once even if it surfaces under multiple assessment columns,
+  // but separate failing tests with the same LLM-emitted pattern_name (e.g.
+  // neawedba's three iterator failures all named "Iterator method returns
+  // null, never implemented") count distinctly. Real drills and concept
+  // reviews are tracked separately so the footer/strip can label them
+  // accurately rather than calling everything "drills."
+  //
+  // The empty-state branch in reportTemplate.js triggers only when BOTH counts
+  // are zero, so review-only-only students still get a populated report.
+  const seenReal = new Set();
+  const seenReview = new Set();
+  const rowKey = d => `${d.pattern_name}\u241F${d.test_names?.[0] || ''}`;
+  let totalUniqueDrills = 0;       // real, deduped by (pattern_name, test_names[0])
+  let totalReviewConcepts = 0;     // review-only, same dedup key
   let totalTime = 0;
   for (const a of sortedAssessments) {
     for (const d of a.drills) {
-      if (!seen.has(d.pattern_name)) {
-        seen.add(d.pattern_name);
+      const set = d.review_only ? seenReview : seenReal;
+      const key = rowKey(d);
+      if (set.has(key)) continue;
+      set.add(key);
+      if (d.review_only) {
+        totalReviewConcepts++;
+      } else {
         totalUniqueDrills++;
         totalTime += d.time_min;
       }
@@ -495,8 +506,11 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
   }
   if (assessmentMap.has('__none__')) {
     const noneDrills = assessmentMap.get('__none__').drills;
-    totalUniqueDrills = noneDrills.length;
-    totalTime = noneDrills.reduce((s, d) => s + d.time_min, 0);
+    totalUniqueDrills   = noneDrills.filter(d => !d.review_only).length;
+    totalReviewConcepts = noneDrills.filter(d =>  d.review_only).length;
+    totalTime           = noneDrills
+      .filter(d => !d.review_only)
+      .reduce((s, d) => s + d.time_min, 0);
   }
 
   // Split into exam and hw zones for the two-zone report layout
@@ -510,6 +524,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     exam_assessments: assessmentMap.has('__none__') ? [] : examAssessments,
     hw_assessments:   assessmentMap.has('__none__') ? [] : hwAssessments,
     total_unique_drills: totalUniqueDrills,
+    total_review_concepts: totalReviewConcepts,
     total_time: totalTime,
     generated_at: new Date().toISOString(),
     review_video_url: reviewVideoUrl && reviewVideoUrl.length > 0 ? reviewVideoUrl : null,
@@ -708,6 +723,8 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     exam_assessments: assessmentEntries.filter(a => a.type === 'exam'),
     hw_assessments:   assessmentEntries.filter(a => a.type !== 'exam'),
     total_unique_drills: totalUniqueDrills,
+    // Generic reports never have review-only rows — they curate bank drills only
+    total_review_concepts: 0,
     total_time: totalTime,
     generated_at: now.toISOString(),
     review_video_url: reviewVideoUrl && reviewVideoUrl.length > 0 ? reviewVideoUrl : null,
