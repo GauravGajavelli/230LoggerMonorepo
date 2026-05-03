@@ -65,9 +65,25 @@ function encodeStudyPath(rawPath) {
 
 // Returns the appropriate URL for a study material file.
 // .md files go through the /view renderer; PDFs and other files served directly.
-function studyMaterialUrl(rawPath, baseUrl) {
+// Absolute URLs (http://, https://) route through /external?token=...&url=...
+// so the click is logged in the events table before redirecting to the
+// destination. The token is extracted from baseUrl (the per-student feedback
+// URL) so the click attribution stays per-student.
+function studyMaterialUrl(rawPath, baseUrl, label) {
+  if (typeof rawPath !== 'string') return '';
   let origin = '';
-  try { origin = new URL(baseUrl).origin; } catch {}
+  let token = '';
+  try {
+    const u = new URL(baseUrl);
+    origin = u.origin;
+    token = u.searchParams.get('token') || '';
+  } catch {}
+  if (/^https?:\/\//i.test(rawPath)) {
+    if (!token) return rawPath; // Best-effort fallback: no token, no tracking.
+    const params = new URLSearchParams({ token, url: rawPath });
+    if (label) params.set('label', String(label).slice(0, 200));
+    return `${origin}/external?${params.toString()}`;
+  }
   if (rawPath.endsWith('.md')) {
     return `${origin}/view?file=${encodeURIComponent(rawPath)}`;
   }
@@ -75,7 +91,7 @@ function studyMaterialUrl(rawPath, baseUrl) {
 }
 
 // Compact assessment table strip — all assessments in one table
-function renderAssessmentTable(allAssessments) {
+function renderAssessmentTable(allAssessments, drillCap = 3) {
   if (!allAssessments || allAssessments.length === 0) return '';
   const rows = allAssessments.map(a => {
     const isExam = a.type === 'exam';
@@ -93,8 +109,14 @@ function renderAssessmentTable(allAssessments) {
         `</div>`
       : '';
 
-    const drillText = a.drill_count > 0
-      ? `${a.drill_count} drill${a.drill_count !== 1 ? 's' : ''} · ${a.total_time} min`
+    // Strip-row count must reflect what's actually printed in the column body —
+    // drillCap caps the visible cards at (default) 3. Showing the raw drill_count
+    // here (e.g. "5 drills") while only 3 cards are rendered below caused a
+    // confusing "where are the other 2?" mismatch in neawedba's PDF.
+    const visibleCount = Math.min(a.drill_count, drillCap);
+    const overflowSuffix = a.drill_count > drillCap ? ` (+${a.drill_count - drillCap} more)` : '';
+    const drillText = visibleCount > 0
+      ? `${visibleCount} drill${visibleCount !== 1 ? 's' : ''} · ${a.total_time} min${overflowSuffix}`
       : '—';
 
     const daysText = a.days_left > 0 ? timeDisplay(a.days_left) : '';
@@ -130,8 +152,8 @@ function renderExamDrillSection(drill, assessment, num, feedbackUrl) {
 
   let linksHtml = '';
   if (drill.source_url) {
-    const href = studyMaterialUrl(drill.source_url, feedbackUrl);
     const label = drill.source_label || drill.source || 'source';
+    const href = studyMaterialUrl(drill.source_url, feedbackUrl, label);
     linksHtml += `<a class="drill-link" href="${escHtml(href)}" target="_blank">${escHtml(label)} &rsaquo;</a>`;
   } else if (drill.source && drill.source !== 'Practice') {
     // Has a named source but no linkable file — show provenance as plain text
@@ -160,7 +182,7 @@ function renderAlsoOnExam(assessment, feedbackUrl, generic = false) {
     // For generic reports, skip the student-specific coverage text — just show resource links.
     if (allLinks.length === 0) return '';
     const linksHtml = allLinks.map(lk => {
-      const href = studyMaterialUrl(lk.url, feedbackUrl);
+      const href = studyMaterialUrl(lk.url, feedbackUrl, lk.label);
       return `<a class="exam-also-link" href="${escHtml(href)}" target="_blank">${escHtml(lk.label)} &rsaquo;</a>`;
     }).join(' ');
     return `
@@ -262,7 +284,7 @@ function renderDrillSheet(reportData, feedbackUrl) {
     if (drill.weight_pct) metaParts.push(`~${drill.weight_pct}% of ${focalAssessment.type === 'exam' ? 'exam' : 'HW'}`);
 
     const sourceLinkHtml = drill.source_url
-      ? `<div class="drill-card-target"><a href="${escHtml(studyMaterialUrl(drill.source_url, feedbackUrl))}" target="_blank" style="color:var(--text-secondary);text-decoration:none;">${escHtml(drill.source_label || drill.source || 'Source')} &rsaquo;</a></div>`
+      ? `<div class="drill-card-target"><a href="${escHtml(studyMaterialUrl(drill.source_url, feedbackUrl, drill.source_label || drill.source || 'Source'))}" target="_blank" style="color:var(--text-secondary);text-decoration:none;">${escHtml(drill.source_label || drill.source || 'Source')} &rsaquo;</a></div>`
       : '';
     const codeHtml = drill.test_code
       ? `<pre class="drill-code">${escHtml(drill.test_code)}</pre>` : '';
@@ -350,7 +372,7 @@ export function renderReportHtml(reportData, feedbackUrl) {
   }
 
   // Assessment table
-  const tableHtml = renderAssessmentTable(tableAssessments);
+  const tableHtml = renderAssessmentTable(tableAssessments, drill_cap ?? 3);
 
   // Focal exam drill column
   const examColumnHtml = focalAssessment

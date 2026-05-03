@@ -62,7 +62,11 @@
       "Bash(node --check lib/report.js)",
       "Bash(node --check /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/scripts/reprocess-students.js)",
       "Bash(node --check /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/lib/report.js)",
-      "Bash(node --check lib/reportTemplate.js)"
+      "Bash(node --check lib/reportTemplate.js)",
+      "Bash(node --check server.js)",
+      "Bash(mkdir -p /tmp/shs-diff/old /tmp/shs-diff/new)",
+      "Bash(unzip -o -q \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/redactedTars/allTar-StringHashSet-Sp2026-2May.zip\" -d /tmp/shs-diff/old/)",
+      "Bash(unzip -o -q \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/studentTars/allTar-StringHashSet-Sp2026-3May.zip\" -d /tmp/shs-diff/new/)"
     ]
   }
 }

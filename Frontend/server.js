@@ -88,6 +88,41 @@ app.use(express.static(DIST_DIR, { index: false }));
 const STUDY_MATERIALS_DIR = path.join(REPO_ROOT, 'Pipeline', 'testInputs', 'csse230');
 app.use('/study-materials', express.static(STUDY_MATERIALS_DIR));
 
+// External-link redirect — used for non-circular references that point at
+// public-internet documentation (Java API docs, Panopto videos, Moodle pages).
+// Logs a tracked click event before 302-ing, so engagement with these links
+// shows up in the events table just like clicks on locally-served materials.
+//
+// URL is gated by an allowlist of trusted domains so this endpoint cannot be
+// abused as an open redirect for phishing.
+const EXTERNAL_LINK_HOSTS = new Set([
+  'docs.oracle.com',
+  'moodle.rose-hulman.edu',
+  'rose-hulman.hosted.panopto.com',
+]);
+app.get('/external', (req, res) => {
+  const { token, url, label } = req.query;
+  if (!token || !url) return res.status(400).send('Missing token or url.');
+  const record = verifyToken(token);
+  if (!record) return res.status(403).send('Invalid token.');
+  let parsed;
+  try { parsed = new URL(url); } catch { return res.status(400).send('Malformed url.'); }
+  if (parsed.protocol !== 'https:' || !EXTERNAL_LINK_HOSTS.has(parsed.hostname)) {
+    return res.status(403).send('Destination not allowed.');
+  }
+  logEvents(token, [{
+    type: 'external_link_clicked',
+    data: {
+      url,
+      label: typeof label === 'string' ? label.slice(0, 200) : null,
+      host: parsed.hostname,
+      student_id: record.student_id,
+      assignment: record.assignment,
+    }
+  }]);
+  res.redirect(302, url);
+});
+
 // Markdown file viewer — renders .md files as styled HTML instead of raw text.
 // Only serves files inside STUDY_MATERIALS_DIR (path traversal protection).
 // PDFs and other files are served directly via the /study-materials static route.
