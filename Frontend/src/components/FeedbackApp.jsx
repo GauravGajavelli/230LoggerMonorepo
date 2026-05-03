@@ -289,8 +289,7 @@ export function FeedbackApp({ token }) {
         borderBottom: '1px solid rgba(0,0,0,0.12)',
       }}>
         <div
-          style={{ cursor: 'pointer', lineHeight: 1.2 }}
-          onClick={() => setView('list')}
+          style={{ lineHeight: 1.2 }}
         >
           <div style={{
             fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em',
