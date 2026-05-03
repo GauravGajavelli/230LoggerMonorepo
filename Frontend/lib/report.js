@@ -293,37 +293,41 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         });
       }
 
-      // Review-only-orphan fallback: feedback item with no drill, no concept on
-      // any upcoming assessment — but courseAppearances (e.g. Java API docs) DO
-      // exist and are non-circular. Without this path, mirandac's iterator
-      // failures showed nothing at all after the strict-bank-match fix dropped
-      // the cross-concept matches and the LLM couldn't generate passable
-      // iterator drills. Render as a concept-review card with the Java-docs
-      // link as the source.
-      if (!pushedToAny && reviewOnly && firstEligibleAssmt && courseApps.length > 0) {
+      // Review-only-orphan fallback: feedback item with no drill and no concept
+      // on any upcoming assessment. Surface as a concept-review card so the
+      // pattern doesn't silently disappear from the report. Source link tries
+      // courseAppearances first (Java docs etc.), then falls back to the closest
+      // assessment's own resources (practice exam zip etc.) so concepts without
+      // configured courseAppearances (toString, size, ...) still get a link.
+      if (!pushedToAny && reviewOnly && firstEligibleAssmt) {
         const nonSolutionCa = courseApps.filter(ca => !ca.url?.toLowerCase().includes('solution'));
-        if (nonSolutionCa.length > 0) {
-          if (!assessmentMap.has(firstEligibleAssmt.id)) {
-            assessmentMap.set(firstEligibleAssmt.id, { config: firstEligibleAssmt, drills: [], rawOverlap: 0 });
-          }
-          const entry = assessmentMap.get(firstEligibleAssmt.id);
-          entry.drills.push({
-            _categories: categories,
-            _matchWeight: 0,
-            _reviewOnly: true,
-            _orphan: true,
-            _extraLinks: nonSolutionCa.slice(1).map(ca => ({ url: ca.url, label: ca.label })),
-            pattern_name: patternName(fb),
-            time_min: 0,
-            test_names: testNames(fb),
-            drill_anchor: null,
-            source: null,
-            source_url: nonSolutionCa[0].url,
-            source_label: nonSolutionCa[0].label,
-            drill_intro: nonSolutionCa[0].description || categoryDescriptions[categories[0]] || null,
-            review_only: true,
-          });
+        const firstNonSolutionResource = (firstEligibleAssmt.resources || [])
+          .find(r => r.url && !r.url.toLowerCase().includes('solution'));
+        const sourceUrl   = nonSolutionCa[0]?.url   || firstNonSolutionResource?.url   || null;
+        const sourceLabel = nonSolutionCa[0]?.label || firstNonSolutionResource?.label || 'Review materials';
+        const intro = nonSolutionCa[0]?.description
+          || categoryDescriptions[categories[0]]
+          || `Review the test's expected behavior — we couldn't generate a curated practice problem for this pattern.`;
+        if (!assessmentMap.has(firstEligibleAssmt.id)) {
+          assessmentMap.set(firstEligibleAssmt.id, { config: firstEligibleAssmt, drills: [], rawOverlap: 0 });
         }
+        const entry = assessmentMap.get(firstEligibleAssmt.id);
+        entry.drills.push({
+          _categories: categories,
+          _matchWeight: 0,
+          _reviewOnly: true,
+          _orphan: true,
+          _extraLinks: nonSolutionCa.slice(1).map(ca => ({ url: ca.url, label: ca.label })),
+          pattern_name: patternName(fb),
+          time_min: 0,
+          test_names: testNames(fb),
+          drill_anchor: null,
+          source: null,
+          source_url: sourceUrl,
+          source_label: sourceLabel,
+          drill_intro: intro,
+          review_only: true,
+        });
       }
     } else {
       // No assessment config — collect drills under a synthetic "no-assessment" entry
@@ -461,15 +465,18 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     }
   }
 
-  // Unique drill count and total time (deduplicated by pattern_name across all assessments).
-  // Review-only entries are excluded — they're concept-review surfacings, not practice drills,
-  // so the headline "X drills, ~Y min" reflects only items the student can actually work on.
+  // Row count and total time across all assessments, deduplicated by pattern_name.
+  // Review-only rows ARE counted as items so the renderer's "no content" empty-state
+  // check (total_unique_drills === 0 in reportTemplate.js) doesn't fire when concept-
+  // review rows are the only thing the student has. Their time_min is 0, so they
+  // contribute to the count without inflating "Y min". Footer reads as "1 drill · 0 min"
+  // for a pure review-only case — slightly imprecise wording but better than a misleading
+  // empty state that hides the row sitting right there in the JSON.
   const seen = new Set();
   let totalUniqueDrills = 0;
   let totalTime = 0;
   for (const a of sortedAssessments) {
     for (const d of a.drills) {
-      if (d.review_only) continue;
       if (!seen.has(d.pattern_name)) {
         seen.add(d.pattern_name);
         totalUniqueDrills++;
@@ -478,7 +485,7 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     }
   }
   if (assessmentMap.has('__none__')) {
-    const noneDrills = assessmentMap.get('__none__').drills.filter(d => !d.review_only);
+    const noneDrills = assessmentMap.get('__none__').drills;
     totalUniqueDrills = noneDrills.length;
     totalTime = noneDrills.reduce((s, d) => s + d.time_min, 0);
   }
