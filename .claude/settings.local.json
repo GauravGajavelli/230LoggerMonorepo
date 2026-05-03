@@ -58,7 +58,8 @@
       "Bash(unzip -l \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/redactedTars/allTar-StringHashSet-Sp2026-2May.zip\")",
       "Bash(unzip -p \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Homework 7/stringhashset-202630.zip\" \"stringhashset-202630/src/StringHashSetTest.java\")",
       "Bash(unzip -l \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Final Exam/FinalPracticeComputerPart.zip\")",
-      "Bash(unzip -p \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Exam 3/Exam3-practice.zip\" \"Exam3-practice/Exam3Practice/src/numcollided/StringHashSetTest.java\")"
+      "Bash(unzip -p \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Exam 3/Exam3-practice.zip\" \"Exam3-practice/Exam3Practice/src/numcollided/StringHashSetTest.java\")",
+      "Bash(node --check lib/report.js)"
     ]
   }
 }

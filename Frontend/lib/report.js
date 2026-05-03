@@ -177,6 +177,8 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
     const time = reviewOnly ? 0 : estimateTime(drill);
 
     if (assessmentConfig?.assessments) {
+      let pushedToAny = false;
+      let firstEligibleAssmt = null;   // closest non-horizon-skipped assessment for orphan fallback
       for (const aCfg of assessmentConfig.assessments) {
         // Skip assessments beyond the drill horizon — they appear in the table strip
         // but are too far out to prioritize drills for now.
@@ -184,12 +186,12 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           (new Date(aCfg.date + 'T00:00:00') - generatedAt) / MS_PER_DAY
         );
         if (aCfgDaysLeft > DRILL_HORIZON_DAYS) continue;
+        if (firstEligibleAssmt === null) firstEligibleAssmt = aCfg;
 
         let matchWeight = 0;
         for (const cat of categories) {
-          if (aCfg.concept_weights?.[cat]) {
-            matchWeight += aCfg.concept_weights[cat];
-          }
+          const w = aCfg.concept_weights?.[cat];
+          if (typeof w === 'number' && isFinite(w) && w > 0) matchWeight += w;
         }
         if (matchWeight === 0) continue;
 
@@ -234,6 +236,36 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
           source_label: sourceLabel,
           drill_intro: drillIntro,
           review_only: reviewOnly,
+        });
+        pushedToAny = true;
+      }
+
+      // Orphan-drill fallback: an LLM-generated drill whose category isn't in any
+      // upcoming assessment's concept_weights still deserves a place in the report —
+      // dropping it silently is what made mirandac's report come out empty when all
+      // her failures were in iterator/toString (HW7-only concepts). Attach to the
+      // closest eligible assessment with _matchWeight=0 so it surfaces but doesn't
+      // distort exam-coverage percentages.
+      if (!pushedToAny && drill && firstEligibleAssmt) {
+        if (!assessmentMap.has(firstEligibleAssmt.id)) {
+          assessmentMap.set(firstEligibleAssmt.id, { config: firstEligibleAssmt, drills: [], rawOverlap: 0 });
+        }
+        const entry = assessmentMap.get(firstEligibleAssmt.id);
+        entry.drills.push({
+          _categories: categories,
+          _matchWeight: 0,
+          _reviewOnly: false,
+          _orphan: true,
+          _extraLinks: [],
+          pattern_name: patternName(fb),
+          time_min: time,
+          test_names: testNames(fb),
+          drill_anchor: drillAnchor(fb),
+          source: drill?.source || null,
+          source_url: drill?.sourceUrl || null,
+          source_label: drill?.sourceLabel || null,
+          drill_intro: drill?.intro || null,
+          review_only: false,
         });
       }
     } else {
@@ -283,7 +315,10 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
         weight_pct: Math.round(w * 100),
       }))
       .sort((a, b) => b.weight_pct - a.weight_pct);
-    entry.rawOverlap = entry.drills.reduce((sum, d) => sum + (d._matchWeight || 0), 0);
+    entry.rawOverlap = entry.drills.reduce((sum, d) => {
+      const w = typeof d._matchWeight === 'number' && isFinite(d._matchWeight) ? d._matchWeight : 0;
+      return sum + w;
+    }, 0);
     // Collect all unique source links across surviving drills + courseAppearances + config resources
     const allLinksMap = new Map(); // url → label
     for (const d of entry.drills) {
@@ -295,12 +330,17 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
       if (r.url) allLinksMap.set(r.url, r.label || 'resource');
     }
     entry.allLinks = [...allLinksMap.entries()].map(([url, label]) => ({ url, label }));
-    // Compute weight_pct from matchWeight, then strip internal tracking fields
+    // Compute weight_pct from matchWeight, then strip internal tracking fields.
+    // Defensive against non-numeric _matchWeight — JSON.stringify renders NaN as
+    // null, which is what produced the "null%" the student saw in the rendered PDF.
     for (const d of entry.drills) {
-      d.weight_pct = Math.round((d._matchWeight || 0) * 100);
+      const w = typeof d._matchWeight === 'number' && isFinite(d._matchWeight) ? d._matchWeight : 0;
+      d.weight_pct = Math.round(w * 100);
       delete d._categories;
       delete d._matchWeight;
       delete d._extraLinks;
+      delete d._reviewOnly;
+      delete d._orphan;
     }
   }
 
@@ -313,15 +353,17 @@ export async function generateReport(studentId, assignment, dataDir, baseUrl) {
       const drills = entry.drills
         .sort((x, y) => x.time_min - y.time_min);
       const totalTime = drills.reduce((s, d) => s + d.time_min, 0);
-      // overlap_pct: sum of surviving drill weights, capped at 100
-      const overlapPct = Math.min(100, Math.round(entry.rawOverlap * 100));
+      // overlap_pct: sum of surviving drill weights, capped at 100. Defensive
+      // against non-numeric rawOverlap so the rendered text never contains "null%".
+      const safeRawOverlap = (typeof entry.rawOverlap === 'number' && isFinite(entry.rawOverlap)) ? entry.rawOverlap : 0;
+      const overlapPct = Math.min(100, Math.round(safeRawOverlap * 100));
       const daysLeft = Math.ceil(
         (new Date(a.date + 'T00:00:00') - generatedAt) / MS_PER_DAY
       );
-      const gradeWeight = a.grade_weight != null
+      const gradeWeight = (typeof a.grade_weight === 'number' && isFinite(a.grade_weight))
         ? a.grade_weight
         : (a.type === 'exam' ? 0.10 : 0.035);
-      const relevanceScore = entry.rawOverlap * gradeWeight * urgencyFactor(daysLeft);
+      const relevanceScore = safeRawOverlap * gradeWeight * urgencyFactor(daysLeft);
       return {
         id: a.id,
         name: a.name,
