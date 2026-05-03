@@ -92,8 +92,6 @@ function renderFeedbackReady(patternCount, reportLink, feedbackLink) {
   const shortSubject = `CSSE 230: ${shortName} Feedback Available (${patternCount} patterns)`;
   const subject = fullSubject.length <= 60 ? fullSubject : shortSubject;
   const body = wrap(`
-    <p><em>Apologies for the earlier email, there was an issue with the feedback system that sent a generic review guide instead of your personalized feedback. Please use the links below instead.</em></p>
-    <hr style="border:none;border-top:1px solid #ddd;margin:14px 0;">
     <p>Your debugging feedback for <strong>${fullName}</strong> has been processed.
        ${patternCount} pattern${patternCount !== 1 ? 's were' : ' was'} identified,
        relevant to ${nearestAssessment} (${assessmentDate}).</p>
