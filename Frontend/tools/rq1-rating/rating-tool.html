@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RQ1 Expert Rating Tool</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9fafb; }
+  .collapsible-header { cursor: pointer; user-select: none; }
+  .collapsible-header:hover { background: #f3f4f6; }
+  .collapsible-body { display: none; }
+  .collapsible-body.open { display: block; }
+  .arrow { transition: transform 0.15s; display: inline-block; }
+  .arrow.open { transform: rotate(90deg); }
+  pre.code-block { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge-high { background: #dcfce7; color: #166534; }
+  .badge-medium { background: #fef9c3; color: #854d0e; }
+  .badge-low { background: #fee2e2; color: #991b1b; }
+  .badge-cat { background: #e0e7ff; color: #3730a3; font-size: 10px; }
+  .rating-panel { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; }
+  .progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; }
+  .progress-fill { height: 100%; background: #3b82f6; border-radius: 2px; transition: width 0.3s; }
+  select { appearance: auto; }
+  .rated-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .rated-dot.complete { background: #22c55e; }
+  .rated-dot.empty { background: #d1d5db; }
+  .diff-label { font-weight: 600; color: #6b7280; font-size: 13px; margin-bottom: 4px; }
+  .diff-note { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 12px; margin-top: 8px; font-size: 13px; color: #92400e; }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const FAILURE_MODES = [
+  { id: 'hallucinated_reference', label: 'Hallucinated reference', desc: 'References a test, method, or concept that doesn\'t exist' },
+  { id: 'wrong_root_cause', label: 'Wrong root cause', desc: 'Identifies a real problem but attributes it to the wrong cause' },
+  { id: 'vague_recommendation', label: 'Vague recommendation', desc: 'Drill or suggestion is too generic to act on' },
+  { id: 'mismatched_concept', label: 'Mismatched concept', desc: 'Maps feedback to the wrong course concept or assessment' },
+  { id: 'redundant', label: 'Redundant', desc: 'Repeats the same point multiple times without adding information' },
+  { id: 'missing_obvious', label: 'Missing obvious', desc: 'Fails to identify a clear, major issue visible in the data' },
+  { id: 'correct_but_unhelpful', label: 'Correct but unhelpful', desc: 'Technically accurate but doesn\'t help the student improve' },
+];
+
+const RUBRIC = {
+  correctness: [
+    '1 — Major errors: misidentifies the problem, references wrong tests or concepts, hallucinates nonexistent methods',
+    '2 — Significant inaccuracies: identifies the right area but wrong specifics',
+    '3 — Mostly correct with minor errors: right problem, some details off',
+    '4 — Accurate: correctly identifies the issue and relevant tests',
+    '5 — Fully correct: precise identification, correct test references, accurate concept mapping',
+  ],
+  actionability: [
+    '1 — Completely vague: "review your code" with no specifics',
+    '2 — Points in a direction but not enough to act: "look at your remove method"',
+    '3 — Gives a general approach: "your recursive return isn\'t wired correctly, check the base case"',
+    '4 — Specific and actionable: identifies exact code location and what\'s wrong',
+    '5 — Directly actionable with a clear path: specific location, what\'s wrong, what to change, and a targeted drill',
+  ],
+  specificity: [
+    '1 — Completely generic: could be pasted into any student\'s feedback',
+    '2 — Mentions the right assignment but nothing student-specific',
+    '3 — References specific tests the student failed but analysis is generic',
+    '4 — Clearly based on this student\'s patterns: references their test sequence and debugging behavior',
+    '5 — Deeply specific: references exact progression, identifies specific misconception, connects to failure pattern',
+  ],
+};
+
+let data = [];
+let currentIndex = 0;
+let ratings = {};
+let raterId = '';
+
+function getStorageKey() { return 'rq1-ratings-' + raterId; }
+function getPositionKey() { return 'rq1-position-' + raterId; }
+
+function loadRatings() {
+  try { ratings = JSON.parse(localStorage.getItem(getStorageKey()) || '{}'); } catch { ratings = {}; }
+}
+
+function saveRatings() {
+  localStorage.setItem(getStorageKey(), JSON.stringify(ratings));
+  localStorage.setItem(getPositionKey(), String(currentIndex));
+}
+
+function getRating(pairId) {
+  return ratings[pairId] || { correctness: 0, actionability: 0, specificity: 0, failureModes: [], otherNote: '', notes: '', timestamp: null };
+}
+
+function setRating(pairId, r) {
+  r.timestamp = new Date().toISOString();
+  ratings[pairId] = r;
+  saveRatings();
+}
+
+function countRated() {
+  return data.filter(p => {
+    const r = ratings[p.pairId];
+    return r && r.correctness > 0 && r.actionability > 0 && r.specificity > 0;
+  }).length;
+}
+
+function isRated(pairId) {
+  const r = ratings[pairId];
+  return r && r.correctness > 0 && r.actionability > 0 && r.specificity > 0;
+}
+
+async function loadData() {
+  const isDemo = new URLSearchParams(window.location.search).has('demo');
+  const file = isDemo ? 'rating-data-demo.json' : 'rating-data.json';
+  try {
+    const res = await fetch(file);
+    if (!res.ok) throw new Error(`Failed to load ${file}: ${res.status}`);
+    data = await res.json();
+  } catch (e) {
+    document.getElementById('app').innerHTML = `
+      <div class="max-w-xl mx-auto mt-20 p-8 bg-white rounded-lg shadow">
+        <h2 class="text-xl font-bold text-red-600 mb-4">Could not load data</h2>
+        <p class="text-gray-600 mb-2">Make sure <code class="bg-gray-100 px-1 rounded">${file}</code> is in the same directory as this HTML file.</p>
+        <p class="text-gray-500 text-sm">Error: ${e.message}</p>
+      </div>`;
+    return false;
+  }
+  return true;
+}
+
+function showSetup() {
+  const saved = localStorage.getItem('rq1-rater-id') || '';
+  document.getElementById('app').innerHTML = `
+    <div class="max-w-md mx-auto mt-20 p-8 bg-white rounded-lg shadow">
+      <h1 class="text-2xl font-bold mb-2">RQ1 Expert Rating Tool</h1>
+      <p class="text-gray-600 mb-6">Rate the quality of generated debugging feedback for CSSE 230 students.</p>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Your Rater ID</label>
+      <input id="rater-input" type="text" value="${saved}" placeholder="e.g., TA-1"
+        class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      <button onclick="startRating()" class="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700">
+        Start Rating
+      </button>
+      <p class="text-xs text-gray-400 mt-4">${data.length} pairs to rate. Ratings are saved locally in your browser.</p>
+    </div>`;
+  const input = document.getElementById('rater-input');
+  input.focus();
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') startRating(); });
+}
+
+function startRating() {
+  const input = document.getElementById('rater-input');
+  raterId = (input.value || '').trim();
+  if (!raterId) { input.classList.add('border-red-500'); return; }
+  localStorage.setItem('rq1-rater-id', raterId);
+  loadRatings();
+  const savedPos = localStorage.getItem(getPositionKey());
+  if (savedPos !== null) currentIndex = Math.min(parseInt(savedPos, 10), data.length - 1);
+  render();
+}
+
+function render() {
+  if (!data.length) return;
+  const pair = data[currentIndex];
+  const r = getRating(pair.pairId);
+  const rated = countRated();
+
+  document.getElementById('app').innerHTML = `
+    <!-- Header -->
+    <div class="bg-white border-b px-4 py-3">
+      <div class="max-w-screen-2xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <h1 class="text-lg font-bold">RQ1 Rating Tool</h1>
+          <span class="text-sm text-gray-500">Rater: <strong>${raterId}</strong></span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-sm text-gray-600">${rated} of ${data.length} rated</span>
+          <div class="progress-bar w-32"><div class="progress-fill" style="width:${(rated/data.length*100).toFixed(1)}%"></div></div>
+          <div class="flex gap-1">${data.map((p, i) =>
+            `<span class="rated-dot ${isRated(p.pairId) ? 'complete' : 'empty'} cursor-pointer" title="${p.pairId}" onclick="goTo(${i})"></span>`
+          ).join('')}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="max-w-screen-2xl mx-auto flex gap-6 p-4" style="min-height: calc(100vh - 56px);">
+      <!-- Left: Feedback display -->
+      <div class="flex-1 overflow-y-auto pr-2" style="max-height: calc(100vh - 72px);">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="text-2xl font-bold">${pair.pairId}</span>
+          <span class="badge badge-cat">${pair.assignment}</span>
+          <span class="text-sm text-gray-500">${currentIndex + 1} / ${data.length}</span>
+        </div>
+
+        ${renderFailedTests(pair)}
+        ${pair.feedbackItems.map((fb, i) => renderFeedbackItem(fb, i, pair.feedbackItems.length)).join('')}
+        ${renderEpisodes(pair)}
+        ${renderReportDrills(pair)}
+      </div>
+
+      <!-- Right: Rating panel -->
+      <div class="w-96 flex-shrink-0">
+        <div class="rating-panel bg-white rounded-lg shadow p-5">
+          <h3 class="font-bold text-lg mb-4">Rate this feedback</h3>
+
+          ${renderRubricToggle()}
+
+          ${renderDropdown('correctness', 'Correctness', r.correctness)}
+          ${renderDropdown('actionability', 'Actionability', r.actionability)}
+          ${renderDropdown('specificity', 'Specificity', r.specificity)}
+
+          <div class="mt-5">
+            <h4 class="font-semibold text-sm mb-2">Failure Modes</h4>
+            ${FAILURE_MODES.map(fm => `
+              <label class="flex items-start gap-2 mb-2 cursor-pointer group">
+                <input type="checkbox" class="mt-0.5 rounded" id="fm-${fm.id}" ${r.failureModes.includes(fm.id) ? 'checked' : ''}
+                  onchange="toggleFailureMode('${fm.id}')">
+                <span class="text-sm"><strong class="text-gray-800">${fm.label}</strong><br><span class="text-gray-500 text-xs">${fm.desc}</span></span>
+              </label>
+            `).join('')}
+            <label class="flex items-start gap-2 mb-1 cursor-pointer">
+              <input type="checkbox" class="mt-0.5 rounded" id="fm-other" ${r.failureModes.includes('other') ? 'checked' : ''}
+                onchange="toggleFailureMode('other')">
+              <span class="text-sm font-medium text-gray-800">Other</span>
+            </label>
+            <input type="text" id="other-note" value="${escapeAttr(r.otherNote)}" placeholder="Describe..."
+              class="w-full border border-gray-200 rounded px-2 py-1 text-sm mt-1 ${r.failureModes.includes('other') ? '' : 'opacity-50'}"
+              oninput="updateOtherNote()" ${r.failureModes.includes('other') ? '' : 'disabled'}>
+          </div>
+
+          <div class="mt-5">
+            <label class="font-semibold text-sm">Notes</label>
+            <textarea id="notes-field" rows="3" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm mt-1"
+              placeholder="Optional notes..." oninput="updateNotes()">${escapeHtml(r.notes)}</textarea>
+          </div>
+
+          <div class="flex gap-2 mt-5">
+            <button onclick="prev()" class="flex-1 py-2 px-3 border border-gray-300 rounded font-medium text-sm hover:bg-gray-50 ${currentIndex === 0 ? 'opacity-50' : ''}" ${currentIndex === 0 ? 'disabled' : ''}>
+              &#9664; Prev
+            </button>
+            <button onclick="next()" class="flex-1 py-2 px-3 bg-blue-600 text-white rounded font-medium text-sm hover:bg-blue-700 ${currentIndex === data.length - 1 ? 'opacity-50' : ''}" ${currentIndex === data.length - 1 ? 'disabled' : ''}>
+              Next &#9654;
+            </button>
+          </div>
+
+          <div class="flex gap-2 mt-3">
+            <button onclick="exportJSON()" class="flex-1 py-1.5 text-xs border border-gray-200 rounded hover:bg-gray-50">Export JSON</button>
+            <button onclick="exportCSV()" class="flex-1 py-1.5 text-xs border border-gray-200 rounded hover:bg-gray-50">Export CSV</button>
+          </div>
+
+          ${rated === data.length ? '<p class="text-center text-green-600 font-semibold mt-4 text-sm">All pairs rated! Export your ratings above.</p>' : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderRubricToggle() {
+  return `
+    <div class="mb-4 border border-gray-200 rounded">
+      <div class="collapsible-header px-3 py-2 flex items-center gap-2 text-sm font-medium text-gray-600" onclick="toggleCollapsible(this)">
+        <span class="arrow">&#9654;</span> Rating Rubric Reference
+      </div>
+      <div class="collapsible-body px-3 pb-3">
+        ${['correctness', 'actionability', 'specificity'].map(dim => `
+          <h5 class="font-semibold text-xs mt-3 mb-1 capitalize">${dim}</h5>
+          <ul class="text-xs text-gray-600 space-y-0.5">
+            ${RUBRIC[dim].map(line => `<li>${escapeHtml(line)}</li>`).join('')}
+          </ul>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+function renderDropdown(dim, label, value) {
+  return `
+    <div class="mb-3">
+      <label class="block text-sm font-semibold mb-1">${label}</label>
+      <select id="sel-${dim}" onchange="updateScore('${dim}')"
+        class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500">
+        <option value="0" ${value === 0 ? 'selected' : ''}>— Select —</option>
+        ${RUBRIC[dim].map((text, i) => `<option value="${i+1}" ${value === i+1 ? 'selected' : ''}>${text}</option>`).join('')}
+      </select>
+    </div>`;
+}
+
+function renderFailedTests(pair) {
+  if (!pair.failedTests.length) return '';
+  return `
+    <div class="bg-white rounded-lg shadow mb-4">
+      <div class="collapsible-header px-4 py-3 flex items-center gap-2 font-semibold" onclick="toggleCollapsible(this)">
+        <span class="arrow open">&#9654;</span> Failed Tests (${pair.failedTests.length})
+      </div>
+      <div class="collapsible-body open px-4 pb-3">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-gray-500 text-xs">
+            <th class="pb-1">Test</th><th class="pb-1">Category</th><th class="pb-1">Failed Runs</th><th class="pb-1">Fixed?</th><th class="pb-1">Progression</th>
+          </tr></thead>
+          <tbody>${pair.failedTests.map(t => `
+            <tr class="border-t border-gray-100">
+              <td class="py-1 font-mono text-xs">${escapeHtml(t.name)}</td>
+              <td>${t.highlightCategory ? `<span class="badge badge-cat">${t.highlightCategory}</span>` : '<span class="text-gray-400 text-xs">—</span>'}</td>
+              <td class="text-center">${t.totalFailedRuns}</td>
+              <td class="text-center">${t.wasFixed === true ? '&#10003;' : t.wasFixed === false ? '&#10007;' : '—'}</td>
+              <td class="text-xs text-gray-500">${escapeHtml(t.progressionSummary || '—')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderFeedbackItem(fb, index, total) {
+  const confClass = fb.confidence === 'high' ? 'badge-high' : fb.confidence === 'medium' ? 'badge-medium' : 'badge-low';
+  return `
+    <div class="bg-white rounded-lg shadow mb-4">
+      <div class="collapsible-header px-4 py-3 flex items-center gap-2" onclick="toggleCollapsible(this)">
+        <span class="arrow open">&#9654;</span>
+        <span class="font-semibold">Feedback ${index + 1}/${total}</span>
+        <span class="badge ${confClass}">${fb.confidence}</span>
+        <span class="text-sm text-gray-600 ml-2">${escapeHtml(fb.pattern)}</span>
+      </div>
+      <div class="collapsible-body open px-4 pb-4">
+        <div class="text-xs text-gray-500 mb-2 font-mono">${escapeHtml(fb.testId)}</div>
+
+        <h5 class="font-semibold text-sm mt-3 mb-1">Root Cause Analysis</h5>
+        <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(fb.explanation)}</p>
+
+        ${fb.nextSteps.length ? `
+          <h5 class="font-semibold text-sm mt-4 mb-1">Next Steps</h5>
+          <ol class="list-decimal list-inside text-sm text-gray-700 space-y-1">
+            ${fb.nextSteps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+          </ol>` : ''}
+
+        ${fb.diffs.length ? `
+          <h5 class="font-semibold text-sm mt-4 mb-2">Code Diffs</h5>
+          ${fb.diffs.map(d => `
+            <div class="mb-3">
+              <div class="diff-label">${escapeHtml(d.label)}</div>
+              ${d.before.length ? `<div class="text-xs text-gray-500 mb-1">Before:</div><pre class="code-block text-red-300">${escapeHtml(d.before.join('\n'))}</pre>` : ''}
+              ${d.after.length ? `<div class="text-xs text-gray-500 mb-1 mt-2">After:</div><pre class="code-block text-green-300">${escapeHtml(d.after.join('\n'))}</pre>` : ''}
+              ${d.note ? `<div class="diff-note">${escapeHtml(d.note)}</div>` : ''}
+            </div>`).join('')}` : ''}
+
+        ${fb.courseAppearances.length ? `
+          <h5 class="font-semibold text-sm mt-4 mb-1">Concept &amp; Assessment Mapping</h5>
+          <ul class="text-sm text-gray-700 space-y-1">
+            ${fb.courseAppearances.map(ca => `<li><strong>${escapeHtml(ca.label)}</strong> — ${escapeHtml(ca.description)}</li>`).join('')}
+          </ul>` : ''}
+
+        ${fb.drills.length ? `
+          <h5 class="font-semibold text-sm mt-4 mb-2">Drill Recommendations</h5>
+          ${fb.drills.map(dr => `
+            <div class="border border-gray-200 rounded p-3 mb-2">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="badge badge-cat">${dr.mode || 'drill'}</span>
+                <span class="text-xs text-gray-500">${escapeHtml(dr.timeEstimate || '')}</span>
+                ${dr.source ? `<span class="text-xs text-gray-400">Source: ${escapeHtml(dr.sourceLabel || dr.source)}</span>` : ''}
+              </div>
+              <p class="text-sm text-gray-700 mb-2">${escapeHtml(dr.intro)}</p>
+              ${dr.testCode ? `<pre class="code-block">${escapeHtml(dr.testCode)}</pre>` : ''}
+              ${dr.hints.length ? `
+                <div class="mt-2">
+                  <div class="collapsible-header text-xs text-blue-600 font-medium" onclick="toggleCollapsible(this)">
+                    <span class="arrow">&#9654;</span> Hints (${dr.hints.length})
+                  </div>
+                  <div class="collapsible-body">
+                    <ol class="list-decimal list-inside text-xs text-gray-600 mt-1 space-y-1">
+                      ${dr.hints.map(h => `<li>${escapeHtml(h)}</li>`).join('')}
+                    </ol>
+                  </div>
+                </div>` : ''}
+            </div>`).join('')}` : ''}
+
+        ${fb.relatedTestIds.length ? `
+          <div class="mt-3 text-xs text-gray-500">Related tests: ${fb.relatedTestIds.map(id => `<code class="bg-gray-100 px-1 rounded">${escapeHtml(id)}</code>`).join(', ')}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderEpisodes(pair) {
+  if (!pair.episodeSummaries.length) return '';
+  return `
+    <div class="bg-white rounded-lg shadow mb-4">
+      <div class="collapsible-header px-4 py-3 flex items-center gap-2 font-semibold" onclick="toggleCollapsible(this)">
+        <span class="arrow">&#9654;</span> Episode Context (${pair.episodeSummaries.length})
+      </div>
+      <div class="collapsible-body px-4 pb-3">
+        ${pair.episodeSummaries.map(ep => `
+          <div class="border-b border-gray-100 py-2 last:border-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-medium text-sm">${escapeHtml(ep.label)}</span>
+              ${ep.dominantIntent ? `<span class="badge badge-cat">${ep.dominantIntent}</span>` : ''}
+              ${ep.progressAssessment ? `<span class="badge ${ep.progressAssessment === 'breakthrough' ? 'badge-high' : ep.progressAssessment === 'stuck' || ep.progressAssessment === 'regressing' ? 'badge-low' : 'badge-medium'}">${ep.progressAssessment}</span>` : ''}
+            </div>
+            <p class="text-sm text-gray-600">${escapeHtml(ep.summary || '')}</p>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderReportDrills(pair) {
+  if (!pair.reportDrills.length) return '';
+  return `
+    <div class="bg-white rounded-lg shadow mb-4">
+      <div class="collapsible-header px-4 py-3 flex items-center gap-2 font-semibold" onclick="toggleCollapsible(this)">
+        <span class="arrow">&#9654;</span> Assessment Drill Mapping (${pair.reportDrills.length})
+      </div>
+      <div class="collapsible-body px-4 pb-3">
+        ${pair.reportDrills.map(rd => `
+          <div class="border-b border-gray-100 py-2 last:border-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-medium text-sm">${escapeHtml(rd.assessmentName)}</span>
+              <span class="text-xs text-gray-500">${rd.overlap_pct}% overlap</span>
+            </div>
+            <ul class="text-sm text-gray-600 space-y-1 ml-4">
+              ${rd.drills.map(d => `<li><strong>${escapeHtml(d.pattern_name)}</strong>${d.source ? ` <span class="text-xs text-gray-400">(${escapeHtml(d.source)})</span>` : ''}${d.drill_intro ? `<br><span class="text-xs text-gray-500">${escapeHtml(d.drill_intro)}</span>` : ''}</li>`).join('')}
+            </ul>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function toggleCollapsible(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.arrow');
+  body.classList.toggle('open');
+  if (arrow) arrow.classList.toggle('open');
+}
+
+function updateScore(dim) {
+  const pair = data[currentIndex];
+  const r = getRating(pair.pairId);
+  r[dim] = parseInt(document.getElementById('sel-' + dim).value, 10);
+  setRating(pair.pairId, r);
+  updateProgressUI();
+}
+
+function toggleFailureMode(id) {
+  const pair = data[currentIndex];
+  const r = getRating(pair.pairId);
+  const idx = r.failureModes.indexOf(id);
+  if (idx >= 0) r.failureModes.splice(idx, 1);
+  else r.failureModes.push(id);
+  setRating(pair.pairId, r);
+  if (id === 'other') {
+    const otherInput = document.getElementById('other-note');
+    otherInput.disabled = !r.failureModes.includes('other');
+    otherInput.classList.toggle('opacity-50', !r.failureModes.includes('other'));
+  }
+}
+
+function updateOtherNote() {
+  const pair = data[currentIndex];
+  const r = getRating(pair.pairId);
+  r.otherNote = document.getElementById('other-note').value;
+  setRating(pair.pairId, r);
+}
+
+function updateNotes() {
+  const pair = data[currentIndex];
+  const r = getRating(pair.pairId);
+  r.notes = document.getElementById('notes-field').value;
+  setRating(pair.pairId, r);
+}
+
+function updateProgressUI() {
+  const rated = countRated();
+  const dots = document.querySelectorAll('.rated-dot');
+  data.forEach((p, i) => {
+    if (dots[i]) {
+      dots[i].className = `rated-dot ${isRated(p.pairId) ? 'complete' : 'empty'} cursor-pointer`;
+    }
+  });
+  const fill = document.querySelector('.progress-fill');
+  if (fill) fill.style.width = (rated / data.length * 100).toFixed(1) + '%';
+}
+
+function goTo(index) {
+  currentIndex = Math.max(0, Math.min(index, data.length - 1));
+  saveRatings();
+  render();
+  window.scrollTo(0, 0);
+}
+
+function prev() { if (currentIndex > 0) goTo(currentIndex - 1); }
+function next() { if (currentIndex < data.length - 1) goTo(currentIndex + 1); }
+
+function exportJSON() {
+  const rows = data.map(p => {
+    const r = getRating(p.pairId);
+    return {
+      pair_id: p.pairId,
+      rater_id: raterId,
+      assignment: p.assignment,
+      correctness: r.correctness || null,
+      actionability: r.actionability || null,
+      specificity: r.specificity || null,
+      failure_mode_tags: r.failureModes || [],
+      notes: [r.notes, r.failureModes.includes('other') ? r.otherNote : ''].filter(Boolean).join(' | '),
+      timestamp: r.timestamp,
+    };
+  }).filter(row => row.correctness !== null);
+  download(`rq1-ratings-${raterId}.json`, JSON.stringify(rows, null, 2), 'application/json');
+}
+
+function exportCSV() {
+  const header = 'pair_id,rater_id,assignment,correctness,actionability,specificity,failure_mode_tags,notes,timestamp';
+  const rows = data.map(p => {
+    const r = getRating(p.pairId);
+    if (!r.correctness) return null;
+    const notes = [r.notes, r.failureModes.includes('other') ? r.otherNote : ''].filter(Boolean).join(' | ');
+    return [
+      p.pairId,
+      raterId,
+      csvEscape(p.assignment),
+      r.correctness || '',
+      r.actionability || '',
+      r.specificity || '',
+      (r.failureModes || []).join('|'),
+      csvEscape(notes),
+      r.timestamp || '',
+    ].join(',');
+  }).filter(Boolean);
+  download(`rq1-ratings-${raterId}.csv`, header + '\n' + rows.join('\n'), 'text/csv');
+}
+
+function csvEscape(s) {
+  if (!s) return '';
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function download(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function escapeAttr(s) {
+  return escapeHtml(s);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowLeft') prev();
+  if (e.key === 'ArrowRight') next();
+});
+
+(async function main() {
+  const ok = await loadData();
+  if (!ok) return;
+  const savedId = localStorage.getItem('rq1-rater-id');
+  if (savedId) {
+    raterId = savedId;
+    loadRatings();
+    const savedPos = localStorage.getItem(getPositionKey());
+    if (savedPos !== null) currentIndex = Math.min(parseInt(savedPos, 10), data.length - 1);
+    render();
+  } else {
+    showSetup();
+  }
+})();
+</script>
+</body>
+</html>
