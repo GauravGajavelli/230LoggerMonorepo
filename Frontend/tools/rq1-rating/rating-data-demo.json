@@ -1,0 +1,653 @@
+[
+  {
+    "pairId": "DEMO-001",
+    "assignment": "Binary Search Tree",
+    "failedTests": [
+      {
+        "name": "testIterator()",
+        "highlightCategory": "sustainedStruggles",
+        "totalFailedRuns": 14,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testContainsNonBST()",
+        "highlightCategory": "sustainedStruggles",
+        "totalFailedRuns": 8,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testRemoveAdvanced()",
+        "highlightCategory": "sustainedStruggles",
+        "totalFailedRuns": 7,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testPreOrderIterator()",
+        "highlightCategory": "sustainedStruggles",
+        "totalFailedRuns": 6,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testRemove()",
+        "highlightCategory": null,
+        "totalFailedRuns": 6,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testRemoveReturnValue()",
+        "highlightCategory": "regressions",
+        "totalFailedRuns": 4,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testToString()",
+        "highlightCategory": null,
+        "totalFailedRuns": 4,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testBasicToString()",
+        "highlightCategory": null,
+        "totalFailedRuns": 2,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testContainsStrings()",
+        "highlightCategory": null,
+        "totalFailedRuns": 1,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testIsEmpty()",
+        "highlightCategory": null,
+        "totalFailedRuns": 1,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testInsertExceptions()",
+        "highlightCategory": null,
+        "totalFailedRuns": 1,
+        "wasFixed": true,
+        "progressionSummary": null
+      },
+      {
+        "name": "testContainsInts()",
+        "highlightCategory": null,
+        "totalFailedRuns": 1,
+        "wasFixed": true,
+        "progressionSummary": null
+      }
+    ],
+    "feedbackItems": [
+      {
+        "testId": "BSTTesting#testRemoveReturnValue()",
+        "pattern": "Regression from incorrect pointer reassignment in remove",
+        "confidence": "high",
+        "explanation": "This test, along with testRemove, covers the core remove operation and its return value. The test first failed at run 45 when the initial remove implementation was added, then passed at run 51 when the remove method was changed to capture the return value of removeHelper, replacing a pattern that created a new root node and called removeHelper without using its return. The test regressed at run 54 when further changes to handle the two-child removal case reintroduced failures; the remove logic produced incorrect values (expected 14 but got 4), indicating the in-order successor lookup was not correctly replacing the deleted node's data or reconnecting subtrees. The fix at run 55 rewrote the two-child case with a proper loop to find the in-order successor, tracking a 'prev' pointer and using comparisons to walk right through the left subtree. Across all these changes, the pattern that emerged was that removeHelper must return the (possibly updated) subtree root at every recursive call, and the caller must always reassign its child pointer to that returned value.",
+        "nextSteps": [
+          "The three-case removal pattern (leaf, one child, two children via in-order successor) recurs directly in EditorTrees Milestone 3 delete(int pos), which adds AVL rebalancing on top. Practice writing remove so that each recursive call returns the new subtree root, letting the parent automatically update its child pointer without special-casing.",
+          "For the two-child case specifically, drill the algorithm: go to the left subtree, walk all the way right to find the in-order predecessor (or go right then all the way left for the in-order successor), copy that node's data into the node being removed, then recursively delete the predecessor/successor node. Ensure size is decremented exactly once.",
+          "When debugging tree mutations, draw the tree state before and after each operation and verify that every parent-child link is correctly updated. The pattern of returning the modified subtree root from a helper method eliminates many pointer bugs."
+        ],
+        "diffs": [
+          {
+            "label": "Run 51 — BinarySearchTree.java",
+            "before": [
+              "\t\tif (this.root == NULL_NODE) {",
+              "\t\t\troot = new Node(i);",
+              "\t\t\treturn true;",
+              "\t\t}",
+              "\t\tremoveHelper(root, i, b);"
+            ],
+            "after": [
+              "\t\troot = removeHelper(root, i, b);"
+            ],
+            "note": "Run 51: Changed remove() to assign root = removeHelper(root, i, b) instead of creating a new root node and discarding removeHelper's return value, fixing the basic remove and return-value tests."
+          },
+          {
+            "label": "Run 54 — BinarySearchTree.java",
+            "before": [
+              "\t\tif (this.root == NULL_NODE) {",
+              "\t\t\troot = new Node(i);",
+              "\t\t\treturn true;",
+              "\t\t}",
+              "\t\tremoveHelper(root, i, b);",
+              "\t\t\t\t//      1",
+              "\t\t\t\t//    2   5",
+              "\t\t\t\t//  3  4    6",
+              "\t\t\t\t// if you remove 1",
+              "\t\t\t\t//     2",
+              "\t\t\t\t//   3   4",
+              "\t\t\t\t//         5",
+              "\t\t\t\t//\t\t     6",
+              "\t\t\t\tNode toRet = cur.left;"
+            ],
+            "after": [
+              "\t\troot = removeHelper(root, i, b);",
+              "\t\t\t\tNode toRet = cur.left;",
+              "\t\t\t\tbottom.left = toRet;"
+            ],
+            "note": "Run 54: Attempted to handle the two-child removal case by introducing toRet and bottom.left reassignment, but the logic produced incorrect node values, causing regression."
+          },
+          {
+            "label": "Run 55 — BinarySearchTree.java",
+            "before": [
+              "\t\tif (this.root == NULL_NODE) {",
+              "\t\t\troot = new Node(i);",
+              "\t\t\treturn true;",
+              "\t\t}",
+              "\t\tremoveHelper(root, i, b);",
+              "\t\t\t\t//      1",
+              "\t\t\t\t//    2   5",
+              "\t\t\t\t//  3  4    6",
+              "\t\t\t\t// if you remove 1",
+              "\t\t\t\t//     2",
+              "\t\t\t\t//   3   4",
+              "\t\t\t\t//         5",
+              "\t\t\t\t//\t\t     6",
+              "\t\t\t\twhile (bottom.right != NULL_NODE) {",
+              "\t\t\t\tbottom.right = cur.right;",
+              "\t\t\t\tNode toRet = cur.left;",
+              "\t\t\t\tcur.left = NULL_NODE;",
+              "\t\t\t\tcur.right = NULL_NODE;",
+              "\t\t\t\treturn toRet;"
+            ],
+            "after": [
+              "\t\troot = removeHelper(root, i, b);",
+              "\t\t\t\tNode prev = cur;",
+              "\t\t\t\tint comp2 = bottom.data.compareTo(i);",
+              "\t\t\t\twhile (bottom.right != NULL_NODE && comp2 < 0) { // keep going right while exploring a viable candidate",
+              "\t\t\t\t\tprev = bottom;",
+              "\t\t\t\t\tcomp2 = bottom.data.compareTo(i);",
+              "\t\t\t\tif (bottom != cur.left) { // we're down there",
+              "\t\t\t\t\t// Bottom is guaranteed greater than the left and less than the right",
+              "\t\t\t\t\t",
+              "\t\t\t\t\t//extricate",
+              "\t\t\t\t\tprev.right = removeHelper(bottom,bottom.data,b);",
+              "\t\t\t\t\t// using it as root",
+              "\t\t\t\t\tbottom.right = cur.right;",
+              "\t\t\t\t\tbottom.left = cur.left;",
+              "\t\t\t\t\treturn bottom; // new root",
+              "\t\t\t\t} else { // the left's right is null; since it's all lefts, just shift up",
+              "\t\t\t\t\tbottom.right = cur.right;",
+              "\t\t\t\t\treturn bottom;",
+              "\t\t\t\t}"
+            ],
+            "note": "Run 55: Rewrote the two-child case with a prev pointer and a while loop to correctly locate the in-order successor, fixing both basic and advanced remove tests."
+          }
+        ],
+        "courseAppearances": [
+          {
+            "label": "EditorTrees Milestone 3",
+            "description": "delete(int pos) applies the same three-case BST removal logic (leaf, one child, two children via in-order successor) but also triggers AVL rebalancing as the recursion unwinds."
+          },
+          {
+            "label": "Exam 2",
+            "description": "pruneFullSubtreesSize3 uses the same pointer-replacement pattern as BST remove—returning NULL_NODE to detach a subtree—to prune every full size-3 subtree from the tree."
+          }
+        ],
+        "drills": [
+          {
+            "mode": "probe",
+            "timeEstimate": "~15 min",
+            "intro": "Practice the pointer-replacement pattern used in BST remove() - this is an actual Exam 2 question. Add pruneFullSubtreesSize3() to BinarySearchTree.java so that it removes every full size-3 subtree (a root with exactly two leaf children), then paste this test into BSTTesting.java for a point back. The same recursive return pattern - returning the updated subtree root - applies directly to EditorTrees Milestone 3 deletion.",
+            "testCode": "@Test\npublic void practice_pruneFullSubtreesSize3_basicCase() {\n    BinarySearchTree<String> bst = new BinarySearchTree<>();\n    bst.insert(\"romeo\");\n    bst.insert(\"echo\");\n    bst.insert(\"tango\");\n    bst.pruneFullSubtreesSize3();\n    assertEquals(\"[]\", bst.toString());\n    points += 3;\n}",
+            "hints": [
+              "A full size-3 subtree has a root with exactly two non-null children and no grandchildren; both children are leaves.",
+              "Visit nodes bottom-up (post-order): recursively prune children before deciding whether the current node is the root of a full size-3 subtree.",
+              "In the recursive helper, return NULL_NODE when the current node qualifies (left != NULL_NODE, right != NULL_NODE, left.left == NULL_NODE, left.right == NULL_NODE, right.left == NULL_NODE, right.right == NULL_NODE); otherwise return this."
+            ],
+            "source": "Exam 2",
+            "sourceLabel": "Exam 2 - 2023 questions"
+          }
+        ],
+        "relatedTestIds": [
+          "BSTTesting#testRemove()"
+        ]
+      },
+      {
+        "testId": "BSTManualTesting#testIterator()",
+        "pattern": "Persistent traversal-order and null-return errors in stack-based in-order iterator",
+        "confidence": "high",
+        "explanation": "This test failed across runs 26 through 39, then passed at run 40. The initial implementation at run 26 threw a NullPointerException during Stack initialization, likely from not properly handling the NULL_NODE sentinel. At run 27, the NPE was resolved but the traversal order was incorrect (returned 1 instead of 2), indicating the iterator was not correctly pushing left children before returning values. At run 28, a change broke 10 other tests, indicating a modification to shared tree structure or the Node class. After recovery at run 29, the iterator returned null instead of a value, meaning next() was falling through without returning the popped node's data. The fix at run 40 involved changing the flag value pushed onto the auxiliary flags stack from 1 to 2 and adding logic to handle revisiting a node: after popping a node, if it has a right child, the right child is pushed with flag 1 (first visit), while the current node's data is returned. This dual-stack approach (one for nodes, one for visit-state flags) correctly implements in-order traversal by tracking whether a node's left subtree has already been explored.",
+        "nextSteps": [
+          "The in-order iterator pattern directly parallels EditorTrees toString(), which must traverse a rank-ordered tree in O(N). Solidify your understanding of the standard stack-based in-order algorithm: push the current node onto the stack, go left until you hit NULL_NODE, then pop, return that node's data, and move to its right child. This avoids the complexity of a flags stack entirely.",
+          "Compare your dual-stack (node + flags) approach with the simpler single-stack approach where you always push-left on entry and after processing a right child. The single-stack version has fewer edge cases and is less error-prone.",
+          "Test your iterator on small trees (e.g., a three-node tree with root, left, right) by hand-tracing the stack contents at each call to next(). Verify the output matches the expected in-order sequence before running automated tests."
+        ],
+        "diffs": [
+          {
+            "label": "Run 40 — BinarySearchTree.java",
+            "before": [
+              "\t\t\t \t\tflags.push(1);",
+              "\t\t \t\treturn cur.data;",
+              "\t\t \treturn null;"
+            ],
+            "after": [
+              "\t\t\t \t\tflags.push(2);",
+              "\t\t\t \tNode cur1 = stack.pop();",
+              "\t\t\t\tint flag1 = flags.pop();",
+              "\t\t\t\tif (cur1.right != NULL_NODE) { // only revisit if there's something to",
+              "\t\t\t\t\tif (cur == cur1) { // we shouldn't add this frame back as a 2; it's already being returned right here",
+              "\t\t\t\t\t\tstack.push(cur1.right);",
+              "\t\t\t\t\t\tflags.push(1);",
+              "\t\t\t\t\t} else {",
+              "\t\t\t\t\t\tstack.push(cur1);",
+              "\t\t\t\t\t\tflags.push(2);",
+              "\t\t\t\t\t}",
+              "\t\t\t\t}",
+              "\t \t\treturn cur.data;"
+            ],
+            "note": "Run 40: Changed the flag value from 1 to 2 and added logic to pop, check for right children, and conditionally re-push nodes, completing the in-order traversal state machine."
+          }
+        ],
+        "courseAppearances": [
+          {
+            "label": "EditorTrees toString()",
+            "description": "EditorTrees toString() must run in O(N) via in-order traversal of the rank-ordered tree, directly paralleling the BST in-order iterator."
+          },
+          {
+            "label": "Exam 3 mirror",
+            "description": "The mirror constructor is verified by asserting that pre/in/post-order traversal outputs of the mirrored tree exactly reverse those of the original, requiring you to predict each traversal's output."
+          },
+          {
+            "label": "HW6",
+            "description": "preOrderInOrderBuild (Problem 3) reconstructs a binary tree from its pre-order traversal string and a children-type string, requiring precise understanding of what information each traversal order encodes."
+          },
+          {
+            "label": "Exam 3 & Final",
+            "description": "Both exams list traversals and iterators as explicit programming topics, with one tree question per exam requiring an O(n) single-pass recursive implementation."
+          }
+        ],
+        "drills": [
+          {
+            "mode": "probe",
+            "timeEstimate": "~10 min",
+            "intro": "Practice full-tree traversal with a depth parameter - this is an actual Exam 2 question. Add countLeftNodesAtDepth(int depth) to BinarySearchTree.java, then paste this test into BSTManualTesting.java for a point back. The same recursive accumulator pattern (traverse all nodes, count at a specific depth) applies to EditorTrees Milestone 1 traversal by rank.",
+            "testCode": "@Test\npublic void practice_countLeftNodesAtDepth_threeNodeTree() {\n    BinarySearchTree<String> bst = new BinarySearchTree<>();\n    bst.insert(\"november\");\n    bst.insert(\"foxtrot\");\n    bst.insert(\"tango\");\n    assertEquals(0, bst.countLeftNodesAtDepth(0));\n    assertEquals(1, bst.countLeftNodesAtDepth(1));\n    points += 1;\n}",
+            "hints": [
+              "Recurse with a depth counter: at each node, reduce the target depth by 1; when the counter hits 0, the current node is at the target depth.",
+              "A node is a left child when it was reached by following a parent's left pointer; pass an isLeftChild boolean down the recursion, and count when depth==0 and isLeftChild==true.",
+              "Base case: if the current node is NULL_NODE, return 0. The root call should pass isLeftChild=false so the root is never counted even when depth==0."
+            ],
+            "source": "Exam 2",
+            "sourceLabel": "Exam 2 - 2023 questions"
+          }
+        ],
+        "relatedTestIds": []
+      },
+      {
+        "testId": "BSTManualTesting#testContainsNonBST()",
+        "pattern": "Incorrect boolean logic in exhaustive tree search",
+        "confidence": "medium",
+        "explanation": "This test checks containsNonBST, which must search the entire tree (not using BST ordering) to find a value. The test failed from run 1 through run 8, consistently returning false when it should have returned true. The initial implementation compiled at run 3 but had incorrect logic; runs 4 through 8 showed no code changes. The fix at run 9 added 20 lines including the containsNonBST method body. The issue was that the recursive search was not correctly combining results from left and right subtrees; containsNonBST must return true if the current node matches OR if either subtree contains the value. A common pattern in failed implementations is to check only one subtree or to use AND instead of OR when combining recursive results.",
+        "nextSteps": [
+          "The navigation pattern in containsNonBST generalizes to problems like shortestWordAlongPath on Exam 2, where you traverse based on BST ordering but accumulate information along the path. Understand the difference: contains uses BST property to go left or right, while containsNonBST must explore both subtrees since ordering is not guaranteed.",
+          "For any exhaustive tree search, the recursive pattern is: check the current node, then return (currentMatch OR recurse(left) OR recurse(right)). Make sure your base case returns false for NULL_NODE, and that you short-circuit with true as soon as a match is found."
+        ],
+        "diffs": [
+          {
+            "label": "Run 9 — BinarySearchTree.java",
+            "before": [],
+            "after": [
+              "import java.util.function.BooleanSupplier;",
+              "",
+              "\tpublic boolean isEmpty() {",
+              "\t\t// TODO Auto-generated method stub",
+              "\t\treturn this.size() == 0;",
+              "\t}",
+              "",
+              "\tpublic boolean containsNonBST(T i) {",
+              "\t\t// TODO Auto-generated method stub",
+              "\t\treturn containsNonBSTHelper(i, root);",
+              "\t}",
+              "\tprivate boolean containsNonBSTHelper(T i, Node cur) {",
+              "\t\tif (cur == NULL_NODE) {",
+              "\t\t\treturn false;",
+              "\t\t}",
+              "\t\tif (cur.data.equals(i)) {",
+              "\t\t\treturn true;",
+              "\t\t}",
+              "\t\treturn containsNonBSTHelper(i, cur.left) || containsNonBSTHelper(i, cur.right);",
+              "\t}"
+            ],
+            "note": "Run 9: Added the containsNonBST method implementation along with supporting imports, fixing the exhaustive search logic to correctly return true when the element exists anywhere in the tree."
+          }
+        ],
+        "courseAppearances": [
+          {
+            "label": "Exam 2",
+            "description": "shortestWordAlongPath navigates the BST exactly as contains does—left if target < current, right otherwise—but accumulates the shortest word seen along the search path to the target."
+          },
+          {
+            "label": "EditorTrees get(int pos)",
+            "description": "get(int pos) uses rank instead of key comparison to decide left or right at each node, showing how the contains navigation pattern generalizes to rank-ordered balanced trees."
+          }
+        ],
+        "drills": [
+          {
+            "mode": "probe",
+            "timeEstimate": "~10 min",
+            "intro": "Practice the BST search path pattern - this is an actual Exam 2 question. Add shortestWordAlongPath(String target) to BinarySearchTree.java that walks the BST search path toward the target and returns the shortest String encountered along the way, then paste this test into BSTManualTesting.java for a point back. Practices the Tree Navigation pattern from the Exam 2 review.",
+            "testCode": "@Test\npublic void practice_shortestWordAlongPath_singleAndTwoNodes() {\n    BinarySearchTree<String> bst = new BinarySearchTree<>();\n    bst.insert(\"romeo\");\n    assertEquals(\"romeo\", bst.shortestWordAlongPath(\"romeo\"));\n    bst.insert(\"echo\");\n    assertEquals(\"echo\", bst.shortestWordAlongPath(\"echo\"));\n    assertEquals(\"romeo\", bst.shortestWordAlongPath(\"romeo\"));\n    points += 1;\n}",
+            "hints": [
+              "Follow the standard BST search path from the root toward the target, comparing at each node exactly as contains() does.",
+              "Track the shortest String seen so far as you walk the path, updating it whenever you find a String with fewer characters than the current best.",
+              "In the recursive helper, pass the current best down and return it; there is no need to backtrack, because you only visit nodes on the single root-to-target path."
+            ],
+            "source": "Exam 2",
+            "sourceLabel": "Exam 2 - 2023 questions"
+          }
+        ],
+        "relatedTestIds": []
+      },
+      {
+        "testId": "BSTTesting#testRemoveAdvanced()",
+        "pattern": "Two-child removal case producing incorrect tree structure",
+        "confidence": "high",
+        "explanation": "This test exercises the most complex removal scenario: removing a node with two children, which requires finding the in-order successor (or predecessor) and restructuring the tree. The test failed from run 45 through run 54, a span of 10 runs. While testRemove and testRemoveReturnValue passed at run 51 after correctly returning the subtree root from removeHelper, testRemoveAdvanced continued to fail with 'expected 3 but got 2' at runs 51 through 54, indicating the two-child case was not correctly replacing the removed node's data with its successor's data or was not properly detaching the successor from its original position. The fix at run 55 rewrote the successor-finding logic: it introduced a 'prev' pointer to track the parent of the successor node, used a while loop walking right through the left subtree (with a compareTo check), and added a conditional branch for when the successor is not the immediate left child. This correctly handles the case where the in-order predecessor is several levels deep in the left subtree.",
+        "nextSteps": [
+          "In EditorTrees Milestone 3, delete(int pos) uses this same three-case logic but must also update balance codes and trigger rotations as the recursion unwinds. Make sure you can implement the two-child case cleanly: copy the successor's data into the node being deleted, then recursively remove the successor node (which is guaranteed to have at most one child).",
+          "A cleaner approach to the two-child case avoids manual pointer tracking: after copying the in-order successor's value into the current node, call removeHelper recursively on the appropriate subtree to delete the successor. This reduces the two-child case to a one-child or leaf case, which you already handle correctly.",
+          "When the successor is the immediate left child versus deeper in the subtree, the pointer updates differ. Draw both scenarios and verify your code handles each. The recursive approach mentioned above eliminates this distinction entirely."
+        ],
+        "diffs": [
+          {
+            "label": "Run 55 — BinarySearchTree.java",
+            "before": [
+              "\t\tif (this.root == NULL_NODE) {",
+              "\t\t\troot = new Node(i);",
+              "\t\t\treturn true;",
+              "\t\t}",
+              "\t\tremoveHelper(root, i, b);",
+              "\t\t\t\t//      1",
+              "\t\t\t\t//    2   5",
+              "\t\t\t\t//  3  4    6",
+              "\t\t\t\t// if you remove 1",
+              "\t\t\t\t//     2",
+              "\t\t\t\t//   3   4",
+              "\t\t\t\t//         5",
+              "\t\t\t\t//\t\t     6",
+              "\t\t\t\twhile (bottom.right != NULL_NODE) {",
+              "\t\t\t\tbottom.right = cur.right;",
+              "\t\t\t\tNode toRet = cur.left;",
+              "\t\t\t\tcur.left = NULL_NODE;",
+              "\t\t\t\tcur.right = NULL_NODE;",
+              "\t\t\t\treturn toRet;"
+            ],
+            "after": [
+              "\t\troot = removeHelper(root, i, b);",
+              "\t\t\t\tNode prev = cur;",
+              "\t\t\t\tint comp2 = bottom.data.compareTo(i);",
+              "\t\t\t\twhile (bottom.right != NULL_NODE && comp2 < 0) { // keep going right while exploring a viable candidate",
+              "\t\t\t\t\tprev = bottom;",
+              "\t\t\t\t\tcomp2 = bottom.data.compareTo(i);",
+              "\t\t\t\tif (bottom != cur.left) { // we're down there",
+              "\t\t\t\t\t// Bottom is guaranteed greater than the left and less than the right",
+              "\t\t\t\t\t",
+              "\t\t\t\t\t//extricate",
+              "\t\t\t\t\tprev.right = removeHelper(bottom,bottom.data,b);",
+              "\t\t\t\t\t// using it as root",
+              "\t\t\t\t\tbottom.right = cur.right;",
+              "\t\t\t\t\tbottom.left = cur.left;",
+              "\t\t\t\t\treturn bottom; // new root",
+              "\t\t\t\t} else { // the left's right is null; since it's all lefts, just shift up",
+              "\t\t\t\t\tbottom.right = cur.right;",
+              "\t\t\t\t\treturn bottom;",
+              "\t\t\t\t}"
+            ],
+            "note": "Run 55: Rewrote the two-child removal logic with a prev pointer, a while loop to find the in-order successor by walking right, and a conditional branch for when the successor is not the immediate left child, correctly restructuring the tree in all cases."
+          }
+        ],
+        "courseAppearances": [
+          {
+            "label": "EditorTrees Milestone 3",
+            "description": "delete(int pos) applies the same three-case BST removal logic (leaf, one child, two children via in-order successor) but also triggers AVL rebalancing as the recursion unwinds."
+          },
+          {
+            "label": "Exam 2",
+            "description": "pruneFullSubtreesSize3 uses the same pointer-replacement pattern as BST remove—returning NULL_NODE to detach a subtree—to prune every full size-3 subtree from the tree."
+          }
+        ],
+        "drills": [
+          {
+            "mode": "probe",
+            "timeEstimate": "~10 min",
+            "intro": "Add removeMin() to BinarySearchTree.java that removes and returns the minimum element (the leftmost node). Uses the same one-child pointer-swap pattern as remove(), and the same return-value propagation pattern required for EditorTrees Milestone 3 deletion. Paste this test into BSTTesting.java for a point back.",
+            "testCode": "@Test\npublic void practice_removeMin_threeNodeTree() {\n    BinarySearchTree<Integer> bst = new BinarySearchTree<>();\n    bst.insert(10);\n    bst.insert(5);\n    bst.insert(15);\n    assertEquals(5, (int) bst.removeMin());\n    assertEquals(\"[10, 15]\", bst.toString());\n    points += 4;\n}",
+            "hints": [
+              "The minimum is always the leftmost node; keep following left pointers until you find a node whose left child is NULL_NODE.",
+              "Once found, unlink the minimum by replacing it with its right child (which may be NULL_NODE), exactly the same pointer-swap as removing a node with zero or one child in remove().",
+              "Return the data value from the removed node. In the recursive helper, when node.left == NULL_NODE, set the parent's left pointer to node.right and return node.data."
+            ],
+            "source": "Practice"
+          }
+        ],
+        "relatedTestIds": []
+      },
+      {
+        "testId": "BSTManualTesting#testPreOrderIterator()",
+        "pattern": "Incorrect stack initialization and child-push ordering in pre-order iterator",
+        "confidence": "high",
+        "explanation": "This test failed across runs 19 through 24, then passed at run 25. The initial implementation at run 19 failed on hasNext(), indicating the stack was not properly initialized with the root node. At run 21, the error changed to 'expected true but got false', showing hasNext() was returning incorrect results, possibly because the root was pushed unconditionally even when the tree was empty. At run 22, a NullPointerException appeared, likely from popping an empty stack or accessing a null node's children. At run 23, a broader regression broke 9 tests, indicating changes to shared infrastructure (possibly the Node class or tree fields). The fix at run 25 added 25 lines including a guard that only pushes the root if it is not NULL_NODE, stored a version field for concurrent modification detection, and kept a reference to the BinarySearchTree. The pre-order algorithm itself requires pushing right then left children (so left is processed first), and the fix ensured this ordering along with proper null-sentinel checks.",
+        "nextSteps": [
+          "Pre-order traversal understanding is tested directly on Exam 3 and the Final, and is needed for HW6's preOrderInOrderBuild. The stack-based pre-order algorithm is: pop the top node, return its data, then push its right child followed by its left child (both only if not NULL_NODE). This naturally produces root-left-right order.",
+          "Always guard your iterator initialization: if the tree is empty (root == NULL_NODE), do not push anything onto the stack. This ensures hasNext() returns false immediately for empty trees, avoiding both incorrect true returns and NullPointerExceptions.",
+          "The version field you added enables fail-fast behavior if the tree is modified during iteration. This is a good practice; make sure you increment the tree's version counter in insert and remove, and check it at the start of each next() call."
+        ],
+        "diffs": [
+          {
+            "label": "Run 25 — BinarySearchTree.java",
+            "before": [
+              "\t\t\tstack.push(binarySearchTree.root);",
+              "\t\t\tstack.push(cur.right);",
+              "\t\t\tstack.push(cur.left);",
+              "\t\t\treturn null;"
+            ],
+            "after": [
+              "import java.util.NoSuchElementException;",
+              "\tprivate int version;",
+              "\t\tprivate int version;",
+              "\t\tprivate BinarySearchTree<T> binarySearchTree;",
+              "\t\t\tif (binarySearchTree.root != NULL_NODE) {",
+              "\t\t\t\tstack.push(binarySearchTree.root);",
+              "\t\t\t}",
+              "\t\t\tversion = binarySearchTree.version;",
+              "\t\t\tthis.binarySearchTree = binarySearchTree;",
+              "\t\t\tif (binarySearchTree.version != this.version) {",
+              "\t\t\t\treturn false;",
+              "\t\t\t}",
+              "\t\t\tif (binarySearchTree.version != this.version) {",
+              "\t\t\t\treturn null;",
+              "\t\t\t}",
+              "\t\t\tif (!hasNext()) {",
+              "\t\t\t\tthrow new NoSuchElementException();",
+              "\t\t\t}",
+              "\t\t\tif (cur.right != NULL_NODE) {",
+              "\t\t\t\tstack.push(cur.right);",
+              "\t\t\t}",
+              "\t\t\tif (cur.left != NULL_NODE) {",
+              "\t\t\t\tstack.push(cur.left);",
+              "\t\t\t}",
+              "\t\t\treturn toRet;"
+            ],
+            "note": "Run 25: Added NULL_NODE guard before pushing root, introduced version tracking for concurrent modification detection, and restructured the push order for right then left children, completing the pre-order iterator."
+          }
+        ],
+        "courseAppearances": [
+          {
+            "label": "EditorTrees toString()",
+            "description": "EditorTrees toString() must run in O(N) via in-order traversal of the rank-ordered tree, directly paralleling the BST in-order iterator."
+          },
+          {
+            "label": "Exam 3 mirror",
+            "description": "The mirror constructor is verified by asserting that pre/in/post-order traversal outputs of the mirrored tree exactly reverse those of the original, requiring you to predict each traversal's output."
+          },
+          {
+            "label": "HW6",
+            "description": "preOrderInOrderBuild (Problem 3) reconstructs a binary tree from its pre-order traversal string and a children-type string, requiring precise understanding of what information each traversal order encodes."
+          },
+          {
+            "label": "Exam 3 & Final",
+            "description": "Both exams list traversals and iterators as explicit programming topics, with one tree question per exam requiring an O(n) single-pass recursive implementation."
+          }
+        ],
+        "drills": [
+          {
+            "mode": "probe",
+            "timeEstimate": "~10 min",
+            "intro": "Add getPreOrderList() to BinarySearchTree.java that collects all elements in pre-order (root first, then left subtree, then right subtree) into an ArrayList<T>. HW6 PreOrderBuildTree requires understanding exactly what pre-order encodes - this drill makes that encoding concrete. Paste this test into BSTManualTesting.java for a point back.",
+            "testCode": "@Test\npublic void practice_getPreOrderList_rootFirst() {\n    BinarySearchTree<Integer> bst = new BinarySearchTree<>();\n    bst.insert(10);\n    bst.insert(5);\n    bst.insert(15);\n    ArrayList<Integer> list = bst.getPreOrderList();\n    assertEquals(Integer.valueOf(10), list.get(0));\n    assertEquals(Integer.valueOf(5), list.get(1));\n    points += 1;\n}",
+            "hints": [
+              "Pre-order means: add the current node's data FIRST, then recurse left, then recurse right; root always comes before its descendants.",
+              "Pass an ArrayList into the recursive helper (or build one from recursive results): add current node data, then append the left subtree's pre-order list, then the right subtree's.",
+              "For a balanced 3-node tree with root 10, left 5, right 15: pre-order visits 10 -> 5 -> 15, so list.get(0)==10 and list.get(1)==5."
+            ],
+            "source": "Practice"
+          }
+        ],
+        "relatedTestIds": []
+      }
+    ],
+    "episodeSummaries": [
+      {
+        "label": "Episode 1",
+        "summary": "Student implemented tree height and size computation methods, passing the height and size tests as their first contributions to the BST implementation.",
+        "dominantIntent": "extending",
+        "progressAssessment": "productive"
+      },
+      {
+        "label": "Episode 2",
+        "summary": "Student implemented isEmpty() successfully, then began working on containsNonBST(). After getting it to compile, they became stuck for an extended period (multiple runs over ~30 minutes) with the contains logic returning incorrect results. No visible code changes across several consecutive runs suggest the student was reading and analyzing the problem without finding a solution.",
+        "dominantIntent": "debugging",
+        "progressAssessment": "stuck"
+      },
+      {
+        "label": "Episode 3",
+        "summary": "Student attempted a fix for containsNonBST() that caused a regression, breaking 3 previously passing tests. This suggests the change had unintended side effects on core tree functionality.",
+        "dominantIntent": "debugging",
+        "progressAssessment": "regressing"
+      },
+      {
+        "label": "Episode 4",
+        "summary": "Breakthrough moment: Student successfully fixed the containsNonBST() implementation, recovering from the regression and passing the contains test for the first time. All previously broken tests were also restored.",
+        "dominantIntent": "debugging",
+        "progressAssessment": "breakthrough"
+      },
+      {
+        "label": "Episode 5",
+        "summary": "Student implemented the toString() method for tree string representation. The initial implementation compiled and ran but encountered a StackOverflowError due to infinite recursion.",
+        "dominantIntent": "extending",
+        "progressAssessment": "productive"
+      },
+      {
+        "label": "Episode 6",
+        "summary": "Extended debugging session on toString(). Student fixed the StackOverflowError (infinite recursion), then iteratively corrected output formatting issues (missing spaces after commas). After fixing toString(), the student rapidly implemented toArrayList(), toArray(), and inefficientIterator(), then began work on preOrderIterator(). The pre-order iterator required significant debugging through multiple failure modes (assertion errors, NullPointerException, a major 9-test regression, and missing exception handling) before finally passing.",
+        "dominantIntent": "extending",
+        "progressAssessment": "breakthrough"
+      },
+      {
+        "label": "Episode 7",
+        "summary": "The most challenging debugging episode: implementing the in-order iterator. The student went through numerous regression cycles (at least 3 instances of breaking 10+ tests), encountered null return values, incorrect traversal order, and repeatedly had to recover broken code. After approximately 14 runs of iterative debugging with multiple approaches, the student finally achieved a working in-order iterator implementation.",
+        "dominantIntent": "debugging",
+        "progressAssessment": "breakthrough"
+      },
+      {
+        "label": "Episode 8",
+        "summary": "Major expansion to the full BSTTesting suite. Student implemented insert functionality, passing 7 new tests including insert for integers and strings with return values. Also fixed null-check exception handling for insert, completing the edge_cases category. A compilation error (unreachable code) in the contains method was introduced but quickly identified.",
+        "dominantIntent": "extending",
+        "progressAssessment": "breakthrough"
+      },
+      {
+        "label": "Episode 9",
+        "summary": "Student quickly fixed the unreachable code compilation error in the contains method, restoring both testContainsInts and testContainsStrings. A surgical fix with no regressions.",
+        "dominantIntent": "debugging",
+        "progressAssessment": "productive"
+      },
+      {
+        "label": "Episode 10",
+        "summary": "Student implemented and passed the efficiency test, demonstrating the BST meets performance requirements. Then began tackling the remove operation, encountering compilation errors that broke the entire test suite. After recovering, the initial remove implementation had fundamental issues: incorrect return values, corrupted tree structure (NullPointerException on root), and nodes being improperly deleted. By the end, basic remove passed but advanced removal scenarios remained broken.",
+        "dominantIntent": "extending",
+        "progressAssessment": "productive"
+      },
+      {
+        "label": "Episode 11",
+        "summary": "Turbulent debugging session focused on the advanced remove operation (node deletion with two children). The student went through multiple regression cycles: incorrect size tracking (expected 3 got 2), overcorrection (expected 3 got 15), and a severe StackOverflowError from infinite recursion in the removal logic. After persistent trial-and-error debugging, the student achieved a breakthrough at run 55 where all 22 tests passed, completing the entire BST assignment.",
+        "dominantIntent": "debugging",
+        "progressAssessment": "breakthrough"
+      },
+      {
+        "label": "Episode 12",
+        "summary": "Final verification session. Student ran the full test suite twice, confirming all 22 tests remain passing across all categories. No code changes were made—this was a stability check after completing the assignment.",
+        "dominantIntent": "refactoring",
+        "progressAssessment": "productive"
+      }
+    ],
+    "reportDrills": [
+      {
+        "assessmentName": "Exam 2",
+        "overlap_pct": 66,
+        "drills": [
+          {
+            "pattern_name": "Incorrect boolean logic in exhaustive tree search",
+            "drill_intro": "Practice the BST search path pattern - this is an actual Exam 2 question. Add shortestWordAlongPath(String target) to BinarySearchTree.java that walks the BST search path toward the target and returns the shortest String encountered along the way, then paste this test into BSTManualTesting.java for a point back. Practices the Tree Navigation pattern from the Exam 2 review.",
+            "source": "Exam 2"
+          },
+          {
+            "pattern_name": "Regression from incorrect pointer reassignment in remove",
+            "drill_intro": "Practice the pointer-replacement pattern used in BST remove() - this is an actual Exam 2 question. Add pruneFullSubtreesSize3() to BinarySearchTree.java so that it removes every full size-3 subtree (a root with exactly two leaf children), then paste this test into BSTTesting.java for a point back. The same recursive return pattern - returning the updated subtree root - applies directly to EditorTrees Milestone 3 deletion.",
+            "source": "Exam 2"
+          }
+        ]
+      },
+      {
+        "assessmentName": "HW5",
+        "overlap_pct": 9,
+        "drills": [
+          {
+            "pattern_name": "Persistent traversal-order and null-return errors in stack-based in-order iterator",
+            "drill_intro": "Practice full-tree traversal with a depth parameter - this is an actual Exam 2 question. Add countLeftNodesAtDepth(int depth) to BinarySearchTree.java, then paste this test into BSTManualTesting.java for a point back. The same recursive accumulator pattern (traverse all nodes, count at a specific depth) applies to EditorTrees Milestone 1 traversal by rank.",
+            "source": "Exam 2"
+          },
+          {
+            "pattern_name": "Incorrect stack initialization and child-push ordering in pre-order iterator",
+            "drill_intro": "Add getPreOrderList() to BinarySearchTree.java that collects all elements in pre-order (root first, then left subtree, then right subtree) into an ArrayList<T>. HW6 PreOrderBuildTree requires understanding exactly what pre-order encodes - this drill makes that encoding concrete. Paste this test into BSTManualTesting.java for a point back.",
+            "source": "Practice"
+          }
+        ]
+      },
+      {
+        "assessmentName": "HW6",
+        "overlap_pct": 10,
+        "drills": [
+          {
+            "pattern_name": "Incorrect stack initialization and child-push ordering in pre-order iterator",
+            "drill_intro": "Add getPreOrderList() to BinarySearchTree.java that collects all elements in pre-order (root first, then left subtree, then right subtree) into an ArrayList<T>. HW6 PreOrderBuildTree requires understanding exactly what pre-order encodes - this drill makes that encoding concrete. Paste this test into BSTManualTesting.java for a point back.",
+            "source": "Practice"
+          }
+        ]
+      },
+      {
+        "assessmentName": "EditorTrees M1",
+        "overlap_pct": 4,
+        "drills": [
+          {
+            "pattern_name": "Persistent traversal-order and null-return errors in stack-based in-order iterator",
+            "drill_intro": "Practice full-tree traversal with a depth parameter - this is an actual Exam 2 question. Add countLeftNodesAtDepth(int depth) to BinarySearchTree.java, then paste this test into BSTManualTesting.java for a point back. The same recursive accumulator pattern (traverse all nodes, count at a specific depth) applies to EditorTrees Milestone 1 traversal by rank.",
+            "source": "Exam 2"
+          }
+        ]
+      }
+    ]
+  }
+]
