@@ -22,7 +22,7 @@ You are editing feedback explanations for a student programming assignment. Your
 - Specific run numbers
 - Line counts from diffs
 - Error type names (NullPointerException, AssertionError, etc.)
-- References to specific BST methods or test names
+- References to specific method names, class names, or test names from the assignment (e.g., successorIterator, addEdge, remove, keyToIndex, BSTTesting, GraphSurfingMilestone1ALTest)
 - The overall structure and length of the explanation (do not shorten aggressively)
 
 ## Input Format
@@ -37,7 +37,7 @@ A JSON array of objects:
 
 ## Output Format
 
-Return the same JSON array with rewritten `explanation` fields. Do not change any other fields. Do not add commentary outside the JSON.
+Return the same JSON array with rewritten `explanation` fields. Do not change any other fields. Your response must begin immediately with `[` and end with `]`. Do not add any commentary, preamble, or text outside the JSON.
 
 ```json
 [

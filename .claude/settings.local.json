@@ -90,7 +90,9 @@
       "Bash(unzip -p /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/studentTars/allTar-GraphSurfing-Sp2026-19May-recovered.zip \"__allTar-GraphSurfing-Sp2026-19May/run-rhit-neawedba.tar_Error.txt\")",
       "Bash(rm -rf /tmp/final-202320-inspect)",
       "Bash(mkdir /tmp/final-202320-inspect)",
-      "Bash(unzip -q \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Final Exam/final-202320.zip\" -d /tmp/final-202320-inspect)"
+      "Bash(unzip -q \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Final Exam/final-202320.zip\" -d /tmp/final-202320-inspect)",
+      "Bash(grep -v \"^#\\\\|^$\\\\|KEY\\\\|SECRET\\\\|PASSWORD\\\\|TOKEN\" /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/.env)",
+      "Bash(grep -v \"^#\\\\|^$\" /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/.env)"
     ]
   }
 }

@@ -18,7 +18,7 @@ Each test entry may include a `relatedTests` array listing test IDs that belong 
 
 **For each test, produce:**
 
-1. **pattern**: A short label describing the error pattern (e.g., "Recurring NullPointerException", "Stuck on IndexOutOfBounds", "Compilation error loop"). Use the error type + behavioral pattern.
+1. **pattern**: A short label (5–10 words) describing the error pattern. When `errorEvolution` data is present, lead with the error type (e.g., "Recurring NullPointerException in removeEdge()", "Stack overflow in SCC recursion resolved by iterative rewrite"). When `errorEvolution` is absent, construct the pattern from the test category and behavioral arc visible in the diffs and status progression (e.g., "Late AM iterator implementation resolved across 8 runs", "Persistent eager iterator despite correctness passing", "Single-run relative speed failure never revisited"). Never invent error types that are not in the input data.
 2. **confidence**: "high" if the error is consistent and clear, "medium" if the error type evolved or is ambiguous, "low" if there's insufficient data.
 3. **explanation**: A single prose paragraph covering ALL contributing code changes chronologically with interaction analysis. Factual — describe what the code changes show, no intent narration. Reference the test category and error progression. Be specific but not condescending.
 4. **nextSteps**: An ordered JSON array of 2–3 concrete steps. Frame each step around the underlying concept or technique the student needs to strengthen — useful to a student reviewing their work even after the assignment is complete, not just "do X to pass this test." Most impactful step first. Reference specific methods or concepts from the assignment. **Do NOT tell the student to look at their own passing run or implementation** — the goal is conceptual understanding, not reverse-engineering what happened to work. Describe the correct algorithm or technique directly.
@@ -41,6 +41,10 @@ Each test entry may include a `relatedTests` array listing test IDs that belong 
 - Do NOT use em dashes (—) anywhere in your output. Use a comma, semicolon, colon, or hyphen instead.
 
 **Never reference compilation errors in feedback.** If tests show ABORTED or ERROR status at some runs, do not tell the student to "fix compilation issues" — assume they already know how to compile their code. Treat those runs as non-informative runs where the test could not execute, not as bugs to fix. Feedback covers algorithmic correctness and test behavior only.
+
+**When a test has no `errorEvolution` field**, error type data was not captured. Do not guess or invent exception names. Build the pattern and explanation from `statusByRun`, `codeDiffs`, `categories`, and `highlightCategory` alone.
+
+**When a test appears in only one or two runs with no associated `codeDiffs`**, state that fact directly: the test was attempted only once and not revisited. The explanation should cover what the test category requires, why correctness at that point in time was insufficient, and what to do now. Do not speculate about what caused the failure beyond what the status data shows.
 
 **Student run history is canonical.** The `statusByRun` data reflects exactly what the student ran in their own environment. Do NOT assume the student intended to fix any test that does not appear in their run history. Do NOT reference tests the student never ran. The feedback must stay grounded in the actual sequence of runs the student performed.
 
@@ -80,4 +84,4 @@ Return a JSON object with a single `feedback` array. Each element must have exac
 }
 ```
 
-Return ONLY the JSON object, no markdown code fences or other text.
+Your response must begin immediately with `{` and end with `}`. Return ONLY the JSON object — no markdown code fences, no preamble, no explanation before or after the JSON.

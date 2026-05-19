@@ -1,7 +1,8 @@
 # Protocol: Configuring a New Assignment for the Feedback Pipeline
 
 Use this protocol when adding a new assignment (e.g. `binaryheaps`, `graphsurfing`).
-Updated 2026-05-17 with the StringHashSet rollout's learnings.
+Updated 2026-05-19 with the GraphSurfing rollout's learnings (on top of
+2026-05-17's StringHashSet revisions).
 
 ---
 
@@ -45,6 +46,17 @@ pedagogical lift — the student already has those problems. Same for `HW{N}_sol
 
 Acceptable drill sources:
 - Past exams (especially the exam closest after the assignment is due)
+  - **Including the user's own personal copy of a past exam** (e.g.
+    `final-{year}.zip` whose filename includes the user's name). Extract to
+    `/tmp/` for internal authoring reference — read **problem-statement files
+    only** (the abstract class declarations and the test class with @Tests;
+    these are the problem-by-example). Do NOT reflect anything from the user's
+    solution files (`AdjacencyListGraph.java` / `BinarySearchTree.java` /
+    similar) in drill content. Author a non-solution markdown reference (e.g.
+    `Final-{year}-{topic}.md`, paralleling `Exam3-202320.md` from the
+    StringHashSet rollout) and use that as the drill's student-facing `url` —
+    never link the .zip directly, as `/study-materials/` serves it and would
+    expose the user's solutions.
 - Earlier homework problems from the same course
 - Practice exams (`Exam{N}-practice.zip` extracted into `Pipeline/testInputs/...`)
 - LLM-generated fresh problems (handled automatically by `PracticeDrillService` when no
@@ -98,8 +110,14 @@ while IFS=, read -r COL1 EMAIL; do
   COL1="${COL1//$'\r'/}"; EMAIL="${EMAIL//$'\r'/}"
   SID="${EMAIL%@*}"
   TAR=""
-  # Try matches in order: literal GH user, strip leading rhit-, strip trailing -rhit, fall back to institutional ID
-  for CANDIDATE in "$COL1" "${COL1#rhit-}" "${COL1%-rhit}" "$SID"; do
+  # Try matches in order: literal GH user, strip leading rhit-, strip trailing -rhit,
+  # fall back to institutional ID, then try -1/-2/-3 suffixes on the previous candidates.
+  # GitHub Classroom appends -1/-2/-3 to repo names when a student accepts the
+  # assignment more than once (rejoin, section transfer); the tar filename inherits
+  # the suffix while the roster's GH username column typically does not.
+  for CANDIDATE in "$COL1" "${COL1#rhit-}" "${COL1%-rhit}" "$SID" \
+                   "${COL1}-1" "${COL1}-2" "${COL1}-3" \
+                   "${COL1#rhit-}-1" "${COL1#rhit-}-2" "${COL1#rhit-}-3"; do
     [ -z "$CANDIDATE" ] && continue
     T=$(find /tmp/{slug}-tars -maxdepth 2 -name "run-${CANDIDATE}.tar" 2>/dev/null | head -1)
     if [ -n "$T" ] && [ -s "$T" ]; then TAR="$T"; break; fi
@@ -775,6 +793,27 @@ Final Exam (2026-05-27).
 ```
 
 ---
+
+## What changed in this update (2026-05-19)
+
+Summary of revisions from the GraphSurfing rollout:
+
+1. **Phase 0 staging script handles GitHub Classroom `-N` suffix tars.** Added
+   `-1` / `-2` / `-3` suffix candidates (both on the raw GH username and on
+   the leading-`rhit-`-stripped form) to the CANDIDATE for-loop. Without these,
+   the staging script silently misses real submissions whenever a student has
+   accepted the assignment more than once and their repo is named e.g.
+   `Jack-B-RHIT-1` or `rhit-hans-2`. The GraphSurfing batch lost 3 students
+   (`Jack-B-RHIT-1`, `rhit-hans-2`, `rhit-osujiun-1`) to this gap before the fix.
+2. **Documented the personal-copy-of-past-exam pattern** under the non-circular
+   rule. The user's own copy of a past final (e.g. `final-202320.zip` whose
+   filename includes the user's name) IS a valid drill source — the rule
+   prohibits the assignment being graded and its solution doc, not past
+   exams. The constraint for personal copies: extract to `/tmp/` for internal
+   authoring, read problem-statement files only, never link the .zip as the
+   student-facing URL (it would expose the user's solutions via
+   `/study-materials/`). Author a non-solution markdown reference (pattern:
+   `Final-{year}-{topic}.md`, paralleling `Exam3-202320.md`) instead.
 
 ## What changed in this update (2026-05-17)
 
