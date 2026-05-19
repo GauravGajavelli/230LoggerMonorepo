@@ -25,6 +25,8 @@ const flags       = new Set(process.argv.slice(2).filter(a => a.startsWith('--')
 const assignment  = args[0];
 const displayName = args[1] || process.env.ASSIGNMENT_DISPLAY_NAME || assignment;
 const skipExisting = flags.has('--skip-existing');
+const concurrencyFlag = [...process.argv].find(a => a.startsWith('--concurrency='));
+const CONCURRENCY = concurrencyFlag ? parseInt(concurrencyFlag.split('=')[1], 10) : 3;
 
 if (!assignment) {
   console.error('Usage: node scripts/process-batch.js <assignment-slug> [display-name] [--skip-existing]');
@@ -139,20 +141,16 @@ logLine(`START  ${students.length} students  (${skipExisting ? '--skip-existing'
 let succeeded = 0;
 const errors = [];
 
-for (const studentId of students) {
+async function processStudent(studentId) {
   const runId = db.prepare(
     "INSERT INTO pipeline_runs (assignment,student_id,status,source,started_at) VALUES (?,?,'processing','batch',datetime('now'))"
   ).run(assignment, studentId).lastInsertRowid;
 
   const t0 = Date.now();
   try {
-    await runPipelineForStudent(studentId); // top-level await — requires "type":"module"
+    await runPipelineForStudent(studentId);
     db.prepare("UPDATE pipeline_runs SET status='success',finished_at=datetime('now') WHERE id=?").run(runId);
 
-    // Decide which report flavor to generate based on whether prepare produced any
-    // feedback patterns. With zero patterns, the personalized report would be empty —
-    // generate the class-wide review guide instead so the on-disk report.pdf is
-    // immediately correct (no need for queue-emails to overwrite it later).
     const frontendJsonPath = path.join(DATA_DIR, assignment, 'output', studentId, 'frontend.json');
     let patternCount = 0;
     if (fs.existsSync(frontendJsonPath)) {
@@ -184,7 +182,6 @@ for (const studentId of students) {
         console.log(`     No token found for ${studentId}/${assignment} — skipping PDF (run generate-tokens.js first)`);
       }
     } else {
-      // No patterns flagged → class-wide review guide, no empty personalized PDF.
       if (tokenRow) {
         try {
           await generateGenericReport(studentId, assignment, tokenRow.token, DATA_DIR, BASE_URL);
@@ -210,6 +207,18 @@ for (const studentId of students) {
     errors.push({ studentId, error: err.message });
   }
 }
+
+// Process students with a concurrency cap to avoid hitting LLM rate limits.
+// Default CONCURRENCY=3; override with --concurrency=N.
+console.log(`  concurrency: ${CONCURRENCY}\n`);
+const queue = [...students];
+async function worker() {
+  while (queue.length) {
+    const studentId = queue.shift();
+    if (studentId) await processStudent(studentId);
+  }
+}
+await Promise.all(Array.from({ length: Math.min(CONCURRENCY, students.length) }, worker));
 
 logLine(`DONE   ${succeeded} succeeded,  ${errors.length} failed`);
 
