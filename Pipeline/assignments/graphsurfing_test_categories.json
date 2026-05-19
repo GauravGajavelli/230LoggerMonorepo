@@ -1,0 +1,159 @@
+{
+  "categories": {
+    "size": {
+      "description": "Constructor from a Set<T> of keys plus size() count",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testConstructorAndSize()",
+        "GraphSurfingMilestone1AMTest#testConstructorAndSize()"
+      ]
+    },
+    "add_edge": {
+      "description": "Adding a directed edge, with the boolean return contract and NoSuchElementException for missing endpoints",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testAddEdge()",
+        "GraphSurfingMilestone1AMTest#testAddEdge()"
+      ]
+    },
+    "has_edge": {
+      "description": "Edge-membership query, including NoSuchElementException for missing endpoints",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testHasEdge()",
+        "GraphSurfingMilestone1AMTest#testHasEdge()"
+      ]
+    },
+    "num_edges": {
+      "description": "Total edge count across the graph",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testNumEdges()",
+        "GraphSurfingMilestone1AMTest#testNumEdges()"
+      ]
+    },
+    "degree": {
+      "description": "In-degree and out-degree of a vertex, with NoSuchElementException for missing keys",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testInDegree()",
+        "GraphSurfingMilestone1ALTest#testOutDegree()",
+        "GraphSurfingMilestone1AMTest#testInDegree()",
+        "GraphSurfingMilestone1AMTest#testOutDegree()"
+      ]
+    },
+    "has_vertex": {
+      "description": "Vertex-membership query against the key set",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testHasVertex()",
+        "GraphSurfingMilestone1AMTest#testHasVertex()"
+      ]
+    },
+    "key_set": {
+      "description": "Returning the Set of vertex keys backing the graph",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testKeySet()",
+        "GraphSurfingMilestone1AMTest#testKeySet()"
+      ]
+    },
+    "remove_edge": {
+      "description": "Removing a directed edge while keeping numEdges and adjacency state in sync",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testRemoveEdge()",
+        "GraphSurfingMilestone1AMTest#testRemoveEdge()"
+      ]
+    },
+    "neighbor_sets": {
+      "description": "Eager Set returns of successors and predecessors of a vertex",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testSuccessorSet()",
+        "GraphSurfingMilestone1ALTest#testPredecessorSet()",
+        "GraphSurfingMilestone1AMTest#testSuccessorSet()",
+        "GraphSurfingMilestone1AMTest#testPredecessorSet()"
+      ]
+    },
+    "neighbor_iterators": {
+      "description": "Iterator<T> traversal of successors and predecessors (correctness, not performance)",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testSuccessorIterator()",
+        "GraphSurfingMilestone1ALTest#testPredecessorIterator()",
+        "GraphSurfingMilestone1AMTest#testSuccessorIterator()",
+        "GraphSurfingMilestone1AMTest#testPredecessorIterator()"
+      ]
+    },
+    "lazy_iteration": {
+      "description": "Constructor-and-first-next() speed tests proving the iterators are lazy, not eager Set-backed",
+      "tests": [
+        "GraphSurfingMilestone1ALTest#testSuccessorIteratorIsLazy()",
+        "GraphSurfingMilestone1ALTest#testPredecessorIteratorIsLazy()",
+        "GraphSurfingMilestone1AMTest#testSuccessorIteratorIsLazy()",
+        "GraphSurfingMilestone1AMTest#testPredecessorIteratorIsLazy()"
+      ]
+    },
+    "relative_speed": {
+      "description": "AdjacencyList vs AdjacencyMatrix relative-speed comparisons that double as a representation-faithfulness check",
+      "tests": [
+        "GraphSurfingMilestone1TestCore#testRelativeSpeedforRemoveEdge()",
+        "GraphSurfingMilestone1TestCore#testRelativeSpeedforOutDegree()"
+      ]
+    },
+    "shortest_path": {
+      "description": "Breadth-first shortest path on a directed graph (List<T> from start to end, empty if unreachable)",
+      "tests": [
+        "GraphSurfingMilestone2ALTest#testALShortestPathExampleGraphs()",
+        "GraphSurfingMilestone2AMTest#testAMShortestPathExampleGraphs()"
+      ]
+    },
+    "strongly_connected_component": {
+      "description": "Strongly connected component of a vertex (forward and reverse reachability intersection)",
+      "tests": [
+        "GraphSurfingMilestone2ALTest#testALStronglyConnectedComponentExampleGraphs()",
+        "GraphSurfingMilestone2AMTest#testAMStronglyConnectedComponentExampleGraphs()"
+      ]
+    },
+    "wiki_surfing": {
+      "description": "Integration of shortestPath and stronglyConnectedComponent on the 460k-vertex Wikipedia living-people graph",
+      "tests": [
+        "GraphSurfingMilestone2TestCore#testWikiSurfingShortestPath()",
+        "GraphSurfingMilestone2TestCore#testWikiSurfingStronglyConnectedComponent()",
+        "GraphSurfingMilestone2TestCore#testWikiSurfingFindChallengePair()"
+      ]
+    }
+  },
+  "testToCategories": {
+    "GraphSurfingMilestone1ALTest#testConstructorAndSize()": ["size"],
+    "GraphSurfingMilestone1AMTest#testConstructorAndSize()": ["size"],
+    "GraphSurfingMilestone1ALTest#testAddEdge()": ["add_edge"],
+    "GraphSurfingMilestone1AMTest#testAddEdge()": ["add_edge"],
+    "GraphSurfingMilestone1ALTest#testHasEdge()": ["has_edge"],
+    "GraphSurfingMilestone1AMTest#testHasEdge()": ["has_edge"],
+    "GraphSurfingMilestone1ALTest#testNumEdges()": ["num_edges"],
+    "GraphSurfingMilestone1AMTest#testNumEdges()": ["num_edges"],
+    "GraphSurfingMilestone1ALTest#testInDegree()": ["degree"],
+    "GraphSurfingMilestone1ALTest#testOutDegree()": ["degree"],
+    "GraphSurfingMilestone1AMTest#testInDegree()": ["degree"],
+    "GraphSurfingMilestone1AMTest#testOutDegree()": ["degree"],
+    "GraphSurfingMilestone1ALTest#testHasVertex()": ["has_vertex"],
+    "GraphSurfingMilestone1AMTest#testHasVertex()": ["has_vertex"],
+    "GraphSurfingMilestone1ALTest#testKeySet()": ["key_set"],
+    "GraphSurfingMilestone1AMTest#testKeySet()": ["key_set"],
+    "GraphSurfingMilestone1ALTest#testRemoveEdge()": ["remove_edge"],
+    "GraphSurfingMilestone1AMTest#testRemoveEdge()": ["remove_edge"],
+    "GraphSurfingMilestone1ALTest#testSuccessorSet()": ["neighbor_sets"],
+    "GraphSurfingMilestone1ALTest#testPredecessorSet()": ["neighbor_sets"],
+    "GraphSurfingMilestone1AMTest#testSuccessorSet()": ["neighbor_sets"],
+    "GraphSurfingMilestone1AMTest#testPredecessorSet()": ["neighbor_sets"],
+    "GraphSurfingMilestone1ALTest#testSuccessorIterator()": ["neighbor_iterators"],
+    "GraphSurfingMilestone1ALTest#testPredecessorIterator()": ["neighbor_iterators"],
+    "GraphSurfingMilestone1AMTest#testSuccessorIterator()": ["neighbor_iterators"],
+    "GraphSurfingMilestone1AMTest#testPredecessorIterator()": ["neighbor_iterators"],
+    "GraphSurfingMilestone1ALTest#testSuccessorIteratorIsLazy()": ["lazy_iteration"],
+    "GraphSurfingMilestone1ALTest#testPredecessorIteratorIsLazy()": ["lazy_iteration"],
+    "GraphSurfingMilestone1AMTest#testSuccessorIteratorIsLazy()": ["lazy_iteration"],
+    "GraphSurfingMilestone1AMTest#testPredecessorIteratorIsLazy()": ["lazy_iteration"],
+    "GraphSurfingMilestone1TestCore#testRelativeSpeedforRemoveEdge()": ["relative_speed"],
+    "GraphSurfingMilestone1TestCore#testRelativeSpeedforOutDegree()": ["relative_speed"],
+    "GraphSurfingMilestone2ALTest#testALShortestPathExampleGraphs()": ["shortest_path"],
+    "GraphSurfingMilestone2AMTest#testAMShortestPathExampleGraphs()": ["shortest_path"],
+    "GraphSurfingMilestone2ALTest#testALStronglyConnectedComponentExampleGraphs()": ["strongly_connected_component"],
+    "GraphSurfingMilestone2AMTest#testAMStronglyConnectedComponentExampleGraphs()": ["strongly_connected_component"],
+    "GraphSurfingMilestone2TestCore#testWikiSurfingShortestPath()": ["wiki_surfing"],
+    "GraphSurfingMilestone2TestCore#testWikiSurfingStronglyConnectedComponent()": ["wiki_surfing"],
+    "GraphSurfingMilestone2TestCore#testWikiSurfingFindChallengePair()": ["wiki_surfing"]
+  }
+}

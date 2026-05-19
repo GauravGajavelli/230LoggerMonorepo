@@ -1,0 +1,50 @@
+[
+  {
+    "id": "final-numDirectedTriangles-simpleAL",
+    "source": "Final Exam",
+    "sourceLabel": "Final Exam — practice (computer part), simple case",
+    "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+    "targetFile": "GraphSurfingMilestone1ALTest.java",
+    "categories": ["add_edge", "has_edge", "neighbor_iterators"],
+    "timeEstimate": "~10 min",
+    "intro": "The Final's graph programming section asks you to extend Graph<T> with a new traversal method on top of your Milestone 1 work. Practice that exact pattern by adding a public int numDirectedTriangles() method to your Graph<T> (or its AL/AM subclasses) that returns the number of directed 3-cycles in the graph — that is, ordered triples of distinct vertices (u, v, w) with edges u→v, v→w, w→u. Then paste this test into GraphSurfingMilestone1ALTest.java for a self-check. The simple 3-vertex case is the warm-up; harder variants follow.",
+    "testCode": "@Test\npublic void practice_numDirectedTriangles_simpleAL() {\n    HashSet<String> keysThree = new HashSet<String>();\n    keysThree.add(\"A\");\n    keysThree.add(\"B\");\n    keysThree.add(\"C\");\n    Graph<String> g3 = new AdjacencyListGraph<String>(keysThree);\n    g3.addEdge(\"A\", \"B\");\n    g3.addEdge(\"B\", \"C\");\n    assertEquals(0, g3.numDirectedTriangles());\n    g3.addEdge(\"C\", \"A\");\n    assertEquals(1, g3.numDirectedTriangles());\n    g3.addEdge(\"B\", \"A\");\n    g3.addEdge(\"C\", \"B\");\n    assertEquals(1, g3.numDirectedTriangles());\n    g3.addEdge(\"A\", \"C\");\n    assertEquals(2, g3.numDirectedTriangles());\n    m1points.add(2 * Core.m1weight);\n}",
+    "hints": [
+      "A directed triangle (u, v, w) requires three directed edges: u→v, v→w, and w→u. The simplest correct implementation iterates over all ordered triples of distinct vertices and checks the three edges via hasEdge — but it must not double-count.",
+      "The triple (A, B, C) and (B, C, A) and (C, A, B) describe the same triangle (a 3-cycle has three rotations). One way to count each triangle exactly once is to enforce a fixed ordering on the triple — e.g. require u to compare-less-than both v and w using vertex.toString().",
+      "If you're seeing 6 where the test expects 2, you're counting each triangle three times (once per rotation). Either divide by 3 at the end, or restrict to one canonical rotation per triangle as described above."
+    ]
+  },
+  {
+    "id": "final-numDirectedTriangles-exampleAL",
+    "source": "Final Exam",
+    "sourceLabel": "Final Exam — practice (computer part), example graph",
+    "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+    "targetFile": "GraphSurfingMilestone1ALTest.java",
+    "categories": ["add_edge", "has_edge", "neighbor_iterators", "key_set"],
+    "timeEstimate": "~10 min",
+    "intro": "Same numDirectedTriangles() method as the warm-up, now on a 6-vertex example from the Final practice's computer part. The graph below has exactly 3 directed triangles after all 9 edges are added. Paste this test into GraphSurfingMilestone1ALTest.java after the simple case passes. If your count is wildly off, the bug is usually rotation-double-counting; if it's off by one or two, you may be misreading the edge list — sketch the adjacency list on paper first.",
+    "testCode": "@Test\npublic void practice_numDirectedTriangles_exampleAL() {\n    HashSet<String> keysExample = new HashSet<String>();\n    keysExample.add(\"A\");\n    keysExample.add(\"B\");\n    keysExample.add(\"C\");\n    keysExample.add(\"D\");\n    keysExample.add(\"E\");\n    keysExample.add(\"F\");\n    Graph<String> exampleGraph = new AdjacencyListGraph<String>(keysExample);\n    assertEquals(0, exampleGraph.numDirectedTriangles());\n    exampleGraph.addEdge(\"A\", \"B\");\n    exampleGraph.addEdge(\"B\", \"C\");\n    exampleGraph.addEdge(\"B\", \"D\");\n    exampleGraph.addEdge(\"C\", \"A\");\n    exampleGraph.addEdge(\"C\", \"E\");\n    exampleGraph.addEdge(\"C\", \"F\");\n    exampleGraph.addEdge(\"D\", \"E\");\n    exampleGraph.addEdge(\"E\", \"B\");\n    exampleGraph.addEdge(\"E\", \"F\");\n    assertEquals(3, exampleGraph.numDirectedTriangles());\n    m1points.add(3 * Core.m1weight);\n}",
+    "hints": [
+      "Build the adjacency list on paper before running. From A: A→B. From B: B→C, B→D. From C: C→A, C→E, C→F. From D: D→E. From E: E→B, E→F. From F: nothing. With those edges in hand, scan for closed 3-cycles by inspection — that gives you the answer to compare against your code.",
+      "If you're seeing 9 instead of 3, you're counting each of the three triangles three times (one per rotation). If you're seeing 6 or 18, you're counting both rotations AND reflections — but in a directed graph there is no reflection symmetry, so check your loop bounds.",
+      "A reliable iteration shape: for u in keySet(), for v in successorSet(u), for w in successorSet(v) — if hasEdge(w, u) and {u,v,w} are pairwise distinct, increment. Then divide the running count by 3 once at the end."
+    ]
+  },
+  {
+    "id": "final-numDirectedTriangles-completeLargeAL",
+    "source": "Final Exam",
+    "sourceLabel": "Final Exam — practice (computer part), large graph perf",
+    "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+    "targetFile": "GraphSurfingMilestone1ALTest.java",
+    "categories": ["has_edge", "neighbor_iterators", "lazy_iteration"],
+    "timeEstimate": "~15 min",
+    "intro": "Same numDirectedTriangles() method, now graded for performance on a 150-vertex complete graph (every ordered pair of distinct vertices has an edge in each direction). The closed-form count is N(N-1)(N-2) ordered triples; how that divides depends on whether your implementation counts each triangle once, three times, or six times — match the divisor you used in the earlier drills. The test asserts both correctness and a 1-second wall-clock budget. Paste this test into GraphSurfingMilestone1ALTest.java after the example case passes. Perf hints below.",
+    "testCode": "@Test\npublic void practice_numDirectedTriangles_completeLargeAL() {\n    int size = 150;\n    int numTris = size * (size - 1) * (size - 2) / 3;\n    HashSet<Integer> keys = new HashSet<Integer>();\n    for (Integer i = 0; i < size; i++) {\n        keys.add(i);\n    }\n    Graph<Integer> g = new AdjacencyListGraph<Integer>(keys);\n    for (int i = 0; i < size; i++) {\n        for (int j = i + 1; j < size; j++) {\n            g.addEdge(i, j);\n            g.addEdge(j, i);\n        }\n    }\n    long startTime = System.nanoTime();\n    assertEquals(numTris, g.numDirectedTriangles());\n    long endTime = System.nanoTime();\n    String timeInMs = Long.toString((endTime - startTime) / 1000000);\n    assertTrue(endTime - startTime <= 1000000000, timeInMs + \" ms > 1000 ms is too slow\");\n    m1points.add(2 * Core.m1weight);\n}",
+    "hints": [
+      "successorIterator construction must be O(1). If you're calling successorSet (which eagerly builds a HashSet) inside an inner loop, you're allocating O(N) sets per outer step — that's an N^4 algorithm. Use successorIterator directly or cache successorSet outside the loop.",
+      "hasEdge in AdjacencyListGraph walks the successors list of `from` looking for `to`. For a complete graph that's an O(N) call. Inside a triple-nested vertex loop, that becomes O(N^4). For this drill, prefer the (u → v → w → u?) shape over (u, v, w from keySet, hasEdge three times) — it visits only real edges, not all triples.",
+      "If you're timing out at exactly 1 second, profile by halving size and confirming wall time drops by ~8× (cubic scaling) and not ~16× (quartic). If it drops by 16×, your inner loop has a hidden O(N) step you can hoist out."
+    ]
+  }
+]

@@ -1,0 +1,178 @@
+{
+  "assignmentName": "Graph Surfing",
+  "excludeTestClasses": [],
+  "courseContext": {
+    "concepts": [
+      {
+        "concept": "Constructing a graph from a Set<T> of keys, and the AL vs AM representation tradeoff",
+        "testCategories": ["size", "relative_speed"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — computer part",
+            "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+            "description": "The Final's coding section asks you to extend an abstract Graph<T> in both AdjacencyList and AdjacencyMatrix forms — the same constructor + representation-choice work you did in Milestone 1, but with a fresh method on top."
+          },
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "Paper-section questions ask you to pick AL vs AM for a given workload and justify the choice in big-O terms — the same reasoning the testRelativeSpeed tests pin down empirically."
+          }
+        ]
+      },
+      {
+        "concept": "Adding directed edges with vertex preconditions and the boolean already-present return",
+        "testCategories": ["add_edge", "num_edges"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — computer part",
+            "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+            "description": "Every graph drill on the Final starts by building a small graph via addEdge calls. If addEdge silently accepts edges into missing vertices, all downstream traversal questions read wrong answers."
+          },
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "Paper tracing questions step through addEdge calls one at a time, asking you to report the resulting adjacency list or matrix. Confidence with the boolean and exception contract makes those questions fast."
+          }
+        ]
+      },
+      {
+        "concept": "Querying graph state (hasVertex, hasEdge, keySet)",
+        "testCategories": ["has_vertex", "has_edge", "key_set"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "Reachability and edge-existence questions on the paper section depend on the same membership semantics hasEdge enforces: a directed edge (from,to) exists iff to is in from's successor set."
+          },
+          {
+            "label": "java.util.Set contract",
+            "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Set.html",
+            "description": "keySet() returns the backing Set of vertex keys. Re-reading the Set interface clarifies what equality semantics callers may rely on — the same contract recurs in EditorTrees iteration and any future Set-returning method."
+          }
+        ]
+      },
+      {
+        "concept": "Computing in-degree and out-degree of a vertex",
+        "testCategories": ["degree"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "Degree-sequence reasoning shows up in paper-section questions about Eulerian paths, balanced graphs, and edge counting (sum of out-degrees = numEdges)."
+          }
+        ]
+      },
+      {
+        "concept": "Returning the neighbor set of a vertex (successors / predecessors)",
+        "testCategories": ["neighbor_sets"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "BFS and DFS trace tables on the paper section list the successor set of each visited vertex at every step. The same Set-returning method is the building block for both algorithms."
+          },
+          {
+            "label": "java.util.Set contract",
+            "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Set.html",
+            "description": "predecessorSet and successorSet must return a defensive-or-snapshot Set, not a live view. Reviewing the Set contract clarifies the iteration / mutation guarantees your callers expect."
+          }
+        ]
+      },
+      {
+        "concept": "Lazy iterators over a vertex's neighbors (constructor and first next() must be O(1) amortized)",
+        "testCategories": ["neighbor_iterators", "lazy_iteration"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — computer part",
+            "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+            "description": "The Final's graph problem traverses the graph via successorIterator inside an inner loop — if your iterator is non-lazy (eagerly building a Set on construction), the perf-bound test that follows the correctness test will time out."
+          },
+          {
+            "label": "java.util.Iterator contract",
+            "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Iterator.html",
+            "description": "Every iterator you write — graphs, hash sets, EditorTrees — satisfies the same hasNext()/next()/NoSuchElementException contract. Re-reading the docs after a failing iterator test usually surfaces the rule that was violated."
+          }
+        ]
+      },
+      {
+        "concept": "Removing edges while keeping numEdges and adjacency state in sync",
+        "testCategories": ["remove_edge"],
+        "futureAppearances": [
+          {
+            "label": "GraphSurfing — Milestone 1 spec recap",
+            "url": "GraphSurfing/GraphSurfing.md",
+            "description": "The Milestone 1 section of the spec restates the removeEdge contract: returns true if the remove succeeds, false if the edge wasn't present, NoSuchElementException for missing endpoints. Re-reading it is a fast way to sanity-check edge cases the unit tests check."
+          },
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "Mutate-the-graph trace questions sequence addEdge and removeEdge calls and ask you to report numEdges after each step. The same invariant your tests check — numEdges decreases by exactly 1 per successful remove — is the answer key."
+          }
+        ]
+      },
+      {
+        "concept": "BFS shortest path on a directed graph (List<T> from start to end, or empty if unreachable)",
+        "testCategories": ["shortest_path"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — computer part",
+            "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+            "description": "Shortest path is the canonical Final graph-programming question: implement a method that returns a List of vertices from start to end, or an empty list if no path exists. Same signature, same BFS-with-parent-map approach as Milestone 2."
+          },
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "Paper questions ask you to trace BFS on a small graph and report the parent-of array at each step. The same bookkeeping that recovers the path in shortestPath is what the trace table is testing."
+          },
+          {
+            "label": "GraphSurfing — Milestone 2 spec recap",
+            "url": "GraphSurfing/GraphSurfing.md",
+            "description": "The Milestone 2 section of the spec describes shortestPath's exact contract — start/end inclusion in the returned list, empty-list-on-unreachable, NoSuchElementException for missing keys. Re-read before practicing for the Final to make sure your mental model matches the contract."
+          },
+          {
+            "label": "java.util.List contract",
+            "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html",
+            "description": "shortestPath returns a List<T>. The List interface specifies ordering, indexed access, and equality semantics — re-reading it clarifies why an ArrayList works and a HashSet would not."
+          }
+        ]
+      },
+      {
+        "concept": "Strongly connected component of a vertex (forward and reverse reachability intersection)",
+        "testCategories": ["strongly_connected_component"],
+        "futureAppearances": [
+          {
+            "label": "Final practice — computer part",
+            "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+            "description": "SCC, cycle counting, and reachability-based methods are common Final graph-section questions. The two-pass forward/reverse-BFS approach you used for stronglyConnectedComponent generalizes directly to those problems."
+          },
+          {
+            "label": "Final practice — paper section",
+            "url": "Exams/Final Exam/PracticeFinalExam.pdf",
+            "description": "Paper questions ask you to identify the SCCs of a small directed graph by inspection. Practicing this by hand is faster than re-tracing your code and is the form the Final usually uses."
+          },
+          {
+            "label": "GraphSurfing — Milestone 2 spec recap",
+            "url": "GraphSurfing/GraphSurfing.md",
+            "description": "The Milestone 2 section explains why SCC matters (defining a 'universe' of mutually-reachable wiki pages) — the conceptual framing the Final's SCC question will assume you understand."
+          }
+        ]
+      },
+      {
+        "concept": "Integrating shortestPath and SCC against a real 460k-vertex graph (WikiSurfing)",
+        "testCategories": ["wiki_surfing"],
+        "futureAppearances": [
+          {
+            "label": "GraphSurfing — Milestone 2 spec recap",
+            "url": "GraphSurfing/GraphSurfing.md",
+            "description": "The WikiSurfing section describes the Living-People graph, the data origin, and the bonus challenge-pair task. WikiSurfing failures usually trace back to a Milestone 1 method that's correct on tiny examples but quadratic on a large graph — re-reading the spec helps locate which method is the bottleneck."
+          },
+          {
+            "label": "Final practice — computer part",
+            "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+            "description": "The Final's graph question is graded for O(N+E) traversal on a moderately-sized random graph. The same performance discipline that lets your shortestPath finish a Living-People query in seconds is what the Final's perf test asserts."
+          }
+        ]
+      }
+    ]
+  }
+}

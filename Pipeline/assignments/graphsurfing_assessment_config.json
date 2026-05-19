@@ -1,0 +1,28 @@
+{
+  "assignment": "Graph Surfing",
+  "short_name": "Graphs",
+  "full_name": "Graph Surfing",
+  "assessments": [
+    {
+      "id": "final_exam",
+      "name": "Final Exam",
+      "date": "2026-05-27",
+      "date_display": "May 27",
+      "type": "exam",
+      "grade_weight": 0.12,
+      "concept_weights": {
+        "shortest_path": 0.04,
+        "strongly_connected_component": 0.03,
+        "neighbor_iterators": 0.02,
+        "add_edge": 0.01,
+        "has_edge": 0.01,
+        "key_set": 0.01,
+        "neighbor_sets": 0.01
+      },
+      "resources": [
+        { "url": "Exams/Final Exam/PracticeFinalExam.pdf", "label": "Practice Final Exam (paper)" },
+        { "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf", "label": "Practice Final — Computer Part (2018)" }
+      ]
+    }
+  ]
+}
