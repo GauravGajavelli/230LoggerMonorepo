@@ -13,6 +13,7 @@
       "concept_weights": {
         "shortest_path": 0.04,
         "strongly_connected_component": 0.03,
+        "lazy_iteration": 0.02,
         "neighbor_iterators": 0.02,
         "add_edge": 0.01,
         "has_edge": 0.01,
