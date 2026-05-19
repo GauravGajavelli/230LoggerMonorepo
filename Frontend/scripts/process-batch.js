@@ -8,7 +8,7 @@
  * Usage (run from Frontend/):
  *   node scripts/process-batch.js bst "Binary Search Tree"
  */
-import 'dotenv/config';
+import { config as dotenvConfig } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,7 +16,12 @@ import { execFile } from 'child_process';
 import db from '../lib/db.js';
 import { generateReport, generateReportForToken, generateGenericReport } from '../lib/report.js';
 
+// Load .env from Frontend/ regardless of the invoking cwd (server runs from repo root).
+// Must run before reading process.env.BASE_URL / DATA_DIR / PIPELINE_JAR below.
+// db.js and report.js are already imported above but both use path-based fallbacks,
+// so they don't depend on this dotenv call.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenvConfig({ path: path.join(__dirname, '..', '.env') });
 // The pipeline JAR resolves prompt templates relative to cwd, which must be the repo root
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
