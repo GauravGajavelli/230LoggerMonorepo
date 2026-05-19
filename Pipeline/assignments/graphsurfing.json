@@ -141,6 +141,11 @@
         "testCategories": ["strongly_connected_component"],
         "futureAppearances": [
           {
+            "label": "Final 2023 — findUnknownBalloons",
+            "url": "Exams/Final Exam/Final-202320-graph.md",
+            "description": "The 2023 Final's graph question asks you to find balloons not in any confirmed network — i.e., not in the same SCC as any confirmed balloon. Solving it is a thin layer over your Milestone 2 stronglyConnectedComponent, and matches the standard Final-Exam pattern of building one new question on top of an M1/M2 method."
+          },
+          {
             "label": "Final practice — computer part",
             "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
             "description": "SCC, cycle counting, and reachability-based methods are common Final graph-section questions. The two-pass forward/reverse-BFS approach you used for stronglyConnectedComponent generalizes directly to those problems."

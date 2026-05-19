@@ -46,5 +46,69 @@
       "hasEdge in AdjacencyListGraph walks the successors list of `from` looking for `to`. For a complete graph that's an O(N) call. Inside a triple-nested vertex loop, that becomes O(N^4). For this drill, prefer the (u → v → w → u?) shape over (u, v, w from keySet, hasEdge three times) — it visits only real edges, not all triples.",
       "If you're timing out at exactly 1 second, profile by halving size and confirming wall time drops by ~8× (cubic scaling) and not ~16× (quartic). If it drops by 16×, your inner loop has a hidden O(N) step you can hoist out."
     ]
+  },
+  {
+    "id": "final-countReachableWithinKHops-exampleAL",
+    "source": "Final Exam",
+    "sourceLabel": "Final Exam — extension drill (BFS practice)",
+    "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+    "targetFile": "GraphSurfingMilestone2ALTest.java",
+    "categories": ["shortest_path", "neighbor_iterators"],
+    "timeEstimate": "~15 min",
+    "intro": "The Final's graph programming section often asks for a BFS-flavored method that's related to shortestPath but not identical — practice that pattern by implementing public int countReachableWithinKHops(T from, int k) on your Graph<T> (or in AdjacencyListGraph if you prefer): it returns the count of vertices reachable from `from` using at most k directed edges, including `from` itself at hop 0. Paste this test into GraphSurfingMilestone2ALTest.java. Note: that file's existing @Test methods route through Core helpers and don't import assertEquals directly — add `import static org.junit.jupiter.api.Assertions.assertEquals;` at the top before the test compiles.",
+    "testCode": "@Test\npublic void practice_countReachableWithinKHops_exampleAL() {\n    Graph<String> g = Core.makeExampleALGraph();\n    assertEquals(1, g.countReachableWithinKHops(\"a\", 0));\n    assertEquals(3, g.countReachableWithinKHops(\"a\", 1));\n    assertEquals(4, g.countReachableWithinKHops(\"a\", 2));\n    assertEquals(6, g.countReachableWithinKHops(\"a\", 3));\n    assertEquals(6, g.countReachableWithinKHops(\"a\", 10));\n    assertEquals(1, g.countReachableWithinKHops(\"f\", 0));\n    assertEquals(2, g.countReachableWithinKHops(\"f\", 1));\n    assertEquals(3, g.countReachableWithinKHops(\"f\", 2));\n    assertEquals(4, g.countReachableWithinKHops(\"f\", 3));\n    m2points.add(2 * Core.m2weight);\n}",
+    "hints": [
+      "Standard BFS with explicit hop tracking: keep a Queue of (vertex, distance) pairs and a HashSet of visited vertices. Pop one at a time, skip if already visited, mark visited, count it. Push successors (via successorIterator) only when their distance is ≤ k.",
+      "Off-by-one trap: countReachableWithinKHops(start, 0) returns 1 — the start vertex itself counts at distance 0. countReachableWithinKHops(start, 1) returns 1 plus the number of distinct direct successors. The hop count is the number of edges traversed, not the number of vertices visited.",
+      "Don't call successorSet inside the BFS inner loop — it eagerly builds a HashSet per call. Use successorIterator for O(1) construction. Eager construction blows an O(V+E) BFS up to O(V·E) or worse, which is exactly what the Final's perf-bound version of this question is designed to catch."
+    ]
+  },
+  {
+    "id": "final-isStronglyConnected-basicAL",
+    "source": "Final Exam",
+    "sourceLabel": "Final Exam — extension drill (SCC practice)",
+    "url": "Exams/Final Exam/PracticeFinalExamComputerPart201830.pdf",
+    "targetFile": "GraphSurfingMilestone2ALTest.java",
+    "categories": ["strongly_connected_component", "neighbor_iterators", "key_set"],
+    "timeEstimate": "~15 min",
+    "intro": "Your Milestone 2 stronglyConnectedComponent returns the SCC containing one specific key. The Final practice's graph section often asks for a related-but-different question: 'is the entire graph one big SCC?' Practice it by implementing public boolean isStronglyConnected() on your Graph<T> that returns true iff every vertex can reach every other vertex. Paste this test into GraphSurfingMilestone2ALTest.java. As with the BFS drill, you'll need to add `import static org.junit.jupiter.api.Assertions.assertEquals;` and `import java.util.HashSet;` at the top — neither is currently in M2ALTest's import block.",
+    "testCode": "@Test\npublic void practice_isStronglyConnected_basicAL() {\n    Graph<String> g = Core.makeExampleALGraph();\n    assertEquals(false, g.isStronglyConnected());\n    HashSet<String> keys = new HashSet<String>();\n    keys.add(\"x\");\n    keys.add(\"y\");\n    keys.add(\"z\");\n    Graph<String> g2 = new AdjacencyListGraph<String>(keys);\n    g2.addEdge(\"x\", \"y\");\n    g2.addEdge(\"y\", \"z\");\n    g2.addEdge(\"z\", \"x\");\n    assertEquals(true, g2.isStronglyConnected());\n    g2.removeEdge(\"z\", \"x\");\n    assertEquals(false, g2.isStronglyConnected());\n    HashSet<String> single = new HashSet<String>();\n    single.add(\"a\");\n    Graph<String> g3 = new AdjacencyListGraph<String>(single);\n    assertEquals(true, g3.isStronglyConnected());\n    m2points.add(2 * Core.m2weight);\n}",
+    "hints": [
+      "Algorithm: pick any vertex v from keySet(). Do a forward BFS from v (via successorIterator) — collect every vertex it reaches. Do a reverse BFS from v (via predecessorIterator) — collect every vertex that reaches it. The graph is strongly connected iff both reachable sets equal keySet().",
+      "Why one vertex is sufficient: if v reaches everyone (forward) and everyone reaches v (reverse), then for any pair a, b, the path a → v → b exists (concatenate reverse-of-a-to-v with forward-of-v-to-b). You don't have to check V·V pairs separately.",
+      "Edge case: a single-vertex graph is trivially strongly connected — its lone vertex reaches itself with the zero-length path. Your BFS will visit only the start vertex, the reachable set is {v}, keySet() is {v}, and the comparison naturally returns true. If your code special-cases size 1 to false, you've added a bug."
+    ]
+  },
+  {
+    "id": "final2023-findUnknownBalloons-example0AL",
+    "source": "Final Exam",
+    "sourceLabel": "Final Exam — 2023 (findUnknownBalloons, warmup)",
+    "url": "Exams/Final Exam/Final-202320-graph.md",
+    "targetFile": "GraphSurfingMilestone2ALTest.java",
+    "categories": ["strongly_connected_component", "neighbor_iterators", "key_set"],
+    "timeEstimate": "~15 min",
+    "intro": "This is the Winter 2023 Final's graph problem, reproduced from the exam's own test cases. Implement public Set<T> findUnknownBalloons(Set<T> confirmedBalloons, Set<T> allBalloons) on your Graph<T>: it returns the set of balloons not in the same network (SCC) as any confirmed balloon. If your Milestone 2 stronglyConnectedComponent is working, this is a thin layer on top. The non-solution reference doc (linked above) describes the problem semantics with worked examples. Paste this warmup test into GraphSurfingMilestone2ALTest.java — you'll need four imports the existing test class doesn't have: `import java.util.HashSet;`, `import java.util.Set;`, `import static org.junit.jupiter.api.Assertions.assertEquals;`, and `import static org.junit.jupiter.api.Assertions.assertTrue;`.",
+    "testCode": "@Test\npublic void practice_findUnknownBalloons_example0_AL() {\n    HashSet<String> allBalloons = new HashSet<String>();\n    allBalloons.add(\"A\");\n    allBalloons.add(\"B\");\n    allBalloons.add(\"C\");\n    allBalloons.add(\"E\");\n    Graph<String> g = new AdjacencyListGraph<String>(allBalloons);\n    g.addEdge(\"A\", \"B\");\n    g.addEdge(\"B\", \"C\");\n    g.addEdge(\"B\", \"E\");\n    g.addEdge(\"C\", \"B\");\n\n    Set<String> confirmed = new HashSet<String>();\n    confirmed.add(\"B\");\n    Set<String> unknown = g.findUnknownBalloons(confirmed, allBalloons);\n    assertEquals(2, unknown.size());\n    assertTrue(unknown.contains(\"A\"));\n    assertTrue(unknown.contains(\"E\"));\n\n    confirmed.clear();\n    confirmed.add(\"C\");\n    unknown = g.findUnknownBalloons(confirmed, allBalloons);\n    assertEquals(2, unknown.size());\n    assertTrue(unknown.contains(\"A\"));\n    assertTrue(unknown.contains(\"E\"));\n\n    confirmed.clear();\n    confirmed.add(\"A\");\n    confirmed.add(\"E\");\n    unknown = g.findUnknownBalloons(confirmed, allBalloons);\n    assertEquals(2, unknown.size());\n    assertTrue(unknown.contains(\"B\"));\n    assertTrue(unknown.contains(\"C\"));\n\n    m2points.add(3 * Core.m2weight);\n}",
+    "hints": [
+      "Skeleton: for each balloon b in confirmedBalloons, compute its SCC via your Milestone 2 method, and accumulate those SCCs into a single HashSet of 'known' balloons. Then return allBalloons minus that known set.",
+      "Why {B} alone and {C} alone give the same answer: B and C form a 2-cycle (B → C → B), so stronglyConnectedComponent(B) and stronglyConnectedComponent(C) both return {B, C}. A and E never participate in any cycle, so their SCCs are singletons.",
+      "If your test fails on the third sub-case (confirmed = {A, E}, expected unknowns = {B, C}): make sure you're computing the SCC of each confirmed balloon, not just adding it to the known set. SCC({A}) = {A} alone because no edge reaches A from elsewhere; you must consult the graph to figure that out."
+    ]
+  },
+  {
+    "id": "final2023-findUnknownBalloons-example1AL",
+    "source": "Final Exam",
+    "sourceLabel": "Final Exam — 2023 (findUnknownBalloons, multi-network)",
+    "url": "Exams/Final Exam/Final-202320-graph.md",
+    "targetFile": "GraphSurfingMilestone2ALTest.java",
+    "categories": ["strongly_connected_component", "neighbor_iterators", "key_set"],
+    "timeEstimate": "~15 min",
+    "intro": "Same findUnknownBalloons method, now on the 2023 Final's 9-vertex example with three distinct networks: {A,B,C,D} (a ring), {E,F} (a 2-cycle), {G,H} (a 2-cycle), and {I} (isolated). Confirming any balloon transitively confirms its whole network. Paste this test into GraphSurfingMilestone2ALTest.java after the warmup passes. Same four imports required (see warmup intro).",
+    "testCode": "@Test\npublic void practice_findUnknownBalloons_example1_AL() {\n    HashSet<String> allBalloons = new HashSet<String>();\n    for (String b : new String[]{\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\"}) {\n        allBalloons.add(b);\n    }\n    Graph<String> g = new AdjacencyListGraph<String>(allBalloons);\n    g.addEdge(\"A\", \"B\");\n    g.addEdge(\"B\", \"C\");\n    g.addEdge(\"B\", \"E\");\n    g.addEdge(\"C\", \"B\");\n    g.addEdge(\"C\", \"D\");\n    g.addEdge(\"D\", \"A\");\n    g.addEdge(\"E\", \"F\");\n    g.addEdge(\"F\", \"E\");\n    g.addEdge(\"G\", \"H\");\n    g.addEdge(\"H\", \"G\");\n\n    Set<String> confirmed = new HashSet<String>();\n    confirmed.add(\"A\");\n    Set<String> unknown = g.findUnknownBalloons(confirmed, allBalloons);\n    assertEquals(5, unknown.size());\n    assertTrue(unknown.contains(\"E\"));\n    assertTrue(unknown.contains(\"F\"));\n    assertTrue(unknown.contains(\"G\"));\n    assertTrue(unknown.contains(\"H\"));\n    assertTrue(unknown.contains(\"I\"));\n\n    confirmed.clear();\n    confirmed.add(\"D\");\n    confirmed.add(\"F\");\n    confirmed.add(\"H\");\n    unknown = g.findUnknownBalloons(confirmed, allBalloons);\n    assertEquals(1, unknown.size());\n    assertTrue(unknown.contains(\"I\"));\n\n    confirmed.clear();\n    confirmed.add(\"I\");\n    unknown = g.findUnknownBalloons(confirmed, allBalloons);\n    assertEquals(8, unknown.size());\n\n    m2points.add(3 * Core.m2weight);\n}",
+    "hints": [
+      "The B → E edge does NOT put B and E in the same network. Networks are SCCs (mutual reachability), and E has no way to reach B. So confirming {A} confirms {A, B, C, D} only — E, F, G, H, I remain unknown.",
+      "Don't recompute the SCC for balloons you've already covered. If A and B are both confirmed, and you've already added stronglyConnectedComponent(A) = {A,B,C,D} to your known set, computing stronglyConnectedComponent(B) is redundant work that returns the same set. Skip B if it's already in known.",
+      "Edge case in the third sub-case: confirming {I} alone — I is a solo vertex with no edges, so SCC({I}) = {I}. The unknown set is everything else (8 balloons). Your code should handle this without crashing on the no-edges case."
+    ]
   }
 ]
