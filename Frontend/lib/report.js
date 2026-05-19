@@ -126,7 +126,12 @@ function dedupByPrimaryConcept(drills, conceptWeights) {
     if (!existing._reviewOnly && d._reviewOnly) continue;
     if (d._matchWeight > existing._matchWeight) best.set(primaryCat, d);
   }
-  return [...best.values(), ...orphans];
+  // Drop orphans whose pattern_name already appears among the non-orphan drills —
+  // this prevents duplicate rows when two tests get the same LLM pattern label but
+  // only one maps to a real drill question in the bank.
+  const nonOrphanNames = new Set([...best.values()].map(d => d.pattern_name));
+  const filteredOrphans = orphans.filter(d => !nonOrphanNames.has(d.pattern_name));
+  return [...best.values(), ...filteredOrphans];
 }
 
 export async function generateReport(studentId, assignment, dataDir, baseUrl) {

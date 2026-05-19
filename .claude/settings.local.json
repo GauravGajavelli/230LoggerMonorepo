@@ -92,7 +92,20 @@
       "Bash(mkdir /tmp/final-202320-inspect)",
       "Bash(unzip -q \"/Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/testInputs/csse230/Exams/Final Exam/final-202320.zip\" -d /tmp/final-202320-inspect)",
       "Bash(grep -v \"^#\\\\|^$\\\\|KEY\\\\|SECRET\\\\|PASSWORD\\\\|TOKEN\" /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Pipeline/.env)",
-      "Bash(grep -v \"^#\\\\|^$\" /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/.env)"
+      "Bash(grep -v \"^#\\\\|^$\" /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/.env)",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/feedback.db \"SELECT student_id, assignment, token FROM tokens WHERE student_id='baptisbc';\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/feedback.db \"SELECT COUNT\\(*\\) FROM tokens WHERE assignment='graphsurfing';\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/feedback.db \"SELECT * FROM pipeline_runs WHERE assignment='graphsurfing' ORDER BY id DESC LIMIT 5;\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/feedback.db \"SELECT assignment, COUNT\\(*\\) FROM pipeline_runs GROUP BY assignment;\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/feedback.db \"SELECT COUNT\\(*\\) FROM pipeline_runs;\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/feedback.db \"SELECT COUNT\\(*\\) FROM tokens; SELECT COUNT\\(*\\) FROM pipeline_runs;\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/feedback.db \"SELECT student_id, assignment, token FROM tokens WHERE assignment='graphsurfing';\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/feedback.db \".tables\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/db/feedback_05_02_2026.db \"SELECT COUNT\\(*\\) FROM tokens; SELECT student_id, assignment FROM tokens WHERE assignment='graphsurfing';\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/db/feedback.db \".tables\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/db/feedback.db \"SELECT COUNT\\(*\\) FROM tokens; SELECT student_id, assignment, substr\\(token,1,8\\) FROM tokens WHERE assignment='graphsurfing';\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/db/feedback.db \"SELECT assignment, COUNT\\(*\\) FROM pipeline_runs GROUP BY assignment;\")",
+      "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/db/feedback.db \"SELECT student_id, assignment, substr\\(token,1,12\\) as tok FROM tokens ORDER BY assignment, student_id LIMIT 20;\")"
     ]
   }
 }
