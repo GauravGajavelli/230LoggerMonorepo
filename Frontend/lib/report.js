@@ -775,15 +775,18 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   });
   try {
-    async function renderPage(html) {
+    async function renderPage(html, fitToPage = false) {
       const page = await browser.newPage();
       await page.setViewport({ width: 816, height: 1056 });
       await page.setContent(html, { waitUntil: 'domcontentloaded' });
-      const scale = await page.evaluate(() => {
-        const PAGE_H   = 1056;
-        const contentH = document.body.scrollHeight;
-        return contentH > PAGE_H ? Math.max(0.60, PAGE_H / contentH) : 1.0;
-      });
+      let scale = 1.0;
+      if (fitToPage) {
+        scale = await page.evaluate(() => {
+          const PAGE_H   = 1056;
+          const contentH = document.body.scrollHeight;
+          return contentH > PAGE_H ? Math.max(0.60, PAGE_H / contentH) : 1.0;
+        });
+      }
       const pdfBytes = await page.pdf({
         format: 'Letter',
         margin: { top: '0', right: '0', bottom: '0', left: '0' },
@@ -794,7 +797,7 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     }
 
     const [bytes1, bytes2] = await Promise.all([
-      renderPage(htmlPage1),
+      renderPage(htmlPage1, true),
       htmlPage2 ? renderPage(htmlPage2) : Promise.resolve(null),
     ]);
 
