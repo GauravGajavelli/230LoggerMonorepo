@@ -107,7 +107,8 @@
       "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/db/feedback.db \"SELECT assignment, COUNT\\(*\\) FROM pipeline_runs GROUP BY assignment;\")",
       "Bash(sqlite3 /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/db/db/feedback.db \"SELECT student_id, assignment, substr\\(token,1,12\\) as tok FROM tokens ORDER BY assignment, student_id LIMIT 20;\")",
       "Bash(git add *)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "Bash(grep -n \"renderReport\\\\|function render\\\\|html\\\\`\\\\|innerHTML\\\\|<h1\\\\|<h2\\\\|<p>\\\\|intro\\\\|subhead\\\\|tagline\" /Users/gauravgajavelli/Documents/GitHub/230LoggerMonorepo/Frontend/lib/report.js)"
     ]
   }
 }

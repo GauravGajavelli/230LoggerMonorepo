@@ -656,37 +656,62 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
 
     const drillsForAssmt = [];
     const uncoveredConcepts = [];
+    const conceptWeights = aCfg.concept_weights || {};
 
-    // Sort concept_weights descending so highest-weight categories get drills first
-    const sortedConcepts = Object.entries(aCfg.concept_weights || {})
-      .sort(([, a], [, b]) => b - a);
-
-    for (const [category, weight] of sortedConcepts) {
+    // Score each unique drill by the total concept_weight it covers for this assessment,
+    // then emit one entry per drill (not one per category) to avoid duplicate test code.
+    const drillScores = new Map(); // drill id → { drill, totalWeight, topCategory }
+    for (const [category, weight] of Object.entries(conceptWeights)) {
       if (weight <= 0) continue;
       const candidates = drillsByCategory.get(category) || [];
       if (candidates.length === 0) {
         uncoveredConcepts.push({ name: category, weight_pct: Math.round(weight * 100) });
         continue;
       }
+      for (const drill of candidates) {
+        const existing = drillScores.get(drill.id);
+        if (!existing) {
+          drillScores.set(drill.id, { drill, totalWeight: weight, topCategory: category });
+        } else {
+          existing.totalWeight += weight;
+          if (weight > (conceptWeights[existing.topCategory] ?? 0)) {
+            existing.topCategory = category;
+          }
+        }
+      }
+    }
+
+    // Sort unique drills by total coverage weight descending
+    const rankedDrills = [...drillScores.values()]
+      .sort((a, b) => b.totalWeight - a.totalWeight);
+
+    for (const { drill, totalWeight, topCategory } of rankedDrills) {
       drillsForAssmt.push({
-        pattern_name: CATEGORY_LABELS[category] ?? category,
-        time_min:     estimateTime(candidates[0]),
+        pattern_name: drill.name || drill.sourceLabel || CATEGORY_LABELS[topCategory] ?? topCategory,
+        time_min:     estimateTime(drill),
         test_names:   [],
-        weight_pct:   Math.round(weight * 100),
-        source:       candidates[0].source       || null,
-        source_url:   candidates[0].url || candidates[0].sourceUrl || null,
-        source_label: candidates[0].sourceLabel || candidates[0].source || null,
+        weight_pct:   Math.round(Math.min(totalWeight, 1) * 100),
+        source:       drill.source       || null,
+        source_url:   drill.url || drill.sourceUrl || null,
+        source_label: drill.sourceLabel || drill.source || null,
         drill_anchor: null,
         also_relevant_to: null,
-        drill_intro:  candidates[0].intro      || null,
-        test_code:    candidates[0].testCode   || null,
-        hints:        candidates[0].hints      || [],
-        target_file:  candidates[0].targetFile || null,
+        drill_intro:  drill.intro      || null,
+        test_code:    drill.testCode   || null,
+        hints:        drill.hints      || [],
+        target_file:  drill.targetFile || null,
       });
     }
 
     const totalTime  = drillsForAssmt.reduce((s, d) => s + d.time_min, 0);
-    const overlapPct = Math.min(100, drillsForAssmt.reduce((s, d) => s + d.weight_pct, 0));
+    // Compute overlap as union of covered categories to avoid double-counting
+    // categories shared across multiple drill questions.
+    const coveredCats = new Set(rankedDrills.flatMap(({ drill }) =>
+      (drill.categories || []).filter(c => (conceptWeights[c] ?? 0) > 0)
+    ));
+    const overlapPct = Math.min(100, Math.round(
+      [...coveredCats].reduce((s, c) => s + (conceptWeights[c] ?? 0), 0) * 100
+    ));
     const gradeWeight   = aCfg.grade_weight ?? (aCfg.type === 'exam' ? 0.10 : 0.035);
     const relevanceScore = (overlapPct / 100) * gradeWeight * urgencyFactor(daysLeft);
 
@@ -708,11 +733,10 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     return (TYPE_PRIORITY[b.type] || 0) - (TYPE_PRIORITY[a.type] || 0);
   });
 
-  const DRILL_CAP = 3;
   const seen = new Set();
   let totalUniqueDrills = 0, totalTime = 0;
   for (const a of assessmentEntries) {
-    for (const d of a.drills.slice(0, DRILL_CAP)) {
+    for (const d of a.drills) {
       if (!seen.has(d.pattern_name)) {
         seen.add(d.pattern_name);
         totalUniqueDrills++;
@@ -734,7 +758,7 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
     generated_at: now.toISOString(),
     review_video_url: reviewVideoUrl && reviewVideoUrl.length > 0 ? reviewVideoUrl : null,
     generic:   true,
-    drill_cap: DRILL_CAP,
+    drill_cap: Math.max(...assessmentEntries.map(a => a.drills.length), 3),
   };
 
   const outputDir    = path.join(dataDir, assignment, 'output', studentId);
