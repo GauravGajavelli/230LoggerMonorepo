@@ -687,7 +687,7 @@ export async function generateGenericReport(studentId, assignment, token, dataDi
 
     for (const { drill, totalWeight, topCategory } of rankedDrills) {
       drillsForAssmt.push({
-        pattern_name: drill.name || drill.sourceLabel || CATEGORY_LABELS[topCategory] ?? topCategory,
+        pattern_name: drill.name || drill.sourceLabel || (CATEGORY_LABELS[topCategory] ?? topCategory),
         time_min:     estimateTime(drill),
         test_names:   [],
         weight_pct:   Math.round(Math.min(totalWeight, 1) * 100),
