@@ -165,23 +165,25 @@ function NullFeedbackScreen({ error: apiError, token }) {
 /**
  * Root app — wireframe header, footer, navigation state.
  */
-export function FeedbackApp({ token }) {
+export function FeedbackApp({ token, raterMode = false, pairId, onBack: raterOnBack }) {
   const { loading, error, apiError, allRuns, frontendData } = usePlaybackDataContext();
 
   // Fire once on mount — used to measure time-on-site and session starts
   useEffect(() => {
-    eventTracker.track('page_view', {});
+    if (!raterMode) eventTracker.track('page_view', {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep the page title in sync with the assignment name once data loads
   useEffect(() => {
     const name = frontendData?.context?.assignmentName;
-    if (name) {
+    if (raterMode && pairId && name) {
+      document.title = `${pairId} · ${name} · Rating`;
+    } else if (name) {
       document.title = `${name} · CSSE 230`;
     }
-  }, [frontendData]);
+  }, [frontendData, raterMode, pairId]);
 
-  const [view, setView] = useState(token ? 'detail' : 'list');
+  const [view, setView] = useState((token || raterMode) ? 'detail' : 'list');
   const [replayRange, setReplayRange] = useState(null); // { start, end } | null
   const [reviewed, setReviewed] = useState(false);
   const [openedFeedbackIds, setOpenedFeedbackIds] = useState(new Set());
@@ -201,13 +203,13 @@ export function FeedbackApp({ token }) {
 
   // Fetch all assignments for this student (identified by the current token)
   useEffect(() => {
-    if (!token) { setAssignmentsLoading(false); return; }
+    if (raterMode || !token) { setAssignmentsLoading(false); return; }
     fetch(`/api/my-assignments?token=${token}`)
       .then(r => r.json())
       .then(data => { if (data.assignments) setAssignments(data.assignments); })
       .catch(() => {})
       .finally(() => setAssignmentsLoading(false));
-  }, [token]);
+  }, [token, raterMode]);
 
   const detailScrollRef = useRef(0);
 
@@ -223,11 +225,12 @@ export function FeedbackApp({ token }) {
 
   const handleAllFeedbackSeen = useCallback(() => {
     setReviewed(true);
-    // Mark the current assignment as reviewed in the local assignments list too
-    setAssignments(prev => prev.map(a => a.token === token ? { ...a, status: 'reviewed' } : a));
-    eventTracker.track('feedback_reviewed', {});
-    eventTracker.flush(); // persist immediately so next visit shows correct state
-  }, [token]);
+    if (!raterMode) {
+      setAssignments(prev => prev.map(a => a.token === token ? { ...a, status: 'reviewed' } : a));
+      eventTracker.track('feedback_reviewed', {});
+      eventTracker.flush();
+    }
+  }, [token, raterMode]);
 
   const handleSelectAssignment = useCallback((selectedToken) => {
     if (!selectedToken || selectedToken === token) {
@@ -264,7 +267,7 @@ export function FeedbackApp({ token }) {
     } else {
       mainContent = (
         <DetailView
-          onBack={() => setView('list')}
+          onBack={raterMode ? raterOnBack : () => setView('list')}
           onReplayRun={handleReplayRun}
           onAllFeedbackSeen={handleAllFeedbackSeen}
           reviewed={reviewed}
@@ -280,66 +283,68 @@ export function FeedbackApp({ token }) {
       minHeight: '100vh', background: '#F1F5F9',
       fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
     }}>
-      {/* Top bar — Rose-Hulman branded header */}
-      <header style={{
-        background: '#800000', color: '#FFFFFF',
-        padding: '12px 28px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.22)',
-        borderBottom: '1px solid rgba(0,0,0,0.12)',
-      }}>
-        <div
-          style={{ lineHeight: 1.2 }}
-        >
-          <div style={{
-            fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em',
-            textTransform: 'uppercase', color: 'rgba(255,255,255,0.58)',
-            marginBottom: 5, fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
-          }}>
-            Rose-Hulman Institute of Technology
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
-            <span style={{
-              fontSize: 19, fontWeight: 700, letterSpacing: '-.02em',
-              fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
-            }}>
-              CSSE 230
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.38)', fontSize: 15, fontWeight: 300 }}>·</span>
-            <span style={{
-              fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.82)',
-              fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
-              letterSpacing: '.01em',
-            }}>
-              Debugging Feedback
-            </span>
-          </div>
-        </div>
-        <span style={{
-          fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.75)',
-          fontFamily: "'IBM Plex Mono', monospace",
-          display: 'flex', alignItems: 'center', gap: 6,
+      {/* Top bar — Rose-Hulman branded header (hidden in rater mode) */}
+      {!raterMode && (
+        <header style={{
+          background: '#800000', color: '#FFFFFF',
+          padding: '12px 28px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.22)',
+          borderBottom: '1px solid rgba(0,0,0,0.12)',
         }}>
-          <LockIcon />
-          Private to you
-        </span>
-      </header>
+          <div style={{ lineHeight: 1.2 }}>
+            <div style={{
+              fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em',
+              textTransform: 'uppercase', color: 'rgba(255,255,255,0.58)',
+              marginBottom: 5, fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+            }}>
+              Rose-Hulman Institute of Technology
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+              <span style={{
+                fontSize: 19, fontWeight: 700, letterSpacing: '-.02em',
+                fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+              }}>
+                CSSE 230
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.38)', fontSize: 15, fontWeight: 300 }}>·</span>
+              <span style={{
+                fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.82)',
+                fontFamily: "'Instrument Sans', 'Segoe UI', sans-serif",
+                letterSpacing: '.01em',
+              }}>
+                Debugging Feedback
+              </span>
+            </div>
+          </div>
+          <span style={{
+            fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.75)',
+            fontFamily: "'IBM Plex Mono', monospace",
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <LockIcon />
+            Private to you
+          </span>
+        </header>
+      )}
 
       {/* Main content */}
       {mainContent}
 
-      {/* Fixed footer — matches wireframe */}
-      <footer style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#F8FAFC', borderTop: '1px solid #E2E8F0',
-        padding: '8px 24px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', gap: 6,
-      }}>
-        <InfoIcon />
-        <span style={{ fontSize: 12, color: '#64748B' }}>
-          Part of an IRB-approved research study.
-        </span>
-      </footer>
+      {/* Fixed footer — hidden in rater mode (IRB note is in RaterApp header instead) */}
+      {!raterMode && (
+        <footer style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          background: '#F8FAFC', borderTop: '1px solid #E2E8F0',
+          padding: '8px 24px', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', gap: 6,
+        }}>
+          <InfoIcon />
+          <span style={{ fontSize: 12, color: '#64748B' }}>
+            Part of an IRB-approved research study.
+          </span>
+        </footer>
+      )}
 
       {/* Replay modal */}
       {replayRange !== null && (

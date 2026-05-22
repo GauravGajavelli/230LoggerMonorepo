@@ -4,11 +4,13 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_DIR = path.resolve(__dirname, '../../data');
-const ASSIGNMENTS = ['bst', 'string_hashset'];
+const ASSIGNMENTS = ['bst', 'string_hashset', 'graphsurfing'];
 const ASSIGNMENT_LABELS = {
   bst: 'Binary Search Tree',
   string_hashset: 'String Hash Set',
+  graphsurfing: 'Graph Surfing',
 };
+const EXCLUDED_STUDENTS = new Set(['gajavegs']);
 const DEMO_STUDENT = 'gajavegs';
 const DEMO_ASSIGNMENT = 'bst';
 const SEED = 42;
@@ -107,14 +109,15 @@ function collectPairs() {
     const outputDir = path.join(DATA_DIR, asgn, 'output');
     if (!fs.existsSync(outputDir)) continue;
     for (const studentId of fs.readdirSync(outputDir)) {
+      if (EXCLUDED_STUDENTS.has(studentId)) continue;
+      if (isDemo && !(asgn === DEMO_ASSIGNMENT && studentId === DEMO_STUDENT)) continue;
+
       const frontendPath = path.join(outputDir, studentId, 'frontend.json');
       const reportPath = path.join(outputDir, studentId, 'report.json');
       if (!fs.existsSync(frontendPath) || !fs.existsSync(reportPath)) continue;
 
       const frontend = JSON.parse(fs.readFileSync(frontendPath, 'utf8'));
       if (!frontend.feedback || frontend.feedback.length === 0) continue;
-
-      if (isDemo && !(asgn === DEMO_ASSIGNMENT && studentId === DEMO_STUDENT)) continue;
 
       const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 

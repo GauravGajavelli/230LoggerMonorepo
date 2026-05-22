@@ -70,6 +70,44 @@ db.exec(`
   );
 
   INSERT OR IGNORE INTO relay_status (id) VALUES (1);
+
+  CREATE TABLE IF NOT EXISTS rater_sessions (
+    rater_id        TEXT PRIMARY KEY,
+    token           TEXT NOT NULL UNIQUE,
+    current_pair    TEXT,
+    created_at      TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS rater_pairs (
+    pair_id         TEXT PRIMARY KEY,
+    student_id      TEXT NOT NULL,
+    assignment      TEXT NOT NULL,
+    display_name    TEXT NOT NULL,
+    pair_type       TEXT NOT NULL DEFAULT 'personalized',
+    sort_order      INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS rater_pair_assignments (
+    rater_id        TEXT NOT NULL,
+    pair_id         TEXT NOT NULL,
+    sort_order      INTEGER NOT NULL,
+    PRIMARY KEY (rater_id, pair_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS ratings (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    pair_id         TEXT NOT NULL,
+    rater_id        TEXT NOT NULL,
+    test_id         TEXT NOT NULL DEFAULT '_pair_',
+    assignment      TEXT NOT NULL,
+    correctness     INTEGER,
+    actionability   INTEGER,
+    specificity     INTEGER,
+    failure_modes   TEXT,
+    notes           TEXT,
+    updated_at      TEXT DEFAULT (datetime('now')),
+    UNIQUE(pair_id, rater_id, test_id)
+  );
 `);
 
 // relay_port added after initial schema — ALTER TABLE is idempotent (fails silently if exists)

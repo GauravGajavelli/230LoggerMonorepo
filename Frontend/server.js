@@ -500,6 +500,229 @@ app.get('/api/health', (_req, res) => {
     demo: DEMO_TOKEN ? true : false });
 });
 
+// ─── Rater endpoints ─────────────────────────────────────────────────────────
+
+function verifyRaterToken(token) {
+  if (!token) return null;
+  return db.prepare('SELECT * FROM rater_sessions WHERE token = ?').get(token) || null;
+}
+
+function resolveRaterPair(pairId) {
+  return db.prepare('SELECT * FROM rater_pairs WHERE pair_id = ?').get(pairId) || null;
+}
+
+app.get('/rate', (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.redirect('/login');
+  if (!verifyRaterToken(token)) return res.redirect('/login?error=invalid');
+  res.sendFile(path.join(DIST_DIR, 'index.html'));
+});
+
+app.get('/api/rater/pairs', (req, res) => {
+  const { token } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+
+  const assignments = db.prepare(
+    'SELECT rpa.pair_id, rpa.sort_order, rp.display_name, rp.assignment, rp.pair_type FROM rater_pair_assignments rpa JOIN rater_pairs rp ON rpa.pair_id = rp.pair_id WHERE rpa.rater_id = ? ORDER BY rpa.sort_order'
+  ).all(session.rater_id);
+
+  const ratedSet = new Set(
+    db.prepare('SELECT DISTINCT pair_id FROM ratings WHERE rater_id = ?').all(session.rater_id).map(r => r.pair_id)
+  );
+
+  res.json({
+    rater_id: session.rater_id,
+    pairs: assignments.map(a => ({
+      pair_id: a.pair_id,
+      assignment: a.display_name,
+      assignment_id: a.assignment,
+      pair_type: a.pair_type,
+      rated: ratedSet.has(a.pair_id),
+    })),
+    current_pair: session.current_pair,
+  });
+});
+
+app.get('/api/rater/data', (req, res) => {
+  const { token, pair } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+  if (!pair) return res.status(400).json({ error: 'pair required' });
+
+  const rp = resolveRaterPair(pair);
+  if (!rp) return res.status(404).json({ error: 'unknown pair' });
+
+  // Verify this rater is assigned this pair
+  const assigned = db.prepare(
+    'SELECT 1 FROM rater_pair_assignments WHERE rater_id = ? AND pair_id = ?'
+  ).get(session.rater_id, pair);
+  if (!assigned) return res.status(403).json({ error: 'pair not assigned to this rater' });
+
+  const jsonPath = path.join(DATA_DIR, rp.assignment, 'output', rp.student_id, 'frontend.json');
+  if (!fs.existsSync(jsonPath)) return res.status(404).json({ error: 'data not found' });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    // De-identify
+    if (data.context) {
+      data.context.studentId = pair;
+      data.context.studentDisplayName = pair;
+      delete data.context.repoRoot;
+    }
+    data.reviewed = false;
+    data.openedTestIds = [];
+    res.json(data);
+  } catch {
+    res.status(500).json({ error: 'failed to read data' });
+  }
+});
+
+app.get('/api/rater/assessment-config', (req, res) => {
+  const { token, pair } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+
+  const rp = resolveRaterPair(pair);
+  if (!rp) return res.status(404).json({ error: 'unknown pair' });
+
+  const cfgPath = path.join(ASSIGNMENTS_DIR, `${rp.assignment}_assessment_config.json`);
+  if (!fs.existsSync(cfgPath)) return res.json({});
+  try {
+    res.json(JSON.parse(fs.readFileSync(cfgPath, 'utf8')));
+  } catch {
+    res.json({});
+  }
+});
+
+app.get('/api/rater/report', (req, res) => {
+  const { token, pair } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+
+  const rp = resolveRaterPair(pair);
+  if (!rp) return res.status(404).json({ error: 'unknown pair' });
+
+  const reportPath = path.join(DATA_DIR, rp.assignment, 'output', rp.student_id, 'report.json');
+  if (!fs.existsSync(reportPath)) return res.json({ assessments: [] });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+    delete data.student_id;
+    res.json(data);
+  } catch {
+    res.json({ assessments: [] });
+  }
+});
+
+app.get('/api/rater/pdf', (req, res) => {
+  const { token, pair } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+
+  const rp = resolveRaterPair(pair);
+  if (!rp) return res.status(404).json({ error: 'unknown pair' });
+
+  const pdfPath = path.join(DATA_DIR, rp.assignment, 'output', rp.student_id, 'report.pdf');
+  if (!fs.existsSync(pdfPath)) return res.status(404).send('PDF not found');
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="${pair}-report.pdf"`);
+  fs.createReadStream(pdfPath).pipe(res);
+});
+
+app.get('/api/rater/ratings', (req, res) => {
+  const { token } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+
+  const rows = db.prepare('SELECT * FROM ratings WHERE rater_id = ?').all(session.rater_id);
+  res.json(rows);
+});
+
+app.put('/api/rater/ratings', express.json(), (req, res) => {
+  const { token } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+
+  const { pair_id, test_id = '_pair_', correctness, actionability, specificity, failure_modes, notes } = req.body;
+  if (!pair_id) return res.status(400).json({ error: 'pair_id required' });
+
+  const rp = resolveRaterPair(pair_id);
+  if (!rp) return res.status(404).json({ error: 'unknown pair' });
+
+  const modesJson = JSON.stringify(failure_modes || []);
+  const notesStr = notes || '';
+
+  const upsertRating = db.prepare(`
+    INSERT INTO ratings (pair_id, rater_id, test_id, assignment, correctness, actionability, specificity, failure_modes, notes, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+    ON CONFLICT(pair_id, rater_id, test_id) DO UPDATE SET
+      correctness=excluded.correctness, actionability=excluded.actionability,
+      specificity=excluded.specificity, failure_modes=excluded.failure_modes,
+      notes=excluded.notes, updated_at=excluded.updated_at
+  `);
+
+  const autoCopied = [];
+
+  db.transaction(() => {
+    upsertRating.run(pair_id, session.rater_id, test_id, rp.assignment, correctness, actionability, specificity, modesJson, notesStr);
+
+    if (rp.pair_type === 'generic') {
+      const siblings = db.prepare(
+        `SELECT rp.pair_id FROM rater_pairs rp
+         JOIN rater_pair_assignments rpa ON rpa.pair_id = rp.pair_id
+         WHERE rp.pair_type = 'generic' AND rp.assignment = ? AND rpa.rater_id = ? AND rp.pair_id != ?`
+      ).all(rp.assignment, session.rater_id, pair_id);
+
+      for (const s of siblings) {
+        upsertRating.run(s.pair_id, session.rater_id, test_id, rp.assignment, correctness, actionability, specificity, modesJson, notesStr);
+        autoCopied.push(s.pair_id);
+      }
+    }
+
+    db.prepare('UPDATE rater_sessions SET current_pair = ? WHERE rater_id = ?')
+      .run(pair_id, session.rater_id);
+  })();
+
+  res.json({ ok: true, auto_copied: autoCopied });
+});
+
+app.get('/api/rater/export', (req, res) => {
+  const { token, format } = req.query;
+  const session = verifyRaterToken(token);
+  if (!session) return res.status(403).json({ error: 'invalid rater token' });
+
+  const rows = db.prepare('SELECT * FROM ratings WHERE rater_id = ? ORDER BY pair_id').all(session.rater_id);
+
+  if (format === 'csv') {
+    const header = 'pair_id,rater_id,test_id,assignment,correctness,actionability,specificity,failure_mode_tags,notes,timestamp';
+    const lines = rows.map(r => {
+      const tags = (JSON.parse(r.failure_modes || '[]')).join('|');
+      const notes = (r.notes || '').replace(/"/g, '""');
+      return `${r.pair_id},${r.rater_id},${r.test_id || '_pair_'},${r.assignment},${r.correctness || ''},${r.actionability || ''},${r.specificity || ''},"${tags}","${notes}",${r.updated_at}`;
+    });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="rq1-ratings-${session.rater_id}.csv"`);
+    res.send([header, ...lines].join('\n'));
+  } else {
+    const data = rows.map(r => ({
+      pair_id: r.pair_id,
+      rater_id: r.rater_id,
+      test_id: r.test_id || '_pair_',
+      assignment: r.assignment,
+      correctness: r.correctness,
+      actionability: r.actionability,
+      specificity: r.specificity,
+      failure_mode_tags: JSON.parse(r.failure_modes || '[]'),
+      notes: r.notes || '',
+      timestamp: r.updated_at,
+    }));
+    res.setHeader('Content-Disposition', `attachment; filename="rq1-ratings-${session.rater_id}.json"`);
+    res.json(data);
+  }
+});
+
 // ─── Report PDF endpoint ──────────────────────────────────────────────────────
 
 app.get('/report', async (req, res) => {

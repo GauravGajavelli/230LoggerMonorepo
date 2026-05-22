@@ -23,6 +23,8 @@ Frontend/data/*/tars/
 # Pipeline output per student (feedback JSON, diffs, code snapshots)
 Frontend/data/*/output/
 #
+Frontend/data/
+
 # Database (tokens, events, email queue)
 Frontend/db/
 
@@ -32,3 +34,4 @@ Pipeline/cache/
 
 # ── OS / editor ───────────────────────────────────────────────────────────────
 .DS_Store
+/Frontend/data-server-pdfs
