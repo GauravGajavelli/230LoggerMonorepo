@@ -20,7 +20,7 @@ const OPTED_IN = new Set([
   'wangj36', 'adusumn', 'theslikj', 'riedliso', 'weberjm1', 'osujiun',
 ]);
 
-const RATER_IDS = ['TA-1', 'TA-2', 'TA-3', 'TA-4'];
+const RATER_IDS = ['TA-1', 'TA-2', 'TA-3', 'TA-4', 'TA-5'];
 const SEED = 42;
 const TOKEN_SECRET = process.env.TOKEN_SECRET || 'rater-rating-secret-key';
 
